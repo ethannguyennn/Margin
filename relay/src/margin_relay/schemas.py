@@ -113,6 +113,9 @@ class AskResponse(_Model):
     verified: bool
     walkthrough: Walkthrough | None = None
     latency_ms: Latency
+    # Additive field: true only on a not_found the model judged ambiguous between
+    # procedures (Part 5's eval checks it; clients that ignore it render NOT FOUND).
+    needs_clarification: bool = False
 
     @model_validator(mode="after")
     def _never_unverified_answer(self) -> AskResponse:

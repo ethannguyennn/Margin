@@ -113,7 +113,8 @@ def test_logged_deviation(client_app):
     assert b["intent"] == "deviation" and b["outcome"] == "logged"
     assert b["glance"] == "Deviation DEV-0001 logged"
     assert b["source"] == "SOP-114 Sec 4.2 rev C"
-    assert "sent to your supervisor" in b["body"]
+    assert b["body"] == ("Deviation DEV-0001 recorded against SOP-114 Sec 4.2 rev C. "
+                         "Supervisor alert sent.")
     row = app.state.pipeline.db.deviations[-1]
     assert row["text"] == "bracket arrived pre-drilled"  # trigger phrase stripped
     assert (row["doc_id"], row["step_id"], row["notified"]) == ("SOP-114", "SOP-114:C:4.2", True)
@@ -278,10 +279,22 @@ def test_second_verify_failure_is_not_found(client_app):
 
 def test_model_refusal_is_not_retried(client_app):
     client, app = client_app
+    gen = app.state.pipeline.generator = ScriptedGenerator(Draft(answerable=False))
+    b = ask(client, TORQUE).json()
+    assert b["outcome"] == "not_found" and gen.calls == 1
+    assert b["needs_clarification"] is False
+
+
+def test_ambiguous_question_flags_needs_clarification(client_app):
+    client, app = client_app
     gen = app.state.pipeline.generator = ScriptedGenerator(
         Draft(answerable=False, needs_clarification=True))
     b = ask(client, TORQUE).json()
-    assert b["outcome"] == "not_found" and gen.calls == 1
+    assert b["outcome"] == "not_found" and b["needs_clarification"] is True
+    assert (b["glance"], b["citations"], b["verified"]) == (NOT_FOUND_GLANCE, [], False)
+    assert gen.calls == 1
+    app.state.pipeline.generator = ScriptedGenerator(GOOD)
+    assert ask(client, TORQUE).json()["needs_clarification"] is False
 
 
 def test_malformed_output_twice_is_llm_error(client_app):
@@ -439,6 +452,23 @@ def test_deviation_route_accepts_part2_context_shape(client_app):
                                            "context": {"doc_id": "SOP-114", "step_id": None}})
     assert r.status_code == 200
     assert app.state.pipeline.db.deviations[-1]["doc_id"] == "SOP-114"
+
+
+def test_deviation_is_stored_before_notifying(client_app):
+    client, app = client_app
+    db = app.state.pipeline.db
+    seen_at_notify = []
+
+    class Spy:
+        async def notify(self, deviation_id, text):
+            seen_at_notify.append([dict(r) for r in db.deviations])
+            return True
+
+    app.state.pipeline.notifier = Spy()
+    r = client.post("/v1/deviation", json={"session_id": sid(), "text": "gap"})
+    assert r.json()["notified"] is True
+    assert seen_at_notify[0][-1]["notified"] is False  # durable row existed first
+    assert db.deviations[-1]["notified"] is True  # then the flag was updated
 
 
 def test_deviation_survives_notifier_failure(client_app):

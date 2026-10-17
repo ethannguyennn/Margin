@@ -62,8 +62,10 @@ endif
 seed:
 	$(PY) db/seed.py $(ARGS)
 
+# Against the running relay; add ARGS=--allow-mock for a MOCK_MODE=1 relay.
+EVAL_URL ?= http://127.0.0.1:$(PORT)
 eval:
-	$(PY) eval/run_eval.py $(ARGS)
+	$(PY) eval/run_eval.py --base-url $(EVAL_URL) $(ARGS)
 
 latency:
 	$(PY) -m margin_relay.latency $(ARGS)
