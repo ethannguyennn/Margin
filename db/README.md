@@ -5,9 +5,12 @@ credentials, or raw audio are included.
 
 ## Current evidence (2026-10-17)
 
-- Independent Python tests pass. These exercise parser/embedding fixtures, query
+- 71 independent Python tests pass. These exercise parser/embedding fixtures, query
   construction and transaction boundaries, walkthrough assembly, notifier failure,
   and HTTP-client evaluation scoring. They are **not** Tiger Cloud or Gemini evidence.
+- The same suite also passes with Part 4's published sanitizer at 5425a67.
+  Its real fuse/step-mapping functions accept the Part 5 store adapter's fixture
+  rows. This is an interface check, not a live database or retrieval-quality test.
 - Local parser counts: **59 chunks, 35 steps**, six revision files, five procedures.
   Effective corpus: **47 chunks, 27 steps**, five effective revisions.
 - **No rows have been seeded into Tiger Cloud.** DATABASE_URL and Gemini credentials

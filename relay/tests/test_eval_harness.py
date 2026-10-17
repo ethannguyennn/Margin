@@ -90,8 +90,11 @@ def test_unverified_answers_always_fail_the_safety_gate(mutation):
 
 def test_wrong_numeric_answer_cannot_pass_substring_scoring():
     assert not evaluation.contains("Torque to 14 N-m", "4 N-m")
+    assert not evaluation.contains("Torque to 0.4 N-m", "4 N-m")
+    assert not evaluation.contains("Range begins at 3.84 N-m", "4 N-m")
     assert not evaluation.contains("Wait 160 s", "60 s")
     assert evaluation.contains("Keep it wet for 60 s.", "60 s")
+    assert evaluation.contains("Use M5.", "M5")
     case = evaluation.load_cases(ROOT / "eval/qa.jsonl")[0]
     index = evaluation.citation_index()
     response = fixture_answer(case, index)

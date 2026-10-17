@@ -28,8 +28,13 @@ def normalized(text: str) -> str:
 
 
 def contains(text: str, expected: str) -> bool:
-    value = re.escape(normalized(expected))
-    return re.search(r"(?<!\w)" + value + r"(?!\w)", normalized(text)) is not None
+    expected = normalized(expected)
+    if not expected:
+        return False
+    # Numeric suffixes are not matches: 4 N-m must not match 0.4 or 3.84 N-m.
+    left = r"(?<![\w.])" if expected[0].isdigit() else r"(?<!\w)"
+    right = r"(?!\w|\.\d)" if expected[-1].isdigit() else r"(?!\w)"
+    return re.search(left + re.escape(expected) + right, normalized(text)) is not None
 
 
 _PART = re.compile(r"\b[a-z]{1,5}-?\d+(?:\.\d+)?\b")
@@ -112,7 +117,7 @@ def citations_verified(response: dict, index: dict, forced_revision: str | None 
         if forced_revision is not None and chunk["revision"] != forced_revision:
             return False
         quote = citation.get("quote")
-        if not isinstance(quote, str) or not normalized(quote) or normalized(quote) not in normalized(chunk["text"]):
+        if not isinstance(quote, str) or not contains(chunk["text"], quote):
             return False
         quotes.append(quote)
         sections.append(chunk["section"])
