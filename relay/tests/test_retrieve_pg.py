@@ -115,7 +115,7 @@ def test_vector_leg_orders_by_cosine_and_filters_effective():
     ids = [r["chunk_id"] for r in rows]
     assert ids[0] == "SOP-114:C:4.2"
     assert ids[1] == "SOP-114:C:4.1"
-    assert rows[0]["score"] == pytest.approx(1 / (1 + 0.09) ** 0.5, abs=1e-4)
+    assert rows[0]["sim"] == pytest.approx(1 / (1 + 0.09) ** 0.5, abs=1e-4)
     assert "SOP-114:B:4.2" not in ids          # superseded revision excluded
 
 
@@ -139,7 +139,7 @@ def test_lexical_leg_matches_a_spoken_question():
     # OR'ed lexemes: 'tight' | 'm5' | 'mount' | 'bracket'. 4.2 (m5, bracket) ties
     # the scope chunk (mounting bracket); the vector leg breaks that tie.
     assert "SOP-114:C:4.2" in [r["chunk_id"] for r in spoken[:2]]
-    assert spoken[0]["score"] == spoken[1]["score"]
+    assert spoken[0]["lex_score"] == spoken[1]["lex_score"]
     assert specific[0]["chunk_id"] == "SOP-114:C:4.2"
     assert all(r["revision"] == "C" or r["doc_id"] != "SOP-114" for r in spoken + specific)
     assert none == []

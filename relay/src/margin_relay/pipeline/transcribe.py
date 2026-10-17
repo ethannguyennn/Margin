@@ -11,6 +11,8 @@ import io
 import wave
 from typing import Any
 
+from . import SttFailed
+
 TRANSCRIBE_TIMEOUT_S = 4.0
 SAMPLE_WIDTH = 2  # s16le
 
@@ -22,8 +24,8 @@ TRANSCRIBE_PROMPT = (
 )
 
 
-class TranscriptionError(Exception):
-    code = "stt_failed"
+class TranscriptionError(SttFailed):
+    pass
 
 
 def pcm_to_wav(pcm: bytes, sample_rate: int, channels: int = 1) -> bytes:

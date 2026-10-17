@@ -15,15 +15,14 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..schemas import NOT_FOUND_BODY, NOT_FOUND_GLANCE
+from . import LlmTimeout
 from .retrieve import should_refuse
 from .sanitize import sanitize
 from .verify import check_draft
 
 GENERATE_TIMEOUT_S = 6.0
 TEMPERATURE = 0.1
-
-NOT_FOUND_GLANCE = "Not in approved SOPs"
-NOT_FOUND_BODY = "No matching procedure. Try rephrasing or ask your supervisor."
 
 SYSTEM_PROMPT = """\
 You answer questions about company procedures using ONLY the provided CONTEXT chunks.
@@ -59,10 +58,8 @@ RESPONSE_SCHEMA: dict = {
 }
 
 
-class GenerationError(Exception):
+class GenerationError(LlmTimeout):
     """Unusable model output (bad JSON, schema mismatch, API error)."""
-
-    code = "llm_timeout"
 
 
 class GenerationTimeout(GenerationError):

@@ -63,7 +63,7 @@ def test_rrf_custom_k():
 
 def row(cid, score):
     doc, rev, sec = cid.split(":")
-    return {"chunk_id": cid, "doc_id": doc, "revision": rev, "section": sec, "text": cid, "score": score}
+    return {"chunk_id": cid, "doc_id": doc, "revision": rev, "section": sec, "text": cid, "sim": score}
 
 
 def test_fuse_best_sim_comes_from_vector_leg_only():
@@ -74,6 +74,21 @@ def test_fuse_best_sim_comes_from_vector_leg_only():
     assert best_rrf == pytest.approx(1 / 62 + 1 / 61)
     assert [r["chunk_id"] for r in rows] == ["A:C:2", "A:C:1"]
     assert rows[0]["rrf"] == pytest.approx(best_rrf)
+
+
+def test_fuse_reads_sim_from_schema_chunks():
+    # Part 5's db.vector_top/fts_top return schemas.Chunk with `sim` set on the vector leg.
+    from margin_relay.schemas import Chunk
+
+    vec = [Chunk(chunk_id="A:C:1", doc_id="A", revision="C", section="1", text="t", sim=0.83)]
+    lex = [Chunk(chunk_id="A:C:2", doc_id="A", revision="C", section="2", text="u")]
+    rows, best_sim, best_rrf = fuse(vec, lex)
+    assert best_sim == 0.83
+    assert [Chunk.model_validate(r).rrf for r in rows] == [pytest.approx(1 / 61)] * 2
+
+
+def test_fuse_accepts_legacy_score_key():
+    assert fuse([{"chunk_id": "A:C:1", "score": 0.7}], [])[1] == 0.7
 
 
 def test_fuse_empty_legs():

@@ -17,6 +17,7 @@ import math
 import re
 from typing import Any, Protocol, Sequence
 
+from . import DbDown, LlmTimeout
 from .sanitize import sanitize
 
 RRF_K = 60
@@ -27,12 +28,12 @@ GLANCE_MAX = 60
 BODY_MAX = 450
 
 
-class EmbeddingError(Exception):
-    code = "llm_timeout"
+class EmbeddingError(LlmTimeout):
+    pass
 
 
-class RetrievalError(Exception):
-    code = "db_down"
+class RetrievalError(DbDown):
+    pass
 
 
 # --- pure functions -----------------------------------------------------------
@@ -64,17 +65,19 @@ def _get(obj: Any, name: str, default: Any = None) -> Any:
 def fuse(vec_rows: list[Any], lex_rows: list[Any], top_n: int = TOP_N) -> tuple[list[dict], float, float]:
     """Merge the two legs. Returns ``(rows, best_sim, best_rrf)``.
 
-    ``best_sim`` is the top cosine similarity from the vector leg (lexical
-    scores are not similarities); ``best_rrf`` is the top fused score.
+    ``best_sim`` is the top cosine similarity from the vector leg, read from
+    ``sim`` (``schemas.Chunk``) or a legacy ``score`` key; lexical scores are
+    not similarities. ``best_rrf`` is the top fused score.
     """
     by_id: dict[str, dict] = {}
     for r in [*vec_rows, *lex_rows]:
-        d = dict(r) if isinstance(r, dict) else dict(vars(r))
+        d = dict(r) if isinstance(r, dict) else (r.model_dump() if hasattr(r, "model_dump") else dict(vars(r)))
         by_id.setdefault(d["chunk_id"], d)
     merged = rrf_merge([[_get(r, "chunk_id") for r in vec_rows], [_get(r, "chunk_id") for r in lex_rows]],
                        top_n=top_n)
     rows = [{**by_id[cid], "rrf": s} for cid, s in merged]
-    best_sim = max((float(_get(r, "score") or 0.0) for r in vec_rows), default=0.0)
+    sims = (_get(r, "sim", _get(r, "score")) for r in vec_rows)
+    best_sim = max((float(s) for s in sims if s is not None), default=0.0)
     best_rrf = merged[0][1] if merged else 0.0
     return rows, best_sim, best_rrf
 
@@ -230,7 +233,7 @@ _FILTER = """
 _COLUMNS = "c.chunk_id, c.doc_id, c.revision, c.section, c.heading, c.text, c.is_step, c.step_order"
 
 VECTOR_SQL = f"""
-SELECT {_COLUMNS}, 1 - (c.embedding <=> %(q)s::vector) AS score
+SELECT {_COLUMNS}, 1 - (c.embedding <=> %(q)s::vector) AS sim
 FROM chunks c
 JOIN documents d ON d.doc_id = c.doc_id AND d.revision = c.revision
 WHERE c.embedding IS NOT NULL AND {_FILTER}
@@ -245,12 +248,12 @@ LEXICAL_SQL = f"""
 WITH q AS (
   SELECT replace(websearch_to_tsquery('english', %(q)s)::text, ' & ', ' | ')::tsquery AS tsq
 )
-SELECT {_COLUMNS}, ts_rank_cd(c.tsv, q.tsq) AS score
+SELECT {_COLUMNS}, ts_rank_cd(c.tsv, q.tsq) AS lex_score
 FROM chunks c
 JOIN documents d ON d.doc_id = c.doc_id AND d.revision = c.revision
 CROSS JOIN q
 WHERE c.tsv @@ q.tsq AND {_FILTER}
-ORDER BY score DESC, c.chunk_id
+ORDER BY lex_score DESC, c.chunk_id
 LIMIT %(k)s"""
 
 STEPS_SQL = f"""
