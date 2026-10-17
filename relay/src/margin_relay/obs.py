@@ -50,6 +50,9 @@ def init_sentry(settings: Settings) -> bool:
         traces_sample_rate=settings.sentry_traces_sample_rate,
         enable_logs=True,
         send_default_pii=False,  # no IPs, no cookies, no request bodies with transcripts
+        # Continue the app's trace inbound; never attach our trace headers to outbound
+        # third-party calls (Gemini, Photon).
+        trace_propagation_targets=[],
         integrations=[
             StarletteIntegration(),
             FastApiIntegration(),
@@ -71,7 +74,9 @@ def resolve_trace_id(headers: Mapping[str, str]) -> str:
     trace), then the incoming ``sentry-trace`` header, then a fresh id, so every
     response carries a trace_id even with Sentry disabled.
     """
-    span = sentry_sdk.get_current_span()
+    client = sentry_sdk.get_client()
+    enabled = client.is_active() and bool(getattr(client, "dsn", None))
+    span = sentry_sdk.get_current_span() if enabled else None
     if span is not None and getattr(span, "trace_id", None):
         return span.trace_id
     match = _SENTRY_TRACE_RE.match(headers.get("sentry-trace", "") or "")

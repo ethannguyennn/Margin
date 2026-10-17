@@ -112,7 +112,7 @@ MOCK_CHUNKS: list[Chunk] = [
 # bracket, so the walkthrough resolves to SOP-114 through the same table.
 _TOPICS: list[tuple[re.Pattern[str], list[str]]] = [
     (re.compile(r"clean|disinfect"), ["SOP-120:B:4.3", "SOP-120:B:4.4"]),
-    (re.compile(r"how tight|torque|\bm5\b|bracket|mounting|guide me|walk me through"),
+    (re.compile(r"how tight|torque|\bm5\b|bracket|mounting|guide me|walk me through|boom"),
      ["SOP-114:C:4.2", "SOP-114:C:4.1"]),
 ]
 
