@@ -1,0 +1,15 @@
+# TLS termination for the public relay origin. Caddy obtains and renews the
+# certificate automatically once the DNS A record points at this VM.
+# CORS is the relay's job; Caddy passes OPTIONS and every header through untouched.
+{
+	email {$ACME_EMAIL}
+}
+
+{$MARGIN_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy relay:8080
+	log {
+		output stdout
+		format console
+	}
+}
