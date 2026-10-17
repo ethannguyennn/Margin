@@ -10,6 +10,7 @@ from margin_relay.pipeline.retrieve import (
     rrf_merge,
     should_refuse,
     step_from_row,
+    tune_gate,
     vector_literal,
 )
 
@@ -94,6 +95,24 @@ def test_gate(sim, rrf, refuse):
     assert should_refuse(sim, rrf, min_sim=0.60, min_rrf=0.030) is refuse
 
 
+def test_tune_gate_never_refuses_answerable_and_maximizes_refusals():
+    samples = [
+        (0.78, 0.0325, True), (0.66, 0.0300, True), (0.52, 0.0322, True),   # answerable
+        (0.70, 0.0330, False),       # near-miss above an answerable on both: gate can't take it
+        (0.31, 0.0164, False), (0.28, 0.0000, False), (0.45, 0.0161, False),  # off-domain
+    ]
+    min_sim, min_rrf, refused = tune_gate(samples)
+    assert refused == 3
+    for s, r, ok in samples:
+        if ok:
+            assert not should_refuse(s, r, min_sim, min_rrf)
+    assert should_refuse(0.45, 0.0161, min_sim, min_rrf)
+
+
+def test_tune_gate_with_nothing_separable_refuses_nothing():
+    assert tune_gate([(0.5, 0.03, True), (0.6, 0.031, False)])[2] == 0
+
+
 # --- Retriever against a fake store ----------------------------------------
 
 class FakeStore:
@@ -164,6 +183,17 @@ def test_steps_for_maps_rows_in_order():
     assert steps[0].glance == "Seat bracket on dowel pins."
     assert steps[1].glance == "Fastening"           # first sentence too long for the lens
     assert "4 N-m" in steps[1].body                 # sanitized, never truncated mid-value
+
+
+def test_step_from_row_drops_markdown_list_number():
+    # Part 5's corpus writes each step as "2. Torque all four ..."
+    s = step_from_row({"chunk_id": "SOP-114:C:4.4", "section": "4.4", "heading": "Apply witness marks",
+                       "text": "4. Apply one blue witness line across each screw head and onto the bracket. "
+                               "Each line must be continuous."})
+    assert s["glance"] == "Apply witness marks"
+    assert s["body"].startswith("Apply one blue witness line")
+    s = step_from_row({"chunk_id": "X:A:1", "section": "1", "heading": None, "text": "1. Disconnect power."})
+    assert s["glance"] == "Disconnect power."
 
 
 def test_step_from_row_caps_body_on_a_sentence():

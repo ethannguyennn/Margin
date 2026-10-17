@@ -85,12 +85,38 @@ def should_refuse(best_sim: float, best_rrf: float, min_sim: float, min_rrf: flo
     return best_sim < min_sim and best_rrf < min_rrf
 
 
+def tune_gate(samples: Sequence[tuple[float, float, bool]]) -> tuple[float, float, int]:
+    """Pick ``(min_sim, min_rrf, refused)`` from eval retrievals.
+
+    ``samples`` are ``(best_sim, best_rrf, answerable)``. The gate is only the
+    cheap first refusal; the LLM and the verifier still stand behind it, so it
+    must never refuse an answerable question. Among thresholds that keep every
+    answerable question, choose the pair that refuses the most expected
+    not_found questions, then the lowest (least aggressive) such pair.
+    Candidates are the observed values themselves.
+    """
+    keep = [(s, r) for s, r, ok in samples if ok]
+    refuse = [(s, r) for s, r, ok in samples if not ok]
+    sims = sorted({s for s, _, _ in samples} | {0.0})
+    rrfs = sorted({r for _, r, _ in samples} | {0.0})
+    best = (0, 0.0, 0.0)
+    for ms in sims:
+        for mr in rrfs:
+            if any(should_refuse(s, r, ms, mr) for s, r in keep):
+                continue
+            refused = sum(should_refuse(s, r, ms, mr) for s, r in refuse)
+            if refused > best[0]:  # ascending scan: first hit is the lowest pair
+                best = (refused, ms, mr)
+    return best[1], best[2], best[0]
+
+
 def vector_literal(vec: Sequence[float]) -> str:
     """pgvector text form, so no numpy/pgvector adapter is needed."""
     return "[" + ",".join(f"{x:.9g}" for x in vec) + "]"
 
 
 _SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+_LIST_NUMBER = re.compile(r"^\d+[.)]\s+")  # corpus steps read "2. Torque all four ..."
 
 
 def _first_sentence(text: str) -> str:
@@ -116,7 +142,7 @@ def step_from_row(row: Any) -> dict:
     The glance is the step's first sentence when it fits, else its heading --
     never a sentence cut mid-value ("Torque to 4 N-" is worse than "Fastening").
     """
-    text = " ".join(sanitize(_get(row, "text") or "").split())
+    text = _LIST_NUMBER.sub("", " ".join(sanitize(_get(row, "text") or "").split()))
     heading = " ".join(sanitize(_get(row, "heading") or "").split())
     first = _first_sentence(text)
     if 0 < len(first) <= GLANCE_MAX:

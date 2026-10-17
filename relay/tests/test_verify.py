@@ -168,6 +168,23 @@ def test_numbers_split_across_two_cited_quotes_pass():
     assert check_draft(d, RETRIEVED)[0] is None
 
 
+def test_bare_count_cannot_borrow_a_value_with_a_unit():
+    # Quote says 3 pulls and 4 N-m; "4 pulls" must not pass on the strength of "4 N-m".
+    chunks = [{"chunk_id": "SOP-131:A:4.3", "doc_id": "SOP-131", "revision": "A", "section": "4.3",
+               "text": "Set the wrench to 4 N-m and make 3 clockwise conditioning pulls."}]
+    quote = "Set the wrench to 4 N-m and make 3 clockwise conditioning pulls"
+    good = draft("Make 3 clockwise pulls at 4 N-m", "Make 3 clockwise pulls at 4 N-m.",
+                 [("SOP-131:A:4.3", quote)])
+    assert check_draft(good, chunks)[0] is None
+    bad = dict(good, glance="Make 4 clockwise pulls")
+    assert check_draft(bad, chunks)[0].startswith("unsupported_number")
+
+
+def test_dropping_the_unit_from_a_value_fails():
+    d = draft("Torque M5 to 4", "Torque the M5 screws.", [("SOP-114:C:4.2", Q42)])
+    assert check_draft(d, RETRIEVED)[0].startswith("unsupported_number")
+
+
 def test_answerable_without_citations_fails():
     d = draft("Torque M5 to 4 N-m", "Torque M5 to 4 N-m.", [])
     assert check_draft(d, RETRIEVED)[0] == "no_citations"

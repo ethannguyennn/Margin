@@ -9,8 +9,9 @@ A draft passes only if all of these hold:
    >= 0.95 *with exactly the same digits* -- fuzziness tolerates spacing noise,
    never a changed value;
 4. every number+unit token and part code (``4 N-m``, ``M5``, ``SOP-131``) in
-   ``glance`` or ``body`` appears in at least one cited quote. A bare number
-   may also be a cited section label ("Step 4.2").
+   ``glance`` or ``body`` appears in at least one cited quote, with the same
+   unit (or the same absence of one). A bare number may also be a cited
+   section label ("Step 4.2").
 
 Inputs may be pydantic models or plain dicts, so the matrix in
 ``tests/test_verify.py`` runs against hand-written chunks.
@@ -96,23 +97,16 @@ def number_tokens(text: str) -> set[str]:
     return tokens
 
 
-def _section_labels(sections: list[str]) -> set[str]:
-    labels: set[str] = set()
-    for s in sections:
-        parts = str(s).split(".")
-        labels.update(".".join(parts[: i + 1]) for i in range(len(parts)))
-    return labels
-
-
 def _unsupported(answer: str, quotes: list[str], sections: list[str]) -> str | None:
     quoted = set().union(*(number_tokens(q) for q in quotes)) if quotes else set()
-    quoted_nums = {tok.split("|")[0] for tok in quoted if "|" in tok}
-    labels = _section_labels(sections)
+    # Full cited labels only: allowing the prefix "4" of section "4.3" would let
+    # any bare 4 through.
+    labels = {f"{s}|" for s in sections}
     for tok in sorted(number_tokens(answer)):
-        if tok in quoted:
-            continue
-        num, _, unit = tok.partition("|")
-        if not tok.startswith("code:") and not unit and (num in quoted_nums or num in labels):
+        # Exact token match only: a bare count ("4 pulls") never borrows a
+        # quoted value that carries a unit ("4 N-m"), and a value never drops
+        # its unit. Bare section labels ("Step 4.2") are allowed.
+        if tok in quoted or tok in labels:
             continue
         return tok.replace("|", " ").strip()
     return None
