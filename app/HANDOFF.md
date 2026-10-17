@@ -10,3 +10,70 @@
   Replace it when Part 3 provides the live origin.
 - No direct STT credentials belong in the WebView bundle.
 - Tooling is local to `app/`; port 5174 preserves the earlier starter on 5173.
+
+## Published dependency
+
+`scaffold-app` points to `a9b2ea3` on `part-1-lens-ui`. The tag and branch were
+pushed before the lens implementation. Fetch only that tag or cherry-pick its
+commit for the app contracts and scaffold. No work has been committed to main.
+
+## Part 2 integration
+
+`src/main.ts` discovers these exact paths and signatures from the role spec:
+
+- `src/api/client.ts`: `ask(req, { signal })`
+- `src/audio/capture.ts`: `startCapture(onLevel)`, `stopCapture()`, `isCapturing()`
+- `src/obs/sentry.ts`: `initObs()`, `startAsk()`
+
+Once all three exist, they take over in live and VITE_MOCK=1 modes. Before
+they land, mock mode uses only the synthetic UI fixture adapter in main;
+live mode fails closed to ERROR. No Part 2 directories were created or edited.
+Ask/capture failures and cancellations are isolated; late relay responses
+cannot replace a newer screen. Audio start/stop share the UI/storage bridge
+queue, which is released before waiting for the relay.
+
+Mic source is persisted as `glasses`/`phone`. The frozen capture interface has
+no setter for it; Part 2 owns selecting/applying its source. No speculative SDK
+call was added. No audio, ordinary answer or transcript is persisted by Part 1.
+
+## Part 4 fixtures
+
+Copy `tests/sanitize-fixtures.json` **verbatim** into the relay suite. This is
+the proposed fixture set announced in the current chat. It has not been
+agreed or run against Part 4's sanitize.py; no team channel was provided.
+The single exported allow-list is `G2_ALLOWED_NON_ASCII` in `ui/glyphs.ts`.
+
+## Acceptance evidence
+
+- Every state/gesture pair has a unit test, including no-ops and root exit.
+- Persistence tests simulate a cold start; stale/future/invalid walkthroughs
+  are discarded. The 30-minute boundary is strict (`age < 30 minutes`).
+- Word-preserving pagination enforces <=450 chars; lens body uses a smaller
+  280-char budget for the 184px body box. An impossible oversized token is
+  refused rather than split; response routing renders ERROR in that case.
+- Three fixed containers, exactly one capture container, brightness 2/4/2,
+  no zOrderIndex declarations, no images and **zero rebuildPageContainer calls**.
+- Actual official simulator 0.9.5: all fixture outcomes, the complete gesture
+  loop, two local walkthrough swipes, multi-page step details and accepted
+  native root shutdown. The smoke test records results and screenshots.
+- The simulator did not emit SYSTEM_EXIT_EVENT after accepting shutdown;
+  mode-1 exit confirmation on physical glasses remains a hardware check.
+- The original screenshots use alpha for glyph brightness; composited
+  black-background QA captures were inspected for text fit and legibility.
+- Hardware font/brightness, live relay/audio and Sentry are untested integrations.
+- The placeholder origin must be replaced before live network use. No real
+  relay origin or public DSN is present, and no provider keys are bundled.
+
+### Recorded results (2026-10-17)
+
+- `npm test`: **174 tests passed**, six files.
+- `npm run test:coverage`: **98.46% lines / 92.07% branches** over the
+  modules exercised by the unit suites. `main.ts` is exercised by the simulator
+  test, not included in that unit coverage figure.
+- `npm run test:simulator`: **29 screen assertions passed**, five fixture
+  requests, step navigation made no extra request, native shutdown accepted,
+  zero console errors. See `tests/evidence/simulator-results.json`.
+- `npm run pack`: succeeded; `margin.ehpk` generated with minimum Even App
+  version **2.2.10** resolved from SDK **0.0.16**.
+- The synthetic visual captures in `tests/evidence/` were inspected. Native
+  shutdown leaves a cleared display, captured by `root-exit-glasses-preview.png`.

@@ -7,6 +7,7 @@ import { LensDisplay } from './ui/layout';
 import { renderScreen, type ScreenText } from './ui/screens';
 import { gestureFromEvent } from './ui/input';
 import { FIXTURE_NAMES, UI_FIXTURES } from './ui/fixtures';
+import { SessionStore } from './ui/session-store';
 
 type CaptureModule = Pick<LensPorts, 'startCapture' | 'stopCapture'> & { isCapturing(): boolean };
 type ClientModule = Pick<LensPorts, 'ask'>;
@@ -14,10 +15,12 @@ interface ObsModule { initObs(): void; startAsk(): { finishSpan(name: string): v
 // Part 2 owns these frozen paths. The live path fails closed until they land.
 const modules = import.meta.glob('./{audio/capture,api/client,obs/sentry}.ts');
 const isMock = import.meta.env.VITE_MOCK === '1';
+const integrationPaths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts'];
+const useUiFixtures = isMock && integrationPaths.some(path => !modules[path]);
 const app = document.querySelector<HTMLDivElement>('#app')!;
 const title = document.createElement('h1'); title.textContent = 'Margin';
 const status = document.createElement('p'); status.textContent = 'Connecting to Even G2...';
-const mode = document.createElement('p'); mode.textContent = isMock ? 'Synthetic UI fixtures. No microphone or network.' : 'Live mode: Part 2 audio and relay integration.';
+const mode = document.createElement('p'); mode.textContent = useUiFixtures ? 'Synthetic UI fixtures. No microphone or network.' : isMock ? 'Part 2 mock integration.' : 'Live mode: Part 2 audio and relay integration.';
 const mirror = document.createElement('pre');
 app.append(title, status, mode, mirror);
 
@@ -48,20 +51,12 @@ async function boot(): Promise<void> {
   await display.render({ header: 'MARGIN', main: '', footer: 'starting...' });
   const raw = await queue.run(() => bridge.getLocalStorage(STORAGE_KEY));
   const state = restoreSession(raw, Date.now(), crypto.randomUUID());
-  let saved = raw;
-  const persist = async (value: LensState) => {
-    const encoded = serializeSession(value);
-    if (encoded === saved) return;
-    await queue.run(async () => {
-      if (encoded === saved) return;
-      if (!await bridge.setLocalStorage(STORAGE_KEY, encoded)) throw new Error('Session storage failed');
-      saved = encoded;
-    });
-  };
+  const store = new SessionStore(encoded => queue.run(() => bridge.setLocalStorage(STORAGE_KEY, encoded)), raw);
+  const persist = (value: LensState) => store.save(serializeSession(value));
   let fixtureIndex = 0;
   let integrations: Promise<[CaptureModule, ClientModule, ObsModule]> | null = null;
   const loadIntegrations = () => integrations ??= (async (): Promise<[CaptureModule, ClientModule, ObsModule]> => {
-    const paths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts'];
+    const paths = integrationPaths;
     if (paths.some(path => !modules[path])) throw new Error('Part 2 integration modules are not installed. Use npm run dev:mock for the fixture demo.');
     const [audio, client, obs] = await Promise.all(paths.map(path => modules[path]()));
     const result: [CaptureModule, ClientModule, ObsModule] = [audio as CaptureModule, client as ClientModule, obs as ObsModule];
@@ -75,16 +70,16 @@ async function boot(): Promise<void> {
       console.info('[Margin] native exit accepted');
     },
     startCapture: async onLevel => {
-      if (isMock) { onLevel(0.5); return; }
+      if (useUiFixtures) { onLevel(0.5); return; }
       const [audio] = await loadIntegrations(); await queue.run(() => audio.startCapture(onLevel));
     },
     stopCapture: async () => {
-      if (isMock || !integrations) return { data_b64: '', sample_rate: 16000 };
+      if (useUiFixtures || !integrations) return { data_b64: '', sample_rate: 16000 };
       const [audio] = await integrations;
       return audio.isCapturing() ? queue.run(() => audio.stopCapture()) : { data_b64: '', sample_rate: 16000 };
     },
     ask: async (request: AskRequest, opts): Promise<AskResponse> => {
-      if (isMock) {
+      if (useUiFixtures) {
         // UI fixture adapter only; no audio/relay/mock module is implemented here.
         const name = FIXTURE_NAMES[fixtureIndex++ % FIXTURE_NAMES.length];
         await new Promise<void>((resolve, reject) => {
@@ -100,6 +95,13 @@ async function boot(): Promise<void> {
   };
   const controller = new LensController(state, ports);
   await controller.start(); await persist(state);
+  const suspend = async () => {
+    // Start suspension synchronously so its save is queued, then flush now:
+    // Android may freeze the WebView before the debounce timer can run.
+    const suspended = controller.suspend();
+    await store.flush();
+    await suspended;
+  };
   let levelTick = 0;
   const originalRender = ports.render;
   ports.render = (value, level) => {
@@ -111,12 +113,12 @@ async function boot(): Promise<void> {
   const unsubscribe = bridge.onEvenHubEvent(event => {
     const sys = event.sysEvent?.eventType;
     if (sys === OsEventTypeList.FOREGROUND_ENTER_EVENT) { void controller.resume().catch(report); return; }
-    if (sys === OsEventTypeList.FOREGROUND_EXIT_EVENT) { void controller.suspend().catch(report); return; }
+    if (sys === OsEventTypeList.FOREGROUND_EXIT_EVENT) { void suspend().catch(report); return; }
     if (sys === OsEventTypeList.SYSTEM_EXIT_EVENT || sys === OsEventTypeList.ABNORMAL_EXIT_EVENT) { void cleanup(); return; }
     const gesture = gestureFromEvent(event);
     if (gesture) controller.dispatch({ type: gesture });
   });
-  const visibility = () => { void (document.hidden ? controller.suspend() : controller.resume()).catch(report); };
+  const visibility = () => { void (document.hidden ? suspend() : controller.resume()).catch(report); };
   document.addEventListener('visibilitychange', visibility);
   async function cleanup() {
     if (closing) return;

@@ -114,6 +114,12 @@ describe('persistence and lifecycle policy', () => {
     const accepted = transition(fresh, { type: 'PRESS' }).state;
     expect(restoreSession(serializeSession(accepted), 1000, 'new').screen).toBe('IDLE');
   });
+  it('discards malformed cached steps while preserving the session and privacy flag', () => {
+    const state = stateFor('WALKTHROUGH'); state.walkthrough!.steps[0].body = 'x'.repeat(451);
+    const restored = restoreSession(serializeSession(state), 2000, 'replacement');
+    expect(restored.screen).toBe('IDLE'); expect(restored.privacySeen).toBe(true);
+    expect(restored.session_id).toBe('session-test'); expect(restored.walkthrough).toBeNull();
+  });
   it.each(['{broken','null','{"version":2}', '{}'])('handles corrupt storage %s', raw => {
     expect(restoreSession(raw, 1000, 'fresh')).toEqual(initialState('fresh'));
   });

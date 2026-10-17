@@ -2,5 +2,7 @@ node_modules/
 dist/
 coverage/
 *.ehpk
-.env.local
+.env
+.env.*
+!.env.mock
 test-artifacts/

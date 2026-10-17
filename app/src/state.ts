@@ -143,7 +143,8 @@ export function restoreSession(raw: string, now: number, newSessionId: string): 
     state.screen = state.privacySeen ? 'IDLE' : 'PRIVACY';
     const age = now - saved.walkthroughReceivedAt;
     if (state.privacySeen && typeof saved.walkthroughReceivedAt === 'number' && age >= 0 && age < WALKTHROUGH_TTL_MS && validWalkthrough(saved.walkthrough)) {
-      saved.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body), BODY_PAGE_CHARS));
+      try { saved.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body), BODY_PAGE_CHARS)); }
+      catch { return state; }
       return { ...state, screen: 'WALKTHROUGH', walkthrough: saved.walkthrough,
         walkthroughReceivedAt: saved.walkthroughReceivedAt };
     }
@@ -212,11 +213,14 @@ export class LensController {
     if (effect === 'START_CAPTURE') {
       const epoch = ++this.epoch;
       this.request?.abort();
-      this.capture = this.capture.then(() => this.ports.startCapture(level => {
+      this.capture = this.capture.then(() => {
+        if (this.epoch !== epoch || this.disposed) return;
+        return this.ports.startCapture(level => {
         if (this.epoch !== epoch || this.state.screen !== 'LISTENING' || this.suspended) return;
         this.level = level;
         void this.ports.render(this.state, level).catch(this.ports.onError);
-      })).catch(error => {
+        });
+      }).catch(error => {
         this.ports.onError(error);
         if (epoch === this.epoch && !this.disposed) this.dispatch({ type: 'FAIL' });
       });

@@ -37,6 +37,7 @@ const initial = await screen();
 assert.ok(['PRIVACY','IDLE'].includes(initial), 'Launch a fresh fixture session before smoke test');
 if (initial === 'PRIVACY') await input('click', 'IDLE');
 await assertScreen('IDLE');
+await screenshot('idle');
 await input('click', 'LISTENING'); await screenshot('listening');
 await input('click', 'THINKING', 100); await wait(650); await assertScreen('ANSWER_GLANCE'); await screenshot('answer-glance');
 await input('click', 'ANSWER_EXPANDED'); await screenshot('answer-expanded');

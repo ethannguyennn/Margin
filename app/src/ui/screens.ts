@@ -26,6 +26,7 @@ export function glanceScreen(state: LensState): ScreenText {
   return { header: '', main: short(state.response.glance, 60), footer: `${short(state.response.source, 46)}  [+]` };
 }
 export function expandedScreen(state: LensState): ScreenText {
+  if (state.response !== null && state.response.verified !== true) return errorScreen();
   // Restored walkthroughs have no ordinary response; their validated stored steps are the source.
   if (state.detailReturn !== 'WALKTHROUGH' && state.response?.verified !== true) return errorScreen();
   if (state.detailReturn === 'WALKTHROUGH' && !state.walkthrough) return errorScreen();
@@ -35,7 +36,7 @@ export function expandedScreen(state: LensState): ScreenText {
 }
 export function walkthroughScreen(state: LensState): ScreenText {
   const w = state.walkthrough;
-  if (!w) return errorScreen();
+  if (!w || (state.response !== null && state.response.verified !== true)) return errorScreen();
   const step = w.steps[w.index];
   const progress = Math.max(1, Math.round(((w.index + 1) / w.total) * 10));
   return { header: `${short(`${w.doc_id} rev ${w.revision}`, 30)}  step ${w.index + 1}/${w.total}`,
