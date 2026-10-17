@@ -28,6 +28,11 @@ export async function initObs(): Promise<boolean> {
       // browserTracingIntegration patches fetch and attaches sentry-trace /
       // baggage, which is how Part 3 continues the trace server-side.
       tracesSampleRate: 1.0,
+      // The Even SDK console.logs every audio event with the raw audioPcm array.
+      // Sentry's console breadcrumbs would ship that audio off the device. Drop it.
+      beforeBreadcrumb: (b: { category?: string; message?: string }) =>
+        b.category === 'console' && b.message?.includes('audioPcm') ? null : b,
+      beforeSendLog: (l: { message?: string }) => (l.message?.includes('audioPcm') ? null : l),
       _experiments: { enableLogs: true },
       // Replay deliberately omitted: unproven in the Even WebView, not worth blocking on.
       // TODO(verify-sdk): tunnel: `${RELAY_ORIGIN}/v1/sentry-tunnel` once Part 3 ships the route.

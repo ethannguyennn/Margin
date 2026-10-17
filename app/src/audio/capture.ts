@@ -26,7 +26,11 @@ type AudioEvent = {
     direction?: number | null;
     speakerRole?: string;
   };
+  sysEvent?: { eventType?: number };
 };
+
+const FOREGROUND_ENTER_EVENT = 4; // OsEventTypeList, sdk-reference
+const FOREGROUND_EXIT_EVENT = 5;
 type Bridge = {
   audioControl: (isOpen: boolean, source?: string) => Promise<boolean>;
   onEvenHubEvent: (cb: (e: AudioEvent) => void) => () => void;
@@ -51,7 +55,11 @@ async function getBridge(): Promise<Bridge> {
   return bridge;
 }
 
-let capturing = false;
+let capturing = false; // the mic is open right now
+// The press is in progress: true from startCapture until stopCapture/cancel, even
+// after the 8 s cap has already closed the mic. Without this, the user's stop
+// press after a cap reads as a new press, reopens the mic and loses the audio.
+let session = false;
 let chunks: Uint8Array[] = [];
 let bytes = 0;
 let unsubscribe: (() => void) | null = null;
@@ -63,7 +71,7 @@ let level: ((rms01: number) => void) | null = null;
 let roles: Record<string, number> = {};
 
 export function isCapturing(): boolean {
-  return MOCK ? mockIsCapturing() : capturing;
+  return MOCK ? mockIsCapturing() : session;
 }
 
 function toU8(pcm: Uint8Array | number[] | string): Uint8Array {
@@ -114,6 +122,12 @@ async function closeMic(reason: string): Promise<void> {
 }
 
 function onAudio(e: AudioEvent): void {
+  // The host's own lifecycle signal; visibilitychange below is the backup.
+  const sys = e.sysEvent?.eventType;
+  if (sys === FOREGROUND_EXIT_EVENT || sys === FOREGROUND_ENTER_EVENT) {
+    void cancelCapture();
+    return;
+  }
   const pcm = e.audioEvent?.audioPcm;
   if (!pcm || !capturing) return;
   const role = e.audioEvent?.speakerRole;
@@ -133,7 +147,7 @@ function onAudio(e: AudioEvent): void {
 
 export async function startCapture(onLevel: (rms01: number) => void): Promise<void> {
   if (MOCK) return mockStartCapture(onLevel);
-  if (capturing) return;
+  if (session) return;
 
   chunks = [];
   bytes = 0;
@@ -167,6 +181,7 @@ export async function startCapture(onLevel: (rms01: number) => void): Promise<vo
     );
   }
   capturing = true;
+  session = true;
   // Wall-clock backstop: if chunks stop arriving we still close the mic.
   capTimer = setTimeout(() => void closeMic(`cap ${MAX_AUDIO_SECONDS}s timer`), MAX_AUDIO_SECONDS * 1000);
 }
@@ -174,6 +189,7 @@ export async function startCapture(onLevel: (rms01: number) => void): Promise<vo
 export async function stopCapture(): Promise<{ data_b64: string; sample_rate: 16000 }> {
   if (MOCK) return mockStopCapture();
   await closeMic('stopCapture');
+  session = false;
   const all = new Uint8Array(bytes);
   let off = 0;
   for (const c of chunks) {
@@ -192,6 +208,7 @@ export async function cancelCapture(): Promise<void> {
     return;
   }
   await closeMic('cancelCapture');
+  session = false;
   chunks = [];
   bytes = 0;
 }

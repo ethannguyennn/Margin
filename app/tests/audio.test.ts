@@ -76,9 +76,12 @@ test('8 s cap: a 20 s press sends 8 s and the mic is already closed', async () =
   const hw = fakeBridge();
   await startCapture(() => {});
   for (let i = 0; i < 200; i++) hw.push(8192); // 20 s
-  assert.equal(isCapturing(), false, 'mic must close itself at the cap');
   await new Promise((r) => setTimeout(r, 0)); // the audioControl(false) is dispatched, not awaited
-  assert.deepEqual(hw.calls.at(-1), [false, undefined]);
+  assert.deepEqual(hw.calls.at(-1), [false, undefined], 'mic must close itself at the cap');
+  assert.equal(isCapturing(), true, 'the press is still open until the user stops it');
+  // Regression (found in the simulator): the stop press after a cap must not reopen the mic.
+  await startCapture(() => {});
+  assert.equal(hw.calls.filter(([open]) => open).length, 1);
   const out = await stopCapture();
   assert.equal(Buffer.from(out.data_b64, 'base64').length, MAX_AUDIO_BYTES);
 });
@@ -152,4 +155,20 @@ test('host payload variants: number[] and base64 audioPcm are both captured', as
   cb!({ audioEvent: { audioPcm: [0, 64, 0, 64], speakerRole: 'self' } });
   cb!({ audioEvent: { audioPcm: Buffer.from([0, 64, 0, 64]).toString('base64'), speakerRole: 'other' } });
   assert.equal(Buffer.from((await stopCapture()).data_b64, 'base64').length, 8);
+});
+
+test('host FOREGROUND_EXIT sysEvent closes the mic and drops the buffer', async () => {
+  let cb: ((e: any) => void) | null = null;
+  const calls: boolean[] = [];
+  setBridge({
+    audioControl: async (open: boolean) => (calls.push(open), true),
+    onEvenHubEvent: (fn: any) => ((cb = fn), () => (cb = null)),
+  });
+  await startCapture(() => {});
+  cb!({ audioEvent: { audioPcm: [0, 64] } });
+  cb!({ sysEvent: { eventType: 5 } });
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(isCapturing(), false);
+  assert.deepEqual(calls, [true, false]);
+  assert.equal((await stopCapture()).data_b64, '');
 });
