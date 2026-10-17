@@ -120,7 +120,7 @@ def _revision_clause(revision: str | None) -> tuple[str, tuple]:
     return "d.revision = %s", (revision,)
 
 
-_CHUNK_COLUMNS = """c.chunk_id, c.doc_id, c.revision, c.section,
+_CHUNK_COLUMNS = """c.chunk_id, c.doc_id, c.revision, c.section, d.title,
     c.is_step, c.step_order, c.heading, c.text"""
 
 
@@ -138,7 +138,7 @@ async def _vector_rows(q_embedding, k: int = 20, revision: str | None = None) ->
 
 async def vector_top(q_embedding, k: int = 20, revision: str | None = None) -> list[Chunk]:
     from .schemas import Chunk
-    return [Chunk(**row) for row in await _vector_rows(q_embedding, k, revision)]
+    return [Chunk(**row, sim=row["score"]) for row in await _vector_rows(q_embedding, k, revision)]
 
 
 async def _fts_rows(query: str, k: int = 20, revision: str | None = None) -> list[dict]:
@@ -196,6 +196,21 @@ class RetrievalStore:
     vector_top = staticmethod(_vector_rows)
     fts_top = staticmethod(_fts_rows)
     steps_for = staticmethod(_step_rows)
+
+
+async def ingest_corpus(corpus_dir: str | Path | None = None) -> list[dict]:
+    """Entry point expected by Part 3's authenticated /v1/ingest route.
+
+    Resolve the owned seed module relative to this checkout, not the server's
+    working directory. The relay image must include the root db/ and corpus/.
+    """
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_margin_corpus_seed", ROOT / "db/seed.py")
+    if spec is None or spec.loader is None:
+        raise RuntimeError("The relay image must include db/seed.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return await module.ingest(Path(corpus_dir) if corpus_dir else ROOT / "corpus")
 
 
 async def list_procedures() -> list[dict]:

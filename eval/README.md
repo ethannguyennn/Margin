@@ -41,5 +41,9 @@ The health endpoint must explicitly identify mock mode.
 
 The independent tests use answer-key fixtures to test the harness. Their
 percentages are not retrieval/generation quality numbers. As of 2026-10-17,
-no live eval was possible because the relay scaffold and credentials were
-unavailable. No threshold tuning or live quality metrics are claimed.
+no live eval was possible because cloud credentials and a real-mode service
+were unavailable. After scaffold-relay was published, the harness also ran
+through its actual mock HTTP handlers in the test suite. These results remain
+fixture evidence. The scaffold currently drops needs_clarification, so its
+ambiguous responses cannot pass that requirement until Part 3 propagates it.
+No threshold tuning or live quality metrics are claimed.

@@ -33,6 +33,7 @@ def schema_dependencies(monkeypatch):
             heading: str | None = None
             text: str
             score: float = 0
+            sim: float | None = None
 
         class FixtureStep(BaseModel):
             step_id: str

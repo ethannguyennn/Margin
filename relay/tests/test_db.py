@@ -78,6 +78,7 @@ async def test_retrieval_has_effective_or_explicit_revision_filter(monkeypatch, 
     vector = await db.vector_top([1.0, 0.0], 20, revision)
     lexical = await db.fts_top("M5'); DROP TABLE chunks; --", 20, revision)
     assert vector[0].chunk_id == lexical[0].chunk_id
+    assert vector[0].sim == 0.9
     for query, params in calls:
         assert ("d.status = 'effective'" in query) == (revision is None)
         assert ("d.revision = %s" in query) == (revision is not None)
