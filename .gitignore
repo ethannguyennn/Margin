@@ -1,0 +1,29 @@
+# secrets
+.env
+.env.*
+!.env.example
+!app/.env.example
+!app/.env.mock
+
+# python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# node
+node_modules/
+
+# editors / os
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# never persist audio
+*.wav
+*.pcm
+!relay/tests/fixtures/*.pcm
