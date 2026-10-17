@@ -10,7 +10,9 @@ export const MAX_AUDIO_SECONDS = 8;
 export const SAMPLE_RATE = 16000 as const;
 export const BYTES_PER_SAMPLE = 2; // pcm_s16le, mono
 export const MAX_AUDIO_BYTES = MAX_AUDIO_SECONDS * SAMPLE_RATE * BYTES_PER_SAMPLE;
-export const ASK_TIMEOUT_MS = 8000;
+// 8 s is the contract. Overridable so tests (and a bad hotel network on demo day)
+// can tune it without a code change.
+export const ASK_TIMEOUT_MS = Number(env.VITE_ASK_TIMEOUT_MS ?? 8000);
 
 /** One id per app launch. Sent as x-session-id on every relay call. */
 export const SESSION_ID: string =

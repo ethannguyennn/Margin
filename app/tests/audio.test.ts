@@ -4,6 +4,13 @@ import assert from 'node:assert/strict';
 
 process.env.VITE_MOCK = '0';
 
+// Stand in for the WebView document so the visibilitychange handler registers.
+const listeners: Record<string, Array<() => void>> = {};
+(globalThis as any).document = {
+  addEventListener: (name: string, fn: () => void) => ((listeners[name] ??= []).push(fn)),
+};
+const fireVisibilityChange = () => listeners['visibilitychange']?.forEach((f) => f());
+
 const { startCapture, stopCapture, cancelCapture, isCapturing, setBridge } = await import('../src/audio/capture.ts');
 const { MAX_AUDIO_BYTES } = await import('../src/settings.ts');
 
@@ -113,4 +120,26 @@ test('chunks arriving after the mic closed are ignored', async () => {
   hw.push();
   const out = await stopCapture();
   assert.equal(out.data_b64, '');
+});
+
+test('WebView suspension: the mic closes and the next press re-arms', async () => {
+  const hw = fakeBridge();
+  await startCapture(() => {});
+  hw.push();
+  assert.equal(listeners['visibilitychange']?.length, 1, 'handler must be registered at import');
+
+  fireVisibilityChange(); // phone locked / app backgrounded
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(isCapturing(), false, 'mic must not stay open in the background');
+  assert.deepEqual(hw.calls.at(-1), [false, undefined]);
+  assert.equal(hw.subscribed, 0);
+  assert.equal((await stopCapture()).data_b64, '', 'the buffer is dropped, not sent later');
+
+  fireVisibilityChange(); // relaunched
+  await new Promise((r) => setTimeout(r, 0));
+  await startCapture(() => {}); // next press
+  assert.equal(isCapturing(), true);
+  assert.deepEqual(hw.calls.at(-1), [true, 'glasses']);
+  hw.push();
+  assert.equal(Buffer.from((await stopCapture()).data_b64, 'base64').length, 3200);
 });
