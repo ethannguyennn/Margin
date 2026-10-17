@@ -1,6 +1,4 @@
-// TEMPORARY -- Part 1 owns this file. Pasted from README-PART-2-APP-IO.md section 6
-// so the app/io modules compile standalone. On `git merge scaffold-app`:
-//   git checkout --theirs app/src/types.ts
+// Frozen app-side contract. Changes require agreement from Parts 1-5.
 export type Intent = 'question' | 'walkthrough' | 'deviation' | 'repeat' | 'unknown';
 export type Outcome = 'answered' | 'not_found' | 'logged' | 'clarify' | 'error';
 
