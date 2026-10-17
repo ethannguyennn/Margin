@@ -20,6 +20,8 @@ node_modules/
 # editors / os
 .vscode/
 .idea/
+.obsidian/
+.trash/
 .DS_Store
 Thumbs.db
 
