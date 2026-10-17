@@ -1,0 +1,123 @@
+{
+  "checks": [
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "LISTENING",
+      "actual": "LISTENING"
+    },
+    {
+      "expected": "THINKING",
+      "actual": "THINKING"
+    },
+    {
+      "expected": "ANSWER_GLANCE",
+      "actual": "ANSWER_GLANCE"
+    },
+    {
+      "expected": "ANSWER_EXPANDED",
+      "actual": "ANSWER_EXPANDED"
+    },
+    {
+      "expected": "ANSWER_GLANCE",
+      "actual": "ANSWER_GLANCE"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "LISTENING",
+      "actual": "LISTENING"
+    },
+    {
+      "expected": "THINKING",
+      "actual": "THINKING"
+    },
+    {
+      "expected": "NOT_FOUND",
+      "actual": "NOT_FOUND"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "LISTENING",
+      "actual": "LISTENING"
+    },
+    {
+      "expected": "THINKING",
+      "actual": "THINKING"
+    },
+    {
+      "expected": "ERROR",
+      "actual": "ERROR"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "LISTENING",
+      "actual": "LISTENING"
+    },
+    {
+      "expected": "THINKING",
+      "actual": "THINKING"
+    },
+    {
+      "expected": "WALKTHROUGH",
+      "actual": "WALKTHROUGH"
+    },
+    {
+      "expected": "WALKTHROUGH",
+      "actual": "WALKTHROUGH"
+    },
+    {
+      "expected": "ANSWER_EXPANDED",
+      "actual": "ANSWER_EXPANDED"
+    },
+    {
+      "expected": "ANSWER_EXPANDED",
+      "actual": "ANSWER_EXPANDED"
+    },
+    {
+      "expected": "WALKTHROUGH",
+      "actual": "WALKTHROUGH"
+    },
+    {
+      "expected": "WALKTHROUGH",
+      "actual": "WALKTHROUGH"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    },
+    {
+      "expected": "LISTENING",
+      "actual": "LISTENING"
+    },
+    {
+      "expected": "THINKING",
+      "actual": "THINKING"
+    },
+    {
+      "expected": "LOGGED",
+      "actual": "LOGGED"
+    },
+    {
+      "expected": "IDLE",
+      "actual": "IDLE"
+    }
+  ],
+  "nativeExitAccepted": true,
+  "systemExitEventObserved": false,
+  "errors": []
+}

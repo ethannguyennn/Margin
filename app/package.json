@@ -1,0 +1,28 @@
+{
+  "name": "margin-lens",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0 --port 5174 --strictPort",
+    "dev:mock": "vite --host 0.0.0.0 --port 5174 --strictPort --mode mock",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "pack": "npm run build && evenhub pack app.json dist -o margin.ehpk --sdk-ver 0.0.16",
+    "simulate": "evenhub-simulator http://localhost:5174 --automation-port 9898",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:simulator": "node tests/simulator-smoke.mjs"
+  },
+  "dependencies": {
+    "@evenrealities/even_hub_sdk": "0.0.16"
+  },
+  "devDependencies": {
+    "@evenrealities/evenhub-cli": "0.1.14",
+    "@evenrealities/evenhub-simulator": "0.9.5",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^4.1.0",
+    "@vitest/coverage-v8": "^4.1.0"
+  }
+}

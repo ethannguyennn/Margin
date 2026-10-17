@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+*.ehpk
+.env
+.env.*
+!.env.mock
+test-artifacts/

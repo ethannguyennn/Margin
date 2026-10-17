@@ -1,0 +1,10 @@
+[
+  { "input": "§4.2 · M5 • bracket", "output": "Sec 4.2 - M5 - bracket" },
+  { "input": "90° 5µm 10Ω", "output": "90 deg 5um 10 ohm" },
+  { "input": "a–b—c “quoted” ‘single’", "output": "a-b-c \"quoted\" 'single'" },
+  { "input": "2×3 ±1 ≥4 ≤9 → exit", "output": "2x3 +/-1 >=4 <=9 -> exit" },
+  { "input": "safe🔧😀 café 中文\u0000\u007f", "output": "safe caf " },
+  { "input": "▲△▶▷▼▽◀◁●○■□★☆━─█▇▆▅▄▃▂▁╭╮╯╰│", "output": "▲△▶▷▼▽◀◁●○■□★☆━─█▇▆▅▄▃▂▁╭╮╯╰│" },
+  { "input": "line 1\nline 2\tend", "output": "line 1\nline 2\tend" },
+  { "input": "", "output": "" }
+]
