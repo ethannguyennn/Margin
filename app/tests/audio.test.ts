@@ -143,3 +143,13 @@ test('WebView suspension: the mic closes and the next press re-arms', async () =
   hw.push();
   assert.equal(Buffer.from((await stopCapture()).data_b64, 'base64').length, 3200);
 });
+
+test('host payload variants: number[] and base64 audioPcm are both captured', async () => {
+  setBridge(null);
+  let cb: ((e: any) => void) | null = null;
+  setBridge({ audioControl: async () => true, onEvenHubEvent: (fn: any) => ((cb = fn), () => (cb = null)) });
+  await startCapture(() => {});
+  cb!({ audioEvent: { audioPcm: [0, 64, 0, 64], speakerRole: 'self' } });
+  cb!({ audioEvent: { audioPcm: Buffer.from([0, 64, 0, 64]).toString('base64'), speakerRole: 'other' } });
+  assert.equal(Buffer.from((await stopCapture()).data_b64, 'base64').length, 8);
+});

@@ -12,7 +12,21 @@ import {
 } from '../settings.ts';
 import { mockIsCapturing, mockStartCapture, mockStopCapture } from '../mock/index.ts';
 
-type AudioEvent = { audioEvent?: { source?: string; audioPcm?: Uint8Array | number[] } };
+// Verified against @evenrealities/even_hub_sdk 0.0.x dist/index.d.ts:
+//   audioControl(isOpen: boolean, source?: AudioInputSource): Promise<boolean>
+//   onEvenHubEvent(cb: (e: EvenHubEvent) => void): () => void
+//   AudioEvent { audioPcm: Uint8Array; source: AudioInputSource; direction: number | null;
+//                speakerRole: 'self' | 'other' | 'unknown' }
+// The SDK normalises audioPcm, but its own doc comment notes the host may send
+// number[] or a base64 string, so we accept all three rather than drop audio.
+type AudioEvent = {
+  audioEvent?: {
+    source?: string;
+    audioPcm?: Uint8Array | number[] | string;
+    direction?: number | null;
+    speakerRole?: string;
+  };
+};
 type Bridge = {
   audioControl: (isOpen: boolean, source?: string) => Promise<boolean>;
   onEvenHubEvent: (cb: (e: AudioEvent) => void) => () => void;
@@ -43,13 +57,20 @@ let bytes = 0;
 let unsubscribe: (() => void) | null = null;
 let capTimer: ReturnType<typeof setTimeout> | null = null;
 let level: ((rms01: number) => void) | null = null;
+// Per-press tally of the SDK's speakerRole tags. Not used to filter audio - a
+// misclassified 'other' would eat the technician's own question - but logged so
+// the glasses-vs-phone mic A/B has numbers behind it.
+let roles: Record<string, number> = {};
 
 export function isCapturing(): boolean {
   return MOCK ? mockIsCapturing() : capturing;
 }
 
-function toU8(pcm: Uint8Array | number[]): Uint8Array {
-  return pcm instanceof Uint8Array ? pcm : new Uint8Array(pcm);
+function toU8(pcm: Uint8Array | number[] | string): Uint8Array {
+  if (pcm instanceof Uint8Array) return pcm;
+  if (typeof pcm !== 'string') return new Uint8Array(pcm);
+  const bin = (globalThis as { atob?: (s: string) => string }).atob?.(pcm) ?? '';
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
 }
 
 /** 0..1 RMS over signed 16-bit LE samples. */
@@ -84,7 +105,7 @@ async function closeMic(reason: string): Promise<void> {
   level = null;
   if (!capturing) return;
   capturing = false;
-  console.info(`[audio] audioControl(false) - ${reason}`);
+  console.info(`[audio] audioControl(false) - ${reason}`, { bytes, seconds: +(bytes / 32000).toFixed(2), roles });
   try {
     await (await getBridge()).audioControl(false);
   } catch (e) {
@@ -95,6 +116,8 @@ async function closeMic(reason: string): Promise<void> {
 function onAudio(e: AudioEvent): void {
   const pcm = e.audioEvent?.audioPcm;
   if (!pcm || !capturing) return;
+  const role = e.audioEvent?.speakerRole;
+  if (role) roles[role] = (roles[role] ?? 0) + 1;
   let buf = toU8(pcm);
   const room = MAX_AUDIO_BYTES - bytes;
   if (buf.byteLength >= room) {
@@ -114,6 +137,7 @@ export async function startCapture(onLevel: (rms01: number) => void): Promise<vo
 
   chunks = [];
   bytes = 0;
+  roles = {};
   level = onLevel;
   const source: MicSource = getMicSource();
   const b = await getBridge();
