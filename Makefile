@@ -78,6 +78,19 @@ deploy-remote:
 logs:
 	$(COMPOSE) logs -f --tail=200 relay
 
+# Read-only, detached checkouts of every team branch under _branches/ (gitignored),
+# refreshed from origin. For browsing (e.g. in Obsidian); never commit in them.
+BRANCHES := part-1-lens-ui part-2-app-io part-4-rag-pipeline part-5-data-corpus
+sync-branches:
+	git fetch origin --prune
+	git worktree prune
+	$(foreach b,$(BRANCHES),$(if $(wildcard _branches/$(b)/.git),git -C _branches/$(b) checkout --detach --force origin/$(b),git worktree add --detach _branches/$(b) origin/$(b))$(\n))
+
+define \n
+
+
+endef
+
 # make health URL=https://margin.<domain>
 URL ?= http://localhost:$(PORT)
 health:

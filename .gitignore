@@ -22,6 +22,8 @@ node_modules/
 .idea/
 .obsidian/
 .trash/
+# read-only checkouts of teammates' branches for browsing (make sync-branches)
+_branches/
 .DS_Store
 Thumbs.db
 
