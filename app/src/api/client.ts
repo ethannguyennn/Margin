@@ -3,7 +3,7 @@
 import type { AskRequest, AskResponse, Outcome } from '../types.ts';
 import { ASK_TIMEOUT_MS, MOCK, RELAY_ORIGIN, SESSION_ID } from '../settings.ts';
 import { mockAsk, mockHealth, mockLogDeviation } from '../mock/index.ts';
-import { captureError, traceSpan } from '../obs/sentry.ts';
+import { captureError, logAsk, traceHeaders, traceSpan } from '../obs/sentry.ts';
 
 /** Client-side codes on top of the relay's stt_failed | db_down | llm_timeout | bad_request. */
 export type ErrorCode = 'stt_failed' | 'db_down' | 'llm_timeout' | 'bad_request' | 'network' | 'timeout';
@@ -89,13 +89,15 @@ async function attempt(req: AskRequest, external?: AbortSignal): Promise<Attempt
   const onExternalAbort = () => ctrl.abort();
   external?.addEventListener('abort', onExternalAbort);
   try {
-    // No sentry-trace / baggage handling here on purpose: the Sentry SDK patches
-    // fetch and attaches them itself. Do not strip them.
     const res = await traceSpan('upload', () =>
       fetch(`${RELAY_ORIGIN}/v1/ask`, {
         method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-session-id': SESSION_ID },
-        body: JSON.stringify(req),
+        headers: {
+          'content-type': 'application/json',
+          'x-session-id': req.session_id || SESSION_ID,
+          ...traceHeaders(),
+        },
+        body: JSON.stringify({ ...req, session_id: req.session_id || SESSION_ID }),
         signal: ctrl.signal,
       }),
     );
@@ -119,7 +121,7 @@ async function attempt(req: AskRequest, external?: AbortSignal): Promise<Attempt
   }
 }
 
-export async function ask(req: AskRequest, opts?: { signal?: AbortSignal }): Promise<AskResponse> {
+async function askInner(req: AskRequest, opts?: { signal?: AbortSignal }): Promise<AskResponse> {
   if (MOCK) return mockAsk(req);
   if (!RELAY_ORIGIN) return errorResponse('bad_request', 'VITE_RELAY_ORIGIN is not set');
 
@@ -136,6 +138,13 @@ export async function ask(req: AskRequest, opts?: { signal?: AbortSignal }): Pro
     return errorResponse(a.code, a.message ?? a.code, served?.trace_id ?? '');
   }
   return validate(a.body);
+}
+
+export async function ask(req: AskRequest, opts?: { signal?: AbortSignal }): Promise<AskResponse> {
+  const t0 = Date.now();
+  const res = await askInner(req, opts);
+  logAsk(res.outcome, Date.now() - t0, res.trace_id);
+  return res;
 }
 
 export async function health(): Promise<{ ok: boolean; mock: boolean; db: string; version: string }> {

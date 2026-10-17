@@ -1,7 +1,5 @@
-// Run: node --test app/tests/
-// Node 24 strips the types itself, so these tests need no package.json and no
-// dev dependency from Part 1.
-import { test } from 'node:test';
+// Run: npm test
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
 process.env.VITE_RELAY_ORIGIN = 'http://relay.test';
@@ -123,4 +121,24 @@ test('mock fixtures cover the whole trigger table', () => {
   assert.equal(mockResponseFor('boom').error?.code, 'llm_timeout');
   assert.equal(mockResponseFor('where is the good coffee').outcome, 'not_found');
   assert.equal(fixtures.NOT_FOUND.glance, 'Not in approved SOPs');
+});
+
+test('session ids are UUIDs even without crypto.randomUUID (insecure WebView)', async () => {
+  const { uuid } = await import('../src/settings.ts');
+  const re = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+  assert.match(uuid(), re);
+  const orig = Object.getOwnPropertyDescriptor(globalThis.crypto, 'randomUUID');
+  Object.defineProperty(globalThis.crypto, 'randomUUID', { value: undefined, configurable: true });
+  try {
+    for (let i = 0; i < 50; i++) assert.match(uuid(), re); // the relay rejects anything else
+  } finally {
+    if (orig) Object.defineProperty(globalThis.crypto, 'randomUUID', orig);
+    else delete (globalThis.crypto as any).randomUUID;
+  }
+});
+
+test('x-session-id follows the request session_id', async () => {
+  const calls = stubFetch({ body: ANSWERED });
+  await ask({ session_id: '7f1c0c4e-2b2a-4c1e-9d0e-0a1b2c3d4e5f', text: 'torque' });
+  assert.equal((calls[0].init.headers as Record<string, string>)['x-session-id'], '7f1c0c4e-2b2a-4c1e-9d0e-0a1b2c3d4e5f');
 });

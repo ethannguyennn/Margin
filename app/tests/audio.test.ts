@@ -1,5 +1,5 @@
-// Run: node --test app/tests/
-import { test } from 'node:test';
+// Run: npm test
+import { test } from 'vitest';
 import assert from 'node:assert/strict';
 
 process.env.VITE_MOCK = '0';

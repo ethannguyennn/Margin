@@ -1,8 +1,8 @@
 // Real HTTP, real sockets, real abort - against a stub relay that speaks the
 // frozen contract. This is NOT Part 3's relay; swap VITE_RELAY_ORIGIN for theirs
 // (MOCK_MODE=1) and the same assertions should hold.
-// Run: node --test app/tests/integration.test.ts
-import { test } from 'node:test';
+// Run: npm test (or npx vitest run tests/integration.test.ts)
+import { afterAll, test } from 'vitest';
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -122,7 +122,7 @@ test('killed relay produces the ERROR outcome, and the next press retries cleanl
   assert.equal(live.trace_id, 'tr-2');
 });
 
-test('deviation logging posts to /v1/deviation', async (t) => {
+test('deviation logging posts to /v1/deviation', async () => {
   await new Promise((r) => relay.close(r));
   relay = await new Promise((resolve) => {
     const s = createServer((req, res) => {
@@ -135,5 +135,5 @@ test('deviation logging posts to /v1/deviation', async (t) => {
   const out = await logDeviation('bracket arrived pre-drilled', { doc_id: 'SOP-114', step_id: 'SOP-114:C:4.2' });
   assert.deepEqual(out, { deviation_id: 'dev-7', notified: true });
   assert.equal(seen.at(-1)!.url, '/v1/deviation');
-  t.after(() => relay.close());
+  afterAll(() => relay.close());
 });
