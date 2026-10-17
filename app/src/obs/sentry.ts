@@ -2,6 +2,8 @@
 // Verified against @sentry/browser 11.4.0 (logs are on by default in 11.x; no flag).
 import { RELAY_ORIGIN, SENTRY_DSN, SESSION_ID, env } from '../settings.ts';
 
+type Span = { end: () => void; setAttribute: (k: string, v: string) => void };
+
 type SentryApi = {
   init: (o: Record<string, unknown>) => void;
   browserTracingIntegration: (o?: Record<string, unknown>) => unknown;
@@ -11,6 +13,8 @@ type SentryApi = {
   captureException: (e: unknown) => void;
   getTraceData: () => Record<string, string>;
   startNewTrace: <T>(cb: () => T) => T;
+  startInactiveSpan: (o: { name: string; op?: string; forceTransaction?: boolean; parentSpan?: Span; startTime?: number }) => Span;
+  withActiveSpan: <T>(span: Span | null, cb: () => T) => T;
   makeFetchTransport: (o: unknown, nativeFetch?: typeof fetch) => unknown;
   logger: { info: (m: string, a?: Record<string, unknown>) => void; error: (m: string, a?: Record<string, unknown>) => void };
 };
@@ -22,6 +26,8 @@ type SentryApi = {
 const SENTRY_PKG = '@sentry/browser';
 
 let sentry: SentryApi | null = null;
+/** The ask opened by startAsk(), so upload spans and trace headers attach to it. */
+let openAsk: Span | null = null;
 
 /** Call once at boot. Never throws - observability must not break the app. */
 export async function initObs(): Promise<boolean> {
@@ -68,16 +74,39 @@ export function traceAsk<T>(fn: () => Promise<T>): Promise<T> {
   return s ? s.startNewTrace(() => s.startSpan({ name: 'ask', op: 'ask', forceTransaction: true }, fn)) : fn();
 }
 
+/** Part 1's handle-style API (app/src/main.ts ObsModule): startAsk() when the ask is
+ * sent, end(outcome) when it resolves. Same transaction/trace rules as traceAsk. */
+export function startAsk(): { finishSpan(name: string): void; end(outcome: string): void } {
+  const s = sentry;
+  if (!s) return { finishSpan() {}, end() {} };
+  const t0 = Date.now() / 1000;
+  const root = s.startNewTrace(() => s.startInactiveSpan({ name: 'ask', op: 'ask', forceTransaction: true }));
+  openAsk = root;
+  return {
+    // A phase that ran from the start of the ask until now (e.g. 'render').
+    finishSpan: (name) => s.startInactiveSpan({ name, op: name, parentSpan: root, startTime: t0 }).end(),
+    end: (outcome) => {
+      root.setAttribute('outcome', outcome);
+      root.end();
+      if (openAsk === root) openAsk = null;
+    },
+  };
+}
+
 /** Child spans. Budget p50: upload 300 ms, render 300 ms; end-of-speech to glance <= 3 s. */
 export function traceSpan<T>(name: 'capture' | 'upload' | 'render', fn: () => T): T {
-  return sentry ? sentry.startSpan({ name, op: name }, fn) : fn();
+  const s = sentry;
+  if (!s) return fn();
+  return openAsk ? s.withActiveSpan(openAsk, () => s.startSpan({ name, op: name }, fn)) : s.startSpan({ name, op: name }, fn);
 }
 
 /** sentry-trace + baggage for the current span, set explicitly on the relay call.
  * Not left to fetch auto-instrumentation: in the simulator WebView it never attached
  * them, so the relay started a new trace instead of continuing ours. */
 export function traceHeaders(): Record<string, string> {
-  return sentry?.getTraceData() ?? {};
+  const s = sentry;
+  if (!s) return {};
+  return openAsk ? s.withActiveSpan(openAsk, () => s.getTraceData()) : s.getTraceData();
 }
 
 export function logAsk(outcome: string, ms: number, traceId: string): void {

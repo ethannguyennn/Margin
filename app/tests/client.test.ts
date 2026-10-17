@@ -142,3 +142,17 @@ test('x-session-id follows the request session_id', async () => {
   await ask({ session_id: '7f1c0c4e-2b2a-4c1e-9d0e-0a1b2c3d4e5f', text: 'torque' });
   assert.equal((calls[0].init.headers as Record<string, string>)['x-session-id'], '7f1c0c4e-2b2a-4c1e-9d0e-0a1b2c3d4e5f');
 });
+
+// app/src/main.ts loads these through import.meta.glob and casts them, so tsc cannot
+// catch a mismatch - this test does. Keep in sync with CaptureModule/ClientModule/ObsModule.
+test("Part 2 modules export exactly what Part 1's main.ts calls", async () => {
+  const audio = await import('../src/audio/capture.ts');
+  const client = await import('../src/api/client.ts');
+  const obs = await import('../src/obs/sentry.ts');
+  for (const fn of [audio.startCapture, audio.stopCapture, audio.isCapturing, client.ask, obs.initObs, obs.startAsk]) {
+    assert.equal(typeof fn, 'function');
+  }
+  const span = obs.startAsk(); // no DSN -> no-op handle, never throws
+  span.finishSpan('render');
+  span.end('answered');
+});
