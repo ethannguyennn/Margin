@@ -11,7 +11,8 @@
     "pack": "npm run build && evenhub pack app.json dist -o margin.ehpk --sdk-ver 0.0.16",
     "simulate": "evenhub-simulator http://localhost:5174 --automation-port 9898",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "test:simulator": "node tests/simulator-smoke.mjs"
   },
   "dependencies": {
     "@evenrealities/even_hub_sdk": "0.0.16"
