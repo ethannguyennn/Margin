@@ -1,14 +1,16 @@
-# Margin -- team build contract. Works with GNU make on Linux/macOS and
+# Specs -- team build contract. Works with GNU make on Linux/macOS and
 # mingw32-make / GNU make on Windows (no shell-specific syntax in recipes).
 #
 #   make install     # one-time: venv deps for the relay (+ dev/test tools)
 #   make dev-relay   # uvicorn, reload, MOCK_MODE from .env, bound to 0.0.0.0 for LAN sideload
 #   make dev-app     # the Even Hub app on :5174 (lens + phone screen; a browser shows the phone screen)
 #   make sim         # even simulator against the dev app
-#   make test        # pytest relay/tests + app tests + app typecheck/build (must stay green)
-#   make pack        # build app/margin.ehpk for Even Hub
+#   make dev-portal  # employer portal dev server (Part 5), proxies /v1 to the relay on :8080
+#   make test        # relay + app (tests, typecheck, build) + portal (must stay green)
+#   make pack        # build app/specs.ehpk for Even Hub
 #   make seed        # python db/seed.py            (Part 5)
 #   make eval        # python eval/run_eval.py      (Part 5)
+#   make eval-conversion  # material -> procedure eval, 0 fabricated values (Part 4)
 #   make latency     # p50/p95 per stage from the events hypertable
 #   make deploy      # docker compose up -d --build (run on the Vultr VM)
 
@@ -27,11 +29,12 @@ PY ?= $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(SYS_PY))
 
 COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
-.PHONY: help venv install dev-relay dev-app sim test test-relay test-app pack \
-        seed eval latency deploy deploy-remote logs health sync-branches
+.PHONY: help venv install dev-relay dev-app dev-portal sim test test-relay test-app \
+        test-portal pack seed eval eval-conversion latency deploy deploy-remote logs health \
+        sync-branches
 
 help:
-	@echo targets: install dev-relay dev-app sim test pack seed eval latency deploy deploy-remote logs health
+	@echo targets: install dev-relay dev-app dev-portal sim test pack seed eval eval-conversion latency deploy deploy-remote logs health
 
 venv:
 	$(SYS_PY) -m venv .venv
@@ -41,9 +44,12 @@ install:
 ifneq ($(wildcard app/package.json),)
 	cd app && npm ci
 endif
+ifneq ($(wildcard portal/package.json),)
+	cd portal && npm ci
+endif
 
 dev-relay:
-	$(PY) -m uvicorn margin_relay.main:create_app --factory --reload --reload-dir relay/src --host 0.0.0.0 --port $(PORT)
+	$(PY) -m uvicorn specs_relay.main:create_app --factory --reload --reload-dir relay/src --host 0.0.0.0 --port $(PORT)
 
 dev-app:
 	cd app && npm run dev
@@ -51,21 +57,31 @@ dev-app:
 sim:
 	cd app && npx evenhub-simulator $(SIM_URL)
 
+# The portal's dev server proxies /v1 to the relay on :8080 (start `make dev-relay` too).
+dev-portal:
+	cd portal && npm run dev
+
 pack:
 	cd app && npm run pack
 
-test: test-relay test-app
+test: test-relay test-app test-portal
 
 test-relay:
 	$(PY) -m pytest relay/tests -q
 
-# Unit tests, then typecheck + production build (lens and phone screen).
 test-app:
 ifneq ($(wildcard app/package.json),)
 	cd app && npm test
 	cd app && npm run build
 else
 	@echo app/ not merged on this branch - skipping app tests
+endif
+
+test-portal:
+ifneq ($(wildcard portal/package.json),)
+	cd portal && npm test
+else
+	@echo portal/ not merged on this branch - skipping portal tests
 endif
 
 seed:
@@ -76,22 +92,31 @@ EVAL_URL ?= http://127.0.0.1:$(PORT)
 eval:
 	$(PY) eval/run_eval.py --base-url $(EVAL_URL) $(ARGS)
 
+# Part 4's conversion eval: runs extract -> convert -> verify_step -> render directly (no
+# HTTP) and exits non-zero if any *passing* step contains a fabricated value.
+eval-conversion:
+ifneq ($(wildcard eval/conversion/run_conversion_eval.py),)
+	$(PY) eval/conversion/run_conversion_eval.py $(ARGS)
+else
+	@echo eval/conversion/run_conversion_eval.py not merged on this branch yet - Part 4
+endif
+
 latency:
-	$(PY) -m margin_relay.latency $(ARGS)
+	$(PY) -m specs_relay.latency $(ARGS)
 
 deploy:
 	$(COMPOSE) up -d --build
 	$(COMPOSE) ps
 
 deploy-remote:
-	ssh $(VM_HOST) "cd margin && git pull --ff-only && make deploy"
+	ssh $(VM_HOST) "cd specs && git pull --ff-only && make deploy"
 
 logs:
 	$(COMPOSE) logs -f --tail=200 relay
 
 # Read-only, detached checkouts of every team branch under _branches/ (gitignored),
 # refreshed from origin. For browsing (e.g. in Obsidian); never commit in them.
-BRANCHES := part-1-lens-ui part-2-app-io part-4-rag-pipeline part-5-data-corpus
+BRANCHES := part-1-lens-hands-free-ui part-2-motion-voice-io part-3-relay-platform part-4-conversion-diagrams part-5-portal-data
 sync-branches:
 	git fetch origin --prune
 	git worktree prune

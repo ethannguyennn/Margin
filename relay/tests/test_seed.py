@@ -6,11 +6,15 @@ import pytest
 
 from part5_support import ROOT, schema_dependencies
 from db import seed
-from margin_relay import db
+from specs_relay import db
+
+# The industrial HX-2 bank these tests were written against (the demo bank in corpus/ is coffee).
+HX2_CORPUS = Path(__file__).parent / "fixtures" / "hx2-corpus"
+HX2_QA = HX2_CORPUS.parent / "hx2-qa.jsonl"
 
 
 def test_corpus_has_five_effective_procedures_and_a_draft_revision():
-    documents, chunks = seed.load_corpus()
+    documents, chunks = seed.load_corpus(HX2_CORPUS)
     assert len(documents) == 6
     assert len({d["doc_id"] for d in documents}) == 5
     assert {(d["doc_id"], d["revision"]) for d in documents if d["status"] == "effective"} == {
@@ -24,7 +28,7 @@ def test_corpus_has_five_effective_procedures_and_a_draft_revision():
 
 
 def test_revision_change_is_narrow_and_cross_reference_exists():
-    _, chunks = seed.load_corpus()
+    _, chunks = seed.load_corpus(HX2_CORPUS)
     index = {c["chunk_id"]: c for c in chunks}
     c, d = index["SOP-114:C:4.2"], index["SOP-114:D:4.2"]
     assert c["text"].replace("4 N-m", "5 N-m") == d["text"]
@@ -44,7 +48,7 @@ def test_revision_change_is_narrow_and_cross_reference_exists():
     ("revision: A", "revision: A:B", "identifier"),
 ])
 def test_invalid_corpus_is_rejected(tmp_path, old, new, error):
-    raw = (ROOT / "corpus/SOP-101-A.md").read_text(encoding="utf-8").replace(old, new)
+    raw = (HX2_CORPUS / "SOP-101-A.md").read_text(encoding="utf-8").replace(old, new)
     path = tmp_path / "invalid.md"
     path.write_text(raw, encoding="utf-8")
     with pytest.raises(ValueError, match=error):
@@ -52,7 +56,7 @@ def test_invalid_corpus_is_rejected(tmp_path, old, new, error):
 
 
 def test_utf8_bom_crlf_and_structure_only_heading(tmp_path):
-    raw = (ROOT / "corpus/SOP-101-A.md").read_text(encoding="utf-8")
+    raw = (HX2_CORPUS / "SOP-101-A.md").read_text(encoding="utf-8")
     path = tmp_path / "windows.md"
     path.write_bytes(("\ufeff" + raw.replace("\n", "\r\n")).encode("utf-8"))
     document, chunks = seed.parse_document(path)
@@ -77,8 +81,8 @@ async def test_ingestion_repeats_stable_ids_and_content(monkeypatch):
         return seed.corpus_stats(documents, chunks)
 
     monkeypatch.setattr(db, "upsert_corpus", upsert)
-    first = await seed.ingest(settings=settings, embedder=embeddings)
-    second = await seed.ingest(settings=settings, embedder=embeddings)
+    first = await seed.ingest(HX2_CORPUS, settings=settings, embedder=embeddings)
+    second = await seed.ingest(HX2_CORPUS, settings=settings, embedder=embeddings)
     assert first == second and writes[0] == writes[1]
     # This checks ingestion identity; SQL idempotence is covered only by the
     # opt-in live database suite, not claimed from an in-memory fixture.
@@ -136,4 +140,6 @@ async def test_check_cli_needs_no_settings(monkeypatch, capsys):
     monkeypatch.setattr(db, "get_settings", lambda: pytest.fail("check mode read config"))
     assert await seed.main(["--check"]) == 0
     output = capsys.readouterr().out
-    assert "no rows seeded" in output and "59 chunks, 35 steps" in output
+    _, chunks = seed.load_corpus()  # --check reports the shipped demo bank in corpus/
+    total = f"{len(chunks)} chunks, {sum(c['is_step'] for c in chunks)} steps"
+    assert "no rows seeded" in output and total in output

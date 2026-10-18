@@ -1,0 +1,19 @@
+{
+  "material": "corpus/materials/SOP-151-filter-change.docx",
+  "mime": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "doc_id": "SOP-151",
+  "revision": "B",
+  "title": "Filter Element Change",
+  "exercises": "DOCX, torque table, embedded figure",
+  "steps": [
+    {"label": "1", "must_contain": ["V1", "V2"]},
+    {"label": "2", "must_contain": ["0.5 L"]},
+    {"label": "3", "must_contain": ["M5"]},
+    {"label": "4", "must_contain": ["HX2-420", "25 um"]},
+    {"label": "5", "must_contain": ["3 N-m"]},
+    {"label": "6", "must_contain": ["8 N-m"]},
+    {"label": "7", "must_contain": ["60 s"]}
+  ],
+  "diagrams": [{"step": 4, "kind": "crop"}],
+  "warning_must_contain": ["Relieve line pressure"]
+}

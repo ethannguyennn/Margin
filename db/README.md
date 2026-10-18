@@ -1,6 +1,13 @@
 # Part 5 integration handoff
 
-All corpus content is fictional, synthetic HX-2 training data. No employer SOPs,
+**Demo bank (2026-10-17):** corpus/ now holds five fictional Ember & Oak Coffee SOPs
+(SOP-201, 202, 210, 220, 230, revision C): 134 chunks, 72 steps. Steps are marked with a
+`<!-- step -->` line opening the section (the seeder also still accepts one numbered item
+per section). The supplied originals are at the repo root; the corpus copies differ only
+by the required `synthetic: true` flag. The HX-2 bank described below moved to
+relay/tests/fixtures/hx2-corpus/ and still backs the unit tests.
+
+All corpus content is fictional, synthetic training data. No employer SOPs,
 credentials, or raw audio are included.
 
 ## Current evidence (2026-10-17)
@@ -59,7 +66,7 @@ Part 3 owns relay/pyproject.toml.
 ## Part 3 wiring
 
 No production environment variables were added. Settings are read exclusively
-from margin_relay.config.get_settings(); lower-case setting attributes and their
+from specs_relay.config.get_settings(); lower-case setting attributes and their
 upper-case environment-style equivalents are accepted:
 
 - DATABASE_URL, EMBED_DIM
@@ -119,8 +126,8 @@ scaffold files arrived only through the authorized tag merge.
 The published Retriever at 5425a67 accepts a Store. Use:
 
 ```python
-from margin_relay import db
-from margin_relay.pipeline.retrieve import Retriever
+from specs_relay import db
+from specs_relay.pipeline.retrieve import Retriever
 
 retriever = Retriever(db.RetrievalStore(), embedder)
 ```

@@ -1,13 +1,42 @@
 # TLS termination for the public relay origin. Caddy obtains and renews the
 # certificate automatically once the DNS A record points at this VM.
+# SPECS_DOMAIN may list several hosts, e.g. "getyourassto.work, 45-32-88-132.sslip.io".
 # CORS is the relay's job; Caddy passes OPTIONS and every header through untouched.
 {
 	email {$ACME_EMAIL}
 }
 
-{$MARGIN_DOMAIN} {
+{$SPECS_DOMAIN} {
 	encode zstd gzip
-	reverse_proxy relay:8080
+
+	# Upload limit at the edge too: MAX_UPLOAD_MB (20) plus multipart overhead.
+	# The relay enforces MAX_UPLOAD_MB exactly; this stops anything far larger early.
+	request_body {
+		max_size 22MB
+	}
+
+	# The bare domain opens the employer portal. Exact "/" only, so every /v1/...
+	# route still reaches the relay. 302, not 308: browsers do not cache it, so the
+	# root can become a landing page later without stale redirects.
+	redir / /portal/ 302
+
+	# Employer portal (static, same origin as /v1, so no CORS): /portal/ -> portal/dist
+	redir /portal /portal/ 308
+	handle_path /portal/* {
+		root * {$PORTAL_ROOT:/srv/portal}
+		header {
+			X-Content-Type-Options nosniff
+			X-Frame-Options DENY
+			Referrer-Policy no-referrer
+		}
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle {
+		reverse_proxy {$RELAY_UPSTREAM:relay:8080}
+	}
+
 	log {
 		output stdout
 		format console

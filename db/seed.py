@@ -15,10 +15,11 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "relay/src"))
-from margin_relay import db
+from specs_relay import db
 
 HEADING = re.compile(r"^#{2,6}\s+(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.MULTILINE)
 ORDERED = re.compile(r"^\s*(\d+)\.\s+", re.MULTILINE)
+STEP_MARKER = "<!-- step -->"
 
 
 def parse_document(path: Path) -> tuple[dict, list[dict]]:
@@ -48,6 +49,7 @@ def parse_document(path: Path) -> tuple[dict, list[dict]]:
     chunks = []
     headings = list(HEADING.finditer(match[2]))
     sections = set()
+    markers = 0
     for index, heading in enumerate(headings):
         section, title = heading.groups()
         if section in sections:
@@ -57,16 +59,26 @@ def parse_document(path: Path) -> tuple[dict, list[dict]]:
         text = match[2][heading.end():stop].strip()
         if not text:  # A structural heading such as "4 Procedure" is not a chunk.
             continue
-        ordered = ORDERED.findall(text)
+        # Two ways to mark a procedural step: a "<!-- step -->" line opening the section
+        # (numbered in document order), or one numbered list item ("2. Torque ...").
+        marked = text.startswith(STEP_MARKER)
+        if marked:
+            text = text[len(STEP_MARKER):].strip()
+            if not text:
+                raise ValueError(f"{path.name}: step {section} has no text")
+            markers += 1
+        ordered = [] if marked else ORDERED.findall(text)
         if ordered and len(ordered) != 1:
             raise ValueError(f"{path.name}: use one numbered procedural step per section")
-        is_step = bool(ordered)
+        is_step = marked or bool(ordered)
         chunks.append({
             "chunk_id": f"{metadata['doc_id']}:{metadata['revision']}:{section}",
             "doc_id": metadata["doc_id"], "revision": metadata["revision"], "section": section,
             "heading": title, "text": text, "is_step": is_step,
-            "step_order": int(ordered[0]) if is_step else None,
+            "step_order": markers if marked else int(ordered[0]) if is_step else None,
         })
+    if markers and any(c["is_step"] for c in chunks) and markers != sum(c["is_step"] for c in chunks):
+        raise ValueError(f"{path.name}: mark steps one way, either <!-- step --> or numbered items")
     orders = [chunk["step_order"] for chunk in chunks if chunk["is_step"]]
     if not chunks or not orders or orders != list(range(1, len(orders) + 1)):
         raise ValueError(f"{path.name}: procedural steps must be contiguous and ordered from 1")
@@ -175,6 +187,9 @@ async def main(argv=None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="Parse/count only; no config, DB, or API calls")
     mode.add_argument("--probe-only", action="store_true", help="Check actual DB capabilities; roll back probes")
+    mode.add_argument("--migrate-only", action="store_true", help="Apply idempotent migrations without seeding")
+    mode.add_argument("--probe-v2-only", action="store_true", help="Apply migrations twice in a rollback-only synthetic schema")
+    mode.add_argument("--from-drafts", action="store_true", help="Republish approved drafts stored in this database")
     args = parser.parse_args(argv)
     if args.check:
         documents, chunks = load_corpus()
@@ -184,10 +199,21 @@ async def main(argv=None) -> int:
     try:
         settings = db.get_settings()
         await db.init_pool(settings)
+        if args.probe_v2_only:
+            print("V2 synthetic migration probe:", json.dumps(await db.validate_v2_migration(), sort_keys=True))
+            return 0
         print("Database capability probe:", json.dumps(await db.validate_capabilities(), sort_keys=True))
         if not args.probe_only:
+            before = await db.storage_counts() if args.migrate_only else None
             await db.apply_migrations()
-            print_stats(await ingest(settings=settings))
+            if args.migrate_only:
+                print("Migration row counts:", json.dumps({"before": before, "after": await db.storage_counts()}, sort_keys=True))
+            elif args.from_drafts:
+                from specs_relay.walkthrough import publish_draft
+                for draft in await db.approved_drafts():
+                    print(json.dumps(await publish_draft(draft, settings=settings), sort_keys=True))
+            elif not args.migrate_only:
+                print_stats(await ingest(settings=settings))
         return 0
     finally:
         await db.close_pool()

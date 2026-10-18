@@ -105,7 +105,7 @@ describe('phone store, linked to the lens', () => {
     attachLens();
     const { result } = renderHook(useStore, { wrapper });
     act(() => result.current.setMicSource('phone'));
-    expect(localStorage.getItem('margin.micSource')).toBe('phone');
+    expect(localStorage.getItem('specs.micSource')).toBe('phone');
     expect(result.current.state.micSource).toBe('phone');
   });
 });

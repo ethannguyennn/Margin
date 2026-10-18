@@ -1,0 +1,20 @@
+{
+  "name": "specs-portal",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 5178 --strictPort",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 5178 --strictPort",
+    "test": "vitest run",
+    "dev:fixture": "vite --config tests/fixture.config.ts"
+  },
+  "devDependencies": {
+    "@fontsource/carlito": "^5.3.0",
+    "jsdom": "^29.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^4.1.0"
+  }
+}

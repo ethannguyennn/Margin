@@ -1,231 +1,373 @@
 [
   {
-    "id": "receiving-kit",
-    "file": "sop-101-receiving.png",
-    "title": "HX-2 kit and serial label",
-    "alt": "Synthetic HX-2 kit: pump body with serial label, mounting bracket, four screws and four washers on a tray beside a sealed carton.",
+    "id": "cashier-station",
+    "file": "sop-201-station.png",
+    "title": "Register, reader and printer",
+    "alt": "Synthetic reference: register, reader and printer.",
     "crop": [
       0,
       0,
       1,
-      1
+      0.54
     ],
     "references": [
       {
-        "chunk_id": "SOP-101:A:2",
-        "quote": "HX-2 pump body"
+        "chunk_id": "SOP-201:C:2.1",
+        "quote": "POS"
       },
       {
-        "chunk_id": "SOP-101:A:4.1",
-        "quote": "match the serial number to the packing list"
+        "chunk_id": "SOP-201:C:2.3",
+        "quote": "card reader"
       },
       {
-        "chunk_id": "SOP-101:A:4.2",
-        "quote": "Inspect all six carton faces"
+        "chunk_id": "SOP-201:C:2.4",
+        "quote": "POS"
       },
       {
-        "chunk_id": "SOP-101:A:4.3",
-        "quote": "Count 1 pump body, 1 mounting bracket, 4 M5 x 12 screws, and 4 flat washers"
+        "chunk_id": "SOP-201:C:3.2",
+        "quote": "POS"
+      },
+      {
+        "chunk_id": "SOP-201:C:4.4",
+        "quote": "POS"
+      },
+      {
+        "chunk_id": "SOP-201:C:5.1",
+        "quote": "POS"
+      },
+      {
+        "chunk_id": "SOP-201:C:6.3",
+        "quote": "POS"
       }
     ]
   },
   {
-    "id": "bracket-fasteners",
-    "file": "sop-114-bracket.png",
-    "title": "M5 screw positions",
-    "alt": "Synthetic close-up of the four M5 screw positions: 1 upper left, 2 lower right, 3 upper right, 4 lower left.",
+    "id": "allergen-binder",
+    "file": "sop-201-station.png",
+    "title": "Allergen binder drawer",
+    "alt": "Synthetic reference: allergen binder drawer.",
     "crop": [
-      0.2,
       0,
       0.52,
-      0.57
+      0.51,
+      0.42
     ],
     "references": [
       {
-        "chunk_id": "SOP-114:C:4.2",
-        "quote": "Torque all four M5 bracket screws"
-      },
-      {
-        "chunk_id": "SOP-114:C:4.4",
-        "quote": "across each screw head and onto the bracket"
-      },
-      {
-        "chunk_id": "SOP-114:D:4.2",
-        "quote": "Torque all four M5 bracket screws"
-      },
-      {
-        "chunk_id": "SOP-114:D:4.4",
-        "quote": "across each screw head and onto the bracket"
+        "chunk_id": "SOP-201:C:5.3",
+        "quote": "allergen binder"
       }
     ]
   },
   {
-    "id": "bracket-overview",
-    "file": "sop-114-bracket.png",
-    "title": "M5 screw positions, bracket and outlet",
-    "alt": "Synthetic bracket reference. Numbered M5 positions: 1 upper left, 2 lower right, 3 upper right, 4 lower left. Bracket, housing and outlet have leader labels.",
+    "id": "cash-handling",
+    "file": "sop-202-cash.png",
+    "title": "Cash drawer and bill ledge",
+    "alt": "Synthetic reference: cash drawer and bill ledge.",
+    "crop": [
+      0,
+      0.05,
+      0.42,
+      0.89
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:3.1",
+        "quote": "drawer ledge"
+      }
+    ]
+  },
+  {
+    "id": "till-closing",
+    "file": "sop-202-cash.png",
+    "title": "Bank bag, log and safe",
+    "alt": "Synthetic reference: bank bag, log and safe.",
+    "crop": [
+      0.52,
+      0.04,
+      0.48,
+      0.9
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:3.2",
+        "quote": "safe slot"
+      },
+      {
+        "chunk_id": "SOP-202:C:7.3",
+        "quote": "bank bag"
+      },
+      {
+        "chunk_id": "SOP-202:C:7.5",
+        "quote": "bank bag"
+      }
+    ]
+  },
+  {
+    "id": "espresso-cleaning",
+    "file": "sop-210-cleaning.png",
+    "title": "Espresso cleaning parts",
+    "alt": "Synthetic reference: espresso cleaning parts.",
     "crop": [
       0,
       0,
-      1,
+      0.62,
       1
     ],
     "references": [
       {
-        "chunk_id": "SOP-114:C:2",
-        "quote": "Fasteners"
+        "chunk_id": "SOP-210:C:5.1",
+        "quote": "blind basket"
       },
       {
-        "chunk_id": "SOP-114:C:4.1",
-        "quote": "Seat bracket HX2-210 with the arrow toward the outlet"
+        "chunk_id": "SOP-210:C:5.3",
+        "quote": "steam wand"
       },
       {
-        "chunk_id": "SOP-114:C:4.5",
-        "quote": "clearance between the bracket edge and outlet collar"
-      },
-      {
-        "chunk_id": "SOP-114:D:2",
-        "quote": "Fasteners"
-      },
-      {
-        "chunk_id": "SOP-114:D:4.1",
-        "quote": "Seat bracket HX2-210 with the arrow toward the outlet"
-      },
-      {
-        "chunk_id": "SOP-114:D:4.5",
-        "quote": "clearance between the bracket edge and outlet collar"
+        "chunk_id": "SOP-210:C:5.4",
+        "quote": "drip tray"
       }
     ]
   },
   {
-    "id": "bracket-gap",
-    "file": "sop-114-bracket.png",
-    "title": "Bracket foot / housing joint",
-    "alt": "Synthetic side detail locating the bracket-foot and housing joint where the feeler gauge is applied. The picture does not establish acceptance.",
+    "id": "sanitizer-test",
+    "file": "sop-210-cleaning.png",
+    "title": "Sanitizer and test strip",
+    "alt": "Synthetic reference: sanitizer and test strip.",
     "crop": [
-      0.707,
-      0.654,
-      0.278,
-      0.316
+      0.75,
+      0.2,
+      0.25,
+      0.74
     ],
     "references": [
       {
-        "chunk_id": "SOP-114:C:4.3",
-        "quote": "gap between the bracket foot and housing"
+        "chunk_id": "SOP-210:C:3.7",
+        "quote": "sanitizer"
       },
       {
-        "chunk_id": "SOP-114:D:4.3",
-        "quote": "gap between the bracket foot and housing"
+        "chunk_id": "SOP-210:C:6.3",
+        "quote": "sanitizer"
+      },
+      {
+        "chunk_id": "SOP-210:C:6.4",
+        "quote": "sanitizer"
+      },
+      {
+        "chunk_id": "SOP-210:C:3.7",
+        "quote": "test strip"
       }
     ]
   },
   {
-    "id": "housing-cleaning",
-    "file": "sop-120-cleaning.png",
-    "title": "Exterior housing, outlet cap and power lead",
-    "alt": "Synthetic pump with a cloth touching the exterior housing, outlet cap installed and power lead disconnected. Leader labels identify the wipe, housing, outlet cap and power lead.",
+    "id": "espresso-shot",
+    "file": "sop-220-espresso.png",
+    "title": "Group head, portafilter and scale",
+    "alt": "Synthetic reference: group head, portafilter and scale.",
     "crop": [
       0,
       0,
-      1,
+      0.56,
       1
     ],
     "references": [
       {
-        "chunk_id": "SOP-120:B:3",
-        "quote": "Never immerse the pump or spray liquid into the outlet or power connector"
+        "chunk_id": "SOP-220:C:3.1",
+        "quote": "group head"
       },
       {
-        "chunk_id": "SOP-120:B:4.1",
-        "quote": "Keep the outlet cap installed throughout cleaning"
+        "chunk_id": "SOP-220:C:3.2",
+        "quote": "portafilter"
       },
       {
-        "chunk_id": "SOP-120:B:4.2",
-        "quote": "Wipe visible soil from the external housing until no residue remains"
+        "chunk_id": "SOP-220:C:3.4",
+        "quote": "portafilter"
       },
       {
-        "chunk_id": "SOP-120:B:4.3",
-        "quote": "Wipe the external housing with a premixed 70 % isopropyl alcohol wipe"
+        "chunk_id": "SOP-220:C:3.5",
+        "quote": "scale"
       },
       {
-        "chunk_id": "SOP-120:B:4.4",
-        "quote": "Leave power disconnected during drying"
-      },
-      {
-        "chunk_id": "SOP-120:B:4.5",
-        "quote": "Inspect the dry housing for cracks, sticky residue, and damaged labels"
+        "chunk_id": "SOP-220:C:6.2",
+        "quote": "group head"
       }
     ]
   },
   {
-    "id": "wrench-analyzer",
-    "file": "sop-131-wrench.png",
-    "title": "Click wrench, adapter and bench analyzer",
-    "alt": "Synthetic click wrench connected by a short adapter to a bench-mounted torque analyzer. Labels identify the handle, ratchet, adapter and analyzer. Blank display contains no readings.",
+    "id": "milk-steaming",
+    "file": "sop-220-espresso.png",
+    "title": "Milk pitcher, wand and tip",
+    "alt": "Synthetic reference: milk pitcher, wand and tip.",
     "crop": [
+      0.54,
       0,
-      0,
-      1,
+      0.46,
       1
     ],
     "references": [
       {
-        "chunk_id": "SOP-131:A:2",
-        "quote": "Torque analyzer"
+        "chunk_id": "SOP-220:C:4.4",
+        "quote": "steam wand"
       },
       {
-        "chunk_id": "SOP-131:A:4.1",
-        "quote": "Inspect the handle, ratchet, and 4 mm adapter for damage"
+        "chunk_id": "SOP-220:C:4.5",
+        "quote": "cold pitcher"
       },
       {
-        "chunk_id": "SOP-131:A:4.2",
-        "quote": "Secure the torque analyzer to bench T1"
+        "chunk_id": "SOP-220:C:4.6",
+        "quote": "tip just under"
       },
       {
-        "chunk_id": "SOP-131:A:4.3",
-        "quote": "Apply 3 smooth clockwise pulls to the first click"
+        "chunk_id": "SOP-220:C:4.7",
+        "quote": "tip deeper"
       },
       {
-        "chunk_id": "SOP-131:A:4.4",
-        "quote": "Record the next 3 clockwise first-click readings"
+        "chunk_id": "SOP-220:C:4.8",
+        "quote": "pitcher"
+      },
+      {
+        "chunk_id": "SOP-220:C:4.9",
+        "quote": "pitcher"
       }
     ]
   },
   {
-    "id": "hold-containment",
-    "file": "sop-140-containment.png",
-    "title": "HOLD tag, affected item and quarantine Q2",
-    "alt": "Synthetic pump and associated parts together in a tray on quarantine shelf Q2, with an attached HOLD tag and a blank deviation record.",
+    "id": "recipe-pumps",
+    "file": "sop-230-recipes.png",
+    "title": "Syrup and mocha pumps",
+    "alt": "Synthetic reference: syrup and mocha pumps.",
     "crop": [
       0,
       0,
-      1,
+      0.39,
       1
     ],
     "references": [
       {
-        "chunk_id": "SOP-140:A:3",
-        "quote": "Stop the affected operation"
+        "chunk_id": "SOP-230:C:1.2",
+        "quote": "pump"
       },
       {
-        "chunk_id": "SOP-140:A:4.1",
-        "quote": "Attach a red HOLD tag and move the item to quarantine shelf Q2"
+        "chunk_id": "SOP-230:C:1.3",
+        "quote": "pump"
       },
       {
-        "chunk_id": "SOP-140:A:4.2",
-        "quote": "State the pump serial number or tool asset number"
+        "chunk_id": "SOP-230:C:2.1",
+        "quote": "pump"
       },
       {
-        "chunk_id": "SOP-140:A:4.3",
-        "quote": "Submit the observation to the deviation log"
+        "chunk_id": "SOP-230:C:2.2",
+        "quote": "pump"
       },
       {
-        "chunk_id": "SOP-140:A:4.4",
-        "quote": "give the supervisor the DEV identifier directly"
+        "chunk_id": "SOP-230:C:2.3",
+        "quote": "syrup"
       },
       {
-        "chunk_id": "SOP-140:A:4.5",
-        "quote": "Keep the item on quarantine shelf Q2"
+        "chunk_id": "SOP-230:C:6.2",
+        "quote": "Pump"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.1",
+        "quote": "pump"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.2",
+        "quote": "Pump"
+      },
+      {
+        "chunk_id": "SOP-230:C:9.1",
+        "quote": "syrup"
+      }
+    ]
+  },
+  {
+    "id": "recipe-cup",
+    "file": "sop-230-recipes.png",
+    "title": "Cup, ice line and milk pitcher",
+    "alt": "Synthetic reference: cup, ice line and milk pitcher.",
+    "crop": [
+      0.36,
+      0.18,
+      0.64,
+      0.78
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:1.4",
+        "quote": "ice line"
+      },
+      {
+        "chunk_id": "SOP-230:C:2.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:2.3",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:2.4",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:3.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:3.3",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:4.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:4.3",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:5.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:6.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:6.3",
+        "quote": "ice line"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.3",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.4",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:8.1",
+        "quote": "ice line"
+      },
+      {
+        "chunk_id": "SOP-230:C:8.2",
+        "quote": "ice line"
+      },
+      {
+        "chunk_id": "SOP-230:C:9.2",
+        "quote": "cup"
+      },
+      {
+        "chunk_id": "SOP-230:C:9.4",
+        "quote": "ice line"
+      },
+      {
+        "chunk_id": "SOP-230:C:10.1",
+        "quote": "cup"
       }
     ]
   }

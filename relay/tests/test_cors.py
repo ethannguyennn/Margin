@@ -10,7 +10,11 @@ from _relay_helpers import DEVICE_ORIGIN, ORIGIN, make_client, sid
 
 ROUTES = [("POST", "/v1/ask"), ("GET", "/v1/health"), ("POST", "/v1/deviation"),
           ("GET", "/v1/procedures"), ("GET", "/v1/procedures/SOP-114/steps"),
-          ("POST", "/v1/ingest")]
+          ("POST", "/v1/ingest"),
+          # v2 lens routes (the WebView calls these cross-origin) and portal routes
+          ("POST", "/v1/devices/pair"), ("GET", "/v1/devices/me"), ("GET", "/v1/assignments/next"),
+          ("POST", "/v1/progress"), ("GET", "/v1/diagrams/DGM-0001"),
+          ("PUT", "/v1/drafts/SOP-150/A/steps/1"), ("POST", "/v1/materials")]
 REQUIRED_HEADERS = ["content-type", "sentry-trace", "baggage", "x-session-id"]
 
 
@@ -43,7 +47,7 @@ def test_bare_options_2xx_on_every_route(client, method, path):
 
 
 def test_rejected_origin_is_logged_at_warn(client, caplog):
-    caplog.set_level(logging.WARNING, logger="margin.relay")
+    caplog.set_level(logging.WARNING, logger="specs.relay")
     r = preflight(client, "/v1/ask", "https://evil.example")
     assert r.status_code == 400
     assert "access-control-allow-origin" not in r.headers
@@ -51,7 +55,7 @@ def test_rejected_origin_is_logged_at_warn(client, caplog):
 
 
 def test_simple_request_from_wrong_origin_gets_no_acao(client, caplog):
-    caplog.set_level(logging.WARNING, logger="margin.relay")
+    caplog.set_level(logging.WARNING, logger="specs.relay")
     r = client.get("/v1/health", headers={"Origin": "http://localhost:9999"})
     assert "access-control-allow-origin" not in r.headers
     assert any("localhost:9999" in m for m in caplog.messages)

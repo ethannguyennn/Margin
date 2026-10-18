@@ -1,3 +1,5 @@
+> **v2:** the current Part 3 handoff is [docs/handoffs/PART-3.md](../docs/handoffs/PART-3.md). This file is the v1 handoff.
+
 # Part 3 handoff
 
 `scaffold-relay` is tagged. Merge it: `git fetch --tags && git merge scaffold-relay`.
@@ -61,7 +63,7 @@ the one retry with the verifier's reason as `feedback=`, and the `embed` / `retr
   `db.close_pool()`. Health: `db.ping()`. Events: `db.write_event(...)`.
 - Notifier: `notify.get_notifier(settings)` (console only until Photon is verified).
 - `make latency` -> `db.latency_summary()`; `make eval` passes `--base-url` (8080).
-- PyYAML is a runtime dependency; the image is an editable install at /srv/margin so
+- PyYAML is a runtime dependency; the image is an editable install at /srv/specs so
   `db.ingest_corpus()` finds `db/seed.py` and `corpus/`.
 - Open: `latency_summary()` includes 0 ms rows for stages that did not run (stt on
   text asks, generate on gated not_found), which pulls those p50s down.

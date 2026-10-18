@@ -11,7 +11,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-from margin_relay.pipeline.transcribe import (
+from specs_relay.pipeline.transcribe import (
     GeminiTranscriber,
     MockTranscriber,
     TranscriptionError,

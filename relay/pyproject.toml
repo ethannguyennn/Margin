@@ -3,9 +3,9 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "margin-relay"
+name = "specs-relay"
 version = "0.1.0"
-description = "Margin relay: voice question -> grounded, citation-verified SOP answer for the Even G2 lens"
+description = "Specs relay: voice question -> grounded, citation-verified SOP answer for the Even G2 lens"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
@@ -20,6 +20,14 @@ dependencies = [
     "pgvector>=0.3",
     # Corpus front matter for db/seed.py and POST /v1/ingest at runtime.
     "pyyaml>=6",
+    # v2: multipart uploads for POST /v1/materials.
+    "python-multipart>=0.0.9",
+    # v2 conversion + diagrams (Part 4's list, README-PART-4 section 2). pypdfium2 is
+    # Apache-2.0; PyMuPDF (AGPL) is deliberately not used.
+    "Pillow>=10",
+    "pypdf>=4",
+    "pypdfium2>=4",
+    "python-docx>=1.1",
 ]
 
 [project.optional-dependencies]
@@ -30,7 +38,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/margin_relay"]
+packages = ["src/specs_relay"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,4 +1,5 @@
 """Published Part 3 HTTP handlers with explicit DB/provider fixtures, not live services."""
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -9,10 +10,14 @@ import pytest
 from part5_support import RecordingConnection, RecordingPool, schema_dependencies
 from db.seed import corpus_stats, load_corpus
 from eval import run_eval as evaluation
-from margin_relay import db
-from margin_relay.config import Settings
-from margin_relay.main import build_pipeline, create_app
-from margin_relay.schemas import Chunk, RetrievalResult
+from specs_relay import db
+from specs_relay.config import Settings
+from specs_relay.main import build_pipeline, create_app
+from specs_relay.schemas import Chunk, RetrievalResult
+
+# The industrial HX-2 bank these tests were written against (the demo bank in corpus/ is coffee).
+HX2_CORPUS = Path(__file__).parent / "fixtures" / "hx2-corpus"
+HX2_QA = HX2_CORPUS.parent / "hx2-qa.jsonl"
 
 
 def fixture_app():
@@ -24,7 +29,7 @@ def fixture_app():
 
 @pytest.mark.asyncio
 async def test_real_procedure_handlers_serialize_five_docs_and_seven_steps(monkeypatch, schema_dependencies):
-    documents, chunks = load_corpus()
+    documents, chunks = load_corpus(HX2_CORPUS)
     effective = [{k: d[k] for k in ("doc_id", "title", "revision", "status")}
                  for d in documents if d["status"] == "effective"]
     steps = [c for c in chunks if c["doc_id"] == "SOP-114" and c["revision"] == "C" and c["is_step"]]
@@ -47,7 +52,7 @@ async def test_real_procedure_handlers_serialize_five_docs_and_seven_steps(monke
 
 @pytest.mark.asyncio
 async def test_actual_ask_returns_full_walkthrough_and_writes_event_metrics(monkeypatch, schema_dependencies):
-    _, chunks = load_corpus()
+    _, chunks = load_corpus(HX2_CORPUS)
     steps = [c for c in chunks if c["doc_id"] == "SOP-114" and c["revision"] == "C" and c["is_step"]]
     monkeypatch.setattr(db, "_rows", AsyncMock(return_value=steps))
     pool = RecordingPool()
@@ -125,18 +130,20 @@ async def test_authenticated_ingest_uses_actual_entry_point_from_another_cwd(mon
         assert denied.status_code == 401 and not calls
         response = await client.post("/v1/ingest", headers={"authorization": "Bearer fixture-admin-token"})
     assert response.status_code == 200
-    assert sum(row["chunks"] for row in response.json()["result"]) == 59
-    assert [len(call["contents"]) for call in calls] == [32, 27]
+    # The real entry point ingests the shipped demo bank in corpus/, in batches of 32.
+    shipped = len(load_corpus(HX2_CORPUS.parents[3] / "corpus")[1])
+    assert sum(row["chunks"] for row in response.json()["result"]) == shipped
+    assert [len(call["contents"]) for call in calls] == [min(32, shipped - i) for i in range(0, shipped, 32)]
 
 
 @pytest.mark.asyncio
 async def test_evaluator_runs_against_actual_mock_relay_and_labels_evidence(capsys):
     settings = Settings(mock_mode=True, _env_file=None)
     app = create_app(settings)
-    cases = evaluation.load_cases(evaluation.ROOT / "eval/qa.jsonl")
+    cases = evaluation.load_cases(HX2_QA)
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app), base_url="http://fixture") as client:
-        results, evidence = await evaluation.run_suite(client, cases, evaluation.citation_index(), allow_mock=True)
+        results, evidence = await evaluation.run_suite(client, cases, evaluation.citation_index(HX2_CORPUS), allow_mock=True)
     metrics = evaluation.print_report(results, evidence)
     assert metrics["cases"] == 36
     assert evidence == "MOCK/FIXTURE ONLY"
-    assert "Margin [MOCK/FIXTURE ONLY]" in capsys.readouterr().out
+    assert "Specs [MOCK/FIXTURE ONLY]" in capsys.readouterr().out

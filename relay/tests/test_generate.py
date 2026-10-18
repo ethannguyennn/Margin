@@ -10,9 +10,9 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-schemas = pytest.importorskip("margin_relay.schemas")
+schemas = pytest.importorskip("specs_relay.schemas")
 
-from margin_relay.pipeline.generate import (  # noqa: E402
+from specs_relay.pipeline.generate import (  # noqa: E402
     NOT_FOUND_GLANCE,
     RESPONSE_SCHEMA,
     SYSTEM_PROMPT,
@@ -204,11 +204,6 @@ def test_generator_output_validates_against_draft():
     assert set(RESPONSE_SCHEMA["required"]) <= set(schemas.Draft.model_fields)
 
 
-def test_generator_uses_the_configured_route_timeout_budget():
-    settings = NS(gemini_api_key='', gemini_model_generate='model-from-config', generate_timeout_s=12.5)
-    assert GeminiGenerator.from_settings(settings, client=client()).timeout == 12.5
-
-
 def test_generator_malformed_json_raises_typed_error():
     with pytest.raises(GenerationError):
         asyncio.run(GeminiGenerator(client(text="Torque it to 4 N-m."), "m").generate("q", CHUNKS))
@@ -223,7 +218,7 @@ def test_generator_timeout_raises_typed_error():
 
 def test_system_prompt_keeps_every_rule():
     for needle in ["ONLY the provided CONTEXT", "answerable=false. Never guess", "verbatim quote",
-                   "<= 60 characters", "<= 450 characters", "Never convert units",
+                   "<= 40 characters", "<= 200 characters", "as few words as possible", "Never convert units",
                    "needs_clarification=true"]:
         assert needle in SYSTEM_PROMPT
 

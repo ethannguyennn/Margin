@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { DeviationResult } from '../contract';
+import { errorTitle } from '../copy';
 import { useStore } from '../store';
+import { toast } from '../toast';
 import { Pill } from './Pills';
 
 /** POST /v1/deviation — the record is the compliance artifact, the alert is a bonus. */
@@ -15,6 +17,7 @@ export function DeviationForm() {
     if (res) {
       setResult(res);
       setText('');
+      toast('Deviation logged');
     }
   };
 
@@ -22,7 +25,7 @@ export function DeviationForm() {
     <section className="card">
       <h2 className="section-title">Log a deviation</h2>
       <p className="meta">
-        {ctx.doc_id ? `Against ${ctx.step_id ?? `${ctx.doc_id} as a whole`}` : 'No context attached.'}
+        {ctx.doc_id ? `Against ${ctx.step_id ?? `${ctx.doc_id} as a whole`}` : 'Not attached to a procedure.'}
       </p>
       <textarea
         className="input"
@@ -31,7 +34,7 @@ export function DeviationForm() {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button className="primary" disabled={busy === 'deviation' || !text.trim()} onClick={() => void submit()}>
+      <button className="primary" aria-busy={busy === 'deviation'} disabled={busy === 'deviation' || !text.trim()} onClick={() => void submit()}>
         {busy === 'deviation' ? 'Logging…' : 'Log deviation'}
       </button>
 
@@ -39,13 +42,13 @@ export function DeviationForm() {
         <div className="row wrap result">
           <Pill tone="info">{result.deviation_id}</Pill>
           <Pill tone={result.notified ? 'ok' : 'warn'}>
-            {result.notified ? 'supervisor alert sent' : 'alert failed — tell your supervisor'}
+            {result.notified ? 'Supervisor alerted' : 'Alert failed: tell your supervisor'}
           </Pill>
         </div>
       )}
       {error && (
-        <p className="error-line">
-          {error.code} · {error.message}
+        <p className="error-line" title={error.code}>
+          {errorTitle(error.code)}. {error.message}
         </p>
       )}
     </section>

@@ -6,7 +6,7 @@
   commit `8cb01354f5ee914c5fab97d06e6d13b28eeb5815`.
 - Frozen contract: `src/types.ts`; Part 2 owns `src/audio`, `src/api`, `src/obs`,
   `src/mock`. Those directories are deliberately absent here.
-- `https://margin.example.com` is the user-approved temporary whitelist origin.
+- `https://specs.example.com` is the user-approved temporary whitelist origin.
   Replace it when Part 3 provides the live origin.
 - No direct STT credentials belong in the WebView bundle.
 - Tooling is local to `app/`; port 5174 preserves the earlier starter on 5173.
@@ -73,7 +73,7 @@ The single exported allow-list is `G2_ALLOWED_NON_ASCII` in `ui/glyphs.ts`.
 - `npm run test:simulator`: **29 screen assertions passed**, five fixture
   requests, step navigation made no extra request, native shutdown accepted,
   zero console errors. See `tests/evidence/simulator-results.json`.
-- `npm run pack`: succeeded; `margin.ehpk` generated with minimum Even App
+- `npm run pack`: succeeded; `specs.ehpk` generated with minimum Even App
   version **2.2.10** resolved from SDK **0.0.16**.
 - The synthetic visual captures in `tests/evidence/` were inspected. Native
   shutdown leaves a cleared display, captured by `root-exit-glasses-preview.png`.

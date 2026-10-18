@@ -41,7 +41,7 @@ _PART = re.compile(r"\b[a-z]{1,5}-?\d+(?:\.\d+)?\b")
 _VALUE = re.compile(
     r"(?<![\w.])(-?\d+(?:\.\d+)*)(?:\s*"
     r"(n-m|in-lb|ft-lb|mm|cm|um|kg|mg|ml|ul|ms|min|deg\s*c|deg\s*f|%|psi|rpm|hz|s|m|g|l))?"
-    r"(?![a-z0-9.])"
+    r"(?![a-z0-9]|\.\d)"  # a sentence-ending period still ends the value ("add $0.75.")
 )
 
 
@@ -255,7 +255,7 @@ def print_report(results: list[Result], evidence: str) -> dict:
     for result in results:
         if not result.correct:
             print(f"  FAIL {result.id}: {result.reason}")
-    print(f"Margin [{evidence}]: {metrics['cases']} questions; "
+    print(f"Specs [{evidence}]: {metrics['cases']} questions; "
           f"answered-correct {percent(metrics['answered_correct_rate'])}; "
           f"not_found P/R {percent(metrics['not_found_precision'])}/{percent(metrics['not_found_recall'])}; "
           f"citation pass {percent(metrics['citation_verification_pass_rate'])}; "

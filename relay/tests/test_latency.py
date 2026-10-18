@@ -3,7 +3,7 @@ from __future__ import annotations
 import sys
 import types
 
-from margin_relay import latency
+from specs_relay import latency
 
 ROWS = [
     {"stage": "generate", "samples": 3, "p50_ms": 1200.0, "p95_ms": 1380.0},
@@ -43,10 +43,10 @@ def test_fetch_reads_through_db_latency_summary(monkeypatch):
         calls.append("summary")
         return ROWS
 
-    fake = types.ModuleType("margin_relay.db")
+    fake = types.ModuleType("specs_relay.db")
     fake.init_pool, fake.close_pool, fake.latency_summary = init_pool, close_pool, latency_summary
-    monkeypatch.setitem(sys.modules, "margin_relay.db", fake)
-    monkeypatch.setattr(sys.modules["margin_relay"], "db", fake, raising=False)
+    monkeypatch.setitem(sys.modules, "specs_relay.db", fake)
+    monkeypatch.setattr(sys.modules["specs_relay"], "db", fake, raising=False)
     import asyncio
     assert asyncio.run(latency.fetch()) == ROWS
     assert calls == ["init", "summary", "close"]

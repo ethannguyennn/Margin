@@ -46,6 +46,8 @@ interface StoreValue {
   sessionId: string;
   health: Health | null;
   healthChecked: boolean;
+  /** Re-poll /v1/health now (the Retry on the offline bar). */
+  recheckHealth: () => Promise<void>;
   busy: Busy;
   error: StoreError | null;
   clearError: () => void;
@@ -216,6 +218,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       sessionId,
       health,
       healthChecked,
+      recheckHealth: checkHealth,
       busy,
       error,
       clearError: () => setError(null),
@@ -236,7 +239,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState((s) => (linkedRef.current ? { ...s, lastAnswer: null, history: [] } : newSession(uuid())));
       },
     }),
-    [state, lens, sessionId, health, healthChecked, busy, error, canPushToTalk, runAsk, repeatLast, submitDeviation],
+    [state, lens, sessionId, health, healthChecked, checkHealth, busy, error, canPushToTalk, runAsk, repeatLast, submitDeviation],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

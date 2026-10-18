@@ -1,0 +1,110 @@
+---
+doc_id: SOP-202
+title: Cashier - Payments, Refunds, Voids, and Closing the Till
+revision: C
+status: effective
+effective_date: 2026-03-01
+synthetic: true
+---
+
+# SOP-202 Cashier - Payments, Refunds, Voids, and Closing the Till
+
+Ember & Oak Coffee is a fictional company. This is a sample document for software testing only.
+
+## 1 Purpose and Scope
+
+### 1.1 Purpose
+This SOP covers how to accept payment, make change, issue voids and refunds, handle gift cards, and close the till at the end of the day.
+
+## 2 Accepted Payment Methods
+
+### 2.1 What we accept
+We accept cash, credit and debit cards (tap, chip, or swipe), Apple Pay, Google Pay, and Ember & Oak gift cards. We do not accept checks.
+
+### 2.2 Cash limits
+Do not accept $100 bills. The largest bill we accept is $50.
+
+### 2.3 Check $50 bills
+<!-- step -->
+Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.
+
+## 3 Cash Handling
+
+### 3.1 Make change
+<!-- step -->
+Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed.
+
+### 3.2 Cash drops
+<!-- step -->
+When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log.
+
+### 3.3 No-sale
+Only the shift lead may open the drawer with a no-sale. Cashiers must never open the drawer without a transaction.
+
+## 4 Card Payments and Tips
+
+### 4.1 Tip screen
+The card reader tip screen offers 15, 20, and 25 percent, plus a custom amount and No Tip. Never comment on or try to influence the tip a guest chooses.
+
+### 4.2 Cards that do not go through
+If a card does not go through, say quietly, "That card didn't go through. Would you like to try another way to pay?" Do not say "declined" out loud.
+
+### 4.3 Chip read failures
+After two failed chip reads, use tap. If tap also fails, you may swipe the card only with shift lead approval.
+
+## 5 Voids and Refunds
+
+### 5.1 Void
+A cashier may void an item or order in the same transaction before payment is finalized, or within 5 minutes after payment. Choose the POS reason code.
+
+### 5.2 Refund approval levels
+| Refund amount | Who approves |
+|---|---|
+| $0.01 to $10.00 | Cashier |
+| $10.01 to $25.00 | Shift lead (PIN) |
+| Over $25.00 | Manager (PIN) |
+
+### 5.3 Refund conditions
+Refunds go back to the original payment method and require the receipt. Refunds are available within 24 hours of purchase. After 24 hours, only a manager may approve a refund.
+
+### 5.4 Remake instead of refund
+If a drink is wrong or the guest is unhappy with it, offer a free remake first. Enter the POS remake code and the reason. Refund only if the guest still wants one.
+
+## 6 Gift Cards
+
+### 6.1 Sell a gift card
+<!-- step -->
+Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00.
+
+### 6.2 Redeem a gift card
+Scan the card at payment. If the balance is less than the total, apply the balance and ask for another payment method for the rest.
+
+### 6.3 Cash-out
+A cashier never pays out a gift card balance in cash. Send cash-out requests to the manager.
+
+## 7 Closing the Till
+
+### 7.1 Run the end-of-day report
+<!-- step -->
+On the POS, go to Reports, then End of Day. Print two copies.
+
+### 7.2 Count the drawer
+<!-- step -->
+Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form.
+
+### 7.3 Leave the float
+<!-- step -->
+Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit.
+
+### 7.4 Check the variance
+<!-- step -->
+Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature.
+
+### 7.5 Secure and sign
+<!-- step -->
+Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe.
+
+## 8 Robbery and Safety
+
+### 8.1 If you are robbed
+Stay calm and give what is asked. Do not resist or chase. When it is safe, call 911, then the manager. Write down what you remember about the person.

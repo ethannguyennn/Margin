@@ -1,18 +1,23 @@
-# Accompanying SOP reference images
+# Accompanying SOP graphics: current-main port
 
-Official Even Hub simulator 0.9.5, SDK 0.0.16, using mock answers drawn from the
-checked-in synthetic HX-2 corpus. Captured on 2026-10-17.
+Official Even Hub simulator 0.9.5, SDK 0.0.16, Windows WebView2, VITE_MOCK=1.
+Native captures show a coffee steam-wand reference beside both the glance and full
+instruction text. The phone capture shows the same cropped figure and synthetic caption.
+The existing two-tile diagram viewer also passed. Simulator exports store intensity in
+alpha; previews composite those original captures on black using the existing QA method.
 
-The native glasses captures show the generated screw-position reference beside
-the torque glance and both full-text instruction pages. The phone capture shows
-the same image with its synthetic-training caption. Native alpha captures are
-composited on black using the repository's existing QA method.
+`simulator-results.json`: 28 screen assertions, reference image transport, existing M1/M2
+flows, ordered progress, native exit, cold-start restore and zero console errors.
+`live-gemini-selections.json`: separate approved real Gemini calls over the five synthetic
+coffee SOP excerpts, with all five image selections citation-verified.
 
-The final simulator flow reported zero console errors. These captures do not
-establish physical-glasses legibility, BLE transfer performance, or live audio.
-The JSON file records separate approved live Gemini selections for torque and
-feeler-gauge questions; the full-view screw reference was subsequently refined
-into the `bracket-fasteners` close-up, which also passed the live selection test.
+Final verification: relay 668 passed / 12 skipped; app 552 passed / 12 skipped; build and
+pack pass (Specs package 4,911,875 bytes). Skips are opt-in live/database tests; the new live
+image-selection test was run separately and passed. Physical glasses, BLE throughput and
+live audio were not tested. The mock phone capture reports Offline because no relay server
+was configured; the image and answer arrived through the actual simulator lens link.
 
-Offline verification: relay 368 passed / 5 skipped; app 259 passed / 6 skipped.
-Typecheck, production build and packaging passed.
+Regenerate with `npm run dev:mock:v2` and `npm run test:simulator` in app. Original full logs
+and captures remain in ignored `app/test-artifacts/v2/`. The source artwork is in
+`app/src/assets/sops/`, generated using built-in imagegen from the prompt set in
+`corpus/illustration-prompts.json`. No generated image is a verified real equipment photo.

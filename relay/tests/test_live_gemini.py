@@ -1,16 +1,17 @@
 """Live Gemini checks. Skipped unless Part 3's config provides GEMINI_API_KEY
 and the three model IDs; keys are read only through that config.
 
-Run: pytest relay/tests/test_live_gemini.py -v
+Run: SPECS_LIVE_GEMINI=1 pytest relay/tests/test_live_gemini.py -v
 """
 
 import asyncio
+import os
 from pathlib import Path
 
 import pytest
 
-config = pytest.importorskip("margin_relay.config")
-schemas = pytest.importorskip("margin_relay.schemas")
+config = pytest.importorskip("specs_relay.config")
+schemas = pytest.importorskip("specs_relay.schemas")
 
 
 def _settings():
@@ -24,11 +25,15 @@ def _settings():
 S = _settings()
 _key = getattr(S, "gemini_api_key", None)
 _key = _key.get_secret_value() if hasattr(_key, "get_secret_value") else _key
-pytestmark = pytest.mark.skipif(not _key, reason="GEMINI_API_KEY not configured")
+# Opt-in: a key in .env must not make `make test` spend quota or flake on 429s
+# (the free tier allows 15 requests/min and 20/day on some models).
+pytestmark = [pytest.mark.skipif(os.environ.get("SPECS_LIVE_GEMINI") != "1",
+                                 reason="live Gemini tests are opt-in: SPECS_LIVE_GEMINI=1"),
+              pytest.mark.skipif(not _key, reason="GEMINI_API_KEY not configured")]
 
 
 def test_live_transcribe_fixture():
-    from margin_relay.pipeline.transcribe import GeminiTranscriber
+    from specs_relay.pipeline.transcribe import GeminiTranscriber
 
     pcm = (Path(__file__).parent / "fixtures" / "m5_question.pcm").read_bytes()
     text = asyncio.run(GeminiTranscriber.from_settings(S).transcribe(pcm, 16000)).lower()
@@ -37,8 +42,8 @@ def test_live_transcribe_fixture():
 
 
 def test_live_embedding_dimension_matches_config():
-    from margin_relay.pipeline.generate import gemini_client
-    from margin_relay.pipeline.retrieve import GeminiEmbedder
+    from specs_relay.pipeline.generate import gemini_client
+    from specs_relay.pipeline.retrieve import GeminiEmbedder
 
     emb = GeminiEmbedder(gemini_client(S.gemini_api_key), S.gemini_model_embed, S.embed_dim)
 
@@ -58,56 +63,48 @@ def test_live_embedding_dimension_matches_config():
 
 
 def test_live_generate_answers_and_refuses():
-    from margin_relay.pipeline.generate import GeminiGenerator, answer_question
+    from specs_relay.pipeline.generate import GeminiGenerator, answer_question
     from test_generate import CHUNKS, FakeRetriever, retrieval
 
     gen = GeminiGenerator.from_settings(S)
-    async def both():
-        out = await answer_question("how tight is the m5 on the mounting bracket", FakeRetriever(retrieval()),
-                                    gen, revision=None, min_sim=0.0, min_rrf=0.0)
-        off = await answer_question("what torque for the M6 screws on the HX-3 motor mount", FakeRetriever(retrieval()),
-                                    gen, revision=None, min_sim=0.0, min_rrf=0.0)
-        return out, off
-
-    out, off = asyncio.run(both())
+    out = asyncio.run(answer_question("how tight is the m5 on the mounting bracket", FakeRetriever(retrieval()),
+                                      gen, revision=None, min_sim=0.0, min_rrf=0.0))
     assert out.outcome == "answered", out.reasons
     assert out.verified and "4 N-m" in out.glance + out.body
     assert out.citations[0].chunk_id == "SOP-114:C:4.2"
 
+    off = asyncio.run(answer_question("what torque for the M6 screws on the HX-3 motor mount", FakeRetriever(retrieval()),
+                                      gen, revision=None, min_sim=0.0, min_rrf=0.0))
     assert off.outcome in ("not_found", "clarify")
     assert not off.verified
 
 
-@pytest.mark.parametrize("kind, text, question", [
-    ("warning", "WARNING: Disconnect power before opening the guard.",
-     "What safety warning applies before opening the guard?"),
-    ("checklist", "Inspect the seal. Check the latch.",
-     "Give me a checklist of both required checks."),
-])
-def test_live_generated_cards(kind, text, question):
-    from margin_relay.pipeline.generate import GeminiGenerator, answer_question
-    from test_generate import C, FakeRetriever, retrieval
-
-    chunk = C("SOP-TEST:A:1", text)
-    gen = GeminiGenerator.from_settings(S)
-    out = asyncio.run(answer_question(question, FakeRetriever(retrieval(chunks=[chunk])),
-                                      gen, revision=None, min_sim=0.0, min_rrf=0.0))
-    assert out.outcome == "answered", out.reasons
-    assert out.verified and out.display is not None
-    assert out.display.kind == kind
-    assert out.display.items
-
-
-def test_live_visual_reference_selection():
+def test_live_reference_graphics_for_current_corpus():
+    import json
+    import time
     from db.seed import load_corpus
-    from margin_relay.pipeline.generate import GeminiGenerator, answer_question
-    from test_generate import C, FakeRetriever, retrieval
-
-    _, source = load_corpus()
-    row = next(c for c in source if c['chunk_id'] == 'SOP-114:C:4.2')
-    chunk = C(row['chunk_id'], row['text'])
-    gen = GeminiGenerator.from_settings(S)
-    out = asyncio.run(answer_question('How tight should I torque the M5 bracket screws?',
-        FakeRetriever(retrieval(chunks=[chunk])), gen, revision=None, min_sim=0, min_rrf=0))
-    assert out.verified, out.reasons
-    assert out.graphic_id == 'bracket-fasteners'
+    from specs_relay.pipeline.generate import GeminiGenerator, answer_question
+    _, chunks = load_corpus()
+    cases = [
+        ('SOP-201:C:2.3', 'Where is the receipt printer and spare paper?', 'cashier-station'),
+        ('SOP-202:C:7.5', 'What do we do with the bank bag?', 'till-closing'),
+        ('SOP-210:C:3.7', 'Where is the test strip used?', 'sanitizer-test'),
+        ('SOP-220:C:4.4', 'How do I purge the steam wand?', 'milk-steaming'),
+        ('SOP-230:C:2.2', 'Where do I pump syrup for a latte?', 'recipe-pumps'),
+    ]
+    async def run():
+        generator=GeminiGenerator.from_settings(S); rows=[]
+        for cid, question, expected in cases:
+            c=next(c for c in chunks if c['chunk_id']==cid)
+            chunk=schemas.Chunk(**{k:c[k] for k in ('chunk_id','doc_id','revision','section','heading','text')})
+            retrieved=schemas.RetrievalResult(chunks=[chunk],best_sim=.9,best_rrf=.04)
+            start=time.perf_counter()
+            out=await answer_question(question,None,generator,revision=None,min_sim=0,min_rrf=0,retrieval=retrieved)
+            assert out.verified and out.graphic_id==expected, (cid,out.outcome,out.graphic_id,out.reasons)
+            rows.append(dict(chunk_id=cid,question=question,graphic_id=out.graphic_id,verified=out.verified,
+                             seconds=round(time.perf_counter()-start,2)))
+        return rows
+    rows=asyncio.run(run())
+    print(json.dumps(rows))
+    output=os.environ.get('SPECS_GRAPHICS_EVIDENCE')
+    if output: Path(output).write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')

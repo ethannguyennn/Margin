@@ -172,3 +172,94 @@ test('host FOREGROUND_EXIT sysEvent closes the mic and drops the buffer', async 
   assert.deepEqual(calls, [true, false]);
   assert.equal((await stopCapture()).data_b64, '');
 });
+
+// --- v2: endpointing -------------------------------------------------------------
+const tick = () => new Promise((r) => setTimeout(r, 0));
+const NOISE = 300; // ~0.009 rms
+const SPEECH = 8000; // ~0.24 rms
+
+test('v2 speech_end: 800 ms of silence closes the mic, fires once, and trims leading silence to 200 ms', async () => {
+  const hw = fakeBridge();
+  const ends: string[] = [];
+  await startCapture(() => {}, (r) => ends.push(r));
+  for (let i = 0; i < 5; i++) hw.push(NOISE); // 500 ms before speech
+  for (let i = 0; i < 10; i++) hw.push(SPEECH); // 1 s of speech
+  for (let i = 0; i < 8; i++) hw.push(NOISE); // 800 ms silence
+  await tick();
+  assert.deepEqual(ends, ['speech_end']);
+  assert.deepEqual(hw.calls.at(-1), [false, undefined], 'mic closed at the endpoint, before stopCapture');
+  hw.push(NOISE); // late chunk after the endpoint is ignored
+  assert.deepEqual(ends, ['speech_end'], 'one endpoint per press');
+  const out = await stopCapture();
+  // 23 chunks captured; speech started at 500 ms; keep 200 ms of pre-roll -> drop 300 ms.
+  assert.equal(Buffer.from(out.data_b64, 'base64').length, 23 * 3200 - 300 * 32);
+  assert.equal(isCapturing(), false);
+});
+
+test('v2 no_speech: nothing said in 3 s -> mic closed, stopCapture returns data_b64 "" and nothing is sent', async () => {
+  const hw = fakeBridge();
+  let fetches = 0;
+  const realFetch = globalThis.fetch;
+  (globalThis as any).fetch = async () => {
+    fetches++;
+    throw new Error('no network expected');
+  };
+  // Part 1's contract (README-PART-1 §6): on endpoint, stopCapture; '' means do not ask.
+  const { ask } = await import('../src/api/client.ts');
+  let asked = false;
+  const done = new Promise<void>((resolve) => {
+    void startCapture(() => {}, async () => {
+      const { data_b64 } = await stopCapture();
+      if (data_b64) {
+        asked = true;
+        await ask({ session_id: 's', audio: { format: 'pcm_s16le', sample_rate: 16000, channels: 1, data_b64 } });
+      }
+      resolve();
+    });
+  });
+  await tick();
+  for (let i = 0; i < 40; i++) hw.push(NOISE); // a stray double nod in a quiet room
+  await done;
+  assert.equal(asked, false);
+  assert.equal(fetches, 0, 'a false trigger costs zero network');
+  assert.deepEqual(hw.calls.at(-1), [false, undefined]);
+  globalThis.fetch = realFetch;
+});
+
+test('v2 cap: 8 s of continuous speech fires cap', async () => {
+  const hw = fakeBridge();
+  const ends: string[] = [];
+  await startCapture(() => {}, (r) => ends.push(r));
+  for (let i = 0; i < 3; i++) hw.push(NOISE);
+  for (let i = 0; i < 100; i++) hw.push(SPEECH);
+  await tick();
+  assert.deepEqual(ends, ['cap']);
+  const out = await stopCapture();
+  assert.ok(Buffer.from(out.data_b64, 'base64').length <= MAX_AUDIO_BYTES);
+});
+
+test('v2 manual send (tap / second double nod) before the VAD saw speech sends everything', async () => {
+  // A loud shop can defeat the energy VAD; the explicit send must still work.
+  const hw = fakeBridge();
+  await startCapture(() => {}, () => assert.fail('no endpoint expected'));
+  for (let i = 0; i < 12; i++) hw.push(4000); // steady loud noise: floor rises, nothing reads as speech
+  const out = await stopCapture();
+  assert.equal(Buffer.from(out.data_b64, 'base64').length, 12 * 3200);
+});
+
+test('v2 cancel (shake) after an endpoint: buffer dropped, next press gets a fresh endpointer', async () => {
+  const hw = fakeBridge();
+  const ends: string[] = [];
+  await startCapture(() => {}, (r) => ends.push(r));
+  for (let i = 0; i < 31; i++) hw.push(NOISE);
+  await cancelCapture();
+  assert.deepEqual(ends, ['no_speech']);
+  await startCapture(() => {}, (r) => ends.push(r));
+  for (let i = 0; i < 3; i++) hw.push(NOISE);
+  for (let i = 0; i < 5; i++) hw.push(SPEECH);
+  for (let i = 0; i < 8; i++) hw.push(NOISE);
+  await tick();
+  assert.deepEqual(ends, ['no_speech', 'speech_end']);
+  const out = await stopCapture();
+  assert.ok(out.data_b64.length > 0, 'the no_speech of the previous press does not leak into this one');
+});

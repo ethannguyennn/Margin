@@ -1,7 +1,7 @@
 """Retrieval SQL against a real Postgres + pgvector, using Part 5's README
 schema in a throwaway schema. Hand-made embeddings, so no Gemini needed.
 
-Opt-in: set MARGIN_TEST_PG_DSN to a database where the ``vector`` extension
+Opt-in: set SPECS_TEST_PG_DSN to a database where the ``vector`` extension
 exists (or can be created). The DSN is a test-only variable; the relay itself
 gets DATABASE_URL from Part 3's config.
 """
@@ -12,12 +12,12 @@ import sys
 
 import pytest
 
-DSN = os.environ.get("MARGIN_TEST_PG_DSN")
-pytestmark = pytest.mark.skipif(not DSN, reason="MARGIN_TEST_PG_DSN not set")
+DSN = os.environ.get("SPECS_TEST_PG_DSN")
+pytestmark = pytest.mark.skipif(not DSN, reason="SPECS_TEST_PG_DSN not set")
 pytest.importorskip("psycopg_pool")
-schemas = pytest.importorskip("margin_relay.schemas")
+schemas = pytest.importorskip("specs_relay.schemas")
 
-from margin_relay.pipeline.retrieve import PgStore, Retriever, should_refuse  # noqa: E402
+from specs_relay.pipeline.retrieve import PgStore, Retriever, should_refuse  # noqa: E402
 
 DIM = 768
 SCHEMA = "part4_it"

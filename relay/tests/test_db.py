@@ -1,3 +1,4 @@
+from pathlib import Path
 import asyncio
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -5,8 +6,12 @@ from unittest.mock import AsyncMock
 import pytest
 
 from part5_support import RecordingConnection, RecordingPool, schema_dependencies
-from margin_relay import db
+from specs_relay import db
 from db.seed import load_corpus
+
+# The industrial HX-2 bank these tests were written against (the demo bank in corpus/ is coffee).
+HX2_CORPUS = Path(__file__).parent / "fixtures" / "hx2-corpus"
+HX2_QA = HX2_CORPUS.parent / "hx2-qa.jsonl"
 
 
 @pytest.mark.parametrize("value", [0, -1, 2001, True, 1.5, "768; DROP TABLE chunks"])
@@ -92,7 +97,7 @@ async def test_retrieval_has_effective_or_explicit_revision_filter(monkeypatch, 
 
 @pytest.mark.asyncio
 async def test_steps_select_only_procedural_chunks_in_order(monkeypatch, schema_dependencies):
-    _, chunks = load_corpus()
+    _, chunks = load_corpus(HX2_CORPUS)
     expected = [c for c in chunks if c["doc_id"] == "SOP-114" and c["revision"] == "C" and c["is_step"]]
     rows = AsyncMock(return_value=expected)
     monkeypatch.setattr(db, "_rows", rows)
@@ -105,7 +110,7 @@ async def test_steps_select_only_procedural_chunks_in_order(monkeypatch, schema_
 
 @pytest.mark.asyncio
 async def test_retrieval_adapter_keeps_raw_text_section_and_score(monkeypatch):
-    _, chunks = load_corpus()
+    _, chunks = load_corpus(HX2_CORPUS)
     raw = next(c for c in chunks if c["chunk_id"] == "SOP-114:C:4.2") | {"score": 0.91}
     monkeypatch.setattr(db, "_rows", AsyncMock(return_value=[raw]))
     monkeypatch.setattr(db, "_embed_dim", 2)
@@ -125,6 +130,7 @@ async def test_event_writes_latency_json_without_audio(monkeypatch):
     assert "INSERT INTO events" in query and "latency_ms" in query
     assert params[-1].obj == {"stt": 0, "total": 12.5}
     assert params[-2] == "M5 torque" and "audio" not in query
+    assert params[-3] is None, "no task context -> NULL assignment_id"
     assert pool.conn.committed
 
 
@@ -186,7 +192,7 @@ async def test_latency_reads_events_instead_of_a_separate_store(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_corpus_upsert_commits_once_and_removes_stale_sections(monkeypatch):
-    documents, chunks = load_corpus()
+    documents, chunks = load_corpus(HX2_CORPUS)
     chunks = [dict(c, embedding=[1, 0]) for c in chunks]
     pool = RecordingPool()
     monkeypatch.setattr(db, "_pool", pool)
@@ -202,7 +208,7 @@ async def test_corpus_upsert_commits_once_and_removes_stale_sections(monkeypatch
 
 @pytest.mark.asyncio
 async def test_failed_upsert_rolls_back_every_revision(monkeypatch):
-    documents, chunks = load_corpus()
+    documents, chunks = load_corpus(HX2_CORPUS)
     connection = RecordingConnection()
     connection.fail_at = 8
     monkeypatch.setattr(db, "_pool", RecordingPool(connection))

@@ -1,12 +1,15 @@
+import { getGraphic } from '../../ui/sop-graphics';
+import { SopGraphic } from '../components/SopGraphic';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ContextPicker } from '../components/ContextPicker';
+import { ChevronIcon } from '../components/Icons';
 import { OutcomePill } from '../components/Pills';
+import { glassesStatus, shortId } from '../copy';
 import { QUICK_ASKS } from '../quick-asks';
 import { relayOrigin } from '../relay';
 import { useStore } from '../store';
-import { getGraphic } from '../../ui/sop-graphics';
-import { SopGraphic } from '../components/SopGraphic';
+import { toast } from '../toast';
 
 /**
  * The phone side of the lens session. Inside the Even app it drives the glasses:
@@ -30,77 +33,64 @@ export default function LensPage() {
   } = useStore();
   const [question, setQuestion] = useState('');
   const res = state.lastAnswer;
+  const glasses = glassesStatus(lens.connected, lens.status);
+  const server = !healthChecked ? null : health?.ok ? (health.mock ? 'Demo data' : 'Connected') : 'Offline';
 
   const submit = async () => {
     const answer = await askNow(question);
     if (answer) setQuestion('');
   };
 
+  const resetSession = () => {
+    startNewSession();
+    toast(lens.connected ? 'History cleared' : 'New session started');
+  };
+
   return (
     <div className="stack">
-      <section className="card">
-        <div className="row between">
-          <h2 className="section-title">Session</h2>
-          <button className="link" onClick={startNewSession}>
-            {lens.connected ? 'Clear history' : 'New session'}
-          </button>
-        </div>
-        <p className="meta mono">session {sessionId}</p>
-
-        <div className="row between mt">
-          <span className="label">Glasses</span>
-          <span className="meta">{lens.connected ? `connected · ${lens.status}` : lens.status}</span>
-        </div>
-
-        <div className="row between mt">
-          <span className="label">Push to talk</span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={state.listening}
-            aria-label="Push to talk"
-            disabled={!canPushToTalk}
-            className={`switch${state.listening ? ' on' : ''}`}
-            onClick={togglePushToTalk}
-          >
-            <span />
-          </button>
-        </div>
-
-        <div className="row between mt">
-          <span className="label">Mic source</span>
-          <div className="segmented">
-            {(['glasses', 'phone'] as const).map((source) => (
-              <button
-                key={source}
-                className={state.micSource === source ? 'on' : ''}
-                onClick={() => setMicSource(source)}
-              >
-                {source}
-              </button>
-            ))}
+      <section className="group">
+        <h2 className="group-title">Glasses</h2>
+        <div className="group-body">
+          <div className="group-row">
+            <span className="label">Status</span>
+            <span className="value" title={lens.status}>
+              {glasses.label}
+            </span>
+          </div>
+          <div className="group-row">
+            <span className="label">Push to talk</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={state.listening}
+              aria-label="Push to talk"
+              disabled={!canPushToTalk}
+              className={`switch${state.listening ? ' on' : ''}`}
+              onClick={togglePushToTalk}
+            >
+              <span />
+            </button>
+          </div>
+          <div className="group-row">
+            <span className="label">Microphone</span>
+            <div className="segmented">
+              {(['glasses', 'phone'] as const).map((source) => (
+                <button
+                  key={source}
+                  className={state.micSource === source ? 'on' : ''}
+                  onClick={() => setMicSource(source)}
+                >
+                  {source}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
-
-        <p className="meta mt">
-          {relayOrigin || 'Relay origin not set'} ·{' '}
-          {!healthChecked
-            ? 'checking…'
-            : health
-              ? `v${health.version}, db ${health.db}${health.mock ? ', mock' : ''}`
-              : 'unreachable'}
-        </p>
-        <p className="meta">
-          {lens.connected
-            ? 'Questions typed here are answered on the glasses too, under the lens session.'
-            : 'No glasses connected (browser preview): questions go straight to the relay and nothing is shown on a lens.'}
-        </p>
+        {glasses.hint && <p className="group-note">{glasses.hint}</p>}
       </section>
 
-      <ContextPicker />
-
       <section className="card">
-        <h2 className="section-title">{lens.connected ? 'Ask on the lens' : 'Ask the relay'}</h2>
+        <h2 className="section-title">Ask a question</h2>
         <textarea
           className="input"
           rows={2}
@@ -109,7 +99,12 @@ export default function LensPage() {
           onChange={(e) => setQuestion(e.target.value)}
         />
         <div className="row wrap">
-          <button className="primary" disabled={busy === 'ask' || !question.trim()} onClick={() => void submit()}>
+          <button
+            className="primary"
+            aria-busy={busy === 'ask'}
+            disabled={busy === 'ask' || !question.trim()}
+            onClick={() => void submit()}
+          >
             {busy === 'ask' ? 'Asking…' : 'Ask'}
           </button>
           <button className="ghost" disabled={busy === 'ask'} onClick={() => void repeatLast()}>
@@ -118,23 +113,23 @@ export default function LensPage() {
         </div>
         <div className="row wrap">
           {QUICK_ASKS.slice(0, 3).map((q) => (
-            <button
-              key={q.label}
-              className="chip"
-              disabled={busy === 'ask'}
-              onClick={() => void askNow(q.text)}
-            >
+            <button key={q.label} className="chip" disabled={busy === 'ask'} onClick={() => void askNow(q.text)}>
               {q.label}
             </button>
           ))}
         </div>
+        <p className="meta">
+          {lens.connected
+            ? 'Answers also appear on your glasses.'
+            : 'Glasses not connected: answers appear here only.'}
+        </p>
       </section>
 
       {lens.connected && lens.lensText && (
         <section className="card">
           <h2 className="section-title">On the lens now</h2>
-          <SopGraphic graphic={getGraphic(lens.graphic_id)} />
           <pre className="glance mono">{lens.lensText}</pre>
+          <SopGraphic graphic={getGraphic(lens.graphic_id)} />
         </section>
       )}
 
@@ -151,13 +146,45 @@ export default function LensPage() {
           </div>
           <p className="glance">{res.glance}</p>
           {res.source && <p className="meta">Source · {res.source}</p>}
-          {res.walkthrough && (
-            <p className="meta">
-              {res.walkthrough.total} steps · open Answer to walk them
-            </p>
-          )}
+          {res.walkthrough && <p className="meta">{res.walkthrough.total} steps · open Answer to walk through them</p>}
         </section>
       )}
+
+      <ContextPicker />
+
+      <section className="group">
+        <h2 className="group-title">Connection</h2>
+        <div className="group-body">
+          <div className="group-row">
+            <span className="label">Server</span>
+            {server ? <span className="value">{server}</span> : <span className="skeleton sk-value" aria-label="Checking" />}
+          </div>
+          <div className="group-row">
+            <span className="label">Session</span>
+            <span className="value num">{shortId(sessionId)}</span>
+          </div>
+          <button className="group-row group-action" onClick={resetSession}>
+            {lens.connected ? 'Clear history' : 'Start new session'}
+          </button>
+        </div>
+
+        <details className="disclosure">
+          <summary>
+            Technical details
+            <ChevronIcon size={14} className="disclosure-chev" />
+          </summary>
+          <dl className="details-list">
+            <dt>Server address</dt>
+            <dd>{relayOrigin || 'Not configured'}</dd>
+            <dt>Server version</dt>
+            <dd>{health ? `v${health.version} · database ${health.db}${health.mock ? ' · mock' : ''}` : 'Unreachable'}</dd>
+            <dt>Session ID</dt>
+            <dd>{sessionId}</dd>
+            <dt>Glasses link</dt>
+            <dd>{lens.status}</dd>
+          </dl>
+        </details>
+      </section>
     </div>
   );
 }

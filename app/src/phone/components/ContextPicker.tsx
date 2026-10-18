@@ -1,10 +1,12 @@
+import { loadError } from '../copy';
+import { LoadError } from './OfflineBanner';
 import { useProcedures, useSteps } from '../hooks/useSops';
 import { useStore } from '../store';
 
 /** What the next question is answered against — the phone sets what the lens asks with. */
 export function ContextPicker() {
   const { state, setContext, clearContext } = useStore();
-  const { procedures, loading, error } = useProcedures();
+  const { procedures, loading, error, retry } = useProcedures();
 
   const docId = state.context.doc_id;
   const procedure = procedures.find((p) => p.doc_id === docId) ?? null;
@@ -60,7 +62,7 @@ export function ContextPicker() {
           ? `Questions are answered against ${state.context.step_id ?? `${docId} as a whole`}.`
           : 'Questions are answered against the whole corpus.'}
       </p>
-      {error && <p className="error-line">{error}</p>}
+      {error && <LoadError message={loadError(error)} detail={error} onRetry={retry} />}
     </section>
   );
 }

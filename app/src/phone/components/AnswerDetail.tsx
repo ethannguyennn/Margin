@@ -1,11 +1,20 @@
-import type { AskResponse, Citation, Latency, Step } from '../contract';
-import { OutcomePill, Pill, VerifiedPill } from './Pills';
-import { Walkthrough } from './Walkthrough';
-import { parseDisplay } from '../../ui/generated-display';
 import { answerGraphic } from '../../ui/sop-graphics';
 import { SopGraphic } from './SopGraphic';
+import type { AskResponse, Citation, Latency, Step } from '../contract';
+import { errorTitle, seconds } from '../copy';
+import { ChevronIcon } from './Icons';
+import { OutcomePill, Pill, VerifiedPill } from './Pills';
+import { Walkthrough } from './Walkthrough';
 
-const STAGES: Array<keyof Latency> = ['stt', 'embed', 'retrieve', 'generate', 'verify', 'total'];
+const STAGES: Array<keyof Latency> = ['stt', 'embed', 'retrieve', 'generate', 'verify'];
+const STAGE_LABEL: Record<keyof Latency, string> = {
+  stt: 'Speech to text',
+  embed: 'Embedding',
+  retrieve: 'Search',
+  generate: 'Writing the answer',
+  verify: 'Citation check',
+  total: 'Total',
+};
 
 /** The phone's reading surface: everything the glance line had to leave out. */
 export function AnswerDetail({
@@ -17,7 +26,6 @@ export function AnswerDetail({
   pinnedStepId: string | null;
   onUseStep: (step: Step) => void;
 }) {
-  const display = res.outcome === 'answered' && res.verified ? parseDisplay(res.display) : null;
   return (
     <div className="stack">
       <section className="card">
@@ -26,26 +34,14 @@ export function AnswerDetail({
           <Pill tone="muted">{res.intent}</Pill>
           {res.outcome === 'answered' && <VerifiedPill verified={res.verified} />}
         </div>
-        <SopGraphic graphic={answerGraphic(res)} />
-        {display && display.kind !== 'answer' && (
-          <section className={`generated-card ${display.kind}`} aria-label={display.kind === 'warning' ? 'SOP warning' : 'SOP checklist'}>
-            <h2 className="section-title">{display.kind === 'warning' ? 'Warning' : 'Checklist'}</h2>
-            <ul className="list">
-              {display.items.map((item, index) => (
-                <li key={index} className="body">
-                  {display.kind === 'checklist' && <span aria-hidden="true">□ </span>}{item}
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
         <p className="glance">{res.glance || '—'}</p>
         {res.body && <p className="body">{res.body}</p>}
+        <SopGraphic graphic={answerGraphic(res)} />
         {res.transcript && <p className="meta">Asked · “{res.transcript}”</p>}
         {res.source && <p className="meta">Source · {res.source}</p>}
         {res.error && (
-          <p className="error-line">
-            {res.error.code} · {res.error.message}
+          <p className="error-line" title={res.error.code}>
+            {errorTitle(res.error.code)}. {res.error.message}
           </p>
         )}
       </section>
@@ -73,17 +69,26 @@ export function AnswerDetail({
         />
       )}
 
-      <section className="card">
-        <h2 className="section-title">Latency</h2>
-        <div className="row wrap">
+      <details className="disclosure card-disclosure">
+        <summary>
+          Answered in {seconds(res.latency_ms.total)}
+          <ChevronIcon size={14} className="disclosure-chev" />
+        </summary>
+        <dl className="details-list">
           {STAGES.map((stage) => (
-            <span key={stage} className={`chip static${stage === 'total' ? ' strong' : ''}`}>
-              {stage} {res.latency_ms[stage]} ms
-            </span>
+            <div key={stage} className="details-pair">
+              <dt>{STAGE_LABEL[stage]}</dt>
+              <dd className="num">{res.latency_ms[stage]} ms</dd>
+            </div>
           ))}
-        </div>
-        {res.trace_id && <p className="meta mono">trace {res.trace_id}</p>}
-      </section>
+          {res.trace_id && (
+            <div className="details-pair">
+              <dt>Trace ID</dt>
+              <dd>{res.trace_id}</dd>
+            </div>
+          )}
+        </dl>
+      </details>
     </div>
   );
 }
