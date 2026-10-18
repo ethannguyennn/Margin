@@ -1,0 +1,63 @@
+{
+  "date": "2026-10-18",
+  "model": "gemini-3.8-flash",
+  "commit": "0b8892c",
+  "source": "live Gemini",
+  "forced_hallucination": false,
+  "results": [
+    {
+      "doc_id": "SOP-153",
+      "material": "corpus/materials/SOP-153-quick-start.md",
+      "seconds": 18.2,
+      "gemini_calls": {
+        "extract": 0,
+        "structure": 1
+      },
+      "pages": 1,
+      "failed_pages": 0,
+      "figures": 0,
+      "steps_expected": 4,
+      "steps_found": 4,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "values_total": 5,
+      "values_preserved": 5,
+      "values_missing": [],
+      "failing_steps": [],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 1,
+      "diagrams_detail": [
+        {
+          "step": 3,
+          "kind": "schematic",
+          "label": "3",
+          "ok": true
+        }
+      ],
+      "diagrams_rendered": {
+        "3": {
+          "kind": "schematic",
+          "tile_bytes": [
+            897,
+            1039
+          ],
+          "wire_bytes": [
+            897,
+            1039
+          ],
+          "format": "png"
+        }
+      },
+      "doc_warnings": [
+        "Do not overtighten the cover screws; the plastic cover cracks."
+      ],
+      "fabricated": [],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    }
+  ]
+}

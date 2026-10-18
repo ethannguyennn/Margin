@@ -1,7 +1,7 @@
 import '@fontsource/carlito/latin-400.css';
 import '@fontsource/carlito/latin-700.css';
 import './style.css';
-import { api, json, poll, TOKEN_KEY, type JsonObject } from './api';
+import { api, downloadMaterial, json, poll, TOKEN_KEY, type JsonObject } from './api';
 import { approvalReasons, element as el, highlightSource, minutesOnStep, preview } from './view';
 
 const app = document.querySelector<HTMLElement>('#app')!;
@@ -97,10 +97,12 @@ function upload() {
   submit(form, 'Upload and convert', async () => {
     const selected = file.files?.[0];
     if (!selected || !selected.size || selected.size > 20 * 1024 * 1024) throw new Error('Choose a nonempty file up to 20 MB.');
-    const result = await api('/v1/materials', { method: 'POST', body: new FormData(form) });
+    message('Uploading and saving the original file…');
+    const result = await api('/v1/materials', { method: 'POST', body: new FormData(form), signal: AbortSignal.timeout(120000) });
     location.hash = `material/${encodeURIComponent(result.material_id)}`;
   });
   app.append(form);
+  app.append(link('Browse saved SOP uploads', '#library'));
   const recent = sessionStorage.getItem(draftKey);
   if (recent) app.append(link('Return to the latest draft', `#review/${recent}`));
   const open = el('form', undefined, 'open-draft');
@@ -111,14 +113,48 @@ function upload() {
   app.append(open);
 }
 
+async function library(epoch: number, search: URLSearchParams) {
+  heading('SOP library', 'Original uploads are saved on the server. Find them here from any browser, even if conversion failed. Review and approve a procedure before assigning it.');
+  const query = search.get('q') ?? '';
+  const offset = Math.max(0, Number.parseInt(search.get('offset') ?? '0', 10) || 0);
+  const form = el('form');
+  const input = field(form, 'q', 'Search document ID, title or filename', { value: query, max: 120, required: false });
+  submit(form, 'Search uploads', async () => { location.hash = `library?${new URLSearchParams({ q: input.value.trim() })}`; });
+  app.append(form, link('Upload an SOP', '#upload'));
+  const params = new URLSearchParams({ q: query, offset: String(offset), limit: '25' });
+  const result: JsonObject = await api(`/v1/materials?${params}`);
+  if (epoch !== generation) return;
+  if (!result.items.length) app.append(el('p', query ? 'No saved uploads match this search.' : 'No SOPs have been uploaded yet.'));
+  for (const item of result.items) {
+    const card = el('article');
+    card.append(el('h2', `${item.title} · ${item.doc_id} rev ${item.revision}`));
+    const date = new Date(item.created_at).toLocaleString();
+    card.append(el('p', `${item.filename} · ${Math.max(1, Math.ceil(item.size_bytes / 1024))} KB · ${date}`));
+    card.append(el('p', `Conversion: ${item.status}${item.error ? ` · ${item.error}` : ''}`, item.status === 'failed' ? 'failure' : ''));
+    const actions = el('div', undefined, 'material-actions');
+    actions.append(button('Download original', () => downloadMaterial(item.material_id, item.filename)));
+    actions.append(link('Open conversion', `#material/${encodeURIComponent(item.material_id)}`));
+    card.append(actions);
+    app.append(card);
+  }
+  if (offset > 0) app.append(link('Previous uploads', `#library?${new URLSearchParams({ q: query, offset: String(Math.max(0, offset - 25)) })}`));
+  if (result.next_offset !== null) app.append(link('More uploads', `#library?${new URLSearchParams({ q: query, offset: String(result.next_offset) })}`));
+}
+
 function materialStatus(id: string, epoch: number) {
-  heading('Converting material', 'You can leave this page and return while the relay converts your upload.');
+  heading('Saved material', 'Your original file has been saved. You can leave this page and find it again in the SOP library while conversion runs.');
+  app.append(link('Browse saved SOP uploads', '#library'));
   const status = el('p', 'Checking conversion status…'); status.setAttribute('role', 'status'); app.append(status);
+  let hasDownload = false;
   let stop = () => {};
   stop = poll(async () => {
     try {
       const data = await api(`/v1/materials/${encodeURIComponent(id)}`);
       if (generation !== epoch) return;
+      if (!hasDownload) {
+        hasDownload = true;
+        app.append(button('Download original', () => downloadMaterial(id, data.filename || 'sop')));
+      }
       if (data.status === 'ready' || data.status === 'approved') {
         stop(); location.hash = `review/${encodeURIComponent(data.doc_id)}/${encodeURIComponent(data.revision)}`;
       } else if (data.status === 'failed') {
@@ -306,13 +342,15 @@ export async function route() {
   if (workspaceBadge) workspaceBadge.hidden = true;
   if (!loggedIn) { login(); return; }
   void showWorkspace(epoch);
-  nav.replaceChildren(...['Upload', 'Review', 'Devices', 'Assign', 'Board'].map(text => {
+  nav.replaceChildren(...['Upload', 'Library', 'Review', 'Devices', 'Assign', 'Board'].map(text => {
     const dest = text === 'Review' ? `review/${sessionStorage.getItem(draftKey) ?? ''}` : text.toLowerCase();
     const a = link(text, `#${dest}`); if (location.hash.slice(1).startsWith(text.toLowerCase())) a.setAttribute('aria-current', 'page'); return a;
   }));
   try {
-    const [page = 'upload', doc, rev] = location.hash.slice(1).split('/').map(decodeURIComponent);
+    const [path, search = ''] = location.hash.slice(1).split('?');
+    const [page = 'upload', doc, rev] = path.split('/').map(decodeURIComponent);
     if (!page || page === 'upload') upload();
+    else if (page === 'library') await library(epoch, new URLSearchParams(search));
     else if (page === 'material' && doc) materialStatus(doc, epoch);
     else if (page === 'review' && doc && rev) await review(doc, rev, epoch);
     else if (page === 'devices') await devices(epoch);

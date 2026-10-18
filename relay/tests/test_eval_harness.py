@@ -110,6 +110,18 @@ def test_wrong_numeric_answer_cannot_pass_substring_scoring():
         evaluation.score_case(case, response, index, 1)])) == 2
 
 
+def test_verified_glance_only_answer_matches_the_v2_display_contract():
+    case = evaluation.load_cases(ROOT / 'eval/qa.jsonl')[0]
+    index = evaluation.citation_index()
+    response = fixture_answer(case, index)
+    response.update(glance='$150.00 opening float', body='')
+    assert evaluation.score_case(case, response, index, 1).correct
+    response.update(glance='')
+    assert not evaluation.citations_verified(response, index)
+    response.update(glance='$999.00 opening float')
+    assert not evaluation.citations_verified(response, index)
+
+
 def test_extra_unsupported_claim_fails_even_when_all_expected_words_are_present():
     case = evaluation.load_cases(HX2_QA)[0]
     index = evaluation.citation_index(HX2_CORPUS)

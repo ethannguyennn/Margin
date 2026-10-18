@@ -651,6 +651,13 @@ td .failure {
   font-weight: 400;
 }
 
+.material-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
 /* --- responsive ----------------------------------------------------------- */
 
 @media (max-width: 1100px) {

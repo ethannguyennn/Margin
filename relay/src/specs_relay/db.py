@@ -551,6 +551,20 @@ async def get_material_text(material_id: str) -> MaterialText | None:
     return MaterialText.model_validate(row["material_text"]) if row and row["material_text"] is not None else None
 
 
+async def list_materials(*, query: str = "", limit: int = 50, offset: int = 0) -> list[dict]:
+    """Upload library metadata only; never transfer file bytes or extracted source text."""
+    if not 1 <= limit <= 101 or offset < 0 or len(query) > 120:
+        raise ValueError("Invalid material library query")
+    return await _rows(
+        """SELECT material_id, created_at, filename, mime, sha256, doc_id, revision,
+        title, status, error, octet_length(bytes) AS size_bytes
+        FROM materials
+        WHERE strpos(lower(concat_ws(' ', doc_id, revision, title, filename)), lower(%s)) > 0
+        AND (%s::text IS NULL OR org_id = %s)
+        ORDER BY created_at DESC, material_id DESC LIMIT %s OFFSET %s""",
+        (query.strip(), org.current(), org.current(), limit, offset))
+
+
 async def save_draft(draft: ProcedureDraft) -> None:
     _identifiers(draft.doc_id, draft.revision)
     async with pool().connection() as conn:

@@ -3,8 +3,9 @@
 Updated 2026-10-18 during v3 integration. The v2 hardware observations below are historical.
 Windows: `make` = `mingw32-make`.
 
-**Where we are:** v3 is staged on `codex/v3-integration` and deployed from a separate VM
-candidate checkout. `main` and the four part branches are retained until acceptance is complete.
+**Where we are:** v3 is merged into `main` and deployed from a separate VM
+candidate checkout. The uploaded-source library and TODO audit are integrated into main;
+redeploying this combined source and completing field acceptance remain open.
 The user has no new Part 4 recordings yet and will supply them later; two wearers remain required.
 
 - **Tests (2026-10-18, `61b9c1e`):** relay 712 passed (12 opt-in live/PG skipped), app 558 passed
@@ -64,8 +65,8 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
 - [ ] **Quota entitlement:** paid/higher quota has not been confirmed. The shared key is paced
       at ten seconds; observed zero 429s alone does not establish a paid account.
 
-Integration validation: **832 relay passed / 12 skipped; 610 app passed / 12 skipped;
-8 portal passed; app and portal typecheck/build passed**. No new hardware, paid quota or
+Merged-main validation: **867 relay passed / 13 skipped; 614 app passed / 12 skipped;
+9 portal passed; app and portal typecheck/build passed**. No new hardware, paid quota or
 macOS/Linux execution result is claimed.
 
 - [x] **Canonical-domain pack:** `builds/v3/specs-0.4.1-aaa266c.ehpk` (local root checkout),
@@ -92,9 +93,8 @@ macOS/Linux execution result is claimed.
 - [ ] **Head shake is impossible on this IMU:** an accelerometer cannot see yaw, so "shake: back"
       became "double: back" (`61b9c1e`). Update BUILD-PLAN-V2 section 3 (gestures table) and the M4
       criteria, which still describe a shake - Parts 1 + 2
-- [ ] **Phone screen in mock mode:** with `VITE_MOCK=1` the lens uses Part 2's mocks, but the phone
-      screen's procedures/steps/deviation calls still go to the relay. Run a `MOCK_MODE=1` relay
-      alongside - Parts 2 + 3
+- [x] **Phone screen in mock mode:** health, procedures, steps, asks and deviations use
+      the shared local mocks with `VITE_MOCK=1`; regression tests assert zero fetch calls.
 - [ ] **Base44:** `ios/` is gone from the repo, but the `ios-base-44` remote branch remains. Confirm
       Base44 no longer syncs into this repo (or it may recreate `ios/`), then delete that branch -
       owner of PR #1
@@ -127,6 +127,17 @@ for the IMU recorder.
       and Android
 
 ## 4. v1 bring-up still open
+
+- [x] **Development-bank gate calibration:** `eval/tune_gate.py` and the saved 45-question
+      report are in `eval/results/2026-10-18-gate-calibration.json`. This historical v2
+      calibration does not replace the deployed v3 thresholds or scoped-walkthrough checks.
+- [x] **Evaluator alignment:** verified glance-only answers are valid; empty glances and
+      unsupported values still fail. Historical quota-limited runs remain failure evidence.
+- [x] **SOP-153 conversion recheck:** 4/4 steps, 5/5 values, 1/1 schematic and no fabricated
+      values in passing steps; retained in `eval/conversion/results/2026-10-18-quota-probe/`.
+- [x] **SOP upload library:** authenticated search, pagination and byte-exact original downloads
+      survive failed conversions. Handoff: `docs/handoffs/SOP-CLOUD-STORAGE.md`.
+- [ ] **Redeploy combined main:** library/tunnel changes need deployment and public HTTPS checks.
 
 - [x] **Gate thresholds:** VM now uses `NOT_FOUND_MIN_SIM=0.68`, `NOT_FOUND_MIN_RRF=0.04`;
       verbose health exposes both. Full live quality evaluation remains part of M7/M9 above.
@@ -164,6 +175,20 @@ for the IMU recorder.
 
 ## Backburner
 
-- [ ] **Sentry trace** lens gesture -> capture -> upload -> stt -> command/answer -> render (code in
-      place on both sides; needs DSNs and a hardware run)
-- [ ] **Photon notifier**, **revision-fork stretch**, `/v1/sentry-tunnel`
+The browser SDK is pinned at 11.8.0. The DSN-pinned, bounded `/v1/sentry-tunnel` is implemented
+and regression tested; deploy/configure it before enabling `VITE_SENTRY_TUNNEL`.
+
+- [x] **Sentry browser wiring:** add/pin the official SDK 11.8.0 to the existing app lockfile;
+      literal lazy import now bundles it. API export check and production bundle pass.
+- [x] **`/v1/sentry-tunnel` implementation:** exact configured app DSN only, 256 KB cap,
+      60 requests/min/client, unchanged binary envelope, bounded upstream timeout, no redirects;
+      16 tests pass. Set VM `SENTRY_DSN_APP` to the app build DSN before enabling the tunnel.
+- [ ] **Observed Sentry trace** lens gesture -> capture -> upload -> stt -> command/answer ->
+      render: needs physical glasses, deployed tunnel/config and dashboard/event verification.
+      No authenticated Sentry event-reading tool is connected in this session.
+- [ ] **Photon notifier:** selector still intentionally supports only console. No Photon key,
+      supervisor destination or account-specific server/API contract is configured; cannot verify
+      a live delivery or choose among similarly named Photon products without that information.
+- [ ] **Revision-fork stretch:** no zero-copy fork endpoint supplied (`DATABASE_URL_FORK` unset,
+      `ENABLE_REVISION_FORK=false`). Existing explicit-revision filters work; they do not prove
+      fork provisioning or isolated fork retrieval. Needs Tiger fork access/connection details.

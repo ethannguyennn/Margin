@@ -498,6 +498,18 @@ class MockDB:
         m = self.materials.get(material_id)
         return MaterialText.model_validate(m["material_text"]) if m and m["material_text"] else None
 
+    async def list_materials(self, *, query: str = "", limit: int = 50, offset: int = 0) -> list[dict]:
+        import hashlib
+
+        needle, current = query.strip().lower(), org.current()
+        rows = [m for m in self.materials.values() if needle in " ".join(
+            str(m[k]) for k in ("doc_id", "revision", "title", "filename")).lower()
+            and (current is None or m.get("org_id", org.DEFAULT_ORG) == current)]
+        rows.sort(key=lambda m: (m["created_at"], m["material_id"]), reverse=True)
+        return [{**{k: v for k, v in m.items() if k not in ("bytes", "material_text", "org_id")},
+                 "size_bytes": len(m["bytes"]), "sha256": hashlib.sha256(m["bytes"]).hexdigest()}
+                for m in rows[offset:offset + limit]]
+
     async def save_draft(self, draft: ProcedureDraft) -> None:
         m = self.materials.get(draft.material_id)
         if m is None or (m["doc_id"], m["revision"]) != (draft.doc_id, draft.revision) or m["status"] == "approved":

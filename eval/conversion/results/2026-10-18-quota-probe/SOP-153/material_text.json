@@ -1,0 +1,10 @@
+{
+  "material_id": "SOP-153",
+  "pages": [
+    {
+      "page": 1,
+      "text": "---\r\ndoc_id: SOP-153\r\ntitle: Cover Plate Quick Start\r\nrevision: A\r\nstatus: draft\r\nsynthetic: true\r\n---\r\n# Halcyon HX-2 portable fluid pump: Cover Plate Quick Start\r\n\r\nThis fictional training sheet refits the HX-2 inspection cover plate. All names,\r\nparts and limits are synthetic demo data.\r\n\r\n> WARNING: Do not overtighten the cover screws; the plastic cover cracks.\r\n\r\n## Steps\r\n1. Place the cover plate on the housing with the arrow pointing to the outlet.\r\n2. Start all six M5 cover screws by hand.\r\n3. Tighten the six M5 cover screws to 3 N-m in a star pattern: top (1), bottom (2),\r\n   upper right (3), lower left (4), lower right (5), upper left (6).\r\n4. Check the gap under the cover plate edge with a 0.10 mm feeler gauge. The gauge must not enter.\r\n"
+    }
+  ],
+  "figures": []
+}

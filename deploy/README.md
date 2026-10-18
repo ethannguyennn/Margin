@@ -166,5 +166,79 @@ unsupported relay tunnel off. Keep the source commit and SHA-256 with the `.ehpk
 and offline tests do not establish deployment, quota capacity, latency or field acceptance.
 The prior SSH blocker is resolved. The existing identity deployed the integration candidate
 from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
-rollback. Verbose health identifies the actual serving commit. Promotion to main waits for
-the acceptance results in `TODO.md`, including the pending two-wearer field recordings.
+rollback. Verbose health identifies the actual serving commit. The source is merged into main;
+field acceptance in `TODO.md`, including two-wearer recordings, remains pending.
+
+## SOP upload library deployment and verification
+
+The upload-library and audit changes are merged into `main`. On the VM, after
+checking that the checkout has no uncommitted work:
+
+```bash
+cd /root/specs
+git status --short
+git fetch origin main
+git switch main
+git merge --ff-only origin/main
+make deploy
+```
+
+Use `MOCK_MODE=0`, a working `DATABASE_URL`, `PORTAL_TOKEN`, and
+`GEMINI_MODEL_CONVERT` in the VM's existing `.env`. Do not copy database or
+provider credentials into the portal. The current database schema already
+stores uploads; this change adds no migration or storage service.
+
+Open `/portal/`, log in, upload a synthetic SOP, and choose **Library**. Its
+source file is saved before the upload receives 202. Search by ID/title/file,
+download the original, and confirm it remains listed after a reload or a new
+login. Conversion failure does not delete the original. Review and approval
+are still required to publish the procedure for workers and Q&A.
+
+Read-only HTTPS verification from the VM, using the container's token without
+printing it (requires at least one upload; verifies the newest file):
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file .env exec -T relay python - <<'PY'
+import hashlib
+import httpx
+from specs_relay.config import Settings
+s = Settings()
+assert s.portal_token, 'PORTAL_TOKEN must be configured'
+headers = {'Authorization': 'Bearer ' + s.portal_token.get_secret_value()}
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    health = client.get('/v1/health'); health.raise_for_status()
+    assert health.json()['db'] == 'ok' and not health.json()['mock']
+    library = client.get('/v1/materials?limit=1'); library.raise_for_status()
+    assert library.json()['items'], 'Upload a synthetic SOP first'
+    item = library.json()['items'][0]
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    original = client.get('/v1/materials/' + item['material_id'] + '/file')
+    original.raise_for_status()
+    assert len(original.content) == item['size_bytes']
+    assert hashlib.sha256(original.content).hexdigest() == item['sha256']
+print('PASS: original SOP is listed and byte-exact over HTTPS in a fresh session')
+PY
+```
+
+This command reads existing data only. For the separately opt-in database
+restart/reconnection test and cleanup behavior, see `portal/README.md`.
+
+## TODO audit configuration (2026-10-18)
+
+The audit is merged into `main`, including offline phone mocks, SDK 11.8.0,
+the SOP library and Sentry tunnel. Main retains its existing source-text citations,
+scoped walkthroughs and deployed v3 gate defaults. Deploy main using the workflow
+above; keep the VM `.env` private. The earlier audit's SSH-authentication blocker
+was superseded by the v3 deployment checkpoint; see that section for VM context.
+
+`eval/results/2026-10-18-gate-calibration.json` preserves historical v2 development-bank
+thresholds (`0.7389722026007067`, `0.031754032258064516`). Do not replace the v3
+defaults from that report: recalibrate against the current bank/model, including
+scoped walkthroughs. This merge changes no private env or provider billing setting.
+
+For the telemetry tunnel, configure server `SENTRY_DSN_APP` to **exactly** the
+app build's public `VITE_SENTRY_DSN`, then opt in with `VITE_SENTRY_TUNNEL=1`.
+The tunnel defaults off when the app DSN is absent. It accepts only that DSN,
+caps streamed envelopes at 256 KB, rate limits each client to 60/min and never
+follows upstream redirects. Its tests mock the upstream: physical trace
+collection and confirmation in Sentry remain open hardware/integration checks.

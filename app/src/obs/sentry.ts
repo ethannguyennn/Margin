@@ -1,5 +1,5 @@
 // Sentry in the WebView: one `ask` transaction with capture / upload / render spans.
-// Verified against @sentry/browser 11.4.0 (logs are on by default in 11.x; no flag).
+// Bundled and API-checked against @sentry/browser 11.8.0 (logs on by default in 11.x).
 import { RELAY_ORIGIN, SENTRY_DSN, SESSION_ID, env } from '../settings.ts';
 import type { Span } from '@sentry/browser';
 
