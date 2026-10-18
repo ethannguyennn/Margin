@@ -110,6 +110,18 @@ def test_wrong_numeric_answer_cannot_pass_substring_scoring():
         evaluation.score_case(case, response, index, 1)])) == 2
 
 
+def test_verified_glance_only_answer_matches_the_v2_display_contract():
+    case = evaluation.load_cases(ROOT / 'eval/qa.jsonl')[0]
+    index = evaluation.citation_index()
+    response = fixture_answer(case, index)
+    response.update(glance='$150.00 opening float', body='')
+    assert evaluation.score_case(case, response, index, 1).correct
+    response.update(glance='')
+    assert not evaluation.citations_verified(response, index)
+    response.update(glance='$999.00 opening float')
+    assert not evaluation.citations_verified(response, index)
+
+
 def test_extra_unsupported_claim_fails_even_when_all_expected_words_are_present():
     case = evaluation.load_cases(HX2_QA)[0]
     index = evaluation.citation_index(HX2_CORPUS)
@@ -193,3 +205,82 @@ def test_a_value_ending_its_sentence_in_the_quote_still_supports_the_answer():
     assert evaluation.values_supported("Accept up to $50 bills", ["The largest bill we accept is $50."], ["2.2"], ["SOP-202"])
     assert not evaluation.values_supported("Add $0.85 for oat milk.", ["Oat, almond, or soy milk: add $0.75."], ["4.3"], ["SOP-201"])
     assert evaluation.fact_tokens("section 4.2.1 says 3.5.") >= {("3.5", "")}
+
+
+@pytest.mark.asyncio
+async def test_conversation_turns_share_only_their_session_and_every_ask_is_paced(monkeypatch):
+    import asyncio
+    cases = evaluation.load_cases(HX2_QA)[:2]
+    cases[0] = {**cases[0], "turns": [cases[1]]}
+    index = evaluation.citation_index(HX2_CORPUS)
+    by_query = {c["q"]: c for c in cases}
+    requests, sleeps = [], []
+    async def sleep(seconds):
+        sleeps.append(seconds)
+    monkeypatch.setattr(asyncio, "sleep", sleep)
+    def handler(request):
+        if request.url.path == "/v1/health":
+            return httpx.Response(200, json={"ok": True, "mock": True})
+        payload = json.loads(request.content)
+        requests.append(payload)
+        return httpx.Response(200, json=fixture_answer(by_query[payload["text"]], index))
+    async with httpx.AsyncClient(base_url="http://fixture.invalid", transport=httpx.MockTransport(handler)) as client:
+        results, _ = await evaluation.run_suite(client, cases, index, allow_mock=True, pace=6)
+    assert all(r.correct for r in results)
+    assert all(r.response["verified"] is True for r in results)
+    assert requests[0]["session_id"] == requests[1]["session_id"] != requests[2]["session_id"]
+    assert sleeps == [6, 6]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pace", [-1, float("inf"), float("nan")])
+async def test_invalid_pacing_is_rejected_before_any_request(pace):
+    async with httpx.AsyncClient(base_url="http://fixture.invalid") as client:
+        with pytest.raises(ValueError, match="pace"):
+            await evaluation.run_suite(client, [], {}, pace=pace)
+
+
+def test_gap_probe_import_is_offline_and_uses_scored_conversations(monkeypatch):
+    monkeypatch.setattr(httpx, "Client", lambda *a, **k: pytest.fail("import must not send requests"))
+    from tools.diagnostic import gap_probe
+    cases = gap_probe.cases()
+    assert len(cases) == 12
+    assert any(c["q"] == "Pull up the espresso standards." for c in cases)
+    assert any(c.get("turns") for c in cases)
+    assert any(c["q"] == "How many pumps of syrup?" and c["turns"][0]["q"] == "cappuccino" for c in cases)
+
+
+def test_step_regression_import_is_offline_and_scores_all_18_asks(monkeypatch):
+    monkeypatch.setattr(httpx, "Client", lambda *a, **k: pytest.fail("import must not send requests"))
+    from tools.diagnostic import clarify_rate
+    cases = clarify_rate.cases()
+    assert len(cases) == len({c["id"] for c in cases}) == 18
+    assert all(c["context"]["step_id"] == f"SOP-210:C:{c['section']}" for c in cases)
+    assert all(c["expect"] == "answered" and c["must_contain"] for c in cases)
+
+
+@pytest.mark.parametrize("actual,expected", [("160deg F", "160\u00b0F"), ("160 Fahrenheit", "160 degF"),
+    ("10 sec on", "10 seconds on"), ("4 h", "4 hours")])
+def test_scoring_normalizes_unit_spelling_without_changing_values_or_units(actual, expected):
+    assert evaluation.contains(actual, expected)
+    assert not evaluation.contains(actual, expected.replace("160", "161").replace("10", "11").replace("4", "5"))
+    assert not evaluation.contains("160 degC", "160 degF")
+    assert not evaluation.contains("10 min", "10 sec")
+
+
+def test_documented_equivalent_answers_still_require_the_right_fact():
+    bank = {c["id"]: c for c in evaluation.load_cases(ROOT / "eval/qa.jsonl")}
+    index = evaluation.citation_index()
+    for case_id, section, glance, quote, wrong in [
+        ("a05", "4.2", "No, Large Flat White not sold", "| Flat White | $5.25 | $5.75 | not sold |", "Large Flat White is sold"),
+        ("a08", "2.3", "Black mark means counterfeit risk", "A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.", "Black mark means genuine"),
+        ("a24", "7.2", "First aid kit under back counter", "The first aid kit is under the back counter by the dish sink.", "First aid kit above back counter"),
+        ("a25", "2.1", "Shot time: 25 to 30 sec", "Shot time\n25 to 30 seconds", "Shot time: 35 to 40 sec"),
+        ("a27", "5.1", "Grind finer", "Grind finer", "Grind coarser"),
+    ]:
+        case = bank[case_id]
+        chunk = index[f"{case['doc_id']}:C:{section}"]
+        response = {"outcome": "answered", "verified": True, "glance": glance, "body": "",
+                    "citations": [{k: chunk[k] for k in ("chunk_id", "doc_id", "revision", "section")} | {"quote": quote}]}
+        assert evaluation.score_case(case, response, index, 1).correct
+        assert not evaluation.score_case(case, {**response, "glance": wrong}, index, 1).correct

@@ -1,0 +1,11 @@
+Evidence: LIVE RELAY; 16 questions; latency is HTTP round-trip.
+Metric                              Result
+Answered-correct rate                  92.9%
+not_found precision                    66.7%
+not_found recall                      100.0%
+Citation-verification pass rate       100.0%
+Median latency                      693.1 ms
+  ambiguous: 3/4 passed
+  answerable: 12/12 passed
+  FAIL gap-syrup-turn-1: unexpected outcome
+Specs [LIVE RELAY]: 16 questions; answered-correct 92.9%; not_found P/R 66.7%/100.0%; citation pass 100.0%; median 693.1 ms; 0 unverified answers.

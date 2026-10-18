@@ -1,5 +1,34 @@
 # Deploy: relay + Caddy on Vultr, behind `getyourassto.work`
 
+## v3 deployment checkpoint
+
+`make deploy-remote` reads `VM_HOST` from a make argument, the process environment, then the
+root `.env` (in that order). For this VM: `make deploy-remote VM_HOST=root@45.32.88.132`.
+It uses existing SSH key authentication, refuses a remote checkout outside `main` or with
+tracked edits, then fast-forwards `/root/specs` and runs `make deploy`. It never copies the
+local `.env`. This Windows checkout currently has no usable deployment SSH key; a deployment
+has not been performed from it.
+
+Before the v3 deploy, the account/VM owner must confirm these values in the **VM's** `.env`:
+`MOCK_MODE=0`, `NOT_FOUND_MIN_SIM=0.68`, `NOT_FOUND_MIN_RRF=0.04`, the selected conversion model,
+and the paid/higher-quota Gemini project. Announce VM configuration changes first. Local
+calibration values can differ and must not silently overwrite these measured v3 thresholds.
+Merge tested branches through PRs in the build-plan order; never deploy a feature branch as main.
+
+`make health URL=https://getyourassto.work` now requests `/v1/health?verbose=1`. On this
+branch, `mock` / `ask_mock` describe answer-path dependencies; `conversion_mock` is separate.
+Verbose health also reports `mocked`, `git_sha`, the gate thresholds, and process-lifetime
+`gemini_429_total` / `gemini_429_by_stage` counters. A restart resets counters. They count
+provider failures observed by stage boundaries and conversion jobs, not HTTP requests, and
+do not include retries recovered internally inside an SDK module. Quota-counter logs omit provider bodies.
+The normal health response retains its four existing fields. Health probing now requires
+`ok: true`; a `200` carrying `ok: false` is unhealthy.
+
+After deployment, verify live asks and DB, the expected commit and thresholds, then run the
+paced voice and gap diagnostics. M9 additionally requires 30 asks at a worker's pace with no
+quota failures and a v3 pack handed to Part 4. None of those live acceptance results is implied
+by a green unit suite. See `tools/diagnostic/README.md` for the current gap-probe dependency.
+
 Deploy the mock relay first (`MOCK_MODE=1`), then flip to real mode once Parts 4
 and 5 are merged. The public HTTPS origin is the fallback for venue Wi-Fi that
 isolates clients; a phone hotspot is the backup.
@@ -121,3 +150,95 @@ and `VITE_RELAY_ORIGIN` must be the same string.
 `make dev-relay` binds `0.0.0.0:8080`; point the app at `http://<laptop LAN IP>:8080`
 (never `localhost` on the phone) and allow that origin via `ALLOWED_ORIGINS` or
 `ALLOWED_ORIGIN_REGEX`.
+
+## v3 integration preparation
+
+The API client accepts bounded `clarify` fields, retains verified picture IDs, and refuses
+malformed walkthrough scopes. The gap wrapper delegates to Part 2's scored, paced CLI once
+that branch is integrated. `make deploy` exports its checkout's commit as `GIT_SHA`; Compose
+sets it explicitly on the relay so verbose health identifies the running source. Verbose
+health also reports configured model names (never provider credentials).
+
+The current 0.4.1 app pack is built from the combined candidate, with
+`VITE_RELAY_ORIGIN=https://getyourassto.work`, `VITE_MOCK=0`, and
+`VITE_ASK_TIMEOUT_MS=50000`. Public app tracing uses the whitelisted ingest origin with the
+unsupported relay tunnel off. Keep the source commit and SHA-256 with the `.ehpk`. Source preparation
+and offline tests do not establish deployment, quota capacity, latency or field acceptance.
+The prior SSH blocker is resolved. The existing identity deployed the integration candidate
+from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
+rollback. Verbose health identifies the actual serving commit. The source is merged into main;
+field acceptance in `TODO.md`, including two-wearer recordings, remains pending.
+
+## SOP upload library deployment and verification
+
+The upload-library and audit changes are merged into `main`. On the VM, after
+checking that the checkout has no uncommitted work:
+
+```bash
+cd /root/specs
+git status --short
+git fetch origin main
+git switch main
+git merge --ff-only origin/main
+make deploy
+```
+
+Use `MOCK_MODE=0`, a working `DATABASE_URL`, `PORTAL_TOKEN`, and
+`GEMINI_MODEL_CONVERT` in the VM's existing `.env`. Do not copy database or
+provider credentials into the portal. The current database schema already
+stores uploads; this change adds no migration or storage service.
+
+Open `/portal/`, log in, upload a synthetic SOP, and choose **Library**. Its
+source file is saved before the upload receives 202. Search by ID/title/file,
+download the original, and confirm it remains listed after a reload or a new
+login. Conversion failure does not delete the original. Review and approval
+are still required to publish the procedure for workers and Q&A.
+
+Read-only HTTPS verification from the VM, using the container's token without
+printing it (requires at least one upload; verifies the newest file):
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file .env exec -T relay python - <<'PY'
+import hashlib
+import httpx
+from specs_relay.config import Settings
+s = Settings()
+assert s.portal_token, 'PORTAL_TOKEN must be configured'
+headers = {'Authorization': 'Bearer ' + s.portal_token.get_secret_value()}
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    health = client.get('/v1/health'); health.raise_for_status()
+    assert health.json()['db'] == 'ok' and not health.json()['mock']
+    library = client.get('/v1/materials?limit=1'); library.raise_for_status()
+    assert library.json()['items'], 'Upload a synthetic SOP first'
+    item = library.json()['items'][0]
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    original = client.get('/v1/materials/' + item['material_id'] + '/file')
+    original.raise_for_status()
+    assert len(original.content) == item['size_bytes']
+    assert hashlib.sha256(original.content).hexdigest() == item['sha256']
+print('PASS: original SOP is listed and byte-exact over HTTPS in a fresh session')
+PY
+```
+
+This command reads existing data only. For the separately opt-in database
+restart/reconnection test and cleanup behavior, see `portal/README.md`.
+
+## TODO audit configuration (2026-10-18)
+
+The audit is merged into `main`, including offline phone mocks, SDK 11.8.0,
+the SOP library and Sentry tunnel. Main retains its existing source-text citations,
+scoped walkthroughs and deployed v3 gate defaults. Deploy main using the workflow
+above; keep the VM `.env` private. The earlier audit's SSH-authentication blocker
+was superseded by the v3 deployment checkpoint; see that section for VM context.
+
+`eval/results/2026-10-18-gate-calibration.json` preserves historical v2 development-bank
+thresholds (`0.7389722026007067`, `0.031754032258064516`). Do not replace the v3
+defaults from that report: recalibrate against the current bank/model, including
+scoped walkthroughs. This merge changes no private env or provider billing setting.
+
+For the telemetry tunnel, configure server `SENTRY_DSN_APP` to **exactly** the
+app build's public `VITE_SENTRY_DSN`, then opt in with `VITE_SENTRY_TUNNEL=1`.
+The tunnel defaults off when the app DSN is absent. It accepts only that DSN,
+caps streamed envelopes at 256 KB, rate limits each client to 60/min and never
+follows upstream redirects. Its tests mock the upstream: physical trace
+collection and confirmation in Sentry remain open hardware/integration checks.

@@ -36,7 +36,13 @@ function authHeader(): Record<string, string> {
 
 const EMPTY_LATENCY = { stt: 0, embed: 0, retrieve: 0, generate: 0, verify: 0, total: 0 };
 
+function quotaFailure(code: unknown, message: unknown): boolean {
+  return code === 'rate_limited' || code === 'quota_exceeded' || message === 'Busy, try again'
+    || (typeof message === 'string' && /\b429\b|\bquota\b|resource_exhausted/i.test(message));
+}
+
 function errorResponse(code: ErrorCode, message: string, trace_id = ''): AskResponse {
+  if (quotaFailure(code, message)) message = 'Busy, try again';
   captureError(code, message);
   return {
     trace_id,
@@ -91,6 +97,9 @@ function validate(raw: unknown): AskResponse {
   if (res.outcome === 'error' && !res.error) {
     return errorResponse('network', 'error outcome with no error body', res.trace_id);
   }
+  if (res.outcome === 'error' && res.error && quotaFailure(res.error.code, res.error.message)) {
+    res.error = { ...res.error, message: 'Busy, try again' };
+  }
   if (res.outcome === 'command') {
     // The lens acts on `command` and never renders a command as text.
     if (!r.command || !COMMANDS.includes(r.command)) {
@@ -100,6 +109,22 @@ function validate(raw: unknown): AskResponse {
   }
   if (res.outcome === 'answered' && (!res.verified || res.citations.length === 0)) {
     console.warn('[client] unverified answer downgraded to not_found', res.trace_id);
+    return notFound(res);
+  }
+  const c = r.clarify;
+  const text = (v: unknown, max: number): v is string => typeof v === 'string' &&
+    !!v.trim() && v.length <= max && /^[\x20-\x7e]+$/.test(v);
+  if (res.outcome === 'not_found' && res.needs_clarification === true && c &&
+      text(c.prompt, 40) && Array.isArray(c.options) && c.options.length >= 2 && c.options.length <= 3 &&
+      c.options.every(o => text(o, 24)) && new Set(c.options.map(o => o.toLowerCase())).size === c.options.length) {
+    res.clarify = { prompt: c.prompt, options: [...c.options] };
+  }
+  if (res.outcome === 'answered' && res.verified && typeof r.graphic_id === 'string' &&
+      /^[a-z0-9-]{1,80}$/.test(r.graphic_id)) res.graphic_id = r.graphic_id;
+  const w = res.walkthrough, scope = w?.scope;
+  if (scope != null && !(Number.isInteger(scope.start) && Number.isInteger(scope.end) &&
+      Number.isInteger(w!.index) && Array.isArray(w!.steps) && w!.total === w!.steps.length &&
+      0 <= scope.start && scope.start <= w!.index && w!.index < scope.end && scope.end <= w!.total)) {
     return notFound(res);
   }
   return res;
@@ -142,7 +167,9 @@ async function attempt(req: AskRequest, external?: AbortSignal): Promise<Attempt
       body,
       code: res.status >= 500 ? 'db_down' : res.status === 401 ? 'unauthorized' : 'bad_request',
       message: `relay returned HTTP ${res.status}`,
-      retryable: res.status >= 500, // never retry a 4xx
+      retryable: res.status >= 500 && !quotaFailure(
+        (body as Partial<AskResponse> | null)?.error?.code,
+        (body as Partial<AskResponse> | null)?.error?.message), // don't replay audio into exhausted quota
     };
   } catch (e) {
     if (timedOut) return { code: 'timeout', message: `no answer in ${ASK_TIMEOUT_MS} ms`, retryable: false };

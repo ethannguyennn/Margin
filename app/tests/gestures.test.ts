@@ -26,6 +26,10 @@ const table: string[] = [];
 for (const f of files) {
   test(`fixture ${f}`, () => {
     const fx = load(f);
+    if (f.endsWith('.g2.json')) {
+      assert.equal(fx.meta.source, 'g2', `${f}: hardware provenance required`);
+      assert.ok(fx.meta.expect, `${f}: add measured NOD/SHAKE counts to meta.expect`);
+    }
     const events = detect(fixtureSamples(fx), paramsFor(fx));
     const got = { NOD: count(events, 'NOD'), SHAKE: count(events, 'SHAKE') };
     table.push(`${f}: NOD=${got.NOD} SHAKE=${got.SHAKE} expect=${JSON.stringify(fx.meta.expect)} source=${fx.meta.source}`);
@@ -143,7 +147,7 @@ test('sensitivity and nod mode come from settings', () => {
   };
   store['specs.sensitivity'] = '2';
   store['specs.nodMode'] = '"single"';
-  store['specs.detector'] = JSON.stringify({ down: 70, gate: 'junk' });
+  store['specs.detector.v2'] = JSON.stringify({ down: 70, gate: 'junk' });
   const p = currentParams();
   assert.equal(p.down, 35, 'override 70 / sensitivity 2');
   assert.equal(p.up, DEFAULT_PARAMS.up / 2);
@@ -222,6 +226,68 @@ test('live: an imuControl that never answers (simulator) times out instead of ha
   await g.stopHeadGestures();
 }, 8000);
 
+test('live: recording shares samples with gestures and stopping it keeps gestures armed', async () => {
+  const hw = imuBridge();
+  const got: string[] = [];
+  const recorded: Sample[] = [];
+  await g.startHeadGestures((x) => got.push(x));
+  const { startImu } = await import('../src/motion/imu.ts');
+  const stopRecording = await startImu((s) => recorded.push(s));
+  hw.feed(trace(4, double(1.5)));
+  assert.deepEqual(got, ['NOD']);
+  assert.ok(recorded.length > 0);
+  await stopRecording();
+  await stopRecording(); // each consumer may release only its own subscription, once
+  assert.equal(hw.subscribed, true);
+  const n = recorded.length;
+  hw.feed(shifted(trace(4, double(1.5)), 10000));
+  assert.deepEqual(got, ['NOD', 'NOD']);
+  assert.equal(recorded.length, n);
+  await g.stopHeadGestures();
+  assert.equal(hw.subscribed, false);
+  assert.deepEqual(hw.calls.at(-1), [false, undefined]);
+});
+
+test('live: a fixed-pace recording suppresses probing, including after foreground resume', async () => {
+  const store: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => (store[k] = v),
+    removeItem: (k: string) => delete store[k],
+  };
+  const hw = imuBridge();
+  const { startImu } = await import('../src/motion/imu.ts');
+  const { setImuPace } = await import('../src/settings.ts');
+  const recorded: Sample[] = [];
+  await g.startHeadGestures(() => {});
+  setImuPace(100);
+  const stopRecording = await startImu((s) => recorded.push(s), { fixedPace: true });
+  const slow = Array.from({ length: 25 }, (_, i) => ({ t: 1000 + i * 100, x: 0, y: 0, z: 1 }));
+  try {
+    hw.feed(slow);
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 100]);
+    hw.sys(5);
+    await settle();
+    const n = recorded.length;
+    hw.feed(shifted(slow, 5000));
+    assert.equal(recorded.length, n, 'recording receives nothing in the background');
+    hw.sys(4);
+    await settle();
+    hw.feed(shifted(slow, 10000));
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 100]);
+    await stopRecording();
+    hw.feed(shifted(slow, 20000));
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 500], 'automatic probing resumes for the detector');
+  } finally {
+    await stopRecording();
+    await g.stopHeadGestures();
+    delete (globalThis as any).localStorage;
+  }
+});
+
 /** n double nods of a given amplitude, 3 s apart, then 1 s of stillness. */
 const nodSession = (amp: number, n = 3) =>
   trace(3 * n + 1, (t) => [...Array(n)].reduce((acc, _, i) => acc + bump(t, 1 + 3 * i, amp) + bump(t, 1.65 + 3 * i, amp), 0));
@@ -242,17 +308,17 @@ test('calibrate: 3 double nods set down/up to 60 % of the median peak and persis
   assert.deepEqual(await p, { ok: true });
   assert.deepEqual(progress, [0, 1, 2, 3]);
   assert.equal(g.isCalibrated(), true);
-  const saved = JSON.parse(store['specs.detector']);
+  const saved = JSON.parse(store['specs.detector.v2']);
   assert.ok(saved.down > DEFAULT_PARAMS.down && saved.down < 100, `down=${saved.down}`);
   assert.deepEqual(hw.calls.at(-1), [false, undefined], 'calibration started the IMU, so it stops it');
 
   // Weak nods: detected by the relaxed pass, but below the floor -> defaults kept, ok: false.
-  delete store['specs.detector'];
+  delete store['specs.detector.v2'];
   const weak = g.calibrate(() => {}, { timeoutMs: 3000 });
   await settle();
   hw.feed(shifted(nodSession(7), 90000));
   assert.deepEqual(await weak, { ok: false });
-  assert.equal(store['specs.detector'], undefined);
+  assert.equal(store['specs.detector.v2'], undefined);
   delete (globalThis as any).localStorage;
 });
 
@@ -271,7 +337,7 @@ const frames: Record<string, (s: Sample) => Sample> = {
 
 for (const [name, frame] of Object.entries(frames)) {
   test(`accel (${name}): auto mode finds every double nod and no false ones, no axis knobs`, () => {
-    for (const f of files) {
+    for (const f of files.filter((name) => name.endsWith('.synthetic.json'))) {
       const fx = load(f);
       const nods = count(detect(gravity(fixtureSamples(fx)).map(frame), DEFAULT_PARAMS), 'NOD');
       if (typeof fx.meta.expect !== 'object' || !fx.meta.expect) console.info(`[gestures] ${f} as accelerometer (${name}): NOD=${nods}`);
@@ -279,6 +345,13 @@ for (const [name, frame] of Object.entries(frames)) {
     }
   });
 }
+
+test('accel: BLE bursts of 3 samples per arrival at 25 Hz still find every double nod', () => {
+  const s = gravity(nods).filter((_, i) => i % 2 === 0);
+  // Each sample arrives with the last one of its burst; the next burst comes 3 samples later.
+  const bursty = s.map((x, i) => ({ ...x, t: s[Math.min(s.length - 1, i - (i % 3) + 2)].t }));
+  assert.equal(count(detect(bursty, DEFAULT_PARAMS), 'NOD'), 10);
+});
 
 test('live: a pace too slow for a nod is replaced by one that is not, and remembered', async () => {
   const store: Record<string, string> = {};

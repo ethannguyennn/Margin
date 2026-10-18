@@ -2,7 +2,7 @@
 // frozen contract. This is NOT Part 3's relay; swap VITE_RELAY_ORIGIN for theirs
 // (MOCK_MODE=1) and the same assertions should hold.
 // Run: npm test (or npx vitest run tests/integration.test.ts)
-import { afterAll, test } from 'vitest';
+import { afterAll, test, vi } from 'vitest';
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
@@ -136,4 +136,31 @@ test('deviation logging posts to /v1/deviation', async () => {
   assert.deepEqual(out, { deviation_id: 'dev-7', notified: true });
   assert.equal(seen.at(-1)!.url, '/v1/deviation');
   afterAll(() => relay.close());
+});
+
+test('production tracing loads the real SDK and creates a fresh trace for each ask', async () => {
+  vi.resetModules();
+  vi.stubEnv('VITE_SENTRY_DSN', 'https://public@o0.ingest.sentry.io/1');
+  vi.stubEnv('VITE_SENTRY_TUNNEL', '0');
+  vi.stubGlobal('fetch', async () => new Response('', { status: 200 }));
+  const sdk = await import('@sentry/browser');
+  try {
+    const obs = await import('../src/obs/sentry.ts');
+    assert.equal(await obs.initObs(), true);
+    const first = obs.startAsk();
+    const a = obs.traceSpan('upload', () => obs.traceHeaders());
+    first.end('answered');
+    const second = obs.startAsk();
+    const b = obs.traceSpan('upload', () => obs.traceHeaders());
+    second.end('answered');
+    assert.match(a['sentry-trace'], /^[0-9a-f]{32}-[0-9a-f]{16}-[01]$/);
+    assert.notEqual(a['sentry-trace'].slice(0, 32), b['sentry-trace'].slice(0, 32));
+    const options = sdk.getClient()!.getOptions();
+    assert.equal(options.beforeBreadcrumb!({ category: 'console', message: 'audioPcm: private' }, {}), null);
+    assert.equal(options.beforeSendLog!({ message: 'audioPcm: private' } as never, {}), null);
+  } finally {
+    await sdk.close(1000);
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  }
 });

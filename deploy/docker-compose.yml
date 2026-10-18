@@ -8,6 +8,8 @@ services:
       context: ..
       dockerfile: deploy/relay.Dockerfile
     env_file: ../.env
+    environment:
+      GIT_SHA: ${GIT_SHA:-unknown}
     restart: unless-stopped
     # Only Caddy talks to the relay; localhost binding is for debugging on the VM.
     ports:

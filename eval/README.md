@@ -35,6 +35,28 @@ optional request_revision field is the only way to force a revision.
 - Median latency: observed HTTP round-trip milliseconds, including failed
   requests. This is not hardware end-of-speech-to-lens latency.
 
+A verified answer may put the whole answer in `glance` and leave `body` empty,
+as the v2 generator prompt specifies. The evaluator requires a visible glance
+and still audits every number and source citation independently. The 2026-10-18
+pre-alignment live report is retained as historical failure evidence; the six
+flagged questions were rechecked with saved responses after this correction.
+
+## Retrieval gate calibration
+
+```powershell
+$env:PYTHONPATH = 'relay/src'
+.venv/Scripts/python.exe eval/tune_gate.py --output eval/results/gate-calibration.json
+```
+
+This uses the normalized `eval/qa.jsonl`, live query embeddings and read-only
+cloud retrieval. It performs no generation and changes no environment setting.
+The candidate gate preserves every answerable and clarification case; among
+those candidates it maximizes cheap refusals. The report records the model,
+dimension, bank and per-case scores. It is development-bank calibration, not
+independent evaluation; rerun when the bank or embedding model changes.
+
+## Interpreting reports
+
 Undefined denominators print N/A. All-refusal behavior cannot claim perfect
 citation coverage. HTTP/transport failures count as failed cases. Every
 response must carry a trace_id. A non-2xx answered body is still inspected for
@@ -45,11 +67,50 @@ usable relay; 2 = at least one unverified answer. Fixture/mock results require
 --allow-mock and are always labeled MOCK/FIXTURE ONLY, never live evidence.
 The health endpoint must explicitly identify mock mode.
 
-The independent tests use answer-key fixtures to test the harness. Their
-percentages are not retrieval/generation quality numbers. As of 2026-10-17,
-no live eval was possible because cloud credentials and a real-mode service
-were unavailable. After scaffold-relay was published, the harness also ran
-through its actual mock HTTP handlers in the test suite. These results remain
-fixture evidence. The scaffold currently drops needs_clarification, so its
-ambiguous responses cannot pass that requirement until Part 3 propagates it.
-No threshold tuning or live quality metrics are claimed.
+Independent harness tests use answer-key fixtures; their percentages are not
+retrieval/generation quality numbers. Actual live evidence is explicitly labeled
+in the saved JSON. On 2026-10-18, the 45-case run was incomplete as a quality
+gate: generation hit HTTP 429 starting at case 18, and the pre-alignment evaluator
+also rejected glance-only answers. Keep that report as failure evidence.
+The six flagged questions were rerun using `gemini-3.8-flash` after alignment:
+6/6 passed with 0 unverified answers; 3 had empty bodies. The responses are saved
+in `results/2026-10-18-glance-only-recheck.json`. This subset does not establish
+full-bank quality or sustained quota, and its 7148 ms median is not a latency pass.
+
+# v3 loop evaluation
+
+The original 45 coffee questions remain first in `qa.jsonl`. Eighteen additional cases cover
+five scoped walkthroughs, five clarify/reply conversations, five contextual follow-up
+conversations and three picture questions. `turns` reuse the case's session ID; distinct cases
+use independent sessions. Each turn is scored, including clarify options, source citations,
+walkthrough section/scope and expected graphic IDs. Empty-body, verified glance-only answers
+are valid. The scorer independently checks every quote against approved corpus text.
+
+Run deliberately against a live relay, with pacing for the shared provider quota:
+
+```bash
+PYTHONPATH=relay/src python eval/run_eval.py --base-url https://getyourassto.work --pace 10 --output eval/results/YYYY-MM-DD-v3.json
+PYTHONPATH=relay/src python tools/diagnostic/gap_probe.py --relay https://getyourassto.work --pace 10
+PYTHONPATH=relay/src python tools/diagnostic/clarify_rate.py --relay https://getyourassto.work --pace 10 --output eval/results/YYYY-MM-DD-step-regression.json
+```
+
+The gap probe is safe to import, refuses mock evidence, and exits nonzero on failed or missing
+checks. Reports include timestamps and model identifiers when verbose health provides them;
+missing model data is recorded as null. Offline tests are fixtures, never live quality evidence.
+
+The step regression accepts verified glance-only answers and independently scores all 18
+responses, rather than applying the obsolete empty-body error rule. It is safe to import.
+The till walkthrough uses the plan's explicit till-closing phrase; a generic closing checklist
+can also refer to back-of-house closing. Cleaning is SOP-210 5.1-5.4, distinct from closing 6.x.
+The generic milk-temperature lead-in checks the 160 degF maximum; individual milk targets
+differ, so a correct whole-milk answer need not include the soy/oat lower bound of 140 degF.
+
+Live-run scoring corrections retain all 45 original questions and required values. Unit spelling
+and HTML degree entities are normalized without changing values or units. `a24` also accepts
+"under back counter" (the same location with the article omitted); "above" still fails. `a25`
+accepts the approved shot-time specification table in 2.1 as well as the procedure in 3.5.
+`a05` accepts the price table's "not sold" answer for a Large flat white; `a08` accepts
+"black" plus "counterfeit" for the black-mark question; `a27` accepts the matching
+troubleshooting row in 5.1. Markdown table cell separators are formatting, not facts.
+These alternatives are explicit annotations and have wrong-fact regression tests. Historical
+reports keep their original scores; reruns identify the new scorer/code revision.

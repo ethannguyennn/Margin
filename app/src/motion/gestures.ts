@@ -98,10 +98,16 @@ const gravityLike = (s: Vec): boolean => {
   const m = Math.hypot(s.x, s.y, s.z);
   return (m > 0.75 && m < 1.25) || (m > 7.5 && m < 12);
 };
+const lerp = (a: Vec, b: Vec, k: number): Vec => ({ x: a.x + k * (b.x - a.x), y: a.y + k * (b.y - a.y), z: a.z + k * (b.z - a.z) });
+const unit = (v: Vec): Vec => {
+  const n = Math.hypot(v.x, v.y, v.z) || 1;
+  return { x: v.x / n, y: v.y / n, z: v.z / n };
+};
 
 export class Detector {
   private prev: { t: number; p: number; y: number; r: number } | null = null;
-  private dtAvg = 0;
+  private t0 = 0; // first arrival since the stream (re)started
+  private n = 0; // samples since then
   private lp = { p: 0, y: 0, r: 0 };
   private bias = { p: 0, y: 0, r: 0 };
   private hist: Filtered[] = [];
@@ -113,6 +119,7 @@ export class Detector {
   private readonly roll: Axis;
   private mode: Exclude<DetectorParams['signal'], 'auto'> | null = null;
   private rest: Vec | null = null;
+  private grav: Vec | null = null;
 
   /** onNod reports every single nod's peak rates once its return lobe ends (calibration). */
   constructor(
@@ -129,21 +136,24 @@ export class Detector {
     this.hist = [];
     this.pitch = this.yawCur = this.lastNod = null;
     this.yawLobes = [];
-    this.rest = null;
+    this.rest = this.grav = null;
   }
 
   /** Degrees between gravity now and the slow rest direction, negated so a nod reads as a
    * down lobe then its return. No axis or sign mapping; yaw is invisible to gravity, so an
    * accelerometer gives no SHAKE (double press covers "back"). */
-  private tilt(s: ImuSample): number {
+  private tilt(s: ImuSample, dt: number): number {
     const m = Math.hypot(s.x, s.y, s.z) || 1;
-    const u = { x: s.x / m, y: s.y / m, z: s.z / m };
+    // Low-pass the gravity direction before taking the angle: the angle is unsigned, so
+    // noise taken through it first would rectify into a jittery tilt that reads as motion.
+    const a = this.grav ? dt / (this.params.lpMs + dt) : 1;
+    const u = unit(lerp(this.grav ?? { x: 0, y: 0, z: 0 }, { x: s.x / m, y: s.y / m, z: s.z / m }, a));
+    this.grav = u;
     const rest = this.rest ?? u;
     const deg = (Math.acos(Math.min(1, Math.max(-1, u.x * rest.x + u.y * rest.y + u.z * rest.z))) * 180) / Math.PI;
-    const k = this.rest && this.prev ? Math.min(1, Math.max(0, s.t - this.prev.t) / this.params.restMs) : 1;
-    const v = { x: rest.x + k * (u.x - rest.x), y: rest.y + k * (u.y - rest.y), z: rest.z + k * (u.z - rest.z) };
-    const n = Math.hypot(v.x, v.y, v.z) || 1;
-    this.rest = { x: v.x / n, y: v.y / n, z: v.z / n };
+    // Rest holds during a pitch lobe: drifting toward the first nod of a double put the head
+    // "above" rest for the second, which then started with a reversal.
+    this.rest = this.pitch?.open ? rest : unit(lerp(rest, u, Math.min(1, dt / this.params.restMs)));
     return -deg;
   }
 
@@ -155,33 +165,31 @@ export class Detector {
     }
     const prev = this.prev;
     const gap = !prev || s.t - prev.t > P.maxGapMs || s.t < prev.t;
-    if (gap) this.reset();
-    const raw = this.mode === 'accel' ? { t: s.t, p: this.tilt(s), y: 0, r: 0 } : {
+    if (gap) {
+      this.reset();
+      this.t0 = s.t;
+      this.n = 0;
+    } else this.n++;
+    // BLE delivers in bursts: several samples share one arrival time and the next burst
+    // comes a whole burst later. The IMU itself samples evenly, so the interval is the mean
+    // since the stream (re)started, not the gap to the previous arrival (which read a nod
+    // in bursts of 3 at a third of its speed).
+    const dt = this.n ? (s.t - this.t0) / this.n : 0;
+    const raw = this.mode === 'accel' ? { t: s.t, p: this.tilt(s, dt), y: 0, r: 0 } : {
       t: s.t,
       p: s[P.pitchAxis] * P.scale * P.pitchSign,
       y: s[P.yawAxis] * P.scale * P.yawSign,
       r: s[this.roll] * P.scale,
     };
-    if (!prev || gap) {
-      this.prev = raw;
-      return null;
-    }
-    let dt = s.t - prev.t;
-    // BLE delivers in bursts: several samples can share one arrival time.
-    if (dt < 1) {
-      if (!this.dtAvg) return null;
-      dt = this.dtAvg;
-    } else {
-      this.dtAvg = this.dtAvg ? 0.9 * this.dtAvg + 0.1 * dt : dt;
-    }
     this.prev = raw;
+    if (!prev || gap || dt < 1) return null;
     const rate = (k: 'p' | 'y' | 'r'): number => {
       if (this.mode === 'rate') return raw[k];
       let d = raw[k] - prev[k];
       if (P.wrap) d -= P.wrap * Math.round(d / P.wrap); // 179 -> -179 is +2, not -358
       return (d / dt) * 1000;
     };
-    const a = dt / (P.lpMs + dt);
+    const a = this.mode === 'accel' ? 1 : dt / (P.lpMs + dt); // accel: tilt() already low-passed
     const b = P.hpMs > 0 ? dt / (P.hpMs + dt) : 0;
     const f: Filtered = { t: s.t, p: 0, y: 0, r: 0 };
     for (const k of ['p', 'y', 'r'] as const) {

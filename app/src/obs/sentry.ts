@@ -1,31 +1,9 @@
 // Sentry in the WebView: one `ask` transaction with capture / upload / render spans.
-// Verified against @sentry/browser 11.4.0 (logs are on by default in 11.x; no flag).
+// Bundled and API-checked against @sentry/browser 11.8.0 (logs on by default in 11.x).
 import { RELAY_ORIGIN, SENTRY_DSN, SESSION_ID, env } from '../settings.ts';
+import type { Span } from '@sentry/browser';
 
-type Span = { end: () => void; setAttribute: (k: string, v: string) => void };
-
-type SentryApi = {
-  init: (o: Record<string, unknown>) => void;
-  browserTracingIntegration: (o?: Record<string, unknown>) => unknown;
-  startSpan: <T>(o: { name: string; op?: string; forceTransaction?: boolean }, cb: () => T) => T;
-  setTag: (k: string, v: string) => void;
-  captureMessage: (m: string, level?: string) => void;
-  captureException: (e: unknown) => void;
-  getTraceData: () => Record<string, string>;
-  startNewTrace: <T>(cb: () => T) => T;
-  startInactiveSpan: (o: { name: string; op?: string; forceTransaction?: boolean; parentSpan?: Span; startTime?: number }) => Span;
-  withActiveSpan: <T>(span: Span | null, cb: () => T) => T;
-  makeFetchTransport: (o: unknown, nativeFetch?: typeof fetch) => unknown;
-  logger: { info: (m: string, a?: Record<string, unknown>) => void; error: (m: string, a?: Record<string, unknown>) => void };
-};
-
-// ponytail: @sentry/browser is not in app/package.json yet (Part 1 owns it), so the
-// specifier is a variable and Vite does not try to bundle it - build stays green and
-// Sentry stays off. Once the dep lands, replace SENTRY_PKG with the literal
-// '@sentry/browser' (verified working that way in the simulator).
-const SENTRY_PKG = '@sentry/browser';
-
-let sentry: SentryApi | null = null;
+let sentry: typeof import('@sentry/browser') | null = null;
 /** The ask opened by startAsk(), so upload spans and trace headers attach to it. */
 let openAsk: Span | null = null;
 
@@ -34,7 +12,7 @@ export async function initObs(): Promise<boolean> {
   if (sentry) return true;
   if (!SENTRY_DSN) return false;
   try {
-    const mod = (await import(/* @vite-ignore */ SENTRY_PKG)) as SentryApi;
+    const mod = await import('@sentry/browser');
     mod.init({
       dsn: SENTRY_DSN,
       // No pageload/navigation spans: in a glasses WebView they are noise, and an ask
@@ -45,7 +23,7 @@ export async function initObs(): Promise<boolean> {
       // Use the page's fetch. Sentry's default borrows a "native" fetch from a throwaway
       // iframe when window.fetch is patched (the Even host patches it); in the simulator
       // WebView that fetch is dead ("global scope is shutting down") and nothing is sent.
-      transport: (o: unknown) => mod.makeFetchTransport(o, globalThis.fetch.bind(globalThis)),
+      transport: (o) => mod.makeFetchTransport(o, globalThis.fetch.bind(globalThis)),
       // sentry-trace / baggage go to the relay only (Part 3 continues the trace and
       // its CORS allows both). Other origins get no tracing headers.
       tracePropagationTargets: RELAY_ORIGIN ? [RELAY_ORIGIN] : [],
@@ -55,7 +33,7 @@ export async function initObs(): Promise<boolean> {
       // Sentry's console breadcrumbs would ship that audio off the device. Drop it.
       beforeBreadcrumb: (b: { category?: string; message?: string }) =>
         b.category === 'console' && b.message?.includes('audioPcm') ? null : b,
-      beforeSendLog: (l: { message?: string }) => (l.message?.includes('audioPcm') ? null : l),
+      beforeSendLog: (l) => (l.message?.includes('audioPcm') ? null : l),
       // Replay deliberately omitted: unproven in the Android WebView, not worth blocking on.
     });
     mod.setTag('session_id', SESSION_ID);
@@ -121,7 +99,9 @@ export function span(name: 'gesture' | 'endpoint' | 'diagram_fetch', startMs?: n
 export function traceHeaders(): Record<string, string> {
   const s = sentry;
   if (!s) return {};
-  return openAsk ? s.withActiveSpan(openAsk, () => s.getTraceData()) : s.getTraceData();
+  const data = openAsk ? s.withActiveSpan(openAsk, () => s.getTraceData()) : s.getTraceData();
+  return { ...(data['sentry-trace'] ? { 'sentry-trace': data['sentry-trace'] } : {}),
+    ...(data.baggage ? { baggage: data.baggage } : {}) };
 }
 
 export function logAsk(outcome: string, ms: number, traceId: string): void {

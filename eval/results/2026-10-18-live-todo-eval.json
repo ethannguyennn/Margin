@@ -1,0 +1,497 @@
+{
+  "evidence": "LOCAL RELAY CODE + LIVE GEMINI + CLOUD POSTGRES; text asks, not hardware or deployed HTTPS",
+  "gate": {
+    "min_sim": 0.7389722026007067,
+    "min_rrf": 0.031754032258064516
+  },
+  "metrics": {
+    "cases": 45,
+    "answered_correct_rate": 0.2777777777777778,
+    "not_found_precision": 1.0,
+    "not_found_recall": 0.5555555555555556,
+    "citation_verification_pass_rate": 0.6470588235294118,
+    "median_latency_ms": 1024.9155000201426,
+    "answered": 17,
+    "unverified_answers": 6,
+    "failed_cases": 30,
+    "category_passes": {
+      "ambiguous": {
+        "passed": 0,
+        "total": 2
+      },
+      "answerable": {
+        "passed": 10,
+        "total": 36
+      },
+      "near-miss": {
+        "passed": 1,
+        "total": 3
+      },
+      "off-domain": {
+        "passed": 4,
+        "total": 4
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "a01",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1497.9145999823231,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a02",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1392.9891000152566,
+      "reason": ""
+    },
+    {
+      "id": "a03",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1642.4741999944672,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a04",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1349.7569000173826,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a05",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1358.7840000109281,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a06",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1320.8487999800127,
+      "reason": ""
+    },
+    {
+      "id": "a07",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1307.1280000149272,
+      "reason": ""
+    },
+    {
+      "id": "a08",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 1219.363300013356,
+      "reason": "wrong citation or missing expected content"
+    },
+    {
+      "id": "a09",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1374.1893999977037,
+      "reason": ""
+    },
+    {
+      "id": "a10",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1471.9978000211995,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a11",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1119.671099993866,
+      "reason": ""
+    },
+    {
+      "id": "a12",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1255.98029998946,
+      "reason": ""
+    },
+    {
+      "id": "a13",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1426.6467999841552,
+      "reason": "unverified answer"
+    },
+    {
+      "id": "a14",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1331.9278999988455,
+      "reason": ""
+    },
+    {
+      "id": "a15",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1635.4444999888074,
+      "reason": ""
+    },
+    {
+      "id": "a16",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1639.3293000000995,
+      "reason": ""
+    },
+    {
+      "id": "a17",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1273.8730999990366,
+      "reason": ""
+    },
+    {
+      "id": "a18",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1024.9155000201426,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a19",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1035.3719999839086,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a20",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1000.7098999922164,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a21",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 937.0143999985885,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a22",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 951.2814999907278,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a23",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 956.5355999802705,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a24",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 977.0882000157144,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a25",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1017.5504000217188,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a26",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 970.850599987898,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a27",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1077.8506000060588,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a28",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 976.3837000064086,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a29",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 978.8515999971423,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a30",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 970.2232000126969,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a31",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 987.5911000126507,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a32",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 987.7160000032745,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a33",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1042.4238000123296,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a34",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1007.6071999792475,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a35",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 965.5533000186551,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "a36",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 980.6884000136051,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "o01",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 435.52509997971356,
+      "reason": ""
+    },
+    {
+      "id": "o02",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 431.4718000241555,
+      "reason": ""
+    },
+    {
+      "id": "o03",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 411.12810000777245,
+      "reason": ""
+    },
+    {
+      "id": "n01",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 365.88870000559837,
+      "reason": ""
+    },
+    {
+      "id": "n02",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1206.3294000108726,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "o04",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 684.9460999947041,
+      "reason": ""
+    },
+    {
+      "id": "n03",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 946.3007999875117,
+      "reason": "HTTP 504; unexpected outcome"
+    },
+    {
+      "id": "c01",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1061.638600018341,
+      "reason": "HTTP 504; missing needs_clarification"
+    },
+    {
+      "id": "c02",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "error",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 997.4363000073936,
+      "reason": "HTTP 504; missing needs_clarification"
+    }
+  ],
+  "evaluation_version": "Before the v2 glance-only evaluator alignment; preserve as historical failure evidence",
+  "models": {
+    "generate": "gemini-3.5-flash-lite",
+    "embed": "gemini-embedding-2"
+  },
+  "limitations": [
+    "Sustained HTTP 429 from answerable case 18; this run is not a passing live quality result.",
+    "The old evaluator rejected every empty body, including valid glance-only answers; six flagged cases are rechecked separately with saved responses."
+  ]
+}

@@ -19,6 +19,7 @@ verify, so nothing over-cap is ever published to the lens.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -125,6 +126,23 @@ class Step(_Model):
     checkpoint: CheckpointText | None = None  # v2, e.g. "0.20 mm gauge must not enter"
     diagram: Diagram | None = None  # v2, only approved diagrams are ever sent
     graphic_id: str | None = None  # revision-pinned synthetic reference
+    source_text: str | None = None  # stored source quotes, never the authored body
+
+
+class Scope(_Model):
+    start: int = Field(ge=0)
+    end: int = Field(ge=1)
+
+
+class Clarify(_Model):
+    prompt: str = Field(min_length=1, max_length=40, pattern=r"^[\x20-\x7e]+$")
+    options: list[Annotated[str, Field(min_length=1, max_length=24, pattern=r"^[\x20-\x7e]+$")]] = Field(min_length=2, max_length=3)
+
+    @model_validator(mode="after")
+    def _distinct(self) -> Clarify:
+        if len({s.casefold() for s in self.options}) != len(self.options):
+            raise ValueError("clarify options must be distinct")
+        return self
 
 
 class Walkthrough(_Model):
@@ -135,6 +153,13 @@ class Walkthrough(_Model):
     index: int = 0
     steps: list[Step]
     assignment_id: str | None = None  # v2: set when the walkthrough is an assigned task
+    scope: Scope | None = None
+
+    @model_validator(mode="after")
+    def _valid_scope(self) -> Walkthrough:
+        if self.scope is not None and not (0 <= self.scope.start <= self.index < self.scope.end <= self.total == len(self.steps)):
+            raise ValueError("scope must contain the index and lie within all steps")
+        return self
 
 
 class Latency(_Model):
@@ -161,12 +186,15 @@ class AskResponse(_Model):
     # Additive field: true only on a not_found the model judged ambiguous between
     # procedures (Part 5's eval checks it; clients that ignore it render NOT FOUND).
     needs_clarification: bool = False
+    clarify: Clarify | None = None
     # v2: set iff outcome == 'command'. The lens acts on it and never renders text.
     command: Command | None = None
     graphic_id: str | None = None
 
     @model_validator(mode="after")
     def _never_unverified_answer(self) -> AskResponse:
+        if self.clarify is not None and (self.outcome != "not_found" or not self.needs_clarification or self.verified):
+            raise ValueError("clarify requires an unverified ambiguous not_found")
         if self.outcome == "answered" and (not self.verified or not self.citations):
             raise ValueError("an `answered` response must be verified and carry citations")
         if self.graphic_id is not None and (self.outcome != "answered" or not self.verified):
@@ -465,6 +493,18 @@ class MaterialStatus(_Model):
     revision: str
     title: str | None = None
     filename: str | None = None
+
+
+class MaterialSummary(MaterialStatus):
+    created_at: datetime
+    mime: str
+    size_bytes: int
+    sha256: str
+
+
+class MaterialLibrary(_Model):
+    items: list[MaterialSummary]
+    next_offset: int | None = None
 
 
 class ApproveResult(_Model):

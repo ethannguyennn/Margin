@@ -1,14 +1,18 @@
 # Specs TODO
 
-Updated 2026-10-18 after the v2 deploy and the first run on real glasses (`61b9c1e`).
+Updated 2026-10-18 during v3 integration. The v2 hardware observations below are historical.
 Windows: `make` = `mingw32-make`.
 
-**Where we are:** v2 is live on both domains and has run on real G2 glasses.
+**Where we are:** v3 is merged into `main` and deployed from a separate VM
+candidate checkout. The uploaded-source library and TODO audit are integrated into main;
+redeploying this combined source and completing field acceptance remain open.
+The user has no new Part 4 recordings yet and will supply them later; two wearers remain required.
 
 - **Tests (2026-10-18, `61b9c1e`):** relay 712 passed (12 opt-in live/PG skipped), app 558 passed
   (12 skipped) + typecheck, portal 8 passed.
-- **Live:** the VM runs `61b9c1e` (relay `0.3.0`) on `https://getyourassto.work` and
-  `https://45-32-88-132.sslip.io`, `MOCK_MODE=0`, Tiger DB `ok`, `/portal/` up. App build `0.3.1`.
+- **Live candidate:** VM relay `0.3.0+524beb4` on `https://getyourassto.work`, live ask path,
+  Tiger DB `ok`, gate 0.68 / 0.04. The former production checkout stays at `61b9c1e` for rollback.
+  App pack is now `0.4.1`; full field installation/validation is pending.
 - **Real glasses (`61b9c1e`):** double nods work (the G2 IMU is a gravity-normalised
   accelerometer), long press = nod, baked PNG reference images render on the lens (the host only
   renders encoded images, never raw Gray8), natural voice commands ("go to the next step").
@@ -20,9 +24,55 @@ Windows: `make` = `mingw32-make`.
 
 ## 1. Deploy and live checks (Part 3)
 
-- [ ] **Domain switch in the app build:** `app/.env.example` still sets
-      `VITE_RELAY_ORIGIN=https://45-32-88-132.sslip.io`. Build/pack with
-      `VITE_RELAY_ORIGIN=https://getyourassto.work` (`app.json` already whitelists both) - Parts 1 + 3
+**v3 platform checkpoint (2026-10-18, Part 3 taken over by Codex):**
+
+- [x] Health distinguishes ask mocks from conversion mocks; verbose health adds gate,
+      commit and process-lifetime Gemini 429 counters. Normal response keeps its four fields.
+- [x] Provider quota failures return safe `Busy, try again` copy through the shared error
+      helper; the API client suppresses its extra 5xx retry. Frozen error codes unchanged.
+- [x] Container probe rejects `ok: false`, even with HTTP 200.
+- [x] `make eval-conversion` now uses `--strict`; `sync-branches` lists all four v3 branches.
+- [x] App example origin is `https://getyourassto.work`; timeout remains 50000 ms.
+      Client validates clarify/scope and passes verified graphic IDs. Contract tags are integrated.
+      Packed app version 0.4.1 from candidate `aaa266c`; artifact and SHA256 below.
+- [x] Diagnostic launcher supports Python 3.11+; voice/app-loop wrappers accept `RELAY` and
+      `PACE`, reject mock evidence, validate the synthetic corpus, and fail closed.
+      Windows launcher/health and 22-file SAPI preparation verified. Live acceptance is in progress.
+- [x] Remote deploy reads `VM_HOST` from `.env` and guards main/clean/fast-forward state.
+- [x] **VM access/deployment:** existing SSH identity works; the earlier missing-key claim was
+      incorrect. `/root/specs` stays on its original main checkout; `/root/specs-v3-candidate`
+      serves candidate `524beb4`. Gate is 0.68 / 0.04; health confirms live ask and DB paths.
+      Backed up the VM environment before changing the two gate settings; secrets remain on VM.
+- [x] **Part 2:** scored, import-safe gap CLI with `--relay`, `--pace`, nonzero failure status.
+- [x] **Part 1:** exact safe quota copy `Busy, try again` renders on the lens ERROR screen.
+- [x] **Part 4:** recovered STT quota errors counted through `obs.record_quota_error`.
+- [x] `v3-contract-app` / `v3-contract-relay` pushed and integrated into the candidate.
+- [x] Production app bundles the real browser tracing SDK (previous dynamic import excluded
+      it), whitelists the configured public ingest origin and filters raw audio logs. An offline
+      real-SDK test creates a fresh trace per ask. Synthetic client -> VM health continued the
+      same trace; Sentry ingest acknowledged HTTP 200. Glasses delivery remains a field check.
+- [x] **M7 reviewed accuracy:** saved complete live responses at `7cdbbc6` score 35/36
+      original answerable questions, 29/29 added loop responses and zero unverified answers.
+      Approved source/wording alternatives are documented in the reviewed report; raw failures
+      remain preserved. Almond milk remains a safe refusal. This is a rescore, not a new full run.
+- [ ] **Clarification blocker:** focused live two-turn check at `524beb4` still safely refuses
+      `How many pumps of syrup?` -> `cappuccino` (1/2 passed, zero unverified answers).
+      Earlier one-off generation success did not establish route acceptance. Preserve
+      `eval/results/2026-10-18-v3-syrup-524beb4.json`; investigate before claiming M9 complete.
+- [ ] **M9 remaining acceptance:** 22-voice suite, live app loop, 18-question regression and
+      30 paced spoken asks/quota window. Broad reruns stopped at the user's request to finish
+      faster; no passing results are claimed for these. Synthetic trace evidence is recorded above.
+- [ ] **Quota entitlement:** paid/higher quota has not been confirmed. The shared key is paced
+      at ten seconds; observed zero 429s alone does not establish a paid account.
+
+Merged-main validation: **867 relay passed / 13 skipped; 614 app passed / 12 skipped;
+9 portal passed; app and portal typecheck/build passed**. No new hardware, paid quota or
+macOS/Linux execution result is claimed.
+
+- [x] **Canonical-domain pack:** `builds/v3/specs-0.4.1-aaa266c.ehpk` (local root checkout),
+      5,070,696 bytes, SHA256 `ad23565d0c178b00f73112a69f944bed10488b14293b53632a39fa0f8e7aafd5`.
+      Built with live mode, canonical origin, 50000 ms timeout and public app telemetry DSN.
+      Direct ingest is whitelisted; tunnel stays off. No install on glasses claimed.
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`
 - [ ] **`make latency` on real v2 traffic:** prints all events, answers and `intent='command'`
       separately. Live DB 2026-10-18: relay p50 total 1208 ms, p95 2850 ms (159 events);
@@ -32,23 +82,19 @@ Windows: `make` = `mingw32-make`.
 
 ## 2. Open requests between parts
 
-- [ ] **Trust: walkthrough citations quote a paraphrase** (fix first). `routes/ask.py:300` builds
-      walkthrough citations with `quote=s.body` and marks the response verified. Authored v2 bodies
-      paraphrase; the verbatim support is the published chunk's `text` (the joined source quotes).
-      Expose it from `steps_for` / `build_walkthrough` and cite it - Parts 3 + 5 (Part 4 supplies
-      `DraftStep.quotes`)
+- [x] **Trust: walkthrough citations** now use the stored raw source text through
+      `Step.source_text`; authored display bodies cannot serve as citation quotes. Regression tested.
 - [ ] **Gemini paid key before the M3 demo:** the key is free tier (`gemini-3.8-flash`: 20
       requests/day; `gemini-3.5-flash-lite`: 15/min). Conversion is about 2-3 calls per material.
       On `gemini-3.5-flash-lite`, SOP-153 converted every value but **no schematic**. Re-run
       `make eval-conversion` on the model we demo with - Part 4 + account owner
-- [ ] **`make eval-conversion` should fail closed:** it runs without `--strict`, so missing steps,
-      values or expected diagrams still exit 0 (only fabrication fails). Add `--strict` - Part 3
+- [x] **`make eval-conversion` fails closed:** target now passes `--strict`, so missing steps,
+      values or expected diagrams fail alongside fabrication - Part 3 v3 checkpoint
 - [ ] **Head shake is impossible on this IMU:** an accelerometer cannot see yaw, so "shake: back"
       became "double: back" (`61b9c1e`). Update BUILD-PLAN-V2 section 3 (gestures table) and the M4
       criteria, which still describe a shake - Parts 1 + 2
-- [ ] **Phone screen in mock mode:** with `VITE_MOCK=1` the lens uses Part 2's mocks, but the phone
-      screen's procedures/steps/deviation calls still go to the relay. Run a `MOCK_MODE=1` relay
-      alongside - Parts 2 + 3
+- [x] **Phone screen in mock mode:** health, procedures, steps, asks and deviations use
+      the shared local mocks with `VITE_MOCK=1`; regression tests assert zero fetch calls.
 - [ ] **Base44:** `ios/` is gone from the repo, but the `ios-base-44` remote branch remains. Confirm
       Base44 no longer syncs into this repo (or it may recreate `ios/`), then delete that branch -
       owner of PR #1
@@ -82,10 +128,19 @@ for the IMU recorder.
 
 ## 4. v1 bring-up still open
 
-- [ ] **Gate thresholds:** `NOT_FOUND_MIN_SIM` / `NOT_FOUND_MIN_RRF` are still unset on the VM (the
-      relay logs "retrieval gate disabled"). Run `retrieve.tune_gate` over live retrieval scores
-      for the 45 demo-bank eval questions, set both in the VM's `.env`, re-run `make eval` -
-      Parts 4 + 5
+- [x] **Development-bank gate calibration:** `eval/tune_gate.py` and the saved 45-question
+      report are in `eval/results/2026-10-18-gate-calibration.json`. This historical v2
+      calibration does not replace the deployed v3 thresholds or scoped-walkthrough checks.
+- [x] **Evaluator alignment:** verified glance-only answers are valid; empty glances and
+      unsupported values still fail. Historical quota-limited runs remain failure evidence.
+- [x] **SOP-153 conversion recheck:** 4/4 steps, 5/5 values, 1/1 schematic and no fabricated
+      values in passing steps; retained in `eval/conversion/results/2026-10-18-quota-probe/`.
+- [x] **SOP upload library:** authenticated search, pagination and byte-exact original downloads
+      survive failed conversions. Handoff: `docs/handoffs/SOP-CLOUD-STORAGE.md`.
+- [ ] **Redeploy combined main:** library/tunnel changes need deployment and public HTTPS checks.
+
+- [x] **Gate thresholds:** VM now uses `NOT_FOUND_MIN_SIM=0.68`, `NOT_FOUND_MIN_RRF=0.04`;
+      verbose health exposes both. Full live quality evaluation remains part of M7/M9 above.
 
 ## 5. Done
 
@@ -120,6 +175,20 @@ for the IMU recorder.
 
 ## Backburner
 
-- [ ] **Sentry trace** lens gesture -> capture -> upload -> stt -> command/answer -> render (code in
-      place on both sides; needs DSNs and a hardware run)
-- [ ] **Photon notifier**, **revision-fork stretch**, `/v1/sentry-tunnel`
+The browser SDK is pinned at 11.8.0. The DSN-pinned, bounded `/v1/sentry-tunnel` is implemented
+and regression tested; deploy/configure it before enabling `VITE_SENTRY_TUNNEL`.
+
+- [x] **Sentry browser wiring:** add/pin the official SDK 11.8.0 to the existing app lockfile;
+      literal lazy import now bundles it. API export check and production bundle pass.
+- [x] **`/v1/sentry-tunnel` implementation:** exact configured app DSN only, 256 KB cap,
+      60 requests/min/client, unchanged binary envelope, bounded upstream timeout, no redirects;
+      16 tests pass. Set VM `SENTRY_DSN_APP` to the app build DSN before enabling the tunnel.
+- [ ] **Observed Sentry trace** lens gesture -> capture -> upload -> stt -> command/answer ->
+      render: needs physical glasses, deployed tunnel/config and dashboard/event verification.
+      No authenticated Sentry event-reading tool is connected in this session.
+- [ ] **Photon notifier:** selector still intentionally supports only console. No Photon key,
+      supervisor destination or account-specific server/API contract is configured; cannot verify
+      a live delivery or choose among similarly named Photon products without that information.
+- [ ] **Revision-fork stretch:** no zero-copy fork endpoint supplied (`DATABASE_URL_FORK` unset,
+      `ENABLE_REVISION_FORK=false`). Existing explicit-revision filters work; they do not prove
+      fork provisioning or isolated fork retrieval. Needs Tiger fork access/connection details.

@@ -24,7 +24,13 @@ export default defineConfig({
         let data = ''; for await (const part of req) data += part;
         if (path === '/v1/devices/claim') { paired = true; send({ device_id: 'LNS-1', worker_name: 'Bay 3', claimed: true }); }
         else if (path === '/v1/devices') send(paired ? [{ device_id: 'LNS-1', worker_name: 'Bay 3', claimed: true }] : []);
+        else if (path === '/v1/materials' && req.method === 'GET') {
+          const query = new URL(req.url!, 'http://fixture').searchParams.get('q')?.toLowerCase() ?? '';
+          const item = { ...draft, filename: 'synthetic-sop.txt', mime: 'text/plain', created_at: '2026-10-18T12:00:00Z', size_bytes: source.length, sha256: 'fixture-only' };
+          send({ items: `${item.doc_id} ${item.title} ${item.filename}`.toLowerCase().includes(query) ? [item] : [], next_offset: null });
+        }
         else if (path === '/v1/materials') { draft = { ...draft, status: 'ready', steps: [freshStep()] }; paired = assigned = advanced = false; send({ material_id: 'MAT-1', status: 'converting' }); }
+        else if (path === '/v1/materials/MAT-1/file') { res.setHeader('Content-Type', 'text/plain'); res.end(source); }
         else if (path === '/v1/materials/MAT-1') send({ ...draft, status: draft.status });
         else if (path === '/v1/materials/MAT-1/text') send({ material_id: 'MAT-1', pages: [{ page: 1, text: source }], figures: [] });
         else if (path === '/v1/drafts/SOP-150/A') send(draft);

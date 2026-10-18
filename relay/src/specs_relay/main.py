@@ -250,6 +250,10 @@ def _set_thresholds(p: Pipeline, settings: Settings, *, mock_retriever: bool) ->
 def error_response(trace_id: str, code: str, message: str, detail: Any = None) -> JSONResponse:
     """The contract error shape. ``detail`` is an additive field for the portal, which
     shows ``detail`` verbatim (e.g. the per-step reasons of a refused approve)."""
+    # ask.py deliberately strips provider details. Preserve its frozen error code
+    # while exposing safe quota copy from this request's observed provider failure.
+    if obs.request_quota.get() and code in {"stt_failed", "llm_timeout", "db_down", "internal"}:
+        message = "Busy, try again"
     body = ErrorResponse(trace_id=trace_id, error=ErrorBody(code=code, message=message)).model_dump()
     if detail is not None:
         body["detail"] = detail
@@ -313,6 +317,7 @@ class TraceMiddleware:
                                       (b"x-trace-id", trace_id.encode("latin-1"))]
             await send(message)
 
+        quota_token = obs.request_quota.set(False)
         try:
             await self.app(scope, receive, send_with_trace)
         except Exception as exc:  # noqa: BLE001
@@ -322,6 +327,8 @@ class TraceMiddleware:
                 raise
             await error_response(trace_id, "internal", "internal relay error")(
                 scope, receive, send_with_trace)
+        finally:
+            obs.request_quota.reset(quota_token)
 
 
 # --- app factory ------------------------------------------------------------------
@@ -397,10 +404,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         materials,
         procedures,
         progress,
+        sentry_tunnel,
     )
 
     for module in (health, ask, deviation, procedures, ingest,  # v1
-                   devices, assignments, progress, diagrams, materials, drafts):  # v2
+                   devices, assignments, progress, diagrams, materials, drafts, sentry_tunnel):  # v2
         app.include_router(module.router)
 
     # Added innermost first: CORS is outermost, so even error responses carry CORS headers.
