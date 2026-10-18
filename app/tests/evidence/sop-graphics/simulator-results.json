@@ -1,0 +1,154 @@
+{
+  "checks": [
+    {
+      "screen": "IDLE"
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "THINKING"
+    },
+    {
+      "screen": "ANSWER_GLANCE"
+    },
+    {
+      "screen": "IDLE"
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "ANSWER_GLANCE"
+    },
+    {
+      "screen": "ANSWER_EXPANDED"
+    },
+    {
+      "screen": "TASK_READY",
+      "step": 0
+    },
+    {
+      "screen": "STEP",
+      "step": 0
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "STEP",
+      "step": 1
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "STEP",
+      "step": 2
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "DIAGRAM",
+      "step": 2
+    },
+    {
+      "screen": "STEP",
+      "step": 2
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "ANSWER_GLANCE",
+      "step": 2
+    },
+    {
+      "screen": "STEP",
+      "step": 2
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "NOT_FOUND",
+      "step": 2
+    },
+    {
+      "screen": "STEP",
+      "step": 2
+    },
+    {
+      "screen": "LISTENING"
+    },
+    {
+      "screen": "ERROR",
+      "step": 2
+    },
+    {
+      "screen": "STEP",
+      "step": 2
+    },
+    {
+      "screen": "IDLE",
+      "step": 2
+    },
+    {
+      "screen": "STEP",
+      "step": 2,
+      "coldStart": true
+    }
+  ],
+  "runs": [
+    {
+      "flow": "M1",
+      "input": "dev Nod button only after setup",
+      "taps": 0,
+      "rebuilds": 0
+    },
+    {
+      "flow": "reference",
+      "graphic": "milk-steaming",
+      "layout": "REFERENCE",
+      "nativeImage": true
+    },
+    {
+      "flow": "M2",
+      "progress": [
+        {
+          "kind": "task_started",
+          "step_id": null
+        },
+        {
+          "kind": "step_started",
+          "step_id": "SOP-114:C:5.1"
+        },
+        {
+          "kind": "step_completed",
+          "step_id": "SOP-114:C:5.1"
+        },
+        {
+          "kind": "step_started",
+          "step_id": "SOP-114:C:5.3"
+        },
+        {
+          "kind": "step_completed",
+          "step_id": "SOP-114:C:5.3"
+        },
+        {
+          "kind": "step_started",
+          "step_id": "SOP-114:C:5.4"
+        }
+      ],
+      "tiles": 2,
+      "rebuilds": 2,
+      "input": "dev Nod/Shake; Part 2 mock commands"
+    }
+  ],
+  "rootExit": true,
+  "coldStartStep": 3,
+  "hardware": "not yet tested on hardware",
+  "integration": "Part 2 mocks (VITE_MOCK=1); not IMU replay or live relay",
+  "errors": []
+}

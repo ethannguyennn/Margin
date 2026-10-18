@@ -130,7 +130,7 @@ async function boot() {
         status.textContent = value.screen;
         app.dataset.screen = value.screen;
         mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
-        lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent });
+        lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent, graphic_id: text.graphic_id });
         console.info(`[Specs] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
         syncMotion(value);
         if (!rendering)

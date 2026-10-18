@@ -46,6 +46,11 @@ if(process.argv.includes('--launch')){launch('m1');}else{
     let log=await entries();assert.equal(log.filter(e=>e.message.includes('[Specs] mock-ask=')).length,1);
     assert.equal(log.filter(e=>e.message.includes('[Specs] layout=')).length,0);
     runs.push({flow:'M1',input:'dev Nod button only after setup',taps:0,rebuilds:0});
+    await say(session,'How do I purge the steam wand?');await screen('ANSWER_GLANCE');
+    await until(async()=> (await entries()).some(e=>e.message.includes('reference=milk-steaming status=success')),'native reference image');
+    await capture('m1-reference');await touch('click');await screen('ANSWER_EXPANDED');await capture('m1-reference-details');
+    log=await entries();assert.deepEqual(log.filter(e=>e.level==='error' || /\[uncaught\]|\[unhandledrejection\]/.test(e.message)),[]);
+    runs.push({flow:'reference',graphic:'milk-steaming',layout:'REFERENCE',nativeImage:true});
     await writeFile(new URL('m1-console.json',output),JSON.stringify(log,null,2));
     session.close();await stop(child);
     child=launch('m2');session=await setup();await screen('TASK_READY',0,14000);await capture('m2-task-ready');

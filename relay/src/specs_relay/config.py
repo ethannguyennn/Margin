@@ -76,6 +76,7 @@ class Settings(BaseSettings):
     convert_concurrency: int = 2
     pair_code_ttl_s: int = 15 * 60
     pair_rate_per_min: int = 10  # POST /v1/devices/pair per client IP
+<<<<<<< HEAD
     # Latency budget. ASK_BUDGET_S is the whole /v1/ask (speech, retrieval, up to two
     # Gemini attempts) and must stay under the app's VITE_ASK_TIMEOUT_MS (8000), or the
     # lens gives up before the answer arrives. The per-call guards below are capped by
@@ -83,6 +84,10 @@ class Settings(BaseSettings):
     ask_budget_s: float = 7.5
     stt_timeout_s: float = 4.5
     generate_timeout_s: float = 6.5
+=======
+    stt_timeout_s: float = 5.0  # outer guard; Part 4 times out at ~4 s itself
+    generate_timeout_s: float = 20.0  # shared by the provider and route guards
+>>>>>>> 54f6f0a708fd83bd3c3432278f9d9dff220bd7e7
     log_level: str = "INFO"
     git_sha: str = ""
 

@@ -145,6 +145,8 @@ def step_from_row(row: Any) -> dict:
     The glance is the step's first sentence when it fits, else its heading --
     never a sentence cut mid-value ("Torque to 4 N-" is worse than "Fastening").
     """
+    from ..illustrations import graphic_for_chunk
+
     text = _LIST_NUMBER.sub("", " ".join(sanitize(_get(row, "text") or "").split()))
     heading = " ".join(sanitize(_get(row, "heading") or "").split())
     first = _first_sentence(text)
@@ -159,6 +161,7 @@ def step_from_row(row: Any) -> dict:
         "label": str(_get(row, "section")),
         "glance": glance,
         "body": _fit_sentences(text, BODY_MAX),
+        "graphic_id": graphic_for_chunk({"chunk_id": _get(row, "chunk_id"), "text": _get(row, "text") or ""}),
     }
 
 

@@ -1,3 +1,5 @@
+import { getGraphic } from '../../ui/sop-graphics';
+import { SopGraphic } from '../components/SopGraphic';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ContextPicker } from '../components/ContextPicker';
@@ -127,6 +129,7 @@ export default function LensPage() {
         <section className="card">
           <h2 className="section-title">On the lens now</h2>
           <pre className="glance mono">{lens.lensText}</pre>
+          <SopGraphic graphic={getGraphic(lens.graphic_id)} />
         </section>
       )}
 
