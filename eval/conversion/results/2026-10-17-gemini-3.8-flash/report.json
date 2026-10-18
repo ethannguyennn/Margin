@@ -1,7 +1,7 @@
 {
   "date": "2026-10-17",
   "model": "gemini-3.8-flash",
-  "commit": "bc08066",
+  "commit": "88f8a1a",
   "source": "saved: C:/Users/matp2/AppData/Local/Temp/claude/c--Users-matp2-OneDrive-Documents-GitHub-Margin/874498ff-4360-4747-b4b2-67bfb2be9ab3/scratchpad/saved-real",
   "forced_hallucination": false,
   "results": [
@@ -41,46 +41,50 @@
         "3.1": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1946,
+            840
           ],
-          "deflated": [
-            2244,
-            1005
-          ]
+          "wire_bytes": [
+            1946,
+            840
+          ],
+          "format": "png"
         },
         "3.2": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1946,
+            840
           ],
-          "deflated": [
-            2244,
-            1005
-          ]
+          "wire_bytes": [
+            1946,
+            840
+          ],
+          "format": "png"
         },
         "3.3": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1946,
+            840
           ],
-          "deflated": [
-            2244,
-            1005
-          ]
+          "wire_bytes": [
+            1946,
+            840
+          ],
+          "format": "png"
         },
         "3.4": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1046,
+            1111
           ],
-          "deflated": [
-            1298,
-            1306
-          ]
+          "wire_bytes": [
+            1046,
+            1111
+          ],
+          "format": "png"
         }
       },
       "doc_warnings": [
@@ -129,57 +133,62 @@
         "2": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1741,
+            1917
           ],
-          "deflated": [
-            2187,
-            2328
-          ]
+          "wire_bytes": [
+            1741,
+            1917
+          ],
+          "format": "png"
         },
         "3": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            2698,
+            826
           ],
-          "deflated": [
-            3334,
-            1176
-          ]
+          "wire_bytes": [
+            2698,
+            826
+          ],
+          "format": "png"
         },
         "4": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            974,
+            652
           ],
-          "deflated": [
-            1281,
-            702
-          ]
+          "wire_bytes": [
+            974,
+            652
+          ],
+          "format": "png"
         },
         "5": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            2698,
+            826
           ],
-          "deflated": [
-            3334,
-            1176
-          ]
+          "wire_bytes": [
+            2698,
+            826
+          ],
+          "format": "png"
         },
         "6": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1741,
+            1917
           ],
-          "deflated": [
-            2187,
-            2328
-          ]
+          "wire_bytes": [
+            1741,
+            1917
+          ],
+          "format": "png"
         }
       },
       "doc_warnings": [
@@ -224,46 +233,50 @@
         "1": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            1661,
+            2445
           ],
-          "deflated": [
-            2366,
-            2834
-          ]
+          "wire_bytes": [
+            1661,
+            2445
+          ],
+          "format": "png"
         },
         "2": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            2034,
+            2312
           ],
-          "deflated": [
-            2385,
-            2366
-          ]
+          "wire_bytes": [
+            2034,
+            2312
+          ],
+          "format": "png"
         },
         "3": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            2216,
+            2425
           ],
-          "deflated": [
-            2528,
-            2415
-          ]
+          "wire_bytes": [
+            2216,
+            2425
+          ],
+          "format": "png"
         },
         "5": {
           "kind": "crop",
           "tile_bytes": [
-            41472,
-            41472
+            2158,
+            2214
           ],
-          "deflated": [
-            2312,
-            2333
-          ]
+          "wire_bytes": [
+            2158,
+            2214
+          ],
+          "format": "png"
         }
       },
       "doc_warnings": [
@@ -307,13 +320,14 @@
         "3": {
           "kind": "schematic",
           "tile_bytes": [
-            41472,
-            41472
+            766,
+            777
           ],
-          "deflated": [
-            1099,
-            1129
-          ]
+          "wire_bytes": [
+            766,
+            777
+          ],
+          "format": "png"
         }
       },
       "doc_warnings": [

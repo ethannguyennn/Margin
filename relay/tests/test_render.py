@@ -7,7 +7,6 @@ Regenerate the goldens deliberately, after looking at them:
 import io
 import json
 import os
-import zlib
 from pathlib import Path
 
 import pytest
@@ -58,19 +57,25 @@ def test_golden_schematic(schematic_tiles):
     golden("schematic-sop153-star", schematic_tiles)
 
 
+PNG_SIGNATURE = bytes([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])
+
+
 @pytest.mark.parametrize("which", ["crop_tiles", "schematic_tiles"])
-def test_two_tiles_of_16_levels_in_gray8(which, request):
+def test_two_png_tiles_of_16_levels(which, request):
+    # Part 2's proven format: 8-bit greyscale PNG, pixels already at level * 17.
     tiles = request.getfixturevalue(which)
-    assert R.TILE_FORMAT == "gray8"
+    assert R.TILE_FORMAT == "png"
     assert len(tiles) == 2
     for t in tiles:
-        assert len(t) == 288 * 144
-        assert set(t) <= {i * 17 for i in range(16)}
+        assert t.startswith(PNG_SIGNATURE)
+        im = Image.open(io.BytesIO(t))
+        assert im.mode == "L" and im.size == (288, 144)
+        assert set(im.tobytes()) <= {i * 17 for i in range(16)}
 
 
 def test_light_paper_is_inverted(crop_tiles):
     # White paper must not glow: most of the lens stays dark.
-    pixels = b"".join(crop_tiles)
+    pixels = b"".join(R.decode_tile(t).tobytes() for t in crop_tiles)
     assert sum(1 for v in pixels if v == 0) / len(pixels) > 0.7
 
 
@@ -89,7 +94,7 @@ def test_dark_source_is_not_inverted():
 
 def test_schematic_tiles_fit_the_budget(schematic_tiles):
     for t in schematic_tiles:
-        assert len(zlib.compress(t, 1)) < R.TILE_BUDGET
+        assert R.tile_wire_bytes(t) < R.TILE_BUDGET
 
 
 def test_label_font_has_14px_caps():
@@ -114,7 +119,6 @@ def test_dither_is_exact_on_flat_levels():
 
 @pytest.mark.parametrize("fmt", ["gray8", "gray4", "png"])
 def test_tile_formats_round_trip(fmt, monkeypatch, schematic_tiles):
-    monkeypatch.setattr(R, "TILE_FORMAT", "gray8")
     tile = R.decode_tile(schematic_tiles[0])
     monkeypatch.setattr(R, "TILE_FORMAT", fmt)
     data = R.encode_tile(tile)

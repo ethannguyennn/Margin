@@ -26,7 +26,7 @@ import json
 import subprocess
 import sys
 import time
-import zlib
+
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -153,7 +153,7 @@ def score(exp: dict, text: dict, draft: dict, out_dir: Path, seconds: float | No
             png = R.preview_png(tiles)
             (mat_dir / f"step-{s['label']}.png").write_bytes(png)
             rendered[s["label"]] = {"kind": d["kind"], "tile_bytes": [len(t) for t in tiles],
-                                    "deflated": [len(zlib.compress(t, 1)) for t in tiles]}
+                                    "wire_bytes": [R.tile_wire_bytes(t) for t in tiles], "format": R.TILE_FORMAT}
         except Exception as e:  # report, do not hide
             rendered[s["label"]] = {"kind": d.get("kind"), "error": f"{type(e).__name__}: {e}"}
 

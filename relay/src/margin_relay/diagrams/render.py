@@ -11,9 +11,10 @@ transparent, 16 grey levels.
   the bundled OFL font at >= 14 px cap height, snapped to 16 levels (no
   dither, so line art stays crisp and compresses well).
 
-Pure functions. The tile byte format is the day-one unknown that Part 2
-proves in the simulator; every tile goes through ``encode_tile`` /
-``decode_tile`` and ``TILE_FORMAT`` is the one line to change.
+Pure functions. Tiles are 8-bit greyscale PNG with every pixel at a lens
+level (Part 2 proved it in the simulator, docs/handoffs/PART-2.md); every
+tile goes through ``encode_tile`` / ``decode_tile`` and ``TILE_FORMAT`` is
+the one line to change (packed 4-bit is the proven fallback).
 """
 
 from __future__ import annotations
@@ -43,8 +44,10 @@ LENS_GREEN = (0x3C, 0xFA, 0x44)  # preview colour of level 15
 # "gray8": raw 8-bit grey, row-major, 41,472 bytes per tile (values 0, 17, ..., 255).
 # "gray4": raw packed 4-bit, two pixels per byte, left pixel in the high nibble.
 # "png":   PNG file bytes of the 8-bit grey tile.
-# Part 2 announces which one updateImageRawData accepts; switch here only.
-TILE_FORMAT = "gray8"
+# Part 2 proved the format in evenhub-simulator 0.9.5 (docs/handoffs/PART-2.md section 2):
+# 8-bit greyscale PNG, every pixel already at level * 17. Fallback, also proven: "gray4".
+# Switch here only.
+TILE_FORMAT = "png"
 
 FONT_PATH = Path(__file__).resolve().parent / "fonts" / "AtkinsonHyperlegible-Bold.ttf"
 
@@ -134,15 +137,21 @@ def decode_tile(data: bytes) -> Image.Image:
     raise ValueError(f"unknown TILE_FORMAT {TILE_FORMAT}")
 
 
+def tile_wire_bytes(data: bytes) -> int:
+    """Size the budget applies to: a PNG is already compressed; raw formats are
+    measured deflated (a proxy for the SDK's LZ4, which is not available here)."""
+    return len(data) if TILE_FORMAT == "png" else len(zlib.compress(data, 1))
+
+
 def split_tiles(canvas: Image.Image) -> list[bytes]:
     tiles = []
     for slot in range(2):
         tile = canvas.crop((slot * TILE_W, 0, (slot + 1) * TILE_W, TILE_H))
         data = encode_tile(tile)
-        packed = len(zlib.compress(data, 1))
-        log.info("diagram tile %d: %d bytes %s, %d bytes deflated (LZ4 proxy)", slot, len(data), TILE_FORMAT, packed)
-        if packed > TILE_BUDGET:
-            log.warning("diagram tile %d is %d bytes deflated, over the %d byte budget", slot, packed, TILE_BUDGET)
+        log.info("diagram tile %d: %d bytes as %s", slot, len(data), TILE_FORMAT)
+        if tile_wire_bytes(data) > TILE_BUDGET:
+            log.warning("diagram tile %d is %d bytes on the wire, over the %d byte budget",
+                        slot, tile_wire_bytes(data), TILE_BUDGET)
         tiles.append(data)
     return tiles
 
