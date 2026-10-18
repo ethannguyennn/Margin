@@ -18,18 +18,20 @@ import io
 import logging
 import re
 import zipfile
+from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import JSONResponse, Response
 from starlette.datastructures import UploadFile
 
 from ..auth import portal_auth, require_portal
-from ..pipeline import BadRequest
+from ..pipeline import BadRequest, DbDown
 from ..schemas import (
     DOC_ID_PATTERN,
     REVISION_PATTERN,
     TITLE_MAX,
     MaterialCreated,
+    MaterialLibrary,
     MaterialStatus,
     MaterialText,
 )
@@ -47,6 +49,14 @@ JPEG = "image/jpeg"
 ALLOWED = {PDF, DOCX, MARKDOWN, TEXT, PNG, JPEG}
 EXTENSIONS = {".pdf": PDF, ".docx": DOCX, ".md": MARKDOWN, ".markdown": MARKDOWN, ".txt": TEXT,
               ".png": PNG, ".jpg": JPEG, ".jpeg": JPEG}
+
+
+def material_store(request: Request):
+    """Real uploads must never silently fall back to a process-local mock database."""
+    p = request.app.state.pipeline
+    if not request.app.state.settings.mock_mode and not p.real_db:
+        raise DbDown("Persistent upload storage is unavailable. No file was saved; try again later.")
+    return p.db
 
 
 def _extension(filename: str) -> str:
@@ -82,6 +92,7 @@ def sniff(data: bytes, filename: str) -> str | None:
              dependencies=[Depends(portal_auth)])
 async def upload(request: Request) -> JSONResponse:
     require_portal(request)  # before the body is read
+    store = material_store(request)
     settings, p = request.app.state.settings, request.app.state.pipeline
     limit = settings.max_upload_mb * 1024 * 1024
     declared = request.headers.get("content-length")
@@ -117,12 +128,39 @@ async def upload(request: Request) -> JSONResponse:
         raise UnsupportedMedia("The file's contents do not match its extension.")
     try:
         material_id = await guarded(
-            p.db.insert_material(filename, mime, data, doc_id, revision, title), "storing the upload")
+            store.insert_material(filename, mime, data, doc_id, revision, title), "storing the upload")
     except ValueError as exc:
         raise BadRequest(str(exc)) from exc
     request.app.state.jobs.start(material_id, data, mime, doc_id, revision, title)
     log.info("material %s stored (%s, %d bytes); conversion started", material_id, mime, len(data))
-    return JSONResponse(MaterialCreated(material_id=material_id).model_dump(), status_code=202)
+    return JSONResponse(MaterialCreated(material_id=material_id).model_dump(), status_code=202,
+                        headers={"Location": f"/v1/materials/{material_id}", "Cache-Control": "no-store"})
+
+
+@router.get("/v1/materials", response_model=MaterialLibrary, dependencies=[Depends(portal_auth)])
+async def library(request: Request, response: Response, q: str = Query(default="", max_length=120),
+                  limit: int = Query(default=50, ge=1, le=100),
+                  offset: int = Query(default=0, ge=0)) -> MaterialLibrary:
+    require_portal(request)
+    rows = await guarded(material_store(request).list_materials(query=q, limit=limit + 1, offset=offset),
+                         "loading saved uploads")
+    response.headers["Cache-Control"] = "no-store"
+    return MaterialLibrary(items=rows[:limit], next_offset=offset + limit if len(rows) > limit else None)
+
+
+@router.get("/v1/materials/{material_id}/file", dependencies=[Depends(portal_auth)])
+async def original(material_id: str, request: Request) -> Response:
+    require_portal(request)
+    row = await guarded(material_store(request).get_material(material_id, include_bytes=True),
+                        "loading the original upload")
+    if row is None:
+        raise NotFound("No material with that id.")
+    # Attachment + nosniff prevents uploaded text/SVG-like content from executing in our origin.
+    filename = (row["filename"] or "upload").replace("\\", "/").rsplit("/", 1)[-1]
+    return Response(bytes(row["bytes"]), media_type=row["mime"], headers={
+        "Content-Disposition": "attachment; filename*=UTF-8''" + quote(filename, safe=""),
+        "X-Content-Type-Options": "nosniff", "Cache-Control": "no-store",
+    })
 
 
 @router.get("/v1/materials/{material_id}", response_model=MaterialStatus,

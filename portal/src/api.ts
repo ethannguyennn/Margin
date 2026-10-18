@@ -20,7 +20,7 @@ function reasons(value: unknown): string {
 // Route JSON stays at this boundary rather than duplicating Part 3's Pydantic
 // models. Lens types are imported directly from the shared app contract.
 export type JsonObject = Record<string, any>;
-export async function api(path: string, init: RequestInit = {}): Promise<any> {
+export async function api(path: string, init: RequestInit = {}, format?: 'blob'): Promise<any> {
   if (!path.startsWith('/v1/') || path.includes('://')) throw new Error('API requests must use the same origin');
   const token = sessionStorage.getItem(TOKEN_KEY);
   if (!token) throw new ApiError(401, 'Enter your portal token to continue.');
@@ -36,7 +36,19 @@ export async function api(path: string, init: RequestInit = {}): Promise<any> {
     throw new ApiError(response.status, reasons(detail) || `Request failed (${response.status}). Try again.`);
   }
   if (response.status === 204) return null;
-  return response.headers.get('content-type')?.includes('image/') ? response.blob() : response.json();
+  return format === 'blob' || response.headers.get('content-type')?.includes('image/') ? response.blob() : response.json();
+}
+
+export async function downloadMaterial(materialId: string, filename: string): Promise<void> {
+  const blob = await api(`/v1/materials/${encodeURIComponent(materialId)}/file`, {}, 'blob');
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.append(a);
+  try { a.click(); } finally {
+    a.remove();
+    // Leave the object alive until the browser has consumed the download navigation.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
 }
 export function json(method: string, data?: unknown): RequestInit {
   return { method, headers: { 'Content-Type': 'application/json' }, body: data === undefined ? undefined : JSON.stringify(data) };

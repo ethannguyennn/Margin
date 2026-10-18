@@ -16,7 +16,12 @@ beforeEach(async () => {
   paired = assigned = progress = false; calls = [];
   vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit = {}) => {
     calls.push([url, init]); let data: any = {};
-    if (url === '/v1/materials') data = { material_id: 'MAT-1', status: 'converting' };
+    if (url.startsWith('/v1/materials?')) {
+      const q = new URL(url, 'http://localhost').searchParams.get('q') ?? '';
+      data = { items: q === 'missing' ? [] : [{ ...draft, filename: 'synthetic.txt', created_at: '2026-10-18T12:00:00Z', size_bytes: 64, status: 'failed', error: 'Conversion unavailable' }], next_offset: null };
+    }
+    else if (url === '/v1/materials/MAT-1/file') return new Response('Torque to 4 N-m.', { headers: { 'Content-Type': 'text/plain' } });
+    else if (url === '/v1/materials') data = { material_id: 'MAT-1', status: 'converting' };
     else if (url === '/v1/materials/MAT-1') data = { ...draft, status: 'ready' };
     else if (url.endsWith('/text')) data = { material_id: 'MAT-1', pages: [{ page: 1, text: 'Torque to 4 N-m.' }], figures: [] };
     else if (url.endsWith('/steps/1')) { Object.assign(draft.steps[0], JSON.parse(init.body as string), { verify: { ok: true } }); data = draft.steps[0]; }
@@ -78,5 +83,25 @@ it('completes upload -> failed review -> edit -> approval -> pair -> assign -> b
   await vi.waitFor(() => expect(document.body.textContent).toContain('2/6'), { timeout: 4000, interval: 100 });
   expect(sessionStorage.getItem(TOKEN_KEY)).toBe('fixture-token');
   expect(calls.every(([, init]) => new Headers(init.headers).get('Authorization') === 'Bearer fixture-token')).toBe(true);
+  location.hash = 'upload';
+});
+
+it('finds persisted uploads after navigation and downloads failed conversions with portal auth', async () => {
+  input('token', 'fixture-token'); click('Log in');
+  await until(() => expect(document.querySelector('[name="file"]')).toBeTruthy());
+  location.hash = 'library';
+  await until(() => expect(document.querySelector('article')?.textContent).toContain('synthetic.txt'));
+  expect(document.body.textContent).toContain('Conversion unavailable');
+  // Download uses fetch with the session token; the bearer token never enters an href.
+  const create = vi.fn().mockReturnValue('blob:download-test');
+  vi.stubGlobal('URL', Object.assign(URL, { createObjectURL: create, revokeObjectURL: vi.fn() }));
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  click('Download original');
+  await until(() => expect(create).toHaveBeenCalled());
+  const call = calls.find(([url]) => url === '/v1/materials/MAT-1/file')!;
+  expect(new Headers(call[1].headers).get('Authorization')).toBe('Bearer fixture-token');
+  expect([...document.querySelectorAll('a')].some(a => a.href.includes('fixture-token'))).toBe(false);
+  input('q', 'missing'); click('Search uploads');
+  await until(() => expect(document.body.textContent).toContain('No saved uploads match this search.'));
   location.hash = 'upload';
 });

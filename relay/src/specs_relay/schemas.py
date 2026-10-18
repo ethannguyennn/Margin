@@ -19,6 +19,7 @@ verify, so nothing over-cap is ever published to the lens.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -465,6 +466,18 @@ class MaterialStatus(_Model):
     revision: str
     title: str | None = None
     filename: str | None = None
+
+
+class MaterialSummary(MaterialStatus):
+    created_at: datetime
+    mime: str
+    size_bytes: int
+    sha256: str
+
+
+class MaterialLibrary(_Model):
+    items: list[MaterialSummary]
+    next_offset: int | None = None
 
 
 class ApproveResult(_Model):
