@@ -54,8 +54,8 @@ def client_for(gen):
     return TestClient(create_app(settings, p))
 
 
-def ask(c, text=None, audio=None):
-    body = {"session_id": str(uuid.uuid4()), "text": text}
+def ask(c, text=None, audio=None, context=None):
+    body = {"session_id": str(uuid.uuid4()), "text": text, **({"context": context} if context else {})}
     if audio is not None:
         body = {"session_id": body["session_id"], "audio": {
             "format": "pcm_s16le", "sample_rate": 16000, "channels": 1,
@@ -106,11 +106,16 @@ def test_audio_path_with_recorded_fixture():
 
 @pytest.mark.parametrize("text, intent", [
     ("what was that torque spec", "question"),
-    pytest.param("say that again", "command", marks=pytest.mark.xfail(
-        strict=True, reason="v2 Intent 'command' arrives with v2-scaffold-relay; v1 schemas reject it")),
+    ("say that again", "repeat"),  # outside a task it stays v1 repeat (BUILD-PLAN-V2 §3)
     ("what was that", "repeat"),
     ("log a deviation the bracket hole is out of round", "deviation"),
 ])
 def test_real_intent_routes(text, intent):
     with client_for(ScriptedGenerator(GOOD)) as c:
         assert ask(c, text)["intent"] == intent
+
+
+def test_say_that_again_inside_a_task_is_the_repeat_command():
+    with client_for(ScriptedGenerator(GOOD)) as c:
+        out = ask(c, "say that again", context={"doc_id": "SOP-114", "step_id": "SOP-114:C:4.2"})
+    assert (out["intent"], out["outcome"], out["command"]) == ("command", "command", "repeat")
