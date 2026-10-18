@@ -1,14 +1,17 @@
 # Specs TODO
 
-Updated 2026-10-18 after the v2 deploy and the first run on real glasses (`61b9c1e`).
+Updated 2026-10-18 during v3 integration. The v2 hardware observations below are historical.
 Windows: `make` = `mingw32-make`.
 
-**Where we are:** v2 is live on both domains and has run on real G2 glasses.
+**Where we are:** v3 is staged on `codex/v3-integration` and deployed from a separate VM
+candidate checkout. `main` and the four part branches are retained until acceptance is complete.
+The user has no new Part 4 recordings yet and will supply them later; two wearers remain required.
 
 - **Tests (2026-10-18, `61b9c1e`):** relay 712 passed (12 opt-in live/PG skipped), app 558 passed
   (12 skipped) + typecheck, portal 8 passed.
-- **Live:** the VM runs `61b9c1e` (relay `0.3.0`) on `https://getyourassto.work` and
-  `https://45-32-88-132.sslip.io`, `MOCK_MODE=0`, Tiger DB `ok`, `/portal/` up. App build `0.3.1`.
+- **Live candidate:** VM relay `0.3.0+155d899` on `https://getyourassto.work`, live ask path,
+  Tiger DB `ok`, gate 0.68 / 0.04. The former production checkout stays at `61b9c1e` for rollback.
+  App pack is now `0.4.0`; full field installation/validation is pending.
 - **Real glasses (`61b9c1e`):** double nods work (the G2 IMU is a gravity-normalised
   accelerometer), long press = nod, baked PNG reference images render on the lens (the host only
   renders encoded images, never raw Gray8), natural voice commands ("go to the next step").
@@ -20,7 +23,7 @@ Windows: `make` = `mingw32-make`.
 
 ## 1. Deploy and live checks (Part 3)
 
-**v3 platform checkpoint (2026-10-18, `v3-part-3-platform-deploy`; not deployed):**
+**v3 platform checkpoint (2026-10-18, Part 3 taken over by Codex):**
 
 - [x] Health distinguishes ask mocks from conversion mocks; verbose health adds gate,
       commit and process-lifetime Gemini 429 counters. Normal response keeps its four fields.
@@ -29,29 +32,32 @@ Windows: `make` = `mingw32-make`.
 - [x] Container probe rejects `ok: false`, even with HTTP 200.
 - [x] `make eval-conversion` now uses `--strict`; `sync-branches` lists all four v3 branches.
 - [x] App example origin is `https://getyourassto.work`; timeout remains 50000 ms.
-      Pack/version bump and the final v3 contract validation are still pending Part 1's tag.
+      Client validates clarify/scope and passes verified graphic IDs. Contract tags are integrated.
+      Packed app version 0.4.0 from candidate `22c5468`; artifact and SHA256 below.
 - [x] Diagnostic launcher supports Python 3.11+; voice/app-loop wrappers accept `RELAY` and
       `PACE`, reject mock evidence, validate the synthetic corpus, and fail closed.
-      Windows launcher/health and 22-file SAPI preparation verified. Live loops remain unrun.
+      Windows launcher/health and 22-file SAPI preparation verified. Live acceptance is in progress.
 - [x] Remote deploy reads `VM_HOST` from `.env` and guards main/clean/fast-forward state.
-- [ ] **M6/M9 deployment:** this computer has no usable authorized SSH key. VM gate changes,
-      redeploy, paid-key verification, live voice/gap checks and 30-ask quota run remain blocked.
-- [ ] **Part 2 request:** add a main guard, `--relay`, `--pace` and assertion-based exit status
-      to `tools/diagnostic/gap_probe.py`; current `make diag-gap` reports this block and exits 1.
-- [ ] **Part 1 request:** render `response.error.message === 'Busy, try again'` on ERROR;
-      `errorScreen()` currently hardcodes `No verified answer`. Client copy alone is not visible.
-- [ ] **Part 4 request:** count recovered internal STT retries with `obs.record_quota_error`
-      before retrying, so verbose health also includes provider 429s recovered inside that module.
-- [ ] `v3-contract-app` / `v3-contract-relay` tags were absent at this checkpoint; wait for
-      their owners before validation/pack. No changes to their contracts or lens code here.
+- [x] **VM access/deployment:** existing SSH identity works; the earlier missing-key claim was
+      incorrect. `/root/specs` stays on its original main checkout; `/root/specs-v3-candidate`
+      serves candidate `155d899`. Gate is 0.68 / 0.04; health confirms live ask and DB paths.
+      Backed up the VM environment before changing the two gate settings; secrets remain on VM.
+- [x] **Part 2:** scored, import-safe gap CLI with `--relay`, `--pace`, nonzero failure status.
+- [x] **Part 1:** exact safe quota copy `Busy, try again` renders on the lens ERROR screen.
+- [x] **Part 4:** recovered STT quota errors counted through `obs.record_quota_error`.
+- [x] `v3-contract-app` / `v3-contract-relay` pushed and integrated into the candidate.
+- [ ] **M7/M9 live acceptance:** gap, full eval, voice, app loop, 18-question regression,
+      30 paced asks, latency and trace evidence. Preserve failed runs as well as passing reports.
+- [ ] **Quota entitlement:** paid/higher quota has not been confirmed. The shared key is paced
+      at ten seconds; observed zero 429s alone does not establish a paid account.
 
-Validation: `make test`: **767 relay passed / 12 skipped; 564 app passed / 12 skipped;
-8 portal passed; app typecheck and production build passed**. Targeted diagnostic tests use
-stubs; no live voice, cloud deployment, paid quota, hardware or cross-platform result claimed.
+Integration validation: **810 relay passed / 12 skipped; 609 app passed / 12 skipped;
+8 portal passed; app and portal typecheck/build passed**. Subsequent harness-only regression:
+25 tests passed. No new hardware, paid quota or macOS/Linux execution result is claimed.
 
-- [ ] **Domain switch in the app build:** `app/.env.example` still sets
-      `VITE_RELAY_ORIGIN=https://45-32-88-132.sslip.io`. Build/pack with
-      `VITE_RELAY_ORIGIN=https://getyourassto.work` (`app.json` already whitelists both) - Parts 1 + 3
+- [x] **Canonical-domain pack:** `builds/v3/specs-0.4.0-22c5468.ehpk` (local root checkout),
+      4,928,949 bytes, SHA256 `1952ab1bc07415d0d8f212e102f4637c66faa70c0e5b52e6be407a0ecbb46dc2`.
+      Built with live mode, canonical origin and 50000 ms timeout. No install on glasses claimed.
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`
 - [ ] **`make latency` on real v2 traffic:** prints all events, answers and `intent='command'`
       separately. Live DB 2026-10-18: relay p50 total 1208 ms, p95 2850 ms (159 events);
@@ -61,11 +67,8 @@ stubs; no live voice, cloud deployment, paid quota, hardware or cross-platform r
 
 ## 2. Open requests between parts
 
-- [ ] **Trust: walkthrough citations quote a paraphrase** (fix first). `routes/ask.py:300` builds
-      walkthrough citations with `quote=s.body` and marks the response verified. Authored v2 bodies
-      paraphrase; the verbatim support is the published chunk's `text` (the joined source quotes).
-      Expose it from `steps_for` / `build_walkthrough` and cite it - Parts 3 + 5 (Part 4 supplies
-      `DraftStep.quotes`)
+- [x] **Trust: walkthrough citations** now use the stored raw source text through
+      `Step.source_text`; authored display bodies cannot serve as citation quotes. Regression tested.
 - [ ] **Gemini paid key before the M3 demo:** the key is free tier (`gemini-3.8-flash`: 20
       requests/day; `gemini-3.5-flash-lite`: 15/min). Conversion is about 2-3 calls per material.
       On `gemini-3.5-flash-lite`, SOP-153 converted every value but **no schematic**. Re-run
@@ -111,10 +114,8 @@ for the IMU recorder.
 
 ## 4. v1 bring-up still open
 
-- [ ] **Gate thresholds:** `NOT_FOUND_MIN_SIM` / `NOT_FOUND_MIN_RRF` are still unset on the VM (the
-      relay logs "retrieval gate disabled"). Run `retrieve.tune_gate` over live retrieval scores
-      for the 45 demo-bank eval questions, set both in the VM's `.env`, re-run `make eval` -
-      Parts 4 + 5
+- [x] **Gate thresholds:** VM now uses `NOT_FOUND_MIN_SIM=0.68`, `NOT_FOUND_MIN_RRF=0.04`;
+      verbose health exposes both. Full live quality evaluation remains part of M7/M9 above.
 
 ## 5. Done
 

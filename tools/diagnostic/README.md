@@ -36,11 +36,9 @@ from the exact same `voice_loop.py` revision before running either voice target.
 speech synthesis is Windows-only. The wrapper validates the copied corpus before making asks.
 Only synthetic audio belongs in this directory. Generated speech and results remain ignored.
 
-**`diag-gap` is blocked and exits nonzero without network calls.** Part 2 owns `gap_probe.py`;
-it currently runs at import, hardcodes localhost and pacing, and only prints observations.
-Requested interface: a main guard plus `--relay`, `--pace` (seconds) and assertion-based exit
-status. Do not treat its existing zero exit code as M7 evidence. Wire that CLI here once it
-lands; its semantic checks stay with Part 2.
+`diag-gap` invokes Part 2's scored CLI with `--relay` and `--pace`; integrate the Part 2 branch
+before running it. The wrapper rejects the old unscored script. `diag-loop` always enables
+the v3 clarify/scope test as well as the voice loop; a skipped v3 test is not passing evidence.
 
 Validation on Windows: mock launcher and verbose health passed; SAPI produced and validated
 22 files; wrapper tests cover incomplete/failed evidence and cleanup after a failing app test.
@@ -60,6 +58,6 @@ Run everything from the repo root on Windows (Git Bash or PowerShell).
 | 6. Gate scores | `PYTHONPATH=relay/src .venv/Scripts/python.exe tools/diagnostic/gate_scores.py` (repo root) | `best_sim`/`best_rrf` for the 45 eval questions + walkthrough prompts; re-measure after any embedding or corpus change |
 | 7. App loop | copy `loop.test.ts` to `app/tests/zz-diagnostic-loop.test.ts`, then in `app/`: `SPECS_DIAG_RELAY=http://127.0.0.1:8090 npx vitest run tests/zz-diagnostic-loop.test.ts --disableConsoleIntercept`; delete the copy afterwards | IMU double nod -> mic -> speech -> walkthrough -> voice/swipe stepping -> clarifying questions -> images on every illustrated step -> TASK_DONE, 0 false nods during bench work |
 
-`clarify_rate.py`'s `ERROR(empty body)` label scores the lens rule from before `b4a86d7`; the
-current lens shows those answers. Generated files (`wav/`, `utterances.txt`, `results.json`,
+Part 2's current `clarify_rate.py --relay URL --pace 10 --output PATH` independently checks
+18 answers and their citations, accepting verified glance-only answers. Generated files (`wav/`, `utterances.txt`, `results.json`,
 `gate_scores.json`, logs) are git-ignored.
