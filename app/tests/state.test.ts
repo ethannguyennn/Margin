@@ -136,3 +136,152 @@ describe('persistence and lifecycle policy', () => {
     expect(timeoutFor(stateFor('IDLE'))).toBeNull();
   });
 });
+
+// v2 acceptance: expectations below are the role's gesture table, not derived
+// from transition(). v1 assertions above remain except the specified renames.
+import { SCREENS, ASSIGNMENT_TTL_MS, type LensState, type Action } from '../src/state';
+import { taskFixture } from '../src/ui/fixtures';
+function v2State(screen: Screen): LensState {
+  const base={...initialState('v2-session'),privacySeen:true,calibrated:true,pairing:{pair_code:'4F7K',claimed:true,worker_name:'Fixture'}};
+  const assignment=taskFixture(1000);assignment.walkthrough.index=2;
+  const task=transition({...base,screen:'IDLE'}, {type:'ASSIGNMENT',assignment,now:1001}).state;
+  const started=transition(task,{type:'NOD'}).state;
+  if(['TASK_READY','STEP','STEP_DETAILS','DIAGRAM','TASK_DONE','WALKTHROUGH'].includes(screen))return {...started,screen,
+    ...(screen==='TASK_READY'?{screen:'TASK_READY' as const}:{}),pages:['first page','second page'],diagramId:screen==='DIAGRAM'?'fixture-step-3':null};
+  if(['ANSWER_GLANCE','ANSWER_EXPANDED'].includes(screen))return {...stateFor(screen),...{calibrated:true,pairing:base.pairing}};
+  return {...base,screen};
+}
+const inputTypes=['PRESS','DOUBLE_PRESS','UP','DOWN','LONG_PRESS','NOD','SHAKE','ENDPOINT','TIMEOUT'] as const;
+const v2Map:Record<Screen,Screen[]>={
+  PRIVACY:['CALIBRATE','PRIVACY','PRIVACY','PRIVACY','PRIVACY','PRIVACY','PRIVACY','PRIVACY','PRIVACY'],
+  CALIBRATE:['IDLE','CALIBRATE','CALIBRATE','CALIBRATE','CALIBRATE','CALIBRATE','CALIBRATE','CALIBRATE','CALIBRATE'],
+  PAIRING:['PAIRING','PAIRING','PAIRING','PAIRING','PAIRING','PAIRING','PAIRING','PAIRING','PAIRING'],
+  IDLE:['LISTENING','IDLE','IDLE','IDLE','IDLE','LISTENING','IDLE','IDLE','IDLE'],
+  TASK_READY:['STEP','IDLE','TASK_READY','TASK_READY','TASK_READY','STEP','TASK_READY','TASK_READY','TASK_READY'],
+  STEP:['STEP_DETAILS','IDLE','STEP','DIAGRAM','STEP','LISTENING','STEP','STEP','STEP'],
+  STEP_DETAILS:['STEP_DETAILS','STEP','STEP_DETAILS','STEP_DETAILS','STEP_DETAILS','LISTENING','STEP','STEP_DETAILS','STEP_DETAILS'],
+  DIAGRAM:['STEP','STEP','DIAGRAM','DIAGRAM','DIAGRAM','LISTENING','STEP','DIAGRAM','DIAGRAM'],
+  TASK_DONE:['IDLE','IDLE','TASK_DONE','TASK_DONE','TASK_DONE','LISTENING','IDLE','TASK_DONE','IDLE'],
+  LISTENING:['THINKING','IDLE','LISTENING','LISTENING','LISTENING','LISTENING','IDLE','THINKING','IDLE'],
+  THINKING:['THINKING','IDLE','THINKING','THINKING','THINKING','THINKING','THINKING','THINKING','IDLE'],
+  ANSWER_GLANCE:['ANSWER_EXPANDED','IDLE','ANSWER_GLANCE','ANSWER_GLANCE','ANSWER_GLANCE','LISTENING','IDLE','ANSWER_GLANCE','IDLE'],
+  ANSWER_EXPANDED:['ANSWER_GLANCE','ANSWER_GLANCE','ANSWER_EXPANDED','ANSWER_EXPANDED','ANSWER_EXPANDED','LISTENING','IDLE','ANSWER_EXPANDED','IDLE'],
+  NOT_FOUND:['LISTENING','IDLE','NOT_FOUND','NOT_FOUND','NOT_FOUND','LISTENING','IDLE','NOT_FOUND','IDLE'],
+  WALKTHROUGH:['STEP_DETAILS','IDLE','STEP','DIAGRAM','WALKTHROUGH','LISTENING','WALKTHROUGH','WALKTHROUGH','WALKTHROUGH'],
+  LOGGED:['IDLE','IDLE','LOGGED','LOGGED','LOGGED','LISTENING','IDLE','LOGGED','IDLE'],
+  ERROR:['LISTENING','IDLE','ERROR','ERROR','ERROR','LISTENING','IDLE','ERROR','IDLE'],
+};
+describe('v2 complete screen x input matrix',()=>{
+  for(const screen of SCREENS)for(const [column,type] of inputTypes.entries())it(`${screen} + ${type}`,()=>{
+    const s=v2State(screen),snapshot=structuredClone(s);
+    const value=transition(s,{type});expect(value.state.screen).toBe(v2Map[screen][column]);expect(s).toEqual(snapshot);
+  });
+  for(const screen of SCREENS)it(`${screen}: payload events are gated`,()=>{
+    const s=v2State(screen);
+    const events:Action[]=[{type:'ASSIGNMENT',assignment:taskFixture(1000),now:1001},{type:'DIAGRAM_READY',id:'wrong-id'},
+      {type:'DIAGRAM_FAILED',id:'wrong-id'},{type:'EMPTY_CAPTURE'},{type:'CALIBRATED',ok:true},
+      {type:'CALIBRATION_PROGRESS',done:2,needed:3},{type:'RESPONSE',response:UI_FIXTURES.answer,now:1001}];
+    for(const a of events){const before=structuredClone(s);const value=transition(s,a);expect(s).toEqual(before);
+      if(a.type==='DIAGRAM_READY' || a.type==='DIAGRAM_FAILED')expect(value.state).toBe(s);
+      if(a.type==='RESPONSE' && screen!=='THINKING')expect(value.state).toBe(s);
+    }
+  });
+});
+
+describe('v2 returnTo and trust',()=>{
+  for(const screen of SCREENS)it(`NOD origin ${screen} is restored exactly after silence/cancel/answer`,()=>{
+    const s=v2State(screen),opened=transition(s,{type:'NOD'});
+    if(['PRIVACY','CALIBRATE','PAIRING','LISTENING','THINKING','TASK_READY'].includes(screen))return;
+    expect(opened.state.returnTo).toBe(screen);
+    expect(transition(opened.state,{type:'SHAKE'}).state).toEqual(s);
+    const thinking=transition(opened.state,{type:'ENDPOINT'}).state;
+    expect(transition(thinking,{type:'EMPTY_CAPTURE'}).state).toEqual(s);
+    for(const fixture of ['answer','not_found','error'] as const){
+      const answered=transition(thinking,{type:'RESPONSE',response:UI_FIXTURES[fixture],now:2000}).state;
+      expect(transition(answered,{type:'SHAKE'}).state).toEqual(s);
+      expect(transition(answered,{type:'TIMEOUT'}).state).toEqual(s);
+      if(['STEP','STEP_DETAILS','DIAGRAM','WALKTHROUGH'].includes(screen))expect(timeoutFor(answered)).toBe(20000);
+    }
+  });
+  it('commands act locally and never preserve any response text',()=>{
+    for(const name of ['next','back','repeat','details','diagram','pause','resume','exit'] as const){
+      const start=v2State('STEP'),thinking=transition(transition(start,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+      const value=transition(thinking,{type:'RESPONSE',now:2000,response:{...UI_FIXTURES.answer,outcome:'command',intent:'command',command:name,verified:false,glance:'UNVERIFIED-MUST-NOT-RENDER',body:'UNVERIFIED-MUST-NOT-RENDER'}});
+      expect(JSON.stringify(value.state)).not.toContain('UNVERIFIED-MUST-NOT-RENDER');
+      expect(value.state.screen).not.toBe('ANSWER_GLANCE');
+    }
+  });
+  it('rejects an unknown command and every unverified answer',()=>{
+    const s={...v2State('THINKING'),returnTo:'IDLE' as const};
+    for(const response of [{...UI_FIXTURES.answer,verified:false},{...UI_FIXTURES.answer,outcome:'command' as const,command:'invalid' as never}]){
+      expect(transition(s,{type:'RESPONSE',response,now:2000}).state.screen).toBe('ERROR');
+    }
+  });
+  it('does not lose an assignment to an ad-hoc response',()=>{
+    const task=v2State('STEP');const thinking=transition(transition(task,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+    const value=transition(thinking,{type:'RESPONSE',response:UI_FIXTURES.answer,now:2000}).state;
+    expect(value.assignment_id).toBe(task.assignment_id);expect(value.walkthrough!.index).toBe(2);
+  });
+  it('shows a fixed no-diagram hint, handles diagram failure, and ignores stale readiness',()=>{
+    let s=v2State('STEP');s.walkthrough!.steps[2].diagram=null;
+    let thinking=transition(transition(s,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+    s=transition(thinking,{type:'RESPONSE',response:{...UI_FIXTURES.answer,outcome:'command',command:'diagram'},now:2000}).state;
+    expect(s.notice).toBe('No diagram for this step');
+    s=v2State('DIAGRAM');expect(transition(s,{type:'DIAGRAM_FAILED',id:s.diagramId!}).state.notice).toBe('Diagram unavailable');
+    expect(transition(s,{type:'DIAGRAM_READY',id:s.diagramId!}).state.diagramReady).toBe(true);
+  });
+});
+
+describe('v2 assigned task persistence and progression',()=>{
+  it.each([ASSIGNMENT_TTL_MS-1,ASSIGNMENT_TTL_MS,ASSIGNMENT_TTL_MS+1,-1])('restores assigned step only under 12h, age=%i',age=>{
+    const s=v2State('STEP');const value=restoreSession(serializeSession(s),1000+age,'replacement');
+    expect(value.screen).toBe(age>=0 && age<ASSIGNMENT_TTL_MS?'STEP':'IDLE');
+    if(value.screen==='STEP'){expect(value.walkthrough!.index).toBe(2);expect(value.assignment_id).toBe(s.assignment_id);}
+  });
+  it('keeps tasks on pause, resumes locally, and does not restore completed tasks',()=>{
+    const s=v2State('STEP'),paused=transition(s,{type:'DOUBLE_PRESS'}).state;
+    expect(paused.screen).toBe('IDLE');expect(paused.walkthrough!.index).toBe(2);
+    let state=s;
+    for(let i=0;i<3;i++){
+      const thinking=transition(transition(state,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+      state=transition(thinking,{type:'RESPONSE',response:{...UI_FIXTURES.answer,outcome:'command',command:'next'},now:2000}).state;
+    }
+    expect(state.screen).toBe('TASK_DONE');expect(restoreSession(serializeSession(state),3000,'new').screen).toBe('IDLE');
+  });
+  it('never stores pairing credentials, answer snapshots, or audio',()=>{
+    let s=v2State('STEP');s=transition(s,{type:'PAIRED',pairing:{device_id:'private-id',device_token:'private-token',pair_code:'4F7K',claimed:true,worker_name:'Fixture'}}).state;
+    const stored=serializeSession(s);expect(stored).not.toContain('private-token');expect(stored).not.toContain('private-id');expect(stored).not.toContain('returnState');expect(stored).not.toContain('audio');
+  });
+  it('keeps calibration and pairing behind privacy, then restores a task after claiming',()=>{
+    let s=initialState('new');s=transition(s,{type:'PAIRED',pairing:{device_id:'x',device_token:'x',pair_code:'4F7K',claimed:false,worker_name:null}}).state;
+    expect(s.screen).toBe('PRIVACY');s=transition(s,{type:'PRESS'}).state;expect(s.screen).toBe('CALIBRATE');
+    s=transition(s,{type:'CALIBRATED',ok:true}).state;expect(s.screen).toBe('PAIRING');
+    s=transition(s,{type:'PAIRED',pairing:{device_id:'x',device_token:'x',pair_code:'4F7K',claimed:true,worker_name:'Fixture'}}).state;expect(s.screen).toBe('IDLE');
+  });
+});
+
+describe('v2 command progression guards',()=>{
+  it('cannot complete or resume an already completed task',()=>{
+    const done=v2State('TASK_DONE');
+    for(const command of ['next','resume','repeat'] as const){
+      const thinking=transition(transition(done,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+      const value=transition(thinking,{type:'RESPONSE',response:{...UI_FIXTURES.answer,outcome:'command',command},now:2000});
+      expect(value.state.screen).toBe('TASK_DONE');expect(value.effects).toEqual([]);
+    }
+  });
+  it('resume starts a deferred TASK_READY exactly once',()=>{
+    let s=v2State('TASK_READY');s.taskStarted=false;
+    s=transition(s,{type:'DOUBLE_PRESS'}).state;
+    let thinking=transition(transition(s,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+    const first=transition(thinking,{type:'RESPONSE',response:{...UI_FIXTURES.answer,outcome:'command',command:'resume'},now:2000});
+    expect(first.state.screen).toBe('STEP');expect(first.state.taskStarted).toBe(true);
+    expect(first.effects.filter(e=>typeof e==='object')).toEqual([{type:'REPORT_PROGRESS',kind:'task_started',step_id:null},{type:'REPORT_PROGRESS',kind:'step_started',step_id:'3'}]);
+    thinking=transition(transition(first.state,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+    expect(transition(thinking,{type:'RESPONSE',response:{...UI_FIXTURES.answer,outcome:'command',command:'resume'},now:2001}).effects).toEqual(['PREFETCH_DIAGRAMS']);
+  });
+  it('a verified ad-hoc walkthrough response cannot replace the assigned task',()=>{
+    const original=v2State('STEP');const thinking=transition(transition(original,{type:'NOD'}).state,{type:'ENDPOINT'}).state;
+    const value=transition(thinking,{type:'RESPONSE',response:UI_FIXTURES.walkthrough,now:2000});
+    expect(value.state.assignment_id).toBe(original.assignment_id);expect(value.state.walkthrough).toEqual(original.walkthrough);expect(value.effects).toEqual(['PREFETCH_DIAGRAMS']);
+  });
+});
