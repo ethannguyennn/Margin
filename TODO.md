@@ -33,7 +33,7 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
 - [x] `make eval-conversion` now uses `--strict`; `sync-branches` lists all four v3 branches.
 - [x] App example origin is `https://getyourassto.work`; timeout remains 50000 ms.
       Client validates clarify/scope and passes verified graphic IDs. Contract tags are integrated.
-      Packed app version 0.4.0 from candidate `22c5468`; artifact and SHA256 below.
+      Packed app version 0.4.1 from candidate `aaa266c`; artifact and SHA256 below.
 - [x] Diagnostic launcher supports Python 3.11+; voice/app-loop wrappers accept `RELAY` and
       `PACE`, reject mock evidence, validate the synthetic corpus, and fail closed.
       Windows launcher/health and 22-file SAPI preparation verified. Live acceptance is in progress.
@@ -46,18 +46,23 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
 - [x] **Part 1:** exact safe quota copy `Busy, try again` renders on the lens ERROR screen.
 - [x] **Part 4:** recovered STT quota errors counted through `obs.record_quota_error`.
 - [x] `v3-contract-app` / `v3-contract-relay` pushed and integrated into the candidate.
+- [x] Production app bundles the real browser tracing SDK (previous dynamic import excluded
+      it), whitelists the configured public ingest origin and filters raw audio logs. An offline
+      real-SDK test creates a fresh trace per ask. Synthetic client -> VM health continued the
+      same trace; Sentry ingest acknowledged HTTP 200. Glasses delivery remains a field check.
 - [ ] **M7/M9 live acceptance:** gap, full eval, voice, app loop, 18-question regression,
       30 paced asks, latency and trace evidence. Preserve failed runs as well as passing reports.
 - [ ] **Quota entitlement:** paid/higher quota has not been confirmed. The shared key is paced
       at ten seconds; observed zero 429s alone does not establish a paid account.
 
-Integration validation: **810 relay passed / 12 skipped; 609 app passed / 12 skipped;
-8 portal passed; app and portal typecheck/build passed**. Subsequent harness-only regression:
-25 tests passed. No new hardware, paid quota or macOS/Linux execution result is claimed.
+Integration validation: **811 relay passed / 12 skipped; 610 app passed / 12 skipped;
+8 portal passed; app and portal typecheck/build passed**. No new hardware, paid quota or
+macOS/Linux execution result is claimed.
 
-- [x] **Canonical-domain pack:** `builds/v3/specs-0.4.0-22c5468.ehpk` (local root checkout),
-      4,928,949 bytes, SHA256 `1952ab1bc07415d0d8f212e102f4637c66faa70c0e5b52e6be407a0ecbb46dc2`.
-      Built with live mode, canonical origin and 50000 ms timeout. No install on glasses claimed.
+- [x] **Canonical-domain pack:** `builds/v3/specs-0.4.1-aaa266c.ehpk` (local root checkout),
+      5,070,696 bytes, SHA256 `ad23565d0c178b00f73112a69f944bed10488b14293b53632a39fa0f8e7aafd5`.
+      Built with live mode, canonical origin, 50000 ms timeout and public app telemetry DSN.
+      Direct ingest is whitelisted; tunnel stays off. No install on glasses claimed.
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`
 - [ ] **`make latency` on real v2 traffic:** prints all events, answers and `intent='command'`
       separately. Live DB 2026-10-18: relay p50 total 1208 ms, p95 2850 ms (159 events);
