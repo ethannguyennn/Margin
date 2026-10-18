@@ -234,3 +234,12 @@ def test_gap_probe_import_is_offline_and_uses_scored_conversations(monkeypatch):
     assert len(cases) == 11
     assert any(c["q"] == "Pull up the espresso standards." for c in cases)
     assert any(c.get("turns") for c in cases)
+
+
+def test_step_regression_import_is_offline_and_scores_all_18_asks(monkeypatch):
+    monkeypatch.setattr(httpx, "Client", lambda *a, **k: pytest.fail("import must not send requests"))
+    from tools.diagnostic import clarify_rate
+    cases = clarify_rate.cases()
+    assert len(cases) == len({c["id"] for c in cases}) == 18
+    assert all(c["context"]["step_id"] == f"SOP-210:C:{c['section']}" for c in cases)
+    assert all(c["expect"] == "answered" and c["must_contain"] for c in cases)
