@@ -1,7 +1,25 @@
 # Margin TODO
 
 Updated 2026-10-17 from all READMEs, handoffs and a full test run of the integrated
-branch. Windows: `make` = `mingw32-make`.
+branch; revised after PR #1 (iPhone companion, `ios/`) merged into main.
+Windows: `make` = `mingw32-make`.
+
+## 0. New since the first version
+
+- [ ] **Re-merge `part-3-relay-infra` into main.** PR #1 merged on top of the older main, so
+      main is missing the real-mode fixes (`25cd8a8`) and this file (`667f1b7`). The merge
+      is clean (checked with `git merge-tree`): open a PR `part-3-relay-infra -> main` - Part 3
+- [ ] **CORS for the iPhone companion:** add `http://localhost:5175` to `ALLOWED_ORIGINS`, plus
+      its LAN origin (`ALLOWED_ORIGIN_REGEX=^http://192\.168\.\d+\.\d+:517[45]$`) and the Base44
+      preview origin once known (read it from the `CORS rejected origin` log) - Part 3
+- [ ] **iPhone over HTTPS needs the HTTPS relay:** a page served over https (Base44 preview,
+      home-screen shortcut) cannot call an `http://` relay (mixed content), so this depends on
+      the deploy in section 2 - Part 3
+- [ ] **`ios/` has no tests and is not in `make test`:** add `cd ios && npm run typecheck`
+      to `make test` at least - Part 3 (Makefile) + ios owner
+- [ ] **Decide:** phone -> lens delivery. The relay is request/response only, so the companion
+      cannot push to the glasses or read the lens session. Needs a new relay route (e.g. a
+      session read endpoint) if we want it for the demo - Part 3 + ios owner
 
 **Where we are:** all five parts are merged and run end to end on mocks.
 `make test` is green (relay 336 passed, app 202 passed). The app's real client passes
@@ -59,6 +77,7 @@ mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glas
 - [x] Client (timeout/abort/one retry), PCM capture, mock fixtures, contract e2e test - Part 2
 - [x] Intent, hybrid retrieval + RRF + gate, structured generation, citation verifier, transcriber - Part 4
 - [x] Synthetic corpus (6 files), migration, seed, `db.py`, walkthrough/deviation, 36-question eval - Part 5
+- [x] iPhone companion web app (`ios/`): Answer / Lens / SOPs screens on the same contract, merged as PR #1
 
 ## Backburner (not needed to get the app working)
 
