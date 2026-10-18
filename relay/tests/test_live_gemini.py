@@ -41,11 +41,15 @@ def test_live_embedding_dimension_matches_config():
     from margin_relay.pipeline.retrieve import GeminiEmbedder
 
     emb = GeminiEmbedder(gemini_client(S.gemini_api_key), S.gemini_model_embed, S.embed_dim)
-    q = asyncio.run(emb.embed_query("how tight is the m5 on the mounting bracket"))
-    docs = asyncio.run(emb.embed_documents(
-        ["Torque all four M5 bracket screws to 4 N-m in a star pattern.",
-         "Rinse the wetted path with purified water at 60 degC for 5 min."],
-        ["Fastening", "Rinse"]))
+    async def both():  # one event loop: the SDK's aio session can't outlive asyncio.run
+        q = await emb.embed_query("how tight is the m5 on the mounting bracket")
+        docs = await emb.embed_documents(
+            ["Torque all four M5 bracket screws to 4 N-m in a star pattern.",
+             "Rinse the wetted path with purified water at 60 degC for 5 min."],
+            ["Fastening", "Rinse"])
+        return q, docs
+
+    q, docs = asyncio.run(both())
     assert len(q) == int(S.embed_dim)
     cos = [sum(a * b for a, b in zip(q, d)) for d in docs]
     assert cos[0] > cos[1]
