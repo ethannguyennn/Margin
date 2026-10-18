@@ -1,5 +1,6 @@
 import { AnswerDetail } from '../components/AnswerDetail';
-import { outcomeTone, Pill } from '../components/Pills';
+import { OutcomePill } from '../components/Pills';
+import { clockTime, errorTitle, shortId } from '../copy';
 import { QUICK_ASKS } from '../quick-asks';
 import { useStore } from '../store';
 
@@ -13,12 +14,14 @@ export default function AnswerPage() {
       {error && (
         <section className="card error-card">
           <div className="row between">
-            <strong>{error.code}</strong>
+            <strong>{errorTitle(error.code)}</strong>
             <button className="link" onClick={clearError}>
               Dismiss
             </button>
           </div>
-          <p className="meta">{error.message}</p>
+          <p className="meta" title={error.code}>
+            {error.message}
+          </p>
         </section>
       )}
 
@@ -46,7 +49,7 @@ export default function AnswerPage() {
             <button className="ghost" disabled={busy === 'ask'} onClick={() => void repeatLast()}>
               Repeat on lens
             </button>
-            <span className="meta">Same session, answered from the relay's memory.</span>
+            <span className="meta">Shows this answer on your glasses again.</span>
           </div>
           <AnswerDetail
             key={res.trace_id}
@@ -66,15 +69,15 @@ export default function AnswerPage() {
             {state.history.map((x, i) => (
               <li key={`${x.trace_id}-${i}`}>
                 <div className="row between">
-                  <Pill tone={outcomeTone(x.outcome)}>{x.outcome}</Pill>
-                  <span className="meta">{new Date(x.at).toLocaleTimeString()}</span>
+                  <OutcomePill outcome={x.outcome} />
+                  <span className="meta num">{clockTime(x.at)}</span>
                 </div>
                 <p className="meta">{x.question}</p>
                 <p className="history-glance">{x.glance}</p>
               </li>
             ))}
           </ul>
-          <p className="meta mono">session {sessionId.slice(0, 8)}</p>
+          <p className="meta num">Session {shortId(sessionId)}</p>
         </section>
       )}
     </div>

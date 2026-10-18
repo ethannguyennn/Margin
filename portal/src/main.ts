@@ -1,3 +1,5 @@
+import '@fontsource/carlito/latin-400.css';
+import '@fontsource/carlito/latin-700.css';
 import './style.css';
 import { api, json, poll, TOKEN_KEY, type JsonObject } from './api';
 import { approvalReasons, element as el, highlightSource, minutesOnStep, preview } from './view';
@@ -266,6 +268,7 @@ function board(epoch: number) {
 export async function route() {
   const epoch = ++generation;
   dispose.forEach(cleanup => cleanup()); dispose = []; app.replaceChildren(); message();
+  app.style.animation = 'none'; void app.offsetWidth; app.style.animation = ''; // replay the page fade-in
   const loggedIn = !!sessionStorage.getItem(TOKEN_KEY); nav.hidden = !loggedIn; logout.hidden = !loggedIn;
   if (!loggedIn) { login(); return; }
   nav.replaceChildren(...['Upload', 'Review', 'Devices', 'Assign', 'Board'].map(text => {
@@ -283,6 +286,36 @@ export async function route() {
     else { heading('Open a draft', 'Upload a material or open a draft by its document ID and revision.'); app.append(link('Upload or open a draft', '#upload')); }
   } catch (exc) { if (generation === epoch) { error(exc); app.append(button('Retry', route)); } }
 }
+// Light / dark: follows the OS until picked; the pick is kept in localStorage
+// (index.html applies it before first paint).
+const THEME_KEY = 'specs.portal.theme';
+const ICONS = {
+  light: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+  dark: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>',
+};
+function currentTheme(): 'light' | 'dark' {
+  const set = document.documentElement.dataset.theme;
+  if (set === 'light' || set === 'dark') return set;
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+function paintThemeButton(themeButton: HTMLButtonElement) {
+  const theme = currentTheme();
+  const label = `Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`;
+  themeButton.innerHTML = ICONS[theme];
+  themeButton.setAttribute('aria-label', label); themeButton.title = label;
+}
+const themeButton = document.querySelector<HTMLButtonElement>('#theme');
+if (themeButton) {
+  paintThemeButton(themeButton);
+  themeButton.onclick = () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(THEME_KEY, next); } catch { /* blocked storage: the pick holds for this page */ }
+    paintThemeButton(themeButton);
+  };
+  window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => paintThemeButton(themeButton));
+}
+
 logout.onclick = () => { sessionStorage.removeItem(TOKEN_KEY); void route(); };
 window.addEventListener('hashchange', () => { void route(); });
 window.addEventListener('portal:unauthorized', () => { void route(); message('Your token was rejected. Log in again.', true); });

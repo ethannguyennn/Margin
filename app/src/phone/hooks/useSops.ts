@@ -9,6 +9,7 @@ export function useProcedures() {
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -28,9 +29,9 @@ export function useProcedures() {
     return () => {
       alive = false;
     };
-  }, [sessionId]);
+  }, [sessionId, attempt]);
 
-  return { procedures, loading, error };
+  return { procedures, loading, error, retry: () => setAttempt((n) => n + 1) };
 }
 
 /** /v1/procedures/{doc_id}/steps — the walkthrough the lens pages through. */
@@ -39,6 +40,7 @@ export function useSteps(docId: string | null, revision: string | null) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!docId) {
@@ -64,7 +66,7 @@ export function useSteps(docId: string | null, revision: string | null) {
     return () => {
       alive = false;
     };
-  }, [docId, revision, sessionId]);
+  }, [docId, revision, sessionId, attempt]);
 
-  return { steps, loading, error };
+  return { steps, loading, error, retry: () => setAttempt((n) => n + 1) };
 }

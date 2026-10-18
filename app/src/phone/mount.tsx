@@ -7,11 +7,15 @@ import { HashRouter } from 'react-router-dom';
 import App from './App';
 import { StoreProvider } from './store';
 import { initTheme } from './theme';
+import '@fontsource/carlito/latin-400.css';
+import '@fontsource/carlito/latin-700.css';
 import './styles.css';
 
 export function mountPhone(root: HTMLElement | null): void {
   if (!root) throw new Error('#root missing from index.html');
   initTheme();
+  // iOS WebKit only applies :active (the press feedback in styles.css) once a touch listener exists.
+  document.addEventListener('touchstart', () => {}, { passive: true });
   createRoot(root).render(
     <StrictMode>
       <HashRouter>
