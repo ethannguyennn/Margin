@@ -86,7 +86,7 @@ if (typeof document !== 'undefined') {
 }
 
 /** `?imu=<fixture>` in mock/dev: replay a committed recording instead of the glasses. */
-function replayName(): string | null {
+export function replayName(): string | null {
   try {
     return new URLSearchParams(globalThis.location?.search ?? '').get('imu');
   } catch {

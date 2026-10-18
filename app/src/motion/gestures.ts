@@ -6,8 +6,9 @@
 // docs/handoffs/PART-2.md. Every threshold is a knob too, persisted per wearer by
 // calibrate() through settings.ts. Nothing here leaves the phone.
 import type { ImuSample } from './imu.ts';
-import { startImu } from './imu.ts';
+import { replayName, startImu } from './imu.ts';
 import {
+  MOCK,
   getDetectorOverrides,
   getNodMode,
   getSensitivity,
@@ -322,8 +323,11 @@ export function simulateGesture(g: HeadGesture): void {
   fire(g, 'simulated');
 }
 
+// Mock sessions without ?imu= replay have no IMU to calibrate against (the simulator has none).
+let mockCalibrated = false;
+
 export function isCalibrated(): boolean {
-  return getDetectorOverrides()?.calibrated === true;
+  return mockCalibrated || getDetectorOverrides()?.calibrated === true;
 }
 
 const median = (xs: number[]): number => {
@@ -341,6 +345,15 @@ export async function calibrate(
   opts: { timeoutMs?: number } = {},
 ): Promise<{ ok: boolean }> {
   const needed = 3;
+  if (MOCK && !replayName()) {
+    // Simulated pass so the mock UI flow runs; nothing is persisted, thresholds stay default.
+    for (let done = 0; done <= needed; done++) {
+      onProgress(done, needed);
+      if (done < needed) await new Promise((r) => setTimeout(r, 300));
+    }
+    mockCalibrated = true;
+    return { ok: true };
+  }
   const base = { ...currentParams(), single: false };
   // Relaxed detection: half the thresholds, no gate, no cooldown, so weak nods still count.
   const relaxed: DetectorParams = { ...base, down: base.down / 2, up: base.up / 2, gate: Infinity, cooldownMs: 0 };

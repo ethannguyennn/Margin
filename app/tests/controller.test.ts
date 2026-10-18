@@ -114,7 +114,8 @@ describe('bridge serialization', () => {
 });
 
 import { taskFixture } from '../src/ui/fixtures';
-import { createLocalV2FixturePorts } from '../src/ui/local-v2-stubs';
+import { mockDiagramImage } from '../src/mock/tiles';
+const tilesFor = (id: string) => ({ ...mockDiagramImage('dg-sop114-bracket')!, diagram_id: id });
 import type { ProgressEvent } from '../src/types';
 import { initialState, transition } from '../src/state';
 function assignedStep(index=0){
@@ -134,14 +135,14 @@ describe('v2 hands-free controller',()=>{
   });
   it('silence sends no ask and restores STEP_DETAILS page 2',async()=>{
     const p=ports();p.stopCapture=vi.fn(async()=>({data_b64:'',sample_rate:16000}));
-    p.getDiagram=id=>createLocalV2FixturePorts(()=>'').api.getDiagram(id);
+    p.getDiagram=id=>Promise.resolve(tilesFor(id));
     let state=transition(assignedStep(1),{type:'PRESS'}).state;state=transition(state,{type:'DOWN'}).state;
     const c=new LensController(state,p);await c.start();c.dispatch({type:'NOD'});await settle();
     c.dispatch({type:'ENDPOINT'});await settle();expect(c.state).toEqual(state);expect(p.ask).not.toHaveBeenCalled();expect(p.onError).not.toHaveBeenCalled();await c.dispose();
   });
   it('M2: emits progress in order, prefetches, shows cached tiles, shake returns to step 3',async()=>{
     const p=ports(),events:ProgressEvent[]=[];p.reportProgress=ev=>events.push(ev);
-    const fixture=createLocalV2FixturePorts(()=>'', 'm2');p.getDiagram=vi.fn(id=>fixture.api.getDiagram(id));
+    p.getDiagram=vi.fn(id=>Promise.resolve(tilesFor(id)));
     const start={...initialState('assigned'),screen:'IDLE' as const,privacySeen:true};
     const c=new LensController(start,p);await c.start();c.dispatch({type:'ASSIGNMENT',assignment:taskFixture(1000),now:1001});
     c.dispatch({type:'NOD'});await settle();expect(c.state.screen).toBe('STEP');
