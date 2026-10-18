@@ -33,6 +33,19 @@
 		file_server
 	}
 
+	# Worker companion and browser lens simulator, alongside the admin portal.
+	redir /app /app/ 308
+	handle_path /app/* {
+		root * /srv/app
+		header {
+			X-Content-Type-Options nosniff
+			X-Frame-Options DENY
+			Referrer-Policy no-referrer
+		}
+		try_files {path} /index.html
+		file_server
+	}
+
 	handle {
 		reverse_proxy {$RELAY_UPSTREAM:relay:8080}
 	}
