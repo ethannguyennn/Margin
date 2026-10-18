@@ -5,10 +5,10 @@
     "title": "Register, reader and printer",
     "alt": "Synthetic reference: register, reader and printer.",
     "crop": [
-      0,
-      0,
-      1,
-      0.54
+      0.05,
+      0.0,
+      0.91,
+      0.52
     ],
     "references": [
       {
@@ -47,10 +47,10 @@
     "title": "Allergen binder drawer",
     "alt": "Synthetic reference: allergen binder drawer.",
     "crop": [
-      0,
+      0.02,
+      0.56,
       0.52,
-      0.51,
-      0.42
+      0.4
     ],
     "references": [
       {
@@ -65,16 +65,42 @@
     "title": "Cash drawer and bill ledge",
     "alt": "Synthetic reference: cash drawer and bill ledge.",
     "crop": [
-      0,
-      0.05,
-      0.42,
-      0.89
+      0.0,
+      0.06,
+      0.43,
+      0.9
     ],
     "references": [
       {
         "chunk_id": "SOP-202:C:3.1",
         "quote": "drawer ledge"
       }
+    ],
+    "erase": [
+      [
+        0.355,
+        0.08,
+        0.08,
+        0.08
+      ],
+      [
+        0.388,
+        0.24,
+        0.05,
+        0.33
+      ],
+      [
+        0.41,
+        0.735,
+        0.03,
+        0.2
+      ],
+      [
+        0.388,
+        0.86,
+        0.05,
+        0.08
+      ]
     ]
   },
   {
@@ -83,9 +109,9 @@
     "title": "Bank bag, log and safe",
     "alt": "Synthetic reference: bank bag, log and safe.",
     "crop": [
-      0.52,
-      0.04,
-      0.48,
+      0.5,
+      0.05,
+      0.5,
       0.9
     ],
     "references": [
@@ -109,10 +135,10 @@
     "title": "Espresso cleaning parts",
     "alt": "Synthetic reference: espresso cleaning parts.",
     "crop": [
-      0,
-      0,
-      0.62,
-      1
+      0.0,
+      0.02,
+      0.79,
+      0.95
     ],
     "references": [
       {
@@ -127,6 +153,14 @@
         "chunk_id": "SOP-210:C:5.4",
         "quote": "drip tray"
       }
+    ],
+    "erase": [
+      [
+        0.762,
+        0.38,
+        0.03,
+        0.45
+      ]
     ]
   },
   {
@@ -135,10 +169,10 @@
     "title": "Sanitizer and test strip",
     "alt": "Synthetic reference: sanitizer and test strip.",
     "crop": [
-      0.75,
-      0.2,
+      0.758,
       0.25,
-      0.74
+      0.242,
+      0.72
     ],
     "references": [
       {
@@ -165,9 +199,9 @@
     "title": "Group head, portafilter and scale",
     "alt": "Synthetic reference: group head, portafilter and scale.",
     "crop": [
-      0,
-      0,
-      0.56,
+      0.0,
+      0.0,
+      0.57,
       1
     ],
     "references": [
@@ -199,9 +233,9 @@
     "title": "Milk pitcher, wand and tip",
     "alt": "Synthetic reference: milk pitcher, wand and tip.",
     "crop": [
-      0.54,
-      0,
-      0.46,
+      0.5,
+      0.0,
+      0.5,
       1
     ],
     "references": [
@@ -237,10 +271,10 @@
     "title": "Syrup and mocha pumps",
     "alt": "Synthetic reference: syrup and mocha pumps.",
     "crop": [
-      0,
-      0,
-      0.39,
-      1
+      0.0,
+      0.0,
+      0.395,
+      0.92
     ],
     "references": [
       {
@@ -287,10 +321,10 @@
     "title": "Cup, ice line and milk pitcher",
     "alt": "Synthetic reference: cup, ice line and milk pitcher.",
     "crop": [
-      0.36,
+      0.355,
       0.18,
-      0.64,
-      0.78
+      0.645,
+      0.72
     ],
     "references": [
       {
