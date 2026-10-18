@@ -59,3 +59,29 @@ def test_selected_graphic_survives_real_ask_route():
 def test_generation_uses_configured_shared_timeout():
     gen=GeminiGenerator.from_settings(NS(gemini_api_key='',gemini_model_generate='test',generate_timeout_s=23),client=object())
     assert gen.timeout == 23
+
+
+def _bake_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('bake_lens', ROOT / 'app/scripts/bake-lens-graphics.py')
+    mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+    return mod
+
+
+def test_erase_regions_are_valid_fractions():
+    for g in catalog():
+        for x, y, w, h in g.get('erase', []):
+            assert 0 <= x < 1 and 0 <= y < 1 and 0 < w and 0 < h and x + w <= 1 + 1e-9 and y + h <= 1 + 1e-9
+
+
+def test_committed_lens_images_match_the_catalog_crops():
+    # A crop or erase change without re-running app/scripts/bake-lens-graphics.py fails here.
+    # Small tolerance: LANCZOS resampling can differ by a pixel or two across Pillow versions.
+    from PIL import Image
+    bake = _bake_module()
+    for g in catalog():
+        want, _ = bake.bake(g)
+        got = Image.open(ROOT / 'app/src/assets/lens' / f"{g['id']}.png").convert('L')
+        assert got.size == (288, 144)
+        diff = sum(a != b for a, b in zip(got.tobytes(), want.tobytes()))
+        assert diff <= 0.005 * 288 * 144, f"{g['id']}: {diff} pixels differ; re-run the bake script"
