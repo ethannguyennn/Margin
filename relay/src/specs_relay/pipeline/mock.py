@@ -282,6 +282,8 @@ class MockRetriever:
                 break
         if not hits:
             return RetrievalResult(chunks=[], best_sim=0.12, best_rrf=0.004)
+        if re.search(r"pumps|syrup", q):
+            hits = sorted(hits, key=lambda chunk_id: chunk_id != "SOP-230:C:1.3")
         ranked = [by_id[i].model_copy(update={"sim": 0.86 - 0.1 * n, "rrf": 1 / (61 + n) * 2})
                   for n, i in enumerate(hits) if i in by_id]
         if revision:
