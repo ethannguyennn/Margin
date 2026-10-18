@@ -9,6 +9,28 @@ import { AnswerDetail } from '../src/phone/components/AnswerDetail';
 import { UI_FIXTURES } from '../src/ui/fixtures';
 import type { AskResponse, Step } from '../src/types';
 afterEach(cleanup);
+it.each([
+  ['2.3', 'Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup.', 'espresso-shot'],
+  ['2.4', 'Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.', 'milk-steaming'],
+  ['3.2', 'Pull the shots (see SOP-220) directly into the cup.', 'espresso-shot'],
+  ['3.3', 'Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.', 'milk-steaming'],
+  ['4.2', 'Pull the shots (see SOP-220) directly into the cup.', 'espresso-shot'],
+  ['4.3', 'Steam the milk to its target temperature, stretching for only 1 to 2 seconds.', 'milk-steaming'],
+  ['5.3', 'Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface.', 'espresso-shot'],
+  ['6.4', 'Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid.', 'espresso-shot'],
+  ['7.3', 'Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved.', 'espresso-shot'],
+  ['7.4', 'Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.', 'milk-steaming'],
+])('shows the action-specific image for recipe step %s', (section, body, expected) => {
+  const step: Step = { step_id: `SOP-230:C:${section}`, label: section, glance: body, body };
+  expect(stepGraphic(step)?.id).toBe(expected); // legacy relay fallback
+  expect(stepGraphic({ ...step, graphic_id: expected })?.id).toBe(expected);
+  expect(stepGraphic({ ...step, graphic_id: 'recipe-cup' })).toBeNull(); // stale wrong mapping is never shown
+  const state = { ...initialState('recipe'), screen: 'STEP' as const,
+    walkthrough: { doc_id: 'SOP-230', revision: 'C', title: 'Recipes', steps: [step], total: 1, index: 0 } };
+  expect(renderScreen(state).graphic_id).toBe(expected);
+  expect(answerGraphic({ ...UI_FIXTURES.answer, graphic_id: expected,
+    citations: [{ chunk_id: step.step_id, doc_id: 'SOP-230', revision: 'C', section, quote: body }] })?.id).toBe(expected);
+});
 const body='Purge the steam wand for 2 seconds before and after every use.';
 const step: Step={step_id:'SOP-220:C:4.4',label:'4.4',glance:'Purge the steam wand.',body,graphic_id:'milk-steaming'};
 const answer: AskResponse={...UI_FIXTURES.answer,body,glance:step.glance,graphic_id:step.graphic_id,
