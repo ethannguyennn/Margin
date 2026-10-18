@@ -26,6 +26,10 @@ const table: string[] = [];
 for (const f of files) {
   test(`fixture ${f}`, () => {
     const fx = load(f);
+    if (f.endsWith('.g2.json')) {
+      assert.equal(fx.meta.source, 'g2', `${f}: hardware provenance required`);
+      assert.ok(fx.meta.expect, `${f}: add measured NOD/SHAKE counts to meta.expect`);
+    }
     const events = detect(fixtureSamples(fx), paramsFor(fx));
     const got = { NOD: count(events, 'NOD'), SHAKE: count(events, 'SHAKE') };
     table.push(`${f}: NOD=${got.NOD} SHAKE=${got.SHAKE} expect=${JSON.stringify(fx.meta.expect)} source=${fx.meta.source}`);
@@ -222,6 +226,68 @@ test('live: an imuControl that never answers (simulator) times out instead of ha
   await g.stopHeadGestures();
 }, 8000);
 
+test('live: recording shares samples with gestures and stopping it keeps gestures armed', async () => {
+  const hw = imuBridge();
+  const got: string[] = [];
+  const recorded: Sample[] = [];
+  await g.startHeadGestures((x) => got.push(x));
+  const { startImu } = await import('../src/motion/imu.ts');
+  const stopRecording = await startImu((s) => recorded.push(s));
+  hw.feed(trace(4, double(1.5)));
+  assert.deepEqual(got, ['NOD']);
+  assert.ok(recorded.length > 0);
+  await stopRecording();
+  await stopRecording(); // each consumer may release only its own subscription, once
+  assert.equal(hw.subscribed, true);
+  const n = recorded.length;
+  hw.feed(shifted(trace(4, double(1.5)), 10000));
+  assert.deepEqual(got, ['NOD', 'NOD']);
+  assert.equal(recorded.length, n);
+  await g.stopHeadGestures();
+  assert.equal(hw.subscribed, false);
+  assert.deepEqual(hw.calls.at(-1), [false, undefined]);
+});
+
+test('live: a fixed-pace recording suppresses probing, including after foreground resume', async () => {
+  const store: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => (store[k] = v),
+    removeItem: (k: string) => delete store[k],
+  };
+  const hw = imuBridge();
+  const { startImu } = await import('../src/motion/imu.ts');
+  const { setImuPace } = await import('../src/settings.ts');
+  const recorded: Sample[] = [];
+  await g.startHeadGestures(() => {});
+  setImuPace(100);
+  const stopRecording = await startImu((s) => recorded.push(s), { fixedPace: true });
+  const slow = Array.from({ length: 25 }, (_, i) => ({ t: 1000 + i * 100, x: 0, y: 0, z: 1 }));
+  try {
+    hw.feed(slow);
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 100]);
+    hw.sys(5);
+    await settle();
+    const n = recorded.length;
+    hw.feed(shifted(slow, 5000));
+    assert.equal(recorded.length, n, 'recording receives nothing in the background');
+    hw.sys(4);
+    await settle();
+    hw.feed(shifted(slow, 10000));
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 100]);
+    await stopRecording();
+    hw.feed(shifted(slow, 20000));
+    await settle();
+    assert.deepEqual(hw.calls.at(-1), [true, 500], 'automatic probing resumes for the detector');
+  } finally {
+    await stopRecording();
+    await g.stopHeadGestures();
+    delete (globalThis as any).localStorage;
+  }
+});
+
 /** n double nods of a given amplitude, 3 s apart, then 1 s of stillness. */
 const nodSession = (amp: number, n = 3) =>
   trace(3 * n + 1, (t) => [...Array(n)].reduce((acc, _, i) => acc + bump(t, 1 + 3 * i, amp) + bump(t, 1.65 + 3 * i, amp), 0));
@@ -271,7 +337,7 @@ const frames: Record<string, (s: Sample) => Sample> = {
 
 for (const [name, frame] of Object.entries(frames)) {
   test(`accel (${name}): auto mode finds every double nod and no false ones, no axis knobs`, () => {
-    for (const f of files) {
+    for (const f of files.filter((name) => name.endsWith('.synthetic.json'))) {
       const fx = load(f);
       const nods = count(detect(gravity(fixtureSamples(fx)).map(frame), DEFAULT_PARAMS), 'NOD');
       if (typeof fx.meta.expect !== 'object' || !fx.meta.expect) console.info(`[gestures] ${f} as accelerometer (${name}): NOD=${nods}`);
