@@ -108,7 +108,8 @@ Gestures:
 - **Double nod** = two nods 250-1200 ms apart. This is the default trigger, emitted as `NOD`.
 - **Shake** = 3 alternating yaw lobes (≥ 2 reversals) within 1 s, with peak pitch < 0.6 x peak yaw.
 - **Motion gate** = RMS of the all-axis rate over the 700 ms ending 200 ms before onset must be
-  ≤ `gate`.
+  ≤ `gate`, and no pitch lobe may start in that window (walking is a steady train of nod-like
+  lobes; a deliberate double nod starts from a still head).
 - **Cooldown** 1.5 s.
 - BLE bursts (duplicate timestamps) use the running mean dt. A gap > 300 ms resets.
 
@@ -117,7 +118,7 @@ Gestures:
 | pitchAxis / pitchSign / yawAxis / yawSign | x / +1 / y / +1 | **PROVISIONAL**, from the recordings |
 | signal / scale / wrap | angle / 1 / 360 | **PROVISIONAL** |
 | lpMs / hpMs | 40 / 0 | set hpMs ≈ 2000 if x/y/z turn out to be a biased gyro |
-| down / up | 50 / 40 °/s | calibrated per wearer |
+| down / up | 22 / 18 °/s | as sensitive as the walking-train check allows; calibration only lowers them |
 | nodMinMs / nodMaxMs | 60 / 600 | down-lobe onset → up-lobe onset |
 | doubleMinMs / doubleMaxMs | 250 / 1200 | |
 | yaw / shakeMs | 50 °/s / 1000 | 80 missed half the Hann-windowed shakes |
@@ -128,8 +129,8 @@ Gestures:
 
 **Calibration** (`calibrate(onProgress)`):
 - Asks for 3 double nods, detected with half thresholds, no gate and no cooldown.
-- Sets `down`/`up` = 0.6 x the wearer's median peak rate, and persists them through
-  `settings.setDetectorOverrides`.
+- Sets `down`/`up` = 0.6 x the wearer's median peak rate, capped at the defaults (it only ever
+  makes the detector more sensitive), and persists them through `settings.setDetectorOverrides`.
 - If that falls below 0.6 x the defaults, the nods are too weak: it keeps the defaults and returns
   `{ ok: false }`. It also returns `{ ok: false }` after a 30 s timeout.
 
