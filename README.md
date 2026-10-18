@@ -2,7 +2,7 @@
 
 **Hands-free work instructions on smart glasses. Every answer is quoted from your own approved SOPs, or it doesn't show up at all.**
 
-A frontline worker nods twice, asks a question out loud, and sees the answer on their Even Realities G2 lens. The answer is a short quote from the employer's approved procedure, with its section cited. If the SOPs don't contain the answer, the lens says *"Not in approved SOPs"* instead of guessing.
+A frontline worker nods twice, asks a question out loud, and sees the answer on their Even Realities G2 lens. The answer is a short quote from the employer's approved procedure, with its section cited. If the SOPs don't contain the answer, the lens says *"Not in your SOPs. Ask your manager to add it."* instead of guessing, so the gap reaches the person who can close it.
 
 ---
 
@@ -44,6 +44,8 @@ Specs puts the employer's own procedures on the worker's glasses, and puts a det
 | Step through it hands-free: *"next"*, *"go back"*, *"show me the picture"*. | **Pair** glasses with a code shown on the lens, and **assign** procedures to a station. |
 | Ask a follow-up mid-step and land back on the same step. | Follow a **live progress board**: who is on which step, and for how long. |
 | Ask something ambiguous and the lens asks *"Which drink?"*, offering only options the SOPs already contain. | Read deviation reports workers file from the phone. |
+| Ask something no SOP covers and get pointed to your manager, never a guess. | **Test** the workspace's SOPs in a browser **glasses simulator** before anyone puts on a headset. |
+| The phone's **Lens** tab mirrors the glasses live, or runs the same simulator when no glasses are connected. | |
 
 The core promise: **nothing reaches the lens unless it is quoted from the employer's material, passes the deterministic verifier, and was approved by a human.**
 
@@ -72,6 +74,7 @@ The core promise: **nothing reaches the lens unless it is quoted from the employ
 - **Gestures:** double nod = talk, head shake = cancel/back (ignored on a step, so you never lose your place), and temple taps remain as a fallback. If no speech arrives within 3 s, the mic closes and nothing is sent, so a stray nod costs nothing.
 - **Clarify, don't guess:** if a question is ambiguous ("how many pumps of syrup?"), the relay returns 2–3 options taken from section headings it actually retrieved. The worker answers ("the cappuccino"), and the relay combines that with the original question.
 - **Scoped walkthroughs:** "walk me through a cappuccino" opens the SOP at section 3.2 and finishes at the end of that section group, not the end of the document.
+- **Not found → manager:** when nothing approved covers a question, the lens shows *"Not in your SOPs. Ask your manager to add it."* and the phone tells the worker to contact their manager so the procedure can be added in the portal. The gap becomes a request for a new SOP instead of a guess.
 - **Reference pictures:** each illustration is pinned to an exact SOP revision and source anchor (`corpus/illustrations.json`). The model can only pick an image that belongs to a chunk it cited.
 
 ### The supervisor loop
@@ -88,6 +91,15 @@ assign to "Bay 3" ────────────────▶ POST /v1/a
                                                                    "Task ready. Nod twice to start"
 live board ◀──────────────────────  GET /v1/progress ◀──────────── step_started / step_completed
 ```
+
+### The glasses simulator
+
+Both web apps include a browser preview of the G2 lens (576×288). It uses the app's real lens controller, screen renderer and container positions.
+
+- **Portal → Simulator** (`/portal/#simulator`): a supervisor asks questions and runs commands against their own workspace's SOPs through `/v1/simulator/ask`, with portal auth. Diagram tiles load only from that workspace's approved, effective procedures. No fake device, assignment or progress event is created.
+- **Worker app → Lens tab** (`/app/#/lens`): the same simulator. When glasses are connected, it becomes a live mirror of the lens text, reference images and diagrams.
+
+Screenshots, reproduction commands, and which results are mock versus hardware evidence: [`app/tests/evidence/browser-simulator/README.md`](app/tests/evidence/browser-simulator/README.md).
 
 ## The trust layer
 
@@ -108,11 +120,11 @@ Around the verifier:
 
 | Sponsor | What we use | Where it matters |
 |---|---|---|
-| **[Even Realities](https://www.evenrealities.com/)** (G2 glasses + Even Hub) | The whole worker experience is an Even Hub app (`app/`): lens text containers, 4-bit greyscale image containers, the glasses microphone, temple gestures and the **IMU** for nod and shake detection. The phone companion screen runs in the Even app's WebView, and `evenhub-simulator` drives our smoke tests. | Hands-free is the product. Our nod detector runs on the G2's gravity-normalised accelerometer and was tuned on real glasses, BLE bursts included. Answers, steps and reference images are laid out for the 576×144 lens. |
+| **[Even Realities](https://www.evenrealities.com/)** (G2 glasses + Even Hub) | The whole worker experience is an Even Hub app (`app/`): lens text containers, 4-bit greyscale image containers, the glasses microphone, temple gestures and the **IMU** for nod and shake detection. The phone companion screen runs in the Even app's WebView. `evenhub-simulator` drives our smoke tests, and our own browser simulator reuses the lens renderer so supervisors can preview the G2 display without hardware. | Hands-free is the product. Our nod detector runs on the G2's gravity-normalised accelerometer and was tuned on real glasses, BLE bursts included. Answers, steps and reference images are laid out for the 576×144 lens. |
 | **[Google Gemini](https://ai.google.dev/)** | Four roles, each configured by its own env var: **speech-to-text** with a domain vocabulary prompt (`pipeline/transcribe.py`), **embeddings** at 768 dimensions for retrieval, **structured cited answer generation** (`pipeline/generate.py`), and **multimodal conversion** of uploaded PDFs, DOCX files and photos into draft procedures (`relay/src/specs_relay/convert/`). | Gemini drafts. The deterministic verifier decides. Structured output gives us typed citations to check. Transient 429/5xx errors get one retry within the latency budget, and quota errors show the lens-safe message *"Busy, try again"*. |
 | **[Tiger Data](https://www.tigerdata.com/)** (Tiger Cloud: Postgres + pgvector + TimescaleDB) | One database for everything: SOP chunks with **pgvector** embeddings and a generated **`tsvector`**, fused by reciprocal-rank fusion for hybrid retrieval; **hypertables** for `events` (per-stage ask latency) and `progress` (the live board); plus devices, assignments, drafts and uploaded source files (`db/migrations/`). Optional **zero-copy fork** for previewing a new SOP revision (`DATABASE_URL_FORK`, `ENABLE_REVISION_FORK`). | Hybrid search catches both "how hot is the milk" (semantic) and "SOP-210 4.2" (lexical). `make latency` reports p50/p95 per stage straight from the hypertable. |
 | **[Sentry](https://sentry.io/)** | Relay and app SDKs, with **one distributed trace per ask**: lens gesture → capture → upload → STT → retrieval → generation → verification → render. Each stage is a span. A same-origin tunnel (`routes/sentry_tunnel.py`) lets the WebView report through the relay. Raw audio is filtered from logs. | Debugging a voice loop across glasses, phone, relay and Gemini needs one timeline. The phone screen shows the trace id with each answer. |
-| **[Vultr](https://www.vultr.com/)** | One Cloud Compute VM running the relay and Caddy (automatic TLS) via Docker Compose (`deploy/`), behind `getyourassto.work`. `make deploy-remote` fast-forwards a clean `main` checkout on the VM and rebuilds. | Small enough for 1 vCPU / 1–2 GB. The relay serves the API at `/v1/` and the employer portal at `/portal/`. |
+| **[Vultr](https://www.vultr.com/)** | One Cloud Compute VM running the relay and Caddy (automatic TLS) via Docker Compose (`deploy/`), behind `getyourassto.work`. `make deploy-remote` fast-forwards a clean `main` checkout on the VM and rebuilds. | Small enough for 1 vCPU / 1–2 GB. One origin serves the API at `/v1/`, the employer portal at `/portal/` and the worker companion with its lens simulator at `/app/`. |
 
 *Photon (supervisor notifications) is stubbed behind `NOTIFIER=photon` but not enabled, because its API access hasn't been verified. The console notifier is the default.*
 
@@ -145,7 +157,7 @@ Around the verifier:
 |---|---|
 | `app/` | Even Hub app: lens UI (`src/state.ts`, `src/ui/`), motion and gestures (`src/motion/`), audio, API client, phone companion (`src/phone/`) |
 | `relay/` | FastAPI relay: routes, ask pipeline (`pipeline/`), conversion (`convert/`), diagram rendering (`diagrams/`), tests |
-| `portal/` | Employer portal: library, uploads, draft review, approvals, pairing, assignments, progress board |
+| `portal/` | Employer portal: library, uploads, draft review, approvals, pairing, assignments, progress board, glasses simulator |
 | `db/` | SQL migrations and `seed.py` |
 | `corpus/` | Demo SOP bank: fictional *Ember & Oak Coffee* SOP-201…230 rev C, illustrations, and sample upload materials (`materials/`) |
 | `eval/` | Answer-quality eval (`qa.jsonl`, `run_eval.py`), gate calibration (`tune_gate.py`), conversion eval, saved results |
@@ -217,7 +229,7 @@ A human review of the same saved responses scored 35/36 on the original answerab
 
 ## Deployment
 
-The relay and Caddy run with Docker Compose on a Vultr VM. Full runbook: [`deploy/README.md`](deploy/README.md).
+The relay and Caddy run with Docker Compose on a Vultr VM. Caddy serves both web apps: the admin portal (with its simulator at `/portal/#simulator`) and the worker app (Lens tab at `/app/#/lens`). Full runbook: [`deploy/README.md`](deploy/README.md).
 
 ```sh
 make deploy-remote VM_HOST=root@<vm-ip>   # fast-forward clean main on the VM, then `make deploy`
