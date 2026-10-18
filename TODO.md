@@ -25,11 +25,10 @@ Windows: `make` = `mingw32-make`.
 - [x] **Deploy v2 to the VM** (checked 2026-10-18): `/root/specs` on the VM runs `54f6f0a`
       (Build 0.3.0) on both domains; `/portal/` is 200, `/v1/devices/me` is 401 (v2 auth).
       `PORTAL_TOKEN` and `GEMINI_MODEL_CONVERT=gemini-3.8-flash` are set in the VM's `.env`
-- [ ] **Redeploy `origin/main`** (2 commits ahead of the VM: `3b141a4` + its conflict fix `ff94e84`,
-      ask latency budget / Gemini 429 retry). No conflict markers left; relay 680 passed
-- [ ] **VM `.env`:** `PUBLIC_ORIGIN` is still `https://45-32-88-132.sslip.io`; `ALLOWED_ORIGINS` is only
-      `http://localhost:5174` (the relay logs `CORS rejected origin 'https://getyourassto.work'`).
-      Same-origin portal requests still work; add the root domain to silence it, then the lens origin
+- [x] **Redeployed `main` (2026-10-18):** VM at `22bd822`, `/v1/health` reports `0.3.0` on both domains;
+      `.env` backed up to `/root/specs/.env.bak-2026-10-18` first
+- [x] **VM `.env` origins:** `PUBLIC_ORIGIN=https://getyourassto.work`; `ALLOWED_ORIGINS` = root domain,
+      sslip.io, `http://localhost:5174`. Preflight from the root domain is 200 with the ACAO header
 - [ ] **Domain switch:** the root domain already answers over TLS. After the v2 deploy, build the
       app with `VITE_RELAY_ORIGIN=https://getyourassto.work`. `app.json` already whitelists both
       origins - Parts 1 + 3
