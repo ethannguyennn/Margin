@@ -17,6 +17,8 @@
 PORT ?= 8080
 SIM_URL ?= http://localhost:5174
 ARGS ?=
+RELAY ?= http://127.0.0.1:8090
+PACE ?= 10
 
 ifeq ($(OS),Windows_NT)
   VENV_PY := .venv/Scripts/python.exe
@@ -31,10 +33,10 @@ COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
 .PHONY: help venv install dev-relay dev-app dev-portal sim test test-relay test-app \
         test-portal pack seed eval eval-conversion latency deploy deploy-remote logs health \
-        sync-branches
+        sync-branches diag-relay diag-voice diag-gap diag-loop
 
 help:
-	@echo targets: install dev-relay dev-app dev-portal sim test pack seed eval eval-conversion latency deploy deploy-remote logs health
+	@echo targets: install dev-relay dev-app dev-portal sim test pack seed eval eval-conversion latency deploy deploy-remote logs health diag-relay diag-voice diag-gap diag-loop
 
 venv:
 	$(SYS_PY) -m venv .venv
@@ -93,10 +95,10 @@ eval:
 	$(PY) eval/run_eval.py --base-url $(EVAL_URL) $(ARGS)
 
 # Part 4's conversion eval: runs extract -> convert -> verify_step -> render directly (no
-# HTTP) and exits non-zero if any *passing* step contains a fabricated value.
+# HTTP). Strict mode fails missing steps, values and expected diagrams as well as fabrication.
 eval-conversion:
 ifneq ($(wildcard eval/conversion/run_conversion_eval.py),)
-	$(PY) eval/conversion/run_conversion_eval.py $(ARGS)
+	$(PY) eval/conversion/run_conversion_eval.py --strict $(ARGS)
 else
 	@echo eval/conversion/run_conversion_eval.py not merged on this branch yet - Part 4
 endif
@@ -109,14 +111,14 @@ deploy:
 	$(COMPOSE) ps
 
 deploy-remote:
-	ssh $(VM_HOST) "cd specs && git pull --ff-only && make deploy"
+	$(PY) deploy/remote.py --host "$(VM_HOST)"
 
 logs:
 	$(COMPOSE) logs -f --tail=200 relay
 
 # Read-only, detached checkouts of every team branch under _branches/ (gitignored),
 # refreshed from origin. For browsing (e.g. in Obsidian); never commit in them.
-BRANCHES := part-1-lens-hands-free-ui part-2-motion-voice-io part-3-relay-platform part-4-conversion-diagrams part-5-portal-data
+BRANCHES := v3-part-1-lens-ux v3-part-2-relay-answers v3-part-3-platform-deploy v3-part-4-field-hardware
 sync-branches:
 	git fetch origin --prune
 	git worktree prune
@@ -130,4 +132,17 @@ endef
 # make health URL=https://getyourassto.work
 URL ?= http://localhost:$(PORT)
 health:
-	$(PY) deploy/healthcheck.py --url $(URL)/v1/health --verbose
+	$(PY) deploy/healthcheck.py --url "$(URL)/v1/health?verbose=1" --verbose
+
+# Paced, opt-in live checks. PACE is seconds between requests, not a quota guarantee.
+diag-relay:
+	$(PY) tools/diagnostic/run_relay.py --relay "$(RELAY)"
+
+diag-voice:
+	$(PY) deploy/diagnostic.py voice --relay "$(RELAY)" --pace $(PACE)
+
+diag-gap:
+	$(PY) deploy/diagnostic.py gap --relay "$(RELAY)" --pace $(PACE)
+
+diag-loop:
+	$(PY) deploy/diagnostic.py loop --relay "$(RELAY)" --pace $(PACE)

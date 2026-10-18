@@ -91,6 +91,36 @@ test('4xx is never retried', async () => {
   assert.equal(res.error?.code, 'bad_request');
 });
 
+test('HTTP 429 shows busy and never repeats the upload', async () => {
+  const calls = stubFetch({ status: 429 });
+  const res = await ask(REQ);
+  assert.equal(res.error?.message, 'Busy, try again');
+  assert.equal(res.verified, false);
+  assert.equal(calls.length, 1);
+});
+
+test('provider quota wrapped in a relay 504 shows busy without retrying', async () => {
+  const calls = stubFetch({ status: 504, body: {
+    outcome: 'error', error: { code: 'llm_timeout', message: 'Gemini HTTP 429 RESOURCE_EXHAUSTED' },
+  } });
+  assert.equal((await ask(REQ)).error?.message, 'Busy, try again');
+  assert.equal(calls.length, 1);
+});
+
+test('a successful HTTP envelope carrying a quota error also shows busy', async () => {
+  stubFetch({ body: { ...ANSWERED, outcome: 'error', verified: false,
+    error: { code: 'rate_limited', message: 'provider limit' } } });
+  assert.equal((await ask(REQ)).error?.message, 'Busy, try again');
+});
+
+test('safe relay quota copy suppresses the normal 5xx retry', async () => {
+  const calls = stubFetch({ status: 504, body: {
+    outcome: 'error', error: { code: 'llm_timeout', message: 'Busy, try again' },
+  } });
+  assert.equal((await ask(REQ)).error?.message, 'Busy, try again');
+  assert.equal(calls.length, 1);
+});
+
 test("the relay's own error code wins over ours", async () => {
   stubFetch({ status: 503, body: { trace_id: 't9', outcome: 'error', error: { code: 'llm_timeout', message: 'slow' } } });
   const res = await ask(REQ);

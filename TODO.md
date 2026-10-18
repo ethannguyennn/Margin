@@ -20,6 +20,35 @@ Windows: `make` = `mingw32-make`.
 
 ## 1. Deploy and live checks (Part 3)
 
+**v3 platform checkpoint (2026-10-18, `v3-part-3-platform-deploy`; not deployed):**
+
+- [x] Health distinguishes ask mocks from conversion mocks; verbose health adds gate,
+      commit and process-lifetime Gemini 429 counters. Normal response keeps its four fields.
+- [x] Provider quota failures return safe `Busy, try again` copy through the shared error
+      helper; the API client suppresses its extra 5xx retry. Frozen error codes unchanged.
+- [x] Container probe rejects `ok: false`, even with HTTP 200.
+- [x] `make eval-conversion` now uses `--strict`; `sync-branches` lists all four v3 branches.
+- [x] App example origin is `https://getyourassto.work`; timeout remains 50000 ms.
+      Pack/version bump and the final v3 contract validation are still pending Part 1's tag.
+- [x] Diagnostic launcher supports Python 3.11+; voice/app-loop wrappers accept `RELAY` and
+      `PACE`, reject mock evidence, validate the synthetic corpus, and fail closed.
+      Windows launcher/health and 22-file SAPI preparation verified. Live loops remain unrun.
+- [x] Remote deploy reads `VM_HOST` from `.env` and guards main/clean/fast-forward state.
+- [ ] **M6/M9 deployment:** this computer has no usable authorized SSH key. VM gate changes,
+      redeploy, paid-key verification, live voice/gap checks and 30-ask quota run remain blocked.
+- [ ] **Part 2 request:** add a main guard, `--relay`, `--pace` and assertion-based exit status
+      to `tools/diagnostic/gap_probe.py`; current `make diag-gap` reports this block and exits 1.
+- [ ] **Part 1 request:** render `response.error.message === 'Busy, try again'` on ERROR;
+      `errorScreen()` currently hardcodes `No verified answer`. Client copy alone is not visible.
+- [ ] **Part 4 request:** count recovered internal STT retries with `obs.record_quota_error`
+      before retrying, so verbose health also includes provider 429s recovered inside that module.
+- [ ] `v3-contract-app` / `v3-contract-relay` tags were absent at this checkpoint; wait for
+      their owners before validation/pack. No changes to their contracts or lens code here.
+
+Validation: `make test`: **767 relay passed / 12 skipped; 564 app passed / 12 skipped;
+8 portal passed; app typecheck and production build passed**. Targeted diagnostic tests use
+stubs; no live voice, cloud deployment, paid quota, hardware or cross-platform result claimed.
+
 - [ ] **Domain switch in the app build:** `app/.env.example` still sets
       `VITE_RELAY_ORIGIN=https://45-32-88-132.sslip.io`. Build/pack with
       `VITE_RELAY_ORIGIN=https://getyourassto.work` (`app.json` already whitelists both) - Parts 1 + 3
@@ -41,8 +70,8 @@ Windows: `make` = `mingw32-make`.
       requests/day; `gemini-3.5-flash-lite`: 15/min). Conversion is about 2-3 calls per material.
       On `gemini-3.5-flash-lite`, SOP-153 converted every value but **no schematic**. Re-run
       `make eval-conversion` on the model we demo with - Part 4 + account owner
-- [ ] **`make eval-conversion` should fail closed:** it runs without `--strict`, so missing steps,
-      values or expected diagrams still exit 0 (only fabrication fails). Add `--strict` - Part 3
+- [x] **`make eval-conversion` fails closed:** target now passes `--strict`, so missing steps,
+      values or expected diagrams fail alongside fabrication - Part 3 v3 checkpoint
 - [ ] **Head shake is impossible on this IMU:** an accelerometer cannot see yaw, so "shake: back"
       became "double: back" (`61b9c1e`). Update BUILD-PLAN-V2 section 3 (gestures table) and the M4
       criteria, which still describe a shake - Parts 1 + 2
