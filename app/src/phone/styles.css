@@ -322,6 +322,12 @@ button {
   cursor: pointer;
 }
 
+a.ghost {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .ghost:disabled {
   opacity: 0.35;
   cursor: default;
