@@ -8,7 +8,7 @@ from __future__ import annotations
 import importlib
 import logging
 from collections import OrderedDict
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from types import ModuleType
@@ -23,15 +23,18 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from . import obs
+from .auth import RateLimiter
 from .config import Settings, get_settings
-from .pipeline import mock
+from .jobs import JobRunner
+from .pipeline import PipelineError, mock
 from .schemas import ErrorBody, ErrorResponse, IntentResult
 
 log = logging.getLogger("margin.relay")
 
 ALLOWED_HEADERS = ["content-type", "sentry-trace", "baggage", "x-session-id", "authorization"]
 ERROR_STATUS = {"bad_request": 400, "stt_failed": 502, "db_down": 503, "llm_timeout": 504,
-                "internal": 500}
+                "internal": 500, "unauthorized": 401, "not_found": 404, "conflict": 409,
+                "rate_limited": 429, "payload_too_large": 413, "unsupported_media_type": 415}
 
 
 # --- pipeline factory -------------------------------------------------------------
@@ -49,6 +52,12 @@ class Pipeline:
     db: Any
     real_db: bool
     walkthrough: Any = None  # Part 5's walkthrough module in real mode (walkthroughs, deviations)
+    # --- v2 ---
+    parse_command: Callable[[str], str | None] = mock.parse_command  # whole-utterance commands
+    converter: Any = None  # Converter: extract() + convert()
+    verify_step: Callable[..., Any] = mock.verify_step  # deterministic draft verifier
+    renderer: Any = None  # DiagramRenderer
+    publisher: Callable[[str, str], Awaitable[dict]] | None = None  # approve -> publish
     mocked: list[str] = field(default_factory=list)  # components running on mocks
     min_sim: float = float("-inf")  # gate thresholds; -inf disables the gate
     min_rrf: float = float("-inf")
@@ -108,10 +117,14 @@ def build_pipeline(settings: Settings) -> Pipeline:
     construct falls back to its mock with a WARN, and /v1/health reports mock=true."""
     mocked: list[str] = []
     if settings.mock_mode:
+        mdb = mock.MockDB()
         p = Pipeline(transcriber=mock.MockTranscriber(), classify=mock.classify_intent,
-                     retriever=mock.MockRetriever(), generator=mock.MockGenerator(),
+                     retriever=mock.MockRetriever(db=mdb), generator=mock.MockGenerator(),
                      verify=mock.verify, sanitize=mock.sanitize, notifier=mock.MockNotifier(),
-                     db=mock.MockDB(), real_db=False, mocked=["all"])
+                     db=mdb, real_db=False, parse_command=mock.parse_command,
+                     converter=mock.MockConverter(), verify_step=mock.verify_step,
+                     renderer=mock.MockRenderer(), mocked=["all"])
+        p.publisher = _mock_publisher(p)
         _set_thresholds(p, settings, mock_retriever=True)
         return p
 
@@ -125,7 +138,8 @@ def build_pipeline(settings: Settings) -> Pipeline:
             return fallback()
 
     db_mod = _import("db")
-    db: Any = db_mod if db_mod is not None else mock.MockDB()
+    mock_db = mock.MockDB() if db_mod is None else None
+    db: Any = db_mod if db_mod is not None else mock_db
     if db_mod is None:
         mocked.append("db")
 
@@ -167,7 +181,7 @@ def build_pipeline(settings: Settings) -> Pipeline:
     def mock_retriever() -> Any:
         nonlocal retriever_is_mock
         retriever_is_mock = True
-        return mock.MockRetriever()
+        return mock.MockRetriever(db=mock_db)
 
     retriever = attempt("retrieve", real_retriever, mock_retriever)
 
@@ -185,13 +199,37 @@ def build_pipeline(settings: Settings) -> Pipeline:
     if db_mod is not None and walkthrough_mod is None:
         mocked.append("walkthrough")
 
+    # --- v2 (Part 4: commands, conversion, step verifier, renderer) ---------------
+    parse_command = attempt("command", lambda: need(intent_mod).parse_command, lambda: mock.parse_command)
+    verify_step_mod = _import("convert.verify_step")
+    verify_step = attempt("verify_step", lambda: need(verify_step_mod).verify_step,
+                          lambda: mock.verify_step)
+    structure_mod = _import("convert.structure")
+    converter = attempt("convert", lambda: _construct(
+        need(structure_mod).GeminiConverter, settings, client=gemini()), mock.MockConverter)
+    render_mod = _import("diagrams.render")
+    renderer = attempt("render", lambda: need(render_mod).DiagramRenderer(), mock.MockRenderer)
+
     p = Pipeline(transcriber=transcriber, classify=classify, retriever=retriever,
                  generator=generator, verify=verify, sanitize=sanitize, notifier=notifier,
-                 db=db, real_db=db_mod is not None, walkthrough=walkthrough_mod, mocked=mocked)
+                 db=db, real_db=db_mod is not None, walkthrough=walkthrough_mod,
+                 parse_command=parse_command, converter=converter, verify_step=verify_step,
+                 renderer=renderer, mocked=mocked)
+    if walkthrough_mod is not None and hasattr(walkthrough_mod, "publish_draft"):
+        p.publisher = lambda doc_id, revision: walkthrough_mod.publish_draft(doc_id, revision)
+    elif mock_db is not None:
+        p.publisher = _mock_publisher(p)
+    else:
+        mocked.append("publish")
     _set_thresholds(p, settings, mock_retriever=retriever_is_mock)
     if mocked:
         log.warning("MOCK_MODE=0 but running on mocks for: %s", ", ".join(mocked))
     return p
+
+
+def _mock_publisher(p: Pipeline) -> Callable[[str, str], Awaitable[dict]]:
+    """MockDB.publish_draft, re-verifying with whichever verify_step the pipeline uses."""
+    return lambda doc_id, revision: p.db.publish_draft(doc_id, revision, p.verify_step)
 
 
 def _set_thresholds(p: Pipeline, settings: Settings, *, mock_retriever: bool) -> None:
@@ -209,9 +247,13 @@ def _set_thresholds(p: Pipeline, settings: Settings, *, mock_retriever: bool) ->
 # --- errors -------------------------------------------------------------------
 
 
-def error_response(trace_id: str, code: str, message: str) -> JSONResponse:
-    body = ErrorResponse(trace_id=trace_id, error=ErrorBody(code=code, message=message))
-    return JSONResponse(body.model_dump(), status_code=ERROR_STATUS.get(code, 500))
+def error_response(trace_id: str, code: str, message: str, detail: Any = None) -> JSONResponse:
+    """The contract error shape. ``detail`` is an additive field for the portal, which
+    shows ``detail`` verbatim (e.g. the per-step reasons of a refused approve)."""
+    body = ErrorResponse(trace_id=trace_id, error=ErrorBody(code=code, message=message)).model_dump()
+    if detail is not None:
+        body["detail"] = detail
+    return JSONResponse(body, status_code=ERROR_STATUS.get(code, 500))
 
 
 def trace_id_of(request: Request) -> str:
@@ -241,7 +283,7 @@ class OptionsMiddleware:
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] == "http" and scope["method"] == "OPTIONS":
-            await Response(status_code=204, headers={"allow": "GET, POST, OPTIONS"})(
+            await Response(status_code=204, headers={"allow": "GET, POST, PUT, OPTIONS"})(
                 scope, receive, send)
             return
         await self.app(scope, receive, send)
@@ -299,7 +341,16 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                 await pipe.db.init_pool()
             except Exception as exc:  # noqa: BLE001 - boot anyway; /v1/health says db: down
                 log.error("db init_pool failed: %s", type(exc).__name__)
+        # A conversion interrupted by a restart must read `failed`, never stuck `converting`.
+        fail_interrupted = getattr(pipe.db, "fail_interrupted_materials", None)
+        if fail_interrupted is not None:
+            try:
+                if (n := await fail_interrupted()):
+                    log.warning("marked %d interrupted conversion(s) failed", n)
+            except Exception as exc:  # noqa: BLE001
+                log.error("could not fail interrupted conversions: %s", type(exc).__name__)
         yield
+        await app.state.jobs.shutdown()
         close = getattr(pipe.db, "close_pool", None)
         if pipe.real_db and close is not None:
             try:
@@ -311,6 +362,14 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                   docs_url="/v1/docs", openapi_url="/v1/openapi.json", redoc_url=None)
     app.state.settings = settings
     app.state.pipeline = pipe
+    app.state.jobs = JobRunner(pipe, settings)
+    app.state.pair_limiter = RateLimiter(settings.pair_rate_per_min)
+
+    @app.exception_handler(PipelineError)
+    async def _pipeline_error(request: Request, exc: PipelineError) -> JSONResponse:
+        # Typed errors raised by routes (auth, rate limit, not found, conflict...).
+        return error_response(trace_id_of(request), exc.code, exc.message,
+                              detail=getattr(exc, "detail", None) or exc.message)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(request: Request, exc: RequestValidationError) -> JSONResponse:
@@ -326,9 +385,22 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         resp.status_code = exc.status_code
         return resp
 
-    from .routes import ask, deviation, health, ingest, procedures
+    from .routes import (
+        ask,
+        assignments,
+        deviation,
+        devices,
+        diagrams,
+        drafts,
+        health,
+        ingest,
+        materials,
+        procedures,
+        progress,
+    )
 
-    for module in (health, ask, deviation, procedures, ingest):
+    for module in (health, ask, deviation, procedures, ingest,  # v1
+                   devices, assignments, progress, diagrams, materials, drafts):  # v2
         app.include_router(module.router)
 
     # Added innermost first: CORS is outermost, so even error responses carry CORS headers.
@@ -339,7 +411,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         log.warning("ALLOWED_ORIGINS is empty: every browser origin will be rejected")
     app.add_middleware(LoggingCORSMiddleware, allow_origins=origins,
                        allow_origin_regex=settings.allowed_origin_regex or None,
-                       allow_methods=["GET", "POST", "OPTIONS"], allow_headers=ALLOWED_HEADERS,
+                       allow_methods=["GET", "POST", "PUT", "OPTIONS"], allow_headers=ALLOWED_HEADERS,
                        expose_headers=["x-trace-id"], allow_credentials=False, max_age=600)
 
     log.info("Margin relay %s up: mock_mode=%s mocked=%s origins=%s", obs.version(settings),
