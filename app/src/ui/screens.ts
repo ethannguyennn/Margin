@@ -1,5 +1,5 @@
 import { answerGraphic, stepGraphic, ILLUSTRATED_PAGE_CHARS } from './sop-graphics';
-import type { LensState } from '../state';
+import { scopeOf, validClarify, type LensState } from '../state';
 import { sanitizeForG2 } from './glyphs';
 import { paginate } from './paginate';
 export interface ScreenText {
@@ -27,6 +27,11 @@ export function compactSource(source: string): string {
     const m = /^(\S+) Sec (\S+)(?: rev \S+)?$/.exec(source.trim());
     return m ? `${m[1]} ${m[2]}` : source;
 }
+/** "k/n" and the bar count inside the walkthrough's scope (the steps the worker asked for). */
+const position = (w: NonNullable<LensState['walkthrough']>) => {
+    const { start, end } = scopeOf(w);
+    return `${w.index - start + 1}/${end - start}  ${bar(w.index - start, end - start)}`;
+};
 const bar = (index: number, total: number) => {
     const done = Math.max(1, Math.round(((index + 1) / Math.max(total, 1)) * 10));
     return `${'━'.repeat(done)}${'─'.repeat(10 - done)}`;
@@ -67,7 +72,7 @@ export function walkthroughScreen(state: LensState, o: RenderOptions = {}): Scre
     if (!w || (state.response !== null && state.response.verified !== true))
         return errorScreen(o);
     const step = w.steps[w.index];
-    return { graphic_id: stepGraphic(step)?.id, header: `${w.index + 1}/${w.total}  ${bar(w.index, w.total)}`,
+    return { graphic_id: stepGraphic(step)?.id, header: position(w),
         main: short(step.glance, 130),
         footer: o.hints === false ? '' : 'swipe: step   press: details' };
 }
@@ -76,9 +81,12 @@ export function stepScreen(state: LensState, o: RenderOptions = {}): ScreenText 
     if (!w || !current)
         return errorScreen(o);
     const copyLength = [current.glance, current.warning, current.checkpoint].filter(Boolean).join('\n\n! > ').length;
-    return { graphic_id: copyLength <= ILLUSTRATED_PAGE_CHARS ? stepGraphic(current)?.id : undefined, header: `${w.index + 1}/${w.total}  ${bar(w.index, w.total)}`,
+    const graphic = stepGraphic(current)?.id, shown = copyLength <= ILLUSTRATED_PAGE_CHARS;
+    // A picture that does not fit beside a long step is one "show me the picture" away.
+    const marker = current.diagram ? '[diagram]' : graphic && !shown ? '[picture]' : '';
+    return { graphic_id: shown ? graphic : undefined, header: position(w),
         main: [short(current.glance, 60), current.warning ? `! ${short(current.warning, 80)}` : '', current.checkpoint ? `> ${short(current.checkpoint, 60)}` : ''].filter(Boolean).join('\n\n'),
-        footer: state.notice || join(o.hints === false ? '' : 'nod twice: speak', current.diagram ? '[diagram]' : '') };
+        footer: state.notice || join(o.hints === false ? '' : 'nod twice: speak', marker) };
 }
 export function renderScreen(state: LensState, level = 0, o: RenderOptions = {}): ScreenText {
     const hint = (text: string) => (o.hints === false ? '' : text);
@@ -91,13 +99,20 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
             case 'STEP': return safe(stepScreen(state, o));
             case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: state.pages.length > 1 ? `${state.page + 1}/${state.pages.length}` : '', main: state.pages[state.page] ?? '', footer: hint('swipe: page   double: back') });
             case 'DIAGRAM': return safe({ header: '', main: '', footer: state.diagramReady ? join(short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '', 45), hint('double: back')) : '...' });
-            case 'TASK_DONE': return safe({ header: 'DONE', main: `${state.walkthrough?.total ?? 0}/${state.walkthrough?.total ?? 0} steps`, footer: hint('press: close') });
+            case 'TASK_DONE': {
+                const scope = state.walkthrough ? scopeOf(state.walkthrough) : { start: 0, end: 0 }, n = scope.end - scope.start;
+                return safe({ header: 'DONE', main: `${n}/${n} steps`, footer: hint('press: close') });
+            }
             case 'IDLE': return safe({ ...idleScreen(o), footer: state.notice || (state.assignment_id ? hint('nod twice: resume') : idleScreen(o).footer) });
             case 'LISTENING': return safe(listeningScreen(level, o));
             case 'THINKING': return safe(thinkingScreen());
             case 'ANSWER_GLANCE': return safe(glanceScreen(state, o));
             case 'ANSWER_EXPANDED': return safe(expandedScreen(state, o));
             case 'NOT_FOUND': return safe(notFoundScreen(o));
+            case 'CLARIFY': {
+                const clarify = state.response ? validClarify(state.response) : null;
+                return safe(clarify ? { header: clarify.prompt, main: clarify.options.join('\n'), footer: hint('nod twice: answer') } : notFoundScreen(o));
+            }
             case 'WALKTHROUGH': return safe(walkthroughScreen(state, o));
             case 'LOGGED': return safe(loggedScreen());
             case 'ERROR': return safe(errorScreen(o));
