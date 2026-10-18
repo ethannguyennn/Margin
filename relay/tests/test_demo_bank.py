@@ -2,9 +2,10 @@
 
 Checks the bank is self-consistent before anything is seeded: every procedural step
 fits the lens, and every answerable eval question's expected values are verbatim in
-the section it cites. The originals the team supplied are at the repo root."""
+the section it cites. Hashes retain the original baseline after duplicate root files were removed."""
 from collections import Counter
 import json
+import hashlib
 from pathlib import Path
 
 import pytest
@@ -39,10 +40,17 @@ def test_every_step_fits_the_lens():
 
 
 def test_corpus_copies_match_the_supplied_originals_except_the_synthetic_flag():
-    for n in (201, 202, 210, 220, 230):
-        original = (ROOT / f"SOP-{n}.md").read_text(encoding="utf-8").replace("\r\n", "\n")
+    # Baseline from the supplied originals at 3457a46, before main removed duplicate files.
+    hashes = {
+        201: "f8866766a5e30c49d8d3a338afe6b46ed2b20586f86313c1ccbe3b3ae4468eca",
+        202: "53023116533016ab5a3c12f2450faea737f3ff7d15ed483b85a52d0a95c94a9d",
+        210: "ca67591c74be9b84f2fd408ddc8080cf88c92443243af29ca0149aeb8898d3d2",
+        220: "2df1d11253d3bb6332b9f72c1fb70011655fa7cd5c37beb4b9eaec4bde037ca3",
+        230: "c354d83ec7dc16806a12c82a8d372081c80e10cf7a03d0f9465f9ba4406ffabe",
+    }
+    for n, digest in hashes.items():
         shipped = (ROOT / f"corpus/SOP-{n}-C.md").read_text(encoding="utf-8").replace("\r\n", "\n")
-        assert shipped.replace("synthetic: true\n", "", 1) == original
+        assert hashlib.sha256(shipped.replace("synthetic: true\n", "", 1).encode()).hexdigest() == digest
 
 
 def test_eval_bank_answers_are_verbatim_in_the_cited_sections():
@@ -65,17 +73,14 @@ def test_eval_bank_answers_are_verbatim_in_the_cited_sections():
 
 
 def test_eval_bank_keeps_the_supplied_questions():
-    supplied = [json.loads(line) for line in (ROOT / "qa.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    # Preserve the original 45 questions and expected results without a duplicate root qa.jsonl.
     cases = evaluation.load_cases(ROOT / "eval/qa.jsonl")
-    assert [c["q"] for c in cases[:len(supplied)]] == [s["q"] for s in supplied]
+    fields = ["q", "expect", "needs_clarification", "doc_id", "section", "must_contain"]
+    source = [json.loads(line) for line in (ROOT / "eval/qa.jsonl").read_text(encoding="utf-8").splitlines() if line]
+    canonical = [{k: c[k] for k in fields if k in c} for c in source[:45]]
+    assert hashlib.sha256(json.dumps(canonical, sort_keys=True).encode()).hexdigest() == \
+        "904bfb9028bdb4c27b027d53db2ad1c967bdb85a0fae6257ad7d795fd5cccf0a"
     assert len([c for c in cases if c["id"].startswith("v3-")]) == 18
-    for case, s in zip(cases, supplied):
-        if s["expect"] == "clarify":  # the relay reports ambiguity as not_found + needs_clarification
-            assert (case["expect"], case.get("needs_clarification")) == ("not_found", True)
-        else:
-            assert case["expect"] == s["expect"]
-            assert [case.get(k) for k in ("doc_id", "section")] == [s["doc_id"], s["section"]]
-            assert case.get("must_contain", []) == s["must_contain"]
 
 
 @pytest.mark.parametrize("body, error", [

@@ -10,7 +10,6 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from PIL import Image
 
 from .. import org
 from ..auth import (Unauthorized, bearer, device_auth, device_org, portal_auth, token_hash)
@@ -39,6 +38,7 @@ class Tile(BaseModel):
         try:
             data = base64.b64decode(self.image, validate=True)
             if data.startswith(b"\x89PNG\r\n\x1a\n"):
+                from PIL import Image  # optional on mock-only boot; loaded only for PNG uploads
                 with Image.open(io.BytesIO(data)) as image:
                     if image.size != (288, 144) or image.format != "PNG":
                         raise ValueError("Invalid PNG dimensions")
