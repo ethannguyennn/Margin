@@ -85,5 +85,8 @@ Live-run scoring corrections retain all 45 original questions and required value
 and HTML degree entities are normalized without changing values or units. `a24` also accepts
 "under back counter" (the same location with the article omitted); "above" still fails. `a25`
 accepts the approved shot-time specification table in 2.1 as well as the procedure in 3.5.
+`a05` accepts the price table's "not sold" answer for a Large flat white; `a08` accepts
+"black" plus "counterfeit" for the black-mark question; `a27` accepts the matching
+troubleshooting row in 5.1. Markdown table cell separators are formatting, not facts.
 These alternatives are explicit annotations and have wrong-fact regression tests. Historical
 reports keep their original scores; reruns identify the new scorer/code revision.

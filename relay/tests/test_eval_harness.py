@@ -260,8 +260,11 @@ def test_documented_equivalent_answers_still_require_the_right_fact():
     bank = {c["id"]: c for c in evaluation.load_cases(ROOT / "eval/qa.jsonl")}
     index = evaluation.citation_index()
     for case_id, section, glance, quote, wrong in [
+        ("a05", "4.2", "No, Large Flat White not sold", "| Flat White | $5.25 | $5.75 | not sold |", "Large Flat White is sold"),
+        ("a08", "2.3", "Black mark means counterfeit risk", "A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.", "Black mark means genuine"),
         ("a24", "7.2", "First aid kit under back counter", "The first aid kit is under the back counter by the dish sink.", "First aid kit above back counter"),
-        ("a25", "2.1", "Shot time: 25 to 30 sec", "Shot time | 25 to 30 seconds", "Shot time: 35 to 40 sec"),
+        ("a25", "2.1", "Shot time: 25 to 30 sec", "Shot time\n25 to 30 seconds", "Shot time: 35 to 40 sec"),
+        ("a27", "5.1", "Grind finer", "Grind finer", "Grind coarser"),
     ]:
         case = bank[case_id]
         chunk = index[f"{case['doc_id']}:C:{section}"]
