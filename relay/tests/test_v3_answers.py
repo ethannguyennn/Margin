@@ -146,9 +146,7 @@ def test_follow_up_keeps_current_source_first_then_previous_citations():
     assert chunks[0].chunk_id == "SOP-230:C:3.3"
     assert chunks[1].chunk_id == prior.chunk_id and chunks[1].text == prior.text
     assert len(chunks) <= 6 and "Previous question" in query
-    assert "How hot should the milk be?" in ret.queries[-1]
-    assert "Current step:" in ret.queries[-1]
-    assert "Extra hot: 160 degF" in ret.queries[-1]
+    assert ret.queries[-1] == "What about extra hot? How hot should the milk be?"
 
 
 def test_a_new_topic_retrieves_without_the_previous_answer():

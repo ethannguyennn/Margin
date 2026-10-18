@@ -78,3 +78,5 @@ The step regression accepts verified glance-only answers and independently score
 responses, rather than applying the obsolete empty-body error rule. It is safe to import.
 The till walkthrough uses the plan's explicit till-closing phrase; a generic closing checklist
 can also refer to back-of-house closing. Cleaning is SOP-210 5.1-5.4, distinct from closing 6.x.
+The generic milk-temperature lead-in checks the 160 degF maximum; individual milk targets
+differ, so a correct whole-milk answer need not include the soy/oat lower bound of 140 degF.
