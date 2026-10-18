@@ -19,23 +19,28 @@ from ..schemas import NOT_FOUND_BODY, NOT_FOUND_GLANCE
 from . import LlmTimeout
 from .retrieve import should_refuse
 from .sanitize import sanitize
-from .verify import check_draft
+from .verify import BODY_MAX, GLANCE_MAX, check_draft
 
 GENERATE_TIMEOUT_S = 6.0
 TEMPERATURE = 0.1
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT = f"""\
 You answer questions about company procedures using ONLY the provided CONTEXT chunks.
+The answer is read on smart glasses mid-task: use as few words as possible.
 Rules:
 1. If the context does not contain the answer, return answerable=false. Never guess.
 2. Every claim must be supported by a verbatim quote copied from a chunk. Cite chunk_id and quote.
    Copy the quote character for character; do not paraphrase inside a quote.
-3. glance: <= 60 characters, ASCII only, imperative, include the key value/unit.
-4. body: <= 450 characters, ASCII only, plain sentences, no markdown.
-5. Preserve numbers, units, and warnings exactly as written. Never convert units.
+3. glance: <= {GLANCE_MAX} characters, ASCII only. Verb + object + value, no articles or filler.
+   Example: "Torque M5 to 4 N-m".
+4. body: <= {BODY_MAX} characters, ASCII only, at most 2 short sentences, no markdown. Only what
+   the glance leaves out (a warning, an order, a check). Empty when the glance is enough.
+5. Never restate the question, never address the reader ("you should"), and never name the
+   document or section in glance or body: the source is shown separately.
+6. Preserve numbers, units, and warnings exactly as written. Never convert units.
    Every number and part code in glance or body must appear in one of your quotes.
-6. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
-Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}]}
+7. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
+Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}]}}
 When answerable=false, return empty glance, body and citations."""
 
 RESPONSE_SCHEMA: dict = {

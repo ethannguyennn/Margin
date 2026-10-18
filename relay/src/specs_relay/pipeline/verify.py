@@ -23,10 +23,12 @@ import re
 from difflib import SequenceMatcher
 from typing import Any, Iterator
 
+from ..schemas import ANSWER_BODY_MAX, ANSWER_GLANCE_MAX
 from .sanitize import sanitize
 
-GLANCE_MAX = 60
-BODY_MAX = 450
+# Limits for new text, tighter than the contract ceilings (see schemas.py).
+GLANCE_MAX = ANSWER_GLANCE_MAX
+BODY_MAX = ANSWER_BODY_MAX
 FUZZY_MIN_RATIO = 0.95
 FUZZY_MIN_LEN = 12  # shorter quotes must match exactly
 
@@ -137,9 +139,9 @@ def check_draft(draft: Any, chunks: list[Any]) -> tuple[str | None, list[dict]]:
     if not glance.strip():
         return "empty_glance", []
     if len(glance) > GLANCE_MAX:
-        return "glance_too_long", []
+        return f"glance_too_long: {len(glance)} chars, the limit is {GLANCE_MAX}", []
     if len(body) > BODY_MAX:
-        return "body_too_long", []
+        return f"body_too_long: {len(body)} chars, the limit is {BODY_MAX}", []
     cites = list(_get(draft, "citations") or [])
     if not cites:
         return "no_citations", []

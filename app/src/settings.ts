@@ -95,6 +95,18 @@ export const getSensitivity = (): number => {
 };
 export const setSensitivity = (s: number): void => save(SENS_KEY, Math.min(2, Math.max(0.5, s)));
 
+/** Gesture hints on the lens ("press: send") disappear once the worker has used
+ * this many gestures: they have learned the controls, and the screen keeps only
+ * content. Reinstalling, or clearing this key, brings the hints back. */
+export const HINT_GESTURES = 25;
+const GESTURES_KEY = 'specs.gesturesUsed';
+export const getGesturesUsed = (): number => Number(load(GESTURES_KEY, 0)) || 0;
+export const noteGesture = (): void => {
+  const used = getGesturesUsed();
+  if (used < HINT_GESTURES) save(GESTURES_KEY, used + 1); // stop writing once learned
+};
+export const showHints = (): boolean => getGesturesUsed() < HINT_GESTURES;
+
 /** 'single' stays off until the M4 false-positive data says it is safe. */
 export type NodMode = 'double' | 'single';
 const NOD_KEY = 'specs.nodMode';

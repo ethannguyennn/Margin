@@ -30,6 +30,14 @@ BODY_MAX = 450
 WARNING_MAX = 80
 CHECKPOINT_MAX = 60
 DIAGRAM_ALT_MAX = 80
+# Generation targets for NEW text: Gemini answers (pipeline/verify.py) and newly
+# converted steps (convert/verify_step.py). Tighter than the contract ceilings
+# above, which still bound everything already published: the lens should carry
+# as few words as possible, so a draft over these is rejected and retried.
+ANSWER_GLANCE_MAX = 40
+ANSWER_BODY_MAX = 200
+STEP_WARNING_MAX = 50
+STEP_CHECKPOINT_MAX = 40
 DIAGRAM_LABEL_MAX = 12
 DIAGRAM_ELEMENTS_MAX = 40
 TITLE_MAX = 120

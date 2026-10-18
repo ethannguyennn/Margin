@@ -7,6 +7,7 @@ import { renderScreen, type ScreenText } from './ui/screens';
 import { gestureFromEvent } from './ui/input';
 import { SessionStore } from './ui/session-store';
 import { lensLink } from './lens-link';
+import { noteGesture, showHints } from './settings';
 import { mountPhone } from './phone/mount';
 type HeadGesture = 'NOD' | 'SHAKE';
 interface Runtime {
@@ -113,7 +114,7 @@ async function boot() {
         if (wanted === motionOn)
             return;
         motionOn = wanted;
-        motionWork = motionWork.then(() => queue.run(() => wanted ? io.motion.startHeadGestures(g => controller.dispatch({ type: g })) : io.motion.stopHeadGestures())).catch(error => { motionOn = false; report(error); });
+        motionWork = motionWork.then(() => queue.run(() => wanted ? io.motion.startHeadGestures(g => { noteGesture(); controller.dispatch({ type: g }); }) : io.motion.stopHeadGestures())).catch(error => { motionOn = false; report(error); });
     };
     let pending: {
         text: ScreenText;
@@ -124,7 +125,7 @@ async function boot() {
         step: number | string;
     } | null = null, rendering: Promise<void> | null = null;
     const render: LensPorts['render'] = (value, level, diagram) => {
-        const text = renderScreen(value, level), layout = value.screen === 'DIAGRAM' ? 'DIAGRAM' : 'TEXT';
+        const text = renderScreen(value, level, { hints: showHints() }), layout = value.screen === 'DIAGRAM' ? 'DIAGRAM' : 'TEXT';
         pending = { text, layout, diagram, screen: value.screen, page: value.page, step: value.walkthrough?.index ?? '-' };
         status.textContent = value.screen;
         app.dataset.screen = value.screen;
@@ -249,8 +250,10 @@ async function boot() {
             return;
         }
         const gesture = gestureFromEvent(event, controller.state.screen === 'DIAGRAM' ? 3 : 2);
-        if (gesture)
+        if (gesture) {
+            noteGesture();
             controller.dispatch({ type: gesture });
+        }
     });
     const visibility = () => { void (document.hidden ? suspend() : resume()).catch(report); };
     document.addEventListener('visibilitychange', visibility);

@@ -212,12 +212,14 @@ def test_short_quote_must_be_exact():
 
 def test_glance_over_cap_fails():
     d = dict(GOOD, glance="Torque all four M5 bracket screws to 4 N-m in a star pattern now")
-    assert check_draft(d, RETRIEVED)[0] == "glance_too_long"
+    reason = check_draft(d, RETRIEVED)[0]
+    assert reason.startswith("glance_too_long") and "the limit is 40" in reason
 
 
 def test_body_over_cap_fails():
     d = dict(GOOD, body="Torque all four M5 bracket screws to 4 N-m. " * 12)
-    assert check_draft(d, RETRIEVED)[0] == "body_too_long"
+    reason = check_draft(d, RETRIEVED)[0]
+    assert reason.startswith("body_too_long") and "the limit is 200" in reason
 
 
 def test_citations_carry_doc_revision_section():

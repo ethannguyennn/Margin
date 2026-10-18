@@ -218,7 +218,7 @@ def test_generator_timeout_raises_typed_error():
 
 def test_system_prompt_keeps_every_rule():
     for needle in ["ONLY the provided CONTEXT", "answerable=false. Never guess", "verbatim quote",
-                   "<= 60 characters", "<= 450 characters", "Never convert units",
+                   "<= 40 characters", "<= 200 characters", "as few words as possible", "Never convert units",
                    "needs_clarification=true"]:
         assert needle in SYSTEM_PROMPT
 

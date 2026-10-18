@@ -37,6 +37,8 @@ from typing import Any
 
 from .. import obs
 from ..schemas import (
+    ANSWER_BODY_MAX,
+    ANSWER_GLANCE_MAX,
     BODY_MAX,
     CHECKPOINT_MAX,
     DIAGRAM_ALT_MAX,
@@ -311,18 +313,20 @@ class MockGenerator:
         if not chunks:
             return Draft(answerable=False)
         top = chunks[0]
-        used = [top]
-        body = top.text
-        for extra in chunks[1:]:
-            if extra.doc_id == top.doc_id and len(body) + 1 + len(extra.text) <= BODY_MAX:
-                body = f"{body} {extra.text}"
-                used.append(extra)
+        # Leading whole sentences of the top chunk within the answer limit. The citation
+        # quotes the whole chunk, so every number in glance or body is covered.
+        body = ""
+        for sentence in _SENTENCE.split(top.text):
+            joined = f"{body} {sentence}".strip()
+            if len(joined) > ANSWER_BODY_MAX:
+                break
+            body = joined
         if top.chunk_id == "SOP-114:C:4.2":
-            glance = "Step 4.2: torque M5 to 4 N-m"
+            glance = "Torque M5 to 4 N-m"
         else:
-            glance = f"Sec {top.section}: {top.heading or top.doc_id}"[:GLANCE_MAX]
+            glance = (top.heading or top.doc_id)[:ANSWER_GLANCE_MAX]
         return Draft(answerable=True, glance=glance, body=body,
-                     citations=[DraftCitation(chunk_id=c.chunk_id, quote=c.text) for c in used])
+                     citations=[DraftCitation(chunk_id=top.chunk_id, quote=top.text)])
 
 
 class MockNotifier:
