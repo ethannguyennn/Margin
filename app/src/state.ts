@@ -291,6 +291,9 @@ export function transition(s: LensState, a: Action): Transition {
             return listen(s);
     }
     if (a.type === 'DOUBLE_PRESS') {
+        // A paused task resumes on a double tap: resuming must not depend on the IMU or voice.
+        if (s.screen === 'IDLE' && s.assignment_id && s.walkthrough)
+            return command(s, 'resume');
         if (['IDLE', 'PRIVACY', 'CALIBRATE', 'PAIRING'].includes(s.screen))
             return result(s, ['EXIT']);
         if (s.screen === 'STEP' || s.screen === 'WALKTHROUGH')

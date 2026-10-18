@@ -97,7 +97,7 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
             case 'PRIVACY': return safe(privacyScreen(o));
             case 'CALIBRATE': return safe({ header: 'CALIBRATE', main: `Nod twice (${state.calibrationDone}/${state.calibrationNeeded})`, footer: state.notice || 'press: skip' });
             case 'PAIRING': return safe({ header: 'JOIN', main: state.pairing ? 'Enter workspace code\nin the Even app' : '...', footer: '' });
-            case 'TASK_READY': return safe({ header: 'NEW TASK', main: `${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: hint('nod twice: start') });
+            case 'TASK_READY': return safe({ header: 'NEW TASK', main: `${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: hint('tap: start') });
             case 'STEP': return safe(stepScreen(state, o));
             case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: state.pages.length > 1 ? `${state.page + 1}/${state.pages.length}` : '', main: state.pages[state.page] ?? '', footer: hint('swipe: page   double: back') });
             case 'DIAGRAM': return safe({ header: '', main: '', footer: state.diagramReady ? join(short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '', 45), hint('double: back')) : '...' });
@@ -105,7 +105,7 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
                 const scope = state.walkthrough ? scopeOf(state.walkthrough) : { start: 0, end: 0 }, n = scope.end - scope.start;
                 return safe({ header: 'DONE', main: `${n}/${n} steps`, footer: hint('press: close') });
             }
-            case 'IDLE': return safe({ ...idleScreen(o), footer: state.notice || (state.assignment_id ? hint('nod twice: resume') : idleScreen(o).footer) });
+            case 'IDLE': return safe({ ...idleScreen(o), footer: state.notice || (state.assignment_id ? hint('double-tap: resume') : idleScreen(o).footer) });
             case 'LISTENING': return safe(listeningScreen(level, o));
             case 'THINKING': return safe(thinkingScreen());
             case 'ANSWER_GLANCE': return safe(glanceScreen(state, o));

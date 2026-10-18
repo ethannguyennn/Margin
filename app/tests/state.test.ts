@@ -306,3 +306,23 @@ describe('v2 command progression guards',()=>{
     expect(value.state.assignment_id).toBe(original.assignment_id);expect(value.state.walkthrough).toEqual(original.walkthrough);expect(value.effects).toEqual(['PREFETCH_DIAGRAMS']);
   });
 });
+
+describe('double tap resumes a paused task', () => {
+  it('from IDLE after a pause, back on the same step; with nothing paused it still exits', () => {
+    const paused = transition(v2State('STEP'), { type: 'DOUBLE_PRESS' }).state;
+    expect(paused.screen).toBe('IDLE');
+    expect(renderScreen(paused).footer).toBe('double-tap: resume');
+    const resumed = transition(paused, { type: 'DOUBLE_PRESS' });
+    expect(resumed.state.screen).toBe('STEP'); expect(resumed.state.walkthrough!.index).toBe(2);
+    expect(resumed.effects).not.toContain('EXIT');
+    expect(transition(initialState('new'), { type: 'DOUBLE_PRESS' }).effects).toEqual(['EXIT']);
+  });
+  it('a task put off from TASK_READY starts on a double tap, reported once', () => {
+    const ready = { ...v2State('TASK_READY'), taskStarted: false };
+    const off = transition(ready, { type: 'DOUBLE_PRESS' }).state;
+    expect(off.screen).toBe('IDLE');
+    const started = transition(off, { type: 'DOUBLE_PRESS' });
+    expect(started.state.screen).toBe('STEP'); expect(started.state.taskStarted).toBe(true);
+    expect(started.effects.filter((e) => typeof e === 'object' && e.type === 'REPORT_PROGRESS' && e.kind === 'task_started')).toHaveLength(1);
+  });
+});
