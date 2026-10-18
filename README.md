@@ -217,7 +217,7 @@ make health URL=https://getyourassto.work
 
 **Latest results** (merged `main`, 2026-10-18):
 
-- **Tests:** relay 893 passed, app 626 passed, portal 10 passed. Typecheck and builds are green.
+- **Tests:** relay 898 passed, app 634 passed, portal 10 passed. Typecheck and builds are green.
 - **Live eval on the deployed relay** (74 cases on the earlier 5-SOP bank, paced; `eval/results/2026-10-18-v3-full-7cdbbc6.json`). The 13-SOP, 139-case bank hasn't had a live run yet:
 
 | Metric | Result |
