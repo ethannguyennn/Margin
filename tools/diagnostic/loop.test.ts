@@ -152,3 +152,42 @@ test('worker loop: voice-open SOP, step through, clarify, images, IMU nods', { t
   assert.equal(a3.screen, 'ANSWER_GLANCE', 'glance-only answer');
   await c.dispose();
 });
+
+// v3 (BUILD-PLAN-V3 M8 against a live relay). Opt in with SPECS_DIAG_V3=1 once Part 2's relay sends
+// `clarify` and `scope` and Part 3's client.ts passes `clarify` through. Typed asks (the phone path),
+// so it needs no extra recordings.
+test.skipIf(process.env.SPECS_DIAG_V3 !== '1')('v3 loop: scoped walkthrough, clarify, reply back on the step', { timeout: 300000 }, async () => {
+  const c = new LensController({ ...initialState(crypto.randomUUID()), screen: 'IDLE', privacySeen: true, calibrated: true,
+    pairing: { pair_code: 'X', claimed: true, worker_name: 'diag' } }, {
+    startCapture: async () => {}, stopCapture: async () => ({ data_b64: '', sample_rate: 16000 as const }),
+    ask: (req, opts) => ask(req, opts), render: async () => {}, persist: async () => {}, exit: async () => {},
+    now: Date.now, onError: () => {},
+  });
+  await c.start();
+  const settle = async (want: string[]) => {
+    const t = Date.now();
+    while (!want.includes(c.state.screen) && Date.now() - t < 60000) await new Promise(r => setTimeout(r, 50));
+    assert.ok(want.includes(c.state.screen), `expected ${want} got ${c.state.screen}`);
+  };
+  const say = async (text: string, want: string[]) => {
+    await new Promise(r => setTimeout(r, PACE_MS));
+    assert.ok(c.askText(text), `lens refused "${text}" on ${c.state.screen}`);
+    await settle(want);
+  };
+  await say('walk me through making a cappuccino', ['STEP']);
+  const w = c.state.walkthrough!, scope = w.scope!;
+  assert.ok(scope, 'spoken walkthrough is scoped');
+  assert.equal(w.steps[scope.start].label, '3.2'); assert.equal(w.steps[scope.end - 1].label, '3.4');
+  const at = w.index;
+  await say('how many pumps of syrup?', ['CLARIFY']);
+  const options = c.state.response!.clarify!.options;
+  console.info(`[diag v3] clarify ${c.state.response!.clarify!.prompt} ${options.join(' / ')}`);
+  await say(options[1], ['ANSWER_GLANCE']);
+  console.info(`[diag v3] reply "${options[1]}" -> ${renderScreen(c.state, 0).main}`);
+  c.dispatch({ type: 'DISMISS' });
+  assert.equal(c.state.screen, 'STEP'); assert.equal(c.state.walkthrough!.index, at);
+  for (let i = at; i < scope.end - 1; i++) c.dispatch({ type: 'DOWN' });
+  c.dispatch({ type: 'DOWN' });
+  assert.equal(c.state.screen, 'TASK_DONE'); assert.equal(renderScreen(c.state, 0).main, `${scope.end - scope.start}/${scope.end - scope.start} steps`);
+  await c.dispose();
+});

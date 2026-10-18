@@ -6,6 +6,9 @@
 **Owns:** everything the worker sees and touches on the G2 and the phone companion: the lens
 state machine, screens, layouts, the phone UI, `types.ts`, and the app-side mocks.
 **Milestones:** M6 (`v3-contract-app` tag + mocks), M8 (simulator loop by voice).
+**Status (2026-10-18):** §3 and §4.1-4.4 done; M8 passes in the native simulator on the mocks
+(`app/tests/evidence/v3/`). Open: §4.5 (waits on Part 4's field reports) and the live M8, which
+needs Part 2's relay and Part 3's `client.ts` passing `clarify` through. Details in `app/HANDOFF.md`.
 
 ---
 
@@ -50,9 +53,11 @@ BUILD-PLAN-V3 §2. Extend `validWalkthrough` (`state.ts`) to accept a scope only
 `0 <= start <= index < end <= total`. Add mock responses to `app/src/mock/index.ts`:
 
 - utterance `"how many pumps of syrup"` -> `not_found`, `needs_clarification: true`,
-  `clarify: {prompt: "Which drink?", options: ["Latte", "Cappuccino", "Iced latte"]}`
-- utterance `"latte"` right after it -> answered (a latte pumps answer)
-- `"walk me through making a cappuccino"` -> walkthrough with `scope: {start: 2, end: 5}`
+  `clarify: {prompt: "Which size?", options: ["Small", "Medium", "Large"]}` (SOP-230 1.3: pumps
+  depend on the size)
+- a reply naming a size right after it -> answered ("3 pumps in Medium", SOP-230 1.3)
+- `"walk me through making a cappuccino"` -> SOP-230 steps 2.2-4.4, index 4, `scope: {start: 4, end: 7}`
+  (3.2-3.4)
 
 Push tag `v3-contract-app`. Part 3 then validates the two fields in `client.ts`.
 
@@ -124,8 +129,8 @@ with photos. You own the fix in `layout.ts` / `screens.ts` / `sop-graphics.ts`. 
 
 - `npm test` + `npx tsc --noEmit` green; new tests for every bullet in §4.
 - **M8 in the simulator, no tap anywhere:** double nod -> "walk me through making a cappuccino"
-  -> step 1/3 -> "next" -> "how many pumps of syrup?" -> CLARIFY "Which drink?" -> double nod ->
-  "cappuccino" -> answer -> dismiss -> back on step 2/3 -> "show me the picture" -> picture ->
+  -> step 1/3 -> "next" -> "how many pumps of syrup?" -> CLARIFY "Which size?" -> double nod ->
+  "medium" -> answer -> dismiss -> back on step 2/3 -> "show me the picture" -> picture ->
   "next" x2 -> TASK_DONE at 3/3.
 - `tools/diagnostic/loop.test.ts` passes against Part 2's relay, extended with the clarify and
   scope steps above.
