@@ -188,6 +188,7 @@ async def test_latency_reads_events_instead_of_a_separate_store(monkeypatch):
     query = rows.await_args.args[0]
     assert "FROM events" in query and "jsonb_each(latency_ms)" in query
     assert "percentile_cont(0.5)" in query and "percentile_cont(0.95)" in query
+    assert "value::double precision > 0" in query  # a stage that did not run is not a 0 ms sample
 
 
 @pytest.mark.asyncio
