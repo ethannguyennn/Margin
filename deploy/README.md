@@ -150,3 +150,18 @@ and `VITE_RELAY_ORIGIN` must be the same string.
 `make dev-relay` binds `0.0.0.0:8080`; point the app at `http://<laptop LAN IP>:8080`
 (never `localhost` on the phone) and allow that origin via `ALLOWED_ORIGINS` or
 `ALLOWED_ORIGIN_REGEX`.
+
+## v3 integration preparation
+
+The API client accepts bounded `clarify` fields, retains verified picture IDs, and refuses
+malformed walkthrough scopes. The gap wrapper delegates to Part 2's scored, paced CLI once
+that branch is integrated. `make deploy` exports its checkout's commit as `GIT_SHA`; Compose
+sets it explicitly on the relay so verbose health identifies the running source. Verbose
+health also reports configured model names (never provider credentials).
+
+The 0.4.0 app pack must be built from the combined candidate, with
+`VITE_RELAY_ORIGIN=https://getyourassto.work`, `VITE_MOCK=0`, and
+`VITE_ASK_TIMEOUT_MS=50000`. Keep its commit and SHA-256 with the `.ehpk`. Source preparation
+and offline tests do not establish deployment, quota capacity, latency or field acceptance.
+The prior SSH blocker is resolved: the existing key completed a read-only VM check on
+2026-10-18; the service was still on `61b9c1e` at that check.

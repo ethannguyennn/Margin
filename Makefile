@@ -17,6 +17,8 @@
 PORT ?= 8080
 SIM_URL ?= http://localhost:5174
 ARGS ?=
+GIT_SHA ?= $(shell git rev-parse --short HEAD)
+export GIT_SHA
 RELAY ?= http://127.0.0.1:8090
 PACE ?= 10
 

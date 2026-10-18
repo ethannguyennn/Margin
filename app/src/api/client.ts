@@ -111,6 +111,22 @@ function validate(raw: unknown): AskResponse {
     console.warn('[client] unverified answer downgraded to not_found', res.trace_id);
     return notFound(res);
   }
+  const c = r.clarify;
+  const text = (v: unknown, max: number): v is string => typeof v === 'string' &&
+    !!v.trim() && v.length <= max && /^[\x20-\x7e]+$/.test(v);
+  if (res.outcome === 'not_found' && res.needs_clarification === true && c &&
+      text(c.prompt, 40) && Array.isArray(c.options) && c.options.length >= 2 && c.options.length <= 3 &&
+      c.options.every(o => text(o, 24)) && new Set(c.options.map(o => o.toLowerCase())).size === c.options.length) {
+    res.clarify = { prompt: c.prompt, options: [...c.options] };
+  }
+  if (res.outcome === 'answered' && res.verified && typeof r.graphic_id === 'string' &&
+      /^[a-z0-9-]{1,80}$/.test(r.graphic_id)) res.graphic_id = r.graphic_id;
+  const w = res.walkthrough, scope = w?.scope;
+  if (scope != null && !(Number.isInteger(scope.start) && Number.isInteger(scope.end) &&
+      Number.isInteger(w!.index) && Array.isArray(w!.steps) && w!.total === w!.steps.length &&
+      0 <= scope.start && scope.start <= w!.index && w!.index < scope.end && scope.end <= w!.total)) {
+    return notFound(res);
+  }
   return res;
 }
 

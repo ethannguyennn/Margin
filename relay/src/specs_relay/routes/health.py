@@ -34,6 +34,8 @@ async def health(request: Request, verbose: bool = False):
     return JSONResponse({**result.model_dump(), "ask_mock": ask_mock,
                          "conversion_mock": conversion_mock, "mocked": list(p.mocked),
                          "git_sha": settings.git_sha or None,
+                         "models": {stage: getattr(settings, f"gemini_model_{stage}", None)
+                                    for stage in ("transcribe", "embed", "generate", "convert")},
                          "gate": {"min_sim": p.min_sim if math.isfinite(p.min_sim) else None,
                                   "min_rrf": p.min_rrf if math.isfinite(p.min_rrf) else None},
                          **obs.quota_snapshot()})

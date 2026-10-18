@@ -107,6 +107,14 @@ def run_loop(relay: str, seconds: float) -> None:
         target.unlink(missing_ok=True)
 
 
+def run_gap(relay: str, seconds: float) -> None:
+    probe = DIAG / "gap_probe.py"
+    if "--relay" not in probe.read_text(encoding="utf-8"):
+        raise RuntimeError("integrate Part 2's scored gap probe before running diag-gap")
+    subprocess.run([sys.executable, str(probe), "--relay", relay, "--pace", str(seconds)],
+                   cwd=ROOT, check=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("check", choices=["voice", "gap", "loop"])
@@ -114,11 +122,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pace", type=pace, default=10.0, help="seconds between requests")
     args = parser.parse_args(argv)
     try:
-        if args.check == "gap":
-            raise RuntimeError("blocked on Part 2: gap_probe.py needs --relay, --pace, a main guard, and assertion-based exit status")
         check_live(args.relay)
         print(f"Live {args.check} diagnostic: {args.relay}, pace={args.pace:g}s", flush=True)
-        {"voice": run_voice, "loop": run_loop}[args.check](args.relay, args.pace)
+        {"voice": run_voice, "loop": run_loop, "gap": run_gap}[args.check](args.relay, args.pace)
     except Exception as exc:
         # Do not dump provider request/response bodies or environment values.
         print(f"diagnostic failed: {exc if isinstance(exc, RuntimeError) else type(exc).__name__}", file=sys.stderr)

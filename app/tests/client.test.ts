@@ -69,6 +69,43 @@ test('answered with no citations is downgraded to not_found', async () => {
   assert.equal((await ask(REQ)).outcome, 'not_found');
 });
 
+test('v3 clarify survives validation and malformed choices are discarded', async () => {
+  const clarify = { prompt: 'Which drink?', options: ['Latte', 'Cappuccino'] };
+  const reply = { ...ANSWERED, outcome: 'not_found', verified: false, citations: [], needs_clarification: true };
+  stubFetch({ body: { ...reply, clarify } });
+  assert.deepEqual((await ask(REQ)).clarify, clarify);
+  for (const bad of [null, { ...clarify, prompt: 'x'.repeat(41) },
+    { ...clarify, options: ['Latte'] }, { ...clarify, options: ['Latte', 'latte'] },
+    { ...clarify, options: ['Latte', 3] }, { ...clarify, options: ['Latte', 'x'.repeat(25)] }]) {
+    stubFetch({ body: { ...reply, clarify: bad } });
+    assert.equal((await ask(REQ)).clarify, undefined);
+  }
+  stubFetch({ body: { ...ANSWERED, clarify } });
+  assert.equal((await ask(REQ)).clarify, undefined);
+});
+
+test('v3 graphic IDs survive only on verified answers and cannot be URLs', async () => {
+  stubFetch({ body: { ...ANSWERED, graphic_id: 'milk-steaming' } });
+  assert.equal((await ask(REQ)).graphic_id, 'milk-steaming');
+  for (const bad of ['https://other.test/image.png', 3, '']) {
+    stubFetch({ body: { ...ANSWERED, graphic_id: bad } });
+    assert.equal((await ask(REQ)).graphic_id, undefined);
+  }
+});
+
+test('v3 scope survives intact; invalid scope refuses the walkthrough', async () => {
+  const walkthrough = mockResponseFor('walk me through it').walkthrough!;
+  const scope = { start: 1, end: 3 };
+  stubFetch({ body: { ...ANSWERED, walkthrough: { ...walkthrough, index: 1, scope } } });
+  assert.deepEqual((await ask(REQ)).walkthrough?.scope, scope);
+  for (const bad of [{ start: 2, end: 3 }, { start: -1, end: 3 }, { start: 1, end: 999 }, { start: 1, end: 1 }]) {
+    stubFetch({ body: { ...ANSWERED, walkthrough: { ...walkthrough, index: 1, scope: bad } } });
+    const result = await ask(REQ);
+    assert.equal(result.outcome, 'not_found');
+    assert.equal(result.walkthrough, null);
+  }
+});
+
 test('unknown outcome becomes an error', async () => {
   stubFetch({ body: { ...ANSWERED, outcome: 'maybe' } });
   const res = await ask(REQ);

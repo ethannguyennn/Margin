@@ -187,12 +187,16 @@ def test_loop_diagnostic_cleans_copy_after_failure(diagnostic_tool, tmp_path, mo
     assert not (tmp_path / "app/tests/zz-diagnostic-loop.test.ts").exists()
 
 
-def test_gap_diagnostic_reports_ownership_block_without_network(diagnostic_tool, monkeypatch, capsys):
-    def forbidden(*args):
-        pytest.fail("blocked gap probe must not make a request")
-    monkeypatch.setattr(diagnostic_tool, "check_live", forbidden)
-    assert diagnostic_tool.main(["gap"]) == 1
-    assert "blocked on Part 2" in capsys.readouterr().err
+def test_gap_diagnostic_targets_the_selected_relay_and_propagates_failure(diagnostic_tool, monkeypatch, capsys):
+    calls = []
+    monkeypatch.setattr(diagnostic_tool, "check_live", lambda relay: calls.append(relay))
+    def fail(relay, seconds):
+        calls.append((relay, seconds))
+        raise RuntimeError("gap assertions failed")
+    monkeypatch.setattr(diagnostic_tool, "run_gap", fail)
+    assert diagnostic_tool.main(["gap", "--relay", "https://relay.example", "--pace", "10"]) == 1
+    assert calls == ["https://relay.example", ("https://relay.example", 10)]
+    assert "gap assertions failed" in capsys.readouterr().err
 
 
 @pytest.mark.parametrize("seconds", ["-1", "nan", "inf"])
