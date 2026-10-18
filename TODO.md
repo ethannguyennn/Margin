@@ -7,22 +7,25 @@ Windows: `make` = `mingw32-make`.
 ## 0. New since the first version
 
 - [ ] **Re-merge `part-3-relay-infra` into main.** PR #1 merged on top of the older main, so
-      main is missing the real-mode fixes (`25cd8a8`) and this file (`667f1b7`). The merge
-      is clean (checked with `git merge-tree`): open a PR `part-3-relay-infra -> main` - Part 3
-- [ ] **CORS for the iPhone companion:** add `http://localhost:5175` to `ALLOWED_ORIGINS`, plus
-      its LAN origin (`ALLOWED_ORIGIN_REGEX=^http://192\.168\.\d+\.\d+:517[45]$`) and the Base44
-      preview origin once known (read it from the `CORS rejected origin` log) - Part 3
+      main is missing the real-mode fixes (`25cd8a8`) and this file. main is already merged
+      into this branch, so a PR `part-3-relay-infra -> main` is a fast-forward - Part 3
+- [x] **CORS for the iPhone companion, local + LAN:** recommended `ALLOWED_ORIGINS` and
+      `ALLOWED_ORIGIN_REGEX` (lens 5174 + companion 5175, 192.168.x / 10.x) are in
+      `.env.example` and covered by `test_cors.py`. Copy them into your `.env` - Part 3
+- [ ] **CORS, Base44 preview origin:** open the preview against the relay, read the
+      `CORS rejected origin` log line, add that exact origin to `ALLOWED_ORIGINS` - Part 3
 - [ ] **iPhone over HTTPS needs the HTTPS relay:** a page served over https (Base44 preview,
       home-screen shortcut) cannot call an `http://` relay (mixed content), so this depends on
       the deploy in section 2 - Part 3
-- [ ] **`ios/` has no tests and is not in `make test`:** add `cd ios && npm run typecheck`
-      to `make test` at least - Part 3 (Makefile) + ios owner
+- [x] **`ios/` in `make test`:** `make test-ios` typechecks and builds the companion; `make
+      install` also runs `npm ci` in `app/` and `ios/`; `make dev-ios` serves it on :5175 - Part 3
+- [ ] **`ios/` unit tests** (none yet; a client test like `app/tests/client.test.ts`) - ios owner
 - [ ] **Decide:** phone -> lens delivery. The relay is request/response only, so the companion
       cannot push to the glasses or read the lens session. Needs a new relay route (e.g. a
       session read endpoint) if we want it for the demo - Part 3 + ios owner
 
 **Where we are:** all five parts are merged and run end to end on mocks.
-`make test` is green (relay 336 passed, app 202 passed). The app's real client passes
+`make test` is green (relay 343 passed, app 202 passed, ios typecheck + build). The app's real client passes
 its contract test against the real relay. Real mode wires every real module with zero
 mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glasses yet.**
 
