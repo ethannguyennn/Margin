@@ -170,14 +170,13 @@ async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
 
 
 def _start_index(walk: Any, chunks: list[Chunk]) -> int:
-    """Start where the worker asked ("closing out the till" -> section 7, not 2.1): the first
-    step of the section group holding the best-ranked step hit. Earlier steps stay one 'back' away."""
-    at = {s.step_id: i for i, s in enumerate(walk.steps)}
-    hit = next((at[c.chunk_id] for c in chunks if c.chunk_id in at), None)
-    if hit is None:
-        return 0
-    group = walk.steps[hit].label.split(".")[0]
-    return next(i for i, s in enumerate(walk.steps) if s.label.split(".")[0] == group)
+    """Start at the best retrieved section group, including a group's reference-only spec."""
+    first: dict[str, int] = {}
+    for i, step in enumerate(walk.steps):
+        first.setdefault(step.label.split(".")[0], i)
+    return next((first[c.section.split(".")[0]] for c in chunks
+                 if c.doc_id == walk.doc_id and c.revision == walk.revision
+                 and c.section.split(".")[0] in first), 0)
 
 
 def _walkthrough_document(query: str, chunks: list[Chunk]) -> Chunk:
@@ -197,15 +196,18 @@ def _walkthrough_document(query: str, chunks: list[Chunk]) -> Chunk:
 
 def _clarify(chunks: list[Chunk], sanitize: Any) -> Clarify | None:
     across_documents = len({c.doc_id for c in chunks}) > 1
-    options: list[str] = []
-    for chunk in chunks:
-        value = sanitize((chunk.title if across_documents else chunk.heading) or "").strip()
-        if (0 < len(value) <= 24 and value.isascii() and not any(ord(c) < 32 for c in value)
-                and value.casefold() not in {s.casefold() for s in options}):
-            options.append(value)
-        if len(options) == 3:
-            break
-    return Clarify(prompt="Which procedure?", options=options) if len(options) >= 2 else None
+    for field in (("title", "heading") if across_documents else ("heading",)):
+        options: list[str] = []
+        for chunk in chunks:
+            value = sanitize(getattr(chunk, field) or "").strip()
+            if (0 < len(value) <= 24 and value.isascii() and not any(ord(c) < 32 for c in value)
+                    and value.casefold() not in {s.casefold() for s in options}):
+                options.append(value)
+            if len(options) == 3:
+                break
+        if len(options) >= 2:
+            return Clarify(prompt="Which procedure?" if field == "title" else "Which one?", options=options)
+    return None
 
 
 def _clarify_query(query: str, previous: AskResponse | None) -> str:
