@@ -143,7 +143,7 @@ test('sensitivity and nod mode come from settings', () => {
   };
   store['specs.sensitivity'] = '2';
   store['specs.nodMode'] = '"single"';
-  store['specs.detector'] = JSON.stringify({ down: 70, gate: 'junk' });
+  store['specs.detector.v2'] = JSON.stringify({ down: 70, gate: 'junk' });
   const p = currentParams();
   assert.equal(p.down, 35, 'override 70 / sensitivity 2');
   assert.equal(p.up, DEFAULT_PARAMS.up / 2);
@@ -242,17 +242,17 @@ test('calibrate: 3 double nods set down/up to 60 % of the median peak and persis
   assert.deepEqual(await p, { ok: true });
   assert.deepEqual(progress, [0, 1, 2, 3]);
   assert.equal(g.isCalibrated(), true);
-  const saved = JSON.parse(store['specs.detector']);
+  const saved = JSON.parse(store['specs.detector.v2']);
   assert.ok(saved.down > DEFAULT_PARAMS.down && saved.down < 100, `down=${saved.down}`);
   assert.deepEqual(hw.calls.at(-1), [false, undefined], 'calibration started the IMU, so it stops it');
 
   // Weak nods: detected by the relaxed pass, but below the floor -> defaults kept, ok: false.
-  delete store['specs.detector'];
+  delete store['specs.detector.v2'];
   const weak = g.calibrate(() => {}, { timeoutMs: 3000 });
   await settle();
   hw.feed(shifted(nodSession(7), 90000));
   assert.deepEqual(await weak, { ok: false });
-  assert.equal(store['specs.detector'], undefined);
+  assert.equal(store['specs.detector.v2'], undefined);
   delete (globalThis as any).localStorage;
 });
 
@@ -279,6 +279,13 @@ for (const [name, frame] of Object.entries(frames)) {
     }
   });
 }
+
+test('accel: BLE bursts of 3 samples per arrival at 25 Hz still find every double nod', () => {
+  const s = gravity(nods).filter((_, i) => i % 2 === 0);
+  // Each sample arrives with the last one of its burst; the next burst comes 3 samples later.
+  const bursty = s.map((x, i) => ({ ...x, t: s[Math.min(s.length - 1, i - (i % 3) + 2)].t }));
+  assert.equal(count(detect(bursty, DEFAULT_PARAMS), 'NOD'), 10);
+});
 
 test('live: a pace too slow for a nod is replaced by one that is not, and remembered', async () => {
   const store: Record<string, string> = {};
