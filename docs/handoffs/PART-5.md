@@ -90,7 +90,7 @@ python -m venv .venv
 # it does not export data or import arbitrary JSON files.
 
 npm --prefix portal ci
-npm --prefix portal run dev          # :5176/portal/, API proxy -> :8080
+npm --prefix portal run dev          # :5178/portal/, API proxy -> :8080
 npm --prefix portal run build        # portal/dist, production /portal/ base
 npm --prefix portal test
 
