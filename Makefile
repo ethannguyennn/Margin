@@ -112,7 +112,7 @@ define \n
 
 endef
 
-# make health URL=https://margin.<domain>
+# make health URL=https://getyourassto.work
 URL ?= http://localhost:$(PORT)
 health:
 	$(PY) deploy/healthcheck.py --url $(URL)/v1/health --verbose

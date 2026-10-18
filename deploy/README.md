@@ -1,4 +1,4 @@
-# Deploy: relay + Caddy on Vultr, behind `margin.<domain>`
+# Deploy: relay + Caddy on Vultr, behind `getyourassto.work`
 
 Deploy the mock relay first (`MOCK_MODE=1`), then flip to real mode once Parts 4
 and 5 are merged. The public HTTPS origin is the fallback for venue Wi-Fi that
@@ -16,19 +16,25 @@ isolates clients; a phone hotspot is the backup.
    cd margin && cp .env.example .env && nano .env
    ```
 
-## 2. DNS (GoDaddy)
+## 2. DNS (Porkbun)
 
-DNS -> Manage DNS for the domain -> add record: type **A**, name **margin**,
-value **<VM IPv4>**, TTL 600. Check with `nslookup margin.<domain>` before
+The relay is served at the root domain. Porkbun -> Domain Management ->
+getyourassto.work -> DNS:
+
+1. Delete the default parking records pointing at `pixie.porkbun.com` (the root
+   **ALIAS** and the `*` **CNAME**).
+2. Add: type **A**, host **(blank)**, answer **45.32.88.132**, TTL 600.
+
+Check with `nslookup getyourassto.work` (must return only 45.32.88.132) before
 starting Caddy, or the Let's Encrypt challenge fails (and rate-limits retries).
 
 ## 3. `.env` on the VM (minimum for the mock relay)
 
 ```
 MOCK_MODE=1
-MARGIN_DOMAIN=margin.<domain>
+MARGIN_DOMAIN=getyourassto.work
 ACME_EMAIL=<you@...>
-PUBLIC_ORIGIN=https://margin.<domain>
+PUBLIC_ORIGIN=https://getyourassto.work
 ALLOWED_ORIGINS=<origins the WebView sends; see step 5>
 SENTRY_DSN_RELAY=<relay project DSN>
 SENTRY_ENVIRONMENT=demo
@@ -42,10 +48,10 @@ Real mode adds `MOCK_MODE=0`, `GEMINI_API_KEY`, the three `GEMINI_MODEL_*`,
 ```bash
 make deploy          # build + start relay and caddy, print status
 make logs            # follow relay logs
-curl -s https://margin.<domain>/v1/health
+curl -s https://getyourassto.work/v1/health
 ```
 
-From a phone **on cellular** (Wi-Fi off), open `https://margin.<domain>/v1/health`;
+From a phone **on cellular** (Wi-Fi off), open `https://getyourassto.work/v1/health`;
 expect `{"ok":true,"mock":true,"db":"mock",...}`.
 
 Restarts: `restart: unless-stopped` brings back a relay that exits; the
@@ -62,7 +68,7 @@ now be 2xx. The simulator / Vite dev origin is `http://localhost:5174`.
 ## 6. Hand Part 1 the whitelist string
 
 `app/app.json` network permission whitelist entry must be exactly
-`https://margin.<domain>` (full origin, no wildcard, no path, no trailing slash),
+`https://getyourassto.work` (full origin, no wildcard, no path, no trailing slash),
 and `VITE_RELAY_ORIGIN` must be the same string.
 
 ## Local hardware sideload
