@@ -2,13 +2,26 @@
   "package_id": "com.margin.lens",
   "edition": "202601",
   "name": "Specs",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "min_app_version": "2.2.10",
   "min_sdk_version": "0.0.16",
   "entrypoint": "index.html",
   "permissions": [
-    { "name": "g2-microphone", "desc": "Process a question on demand; audio is not stored." },
-    { "name": "network", "desc": "Ask the approved Specs relay for verified procedures.", "whitelist": ["https://45-32-88-132.sslip.io", "https://getyourassto.work"] }
+    {
+      "name": "g2-microphone",
+      "desc": "Process a question on demand; audio is not stored."
+    },
+    {
+      "name": "network",
+      "desc": "Ask the approved Specs relay for verified procedures.",
+      "whitelist": [
+        "https://45-32-88-132.sslip.io",
+        "https://getyourassto.work",
+        "https://o4512274099535872.ingest.us.sentry.io"
+      ]
+    }
   ],
-  "supported_languages": ["en"]
+  "supported_languages": [
+    "en"
+  ]
 }
