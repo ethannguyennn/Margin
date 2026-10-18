@@ -28,6 +28,10 @@ Wash at the start of every shift, after using the restroom, after handling cash,
 ### 2.3 Appearance
 Tie back long hair or wear a cap. Wear a clean apron. Cover cuts with a blue bandage and a glove.
 
+### 2.4 Diagram - Handwashing: 20 seconds
+![Figure 2.4 - Handwashing: 20 seconds](figures/png/fig-210-handwash.png)
+Figure 2.4 shows: Handwashing: 1 wet hands with warm water of at least 100°F, 2 soap, 3 scrub for 20 seconds, 4 rinse, 5 dry with a single-use paper towel.
+
 ## 3 Opening Procedure (Back of House)
 
 ### 3.1 Arrive and clock in
@@ -62,6 +66,10 @@ Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration wit
 <!-- step -->
 Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.
 
+### 3.9 Diagram - Opening: 5:15 to 6:00 AM
+![Figure 3.9 - Opening: 5:15 to 6:00 AM](figures/png/fig-210-opening-timeline.png)
+Figure 3.9 shows: Opening timeline: arrive 5:15 AM, clock in, turn on the espresso machine. It warms up for 30 minutes, so no shots before 5:45 AM. The café opens at 6:00 AM. Meanwhile log fridge temperatures, set the grinder, brew drip, fill ice, set up the sanitizer bucket, and restock.
+
 ## 4 Food Safety and Labeling
 
 ### 4.1 Cold holding
@@ -90,6 +98,14 @@ Never touch pastries with bare hands. Use tongs or clean gloves.
 ### 4.5 Spills
 Wipe up spills right away and set out the yellow wet-floor sign.
 
+### 4.6 Diagram - Temperature cheat sheet
+![Figure 4.6 - Temperature cheat sheet](figures/png/fig-210-temps.png)
+Figure 4.6 shows: Temperature cheat sheet: fridges 41°F or below, handwash water at least 100°F, sink wash water 110°F, kid's temp milk 130°F, whole and 2 percent milk 150 to 155°F, extra hot and the maximum 160°F (never above), matcha slurry water 175°F, espresso brew water 200°F.
+
+### 4.7 Diagram - Shelf life after opening
+![Figure 4.7 - Shelf life after opening](figures/png/fig-210-shelf-life.png)
+Figure 4.7 shows: Shelf life after opening: milks and half-and-half 7 days, cold brew concentrate 14 days, whipped cream 14 days, matcha 30 days, mocha sauce 60 days, flavor syrups 90 days. Drip coffee is discarded after 60 minutes.
+
 ## 5 Cleaning the Espresso Machine (Daily)
 
 ### 5.1 Backflush the group heads
@@ -111,6 +127,10 @@ Empty and wash the knock box and the drip tray.
 ### 5.5 Grinder
 Brush out the burr chamber every day. Do a full grinder deep clean every Sunday at close.
 
+### 5.6 Diagram - Backflush the group heads
+![Figure 5.6 - Backflush the group heads](figures/png/fig-210-backflush.png)
+Figure 5.6 shows: Backflush: insert the blind basket with 3 g of cleaner, run 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water.
+
 ## 6 Closing Procedure (Back of House)
 
 ### 6.1 Last call
@@ -131,6 +151,14 @@ Empty the trash and recycling, sweep, and mop with sanitizer solution.
 ### 6.5 Lock up
 <!-- step -->
 Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.
+
+### 6.6 Diagram - Three-compartment sink
+![Figure 6.6 - Three-compartment sink](figures/png/fig-210-sink.png)
+Figure 6.6 shows: Three-compartment sink: 1 wash in soapy water at 110°F, 2 rinse in clear water, 3 sanitize in quat at 200 to 400 ppm for 60 seconds, 4 air dry and do not towel dry.
+
+### 6.7 Diagram - Closing: back of house
+![Figure 6.7 - Closing: back of house](figures/png/fig-210-closing-flow.png)
+Figure 6.7 shows: Closing, back of house: 1 last call 7:45 PM, 2 close 8:00 PM, 3 discard drip and leftover milk, 4 three-compartment sink, 5 trash, sweep and mop, 6 lock the back door, turn off the espresso machine and lights, set the alarm.
 
 ## 7 Injuries and Emergencies
 

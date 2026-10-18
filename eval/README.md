@@ -2,15 +2,19 @@
 
 Run python eval/run_eval.py against a running relay. The default origin is
 http://127.0.0.1:8000; use --base-url for another origin and --output for a JSON
-report. qa.jsonl is the demo bank's 45 questions (the Ember & Oak SOPs it asks about
-are in corpus/):
+report. qa.jsonl is the demo bank: the team's 121 supplied questions
+(supplied-qa.jsonl, kept verbatim) plus 18 v3 loop cases (`v3-*`). The Ember & Oak SOPs
+it asks about are in corpus/. Outside the v3 cases:
 
-- 36 answerable lookups spanning SOP-201, 202, 210, 220 and 230 (all revision C).
-- 3 near-misses whose topic is nearby but whose answer is absent (pumpkin spice latte,
-  ice machine cleaning, bleach concentration).
-- 2 ambiguous questions requiring not_found plus needs_clarification=true (the supplied
+- 107 answerable lookups spanning the 13 SOPs, SOP-201 through SOP-300 (all revision C).
+- 7 near-misses whose topic is nearby but whose answer is absent (pumpkin spice latte,
+  bleach concentration, descaling the boiler, chai concentrate from scratch, ...).
+- 3 ambiguous questions requiring not_found plus needs_clarification=true (the supplied
   list says "clarify"; the relay reports ambiguity this way).
 - 4 off-domain questions requiring not_found.
+
+Ice machine cleaning and requesting time off were refusals on the 5-SOP bank. SOP-270 and
+SOP-300 now answer them, so they are answerable cases (`n02`, `o04`).
 
 The previous industrial HX-2 bank (36 questions over SOP-101..140) is kept as a test
 fixture in relay/tests/fixtures/ (hx2-qa.jsonl, hx2-corpus/) for the relay's unit tests.

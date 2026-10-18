@@ -163,7 +163,7 @@ Around the verifier:
 | `relay/` | FastAPI relay: routes, ask pipeline (`pipeline/`), conversion (`convert/`), diagram rendering (`diagrams/`), tests |
 | `portal/` | Employer portal: library, uploads, draft review, approvals, pairing, assignments, progress board, glasses simulator |
 | `db/` | SQL migrations and `seed.py` |
-| `corpus/` | Demo SOP bank: fictional *Ember & Oak Coffee* SOP-201…230 rev C, illustrations, and sample upload materials (`materials/`) |
+| `corpus/` | Demo SOP bank: 13 fictional *Ember & Oak Coffee* SOPs (SOP-201…300, rev C) covering the register, back of house, espresso, recipes, tea and blended drinks, food, guest service, front of house, equipment, inventory, safety and team policies. Also their 71 figures (`figures/`), the lens reference illustrations, and sample upload materials (`materials/`) |
 | `eval/` | Answer-quality eval (`qa.jsonl`, `run_eval.py`), gate calibration (`tune_gate.py`), conversion eval, saved results |
 | `deploy/` | Docker Compose, Caddy, relay image, health check, remote deploy |
 | `tools/diagnostic/` | Paced live end-to-end harness: synthesized speech through the app's real detector, controller and client |
@@ -209,7 +209,7 @@ The app's relay origin must exactly match the `network` whitelist in `app/app.js
 
 ```sh
 make test                     # relay pytest + app tests, typecheck and build + portal tests
-make eval                     # 45-question answer-quality bank against a running relay
+make eval                     # 139-case answer-quality bank against a running relay
 make eval-conversion          # material → procedure; fails on any fabricated value
 make latency                  # p50 / p95 per pipeline stage from the events hypertable
 make health URL=https://getyourassto.work
@@ -217,8 +217,8 @@ make health URL=https://getyourassto.work
 
 **Latest results** (merged `main`, 2026-10-18):
 
-- **Tests:** relay 867 passed, app 614 passed, portal 9 passed. Typecheck and builds are green.
-- **Live eval on the deployed relay** (74 cases, paced; `eval/results/2026-10-18-v3-full-7cdbbc6.json`):
+- **Tests:** relay 893 passed, app 626 passed, portal 10 passed. Typecheck and builds are green.
+- **Live eval on the deployed relay** (74 cases on the earlier 5-SOP bank, paced; `eval/results/2026-10-18-v3-full-7cdbbc6.json`). The 13-SOP, 139-case bank hasn't had a live run yet:
 
 | Metric | Result |
 |---|---|

@@ -41,6 +41,10 @@ Ask the shift lead which items are out of stock (86'd). Mark them unavailable in
 <!-- step -->
 Wash your hands for 20 seconds with soap and warm water before touching the register or any food item.
 
+### 2.6 Diagram - Opening float: $150.00
+![Figure 2.6 - Opening float: $150.00](figures/png/fig-201-float.png)
+Figure 2.6 shows: Opening float is $150.00: 2 x $20 = $40.00, 3 x $10 = $30.00, 6 x $5 = $30.00, 30 x $1 = $30.00, and 2 rolls of quarters = $20.00. If it is off by any amount, tell the shift lead before opening.
+
 ## 3 Greeting and Taking Orders
 
 ### 3.1 Greet the guest
@@ -62,6 +66,10 @@ Read the full order back to the guest and confirm the total before taking paymen
 ### 3.5 Offer one suggestion
 <!-- step -->
 Offer a single add-on, such as a pastry. Never offer more than one suggestion per guest, and do not repeat it if the guest says no.
+
+### 3.6 Diagram - Order flow at the register
+![Figure 3.6 - Order flow at the register](figures/png/fig-201-order-flow.png)
+Figure 3.6 shows: Order flow: 1 greet within 10 seconds, 2 take the guest's name, 3 ring in size, drink, milk, then modifiers, 4 repeat the order back with the total, 5 offer one suggestion, 6 take payment.
 
 ## 4 Sizes, Prices, and Modifiers
 
@@ -87,6 +95,10 @@ Oat, almond, or soy milk: add $0.75. Extra espresso shot: add $1.00. Flavor syru
 ### 4.4 Sales tax
 The POS adds 9.5 percent sales tax automatically. Never enter tax by hand.
 
+### 4.5 Diagram - Cup sizes
+![Figure 4.5 - Cup sizes](figures/png/fig-201-sizes.png)
+Figure 4.5 shows: Cup sizes: Small is 12 oz, Medium is 16 oz, Large is 20 oz. Flat White is sold in Small and Medium only.
+
 ## 5 Allergies and Special Requests
 
 ### 5.1 Ask and flag
@@ -108,3 +120,11 @@ If an order has waited more than 6 minutes, apologize to the guest and tell the 
 
 ### 6.3 Mobile orders
 Mobile orders appear with an orange banner on the POS. Accept each one within 60 seconds. Hand off mobile orders by order number, not by name.
+
+### 6.4 Diagram - Wait time targets
+![Figure 6.4 - Wait time targets](figures/png/fig-201-wait.png)
+Figure 6.4 shows: Wait time targets: ready within 4 minutes of payment is the target. Between 4 and 6 minutes, hurry. Over 6 minutes, apologize and tell the shift lead, who may comp a drip coffee.
+
+### 6.5 Diagram - Mobile orders
+![Figure 6.5 - Mobile orders](figures/png/fig-201-mobile.png)
+Figure 6.5 shows: Mobile orders: an orange banner appears on the POS, accept within 60 seconds, make the drink, and hand it off by order number, not by name.

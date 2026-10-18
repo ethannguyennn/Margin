@@ -28,6 +28,10 @@ Do not accept $100 bills. The largest bill we accept is $50.
 <!-- step -->
 Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.
 
+### 2.4 Diagram - Checking a bill
+![Figure 2.4 - Checking a bill](figures/png/fig-202-bill-check.png)
+Figure 2.4 shows: Checking a bill: refuse any $100 bill because the largest bill we accept is $50. Mark every $50 with the counterfeit pen. Amber or yellow means genuine. Dark brown or black means it may be counterfeit: ask for another payment method and call the shift lead.
+
 ## 3 Cash Handling
 
 ### 3.1 Make change
@@ -40,6 +44,10 @@ When the drawer holds more than $400.00, do a cash drop with the shift lead: rem
 
 ### 3.3 No-sale
 Only the shift lead may open the drawer with a no-sale. Cashiers must never open the drawer without a transaction.
+
+### 3.4 Diagram - Cash drop
+![Figure 3.4 - Cash drop](figures/png/fig-202-cash-drop.png)
+Figure 3.4 shows: Cash drop: when the drawer holds more than $400.00, do a drop with the shift lead. Remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log.
 
 ## 4 Card Payments and Tips
 
@@ -69,6 +77,14 @@ Refunds go back to the original payment method and require the receipt. Refunds 
 
 ### 5.4 Remake instead of refund
 If a drink is wrong or the guest is unhappy with it, offer a free remake first. Enter the POS remake code and the reason. Refund only if the guest still wants one.
+
+### 5.5 Diagram - Void or refund?
+![Figure 5.5 - Void or refund?](figures/png/fig-202-void-window.png)
+Figure 5.5 shows: Void or refund: a cashier may void before payment is finalized or within 5 minutes after payment. After that it is a refund, which needs the receipt and is available within 24 hours. After 24 hours only a manager may approve.
+
+### 5.6 Diagram - Refund approval ladder
+![Figure 5.6 - Refund approval ladder](figures/png/fig-202-refund-ladder.png)
+Figure 5.6 shows: Refund approval ladder: Cashier approves $0.01 to $10.00. Shift lead (PIN) approves $10.01 to $25.00. Manager (PIN) approves over $25.00. Within 24 hours with receipt; after 24 hours manager only.
 
 ## 6 Gift Cards
 
@@ -103,6 +119,14 @@ Compare your count to the POS report. A difference of up to $2.00 over or short 
 ### 7.5 Secure and sign
 <!-- step -->
 Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe.
+
+### 7.6 Diagram - Closing the till
+![Figure 7.6 - Closing the till](figures/png/fig-202-close-till.png)
+Figure 7.6 shows: Closing the till: 1 print two End of Day reports, 2 count cash twice in the back office, 3 leave $150.00 float in the drawer bag, 4 compare to the POS report, 5 two people seal the bank bag, both sign the close log, and the drawer goes in the safe.
+
+### 7.7 Diagram - Till variance (count vs POS)
+![Figure 7.7 - Till variance (count vs POS)](figures/png/fig-202-variance.png)
+Figure 7.7 shows: Till variance: up to $2.00 over or short is noted on the close form. Over $2.00 is reported to the shift lead right away and recounted. Over $5.00 also needs a manager signature.
 
 ## 8 Robbery and Safety
 

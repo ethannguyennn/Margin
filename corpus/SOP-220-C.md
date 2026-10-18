@@ -35,6 +35,10 @@ Small and Medium drinks use one double (2 shots). Large drinks use one double pl
 ### 2.3 Freshness
 Serve espresso within 30 seconds of pulling it. Discard older shots.
 
+### 2.4 Diagram - The espresso standard
+![Figure 2.4 - The espresso standard](figures/png/fig-220-espresso-specs.png)
+Figure 2.4 shows: Espresso standard: 18.0 g of ground coffee (plus or minus 0.5 g) at 200°F and 9 bar gives 36 g of espresso in 25 to 30 seconds. Small and Medium use a double (2 shots). Large uses a double plus a single (3 shots). A single is 9.0 g in and 18 g out.
+
 ## 3 Dialing In the Grinder
 
 ### 3.1 Purge
@@ -64,6 +68,14 @@ If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, gr
 ### 3.7 Record it
 <!-- step -->
 Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours.
+
+### 3.8 Diagram - Dialing in the grinder
+![Figure 3.8 - Dialing in the grinder](figures/png/fig-220-dialin-steps.png)
+Figure 3.8 shows: Dial-in steps: 1 purge 3 seconds, 2 dose 18.0 g, 3 tamp about 30 lb and level, 4 pull the shot and start the timer, 5 stop at 36 g, 6 adjust the grind one notch, 7 record on the dial-in sheet. Dial in at opening and every 4 hours.
+
+### 3.9 Diagram - Shot time: what to do
+![Figure 3.9 - Shot time: what to do](figures/png/fig-220-dialin-scale.png)
+Figure 3.9 shows: Shot time scale: under 22 seconds, grind finer. 22 to 25 seconds, taste it. 25 to 30 seconds is good. 30 to 33 seconds, taste it. Over 33 seconds, grind coarser. Change one notch at a time and discard the first 2 shots after any change.
 
 ## 4 Steaming Milk
 
@@ -106,6 +118,14 @@ Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the 
 ### 4.9 Leftovers and allergy orders
 Never re-steam milk. Discard leftovers. For allergy-flagged orders, use a clean pitcher and a freshly sanitized wand.
 
+### 4.10 Diagram - Steamed milk target temperatures
+![Figure 4.10 - Steamed milk target temperatures](figures/png/fig-220-milk-temps.png)
+Figure 4.10 shows: Milk temperatures: almond 130 to 140°F, soy 140 to 150°F, oat 140 to 150°F, whole and 2 percent 150 to 155°F, kid's temp 130°F, extra hot 160°F. Never exceed 160°F.
+
+### 4.11 Diagram - Steaming milk: stretch, then spin
+![Figure 4.11 - Steaming milk: stretch, then spin](figures/png/fig-220-steam-stages.png)
+Figure 4.11 shows: Steaming: stretch with the tip just under the surface (2 to 4 seconds latte, 6 to 8 seconds cappuccino, 1 to 2 seconds flat white), then spin with the tip deeper until the milk reaches its target temperature. Start with cold milk at 38 to 41°F, then wipe, purge, swirl, and pour within 30 seconds.
+
 ## 5 Troubleshooting
 
 ### 5.1 Troubleshooting table
@@ -117,6 +137,10 @@ Never re-steam milk. Discard leftovers. For allergy-flagged orders, use a clean 
 | Large bubbles in milk | Too much air, or air added too long | Shorten the stretch time |
 | Thin, watery milk | Too little air | Stretch longer |
 | Scalded or flat milk | Over 160°F | Discard and restart |
+
+### 5.2 Diagram - Troubleshooting
+![Figure 5.2 - Troubleshooting](figures/png/fig-220-troubleshoot.png)
+Figure 5.2 shows: Troubleshooting: under 22 seconds, grind finer. Over 33 seconds, grind coarser. Spurting stream, redistribute and tamp level. Big bubbles, shorten the stretch. Thin milk, stretch longer. Milk over 160°F, discard and restart.
 
 ## 6 Machine Alerts
 

@@ -25,6 +25,10 @@ Flavored drinks (vanilla, caramel, or hazelnut) get 2 pumps in Small, 3 pumps in
 ### 1.4 Ice line
 Every iced drink is filled with ice up to the ice line marked on the cold cup.
 
+### 1.5 Diagram - Pumps by size
+![Figure 1.5 - Pumps by size](figures/png/fig-230-pumps.png)
+Figure 1.5 shows: Pumps by size: flavor syrup is 2, 3, 4 pumps for Small, Medium, Large and one pump is 1/4 fl oz. Mocha sauce is 2, 3, 4 pumps for Small, Medium, Large and one pump is 1/2 fl oz.
+
 ## 2 Latte (Hot)
 
 ### 2.1 Latte specifications
@@ -51,6 +55,10 @@ Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 se
 <!-- step -->
 Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name.
 
+### 2.6 Diagram - Latte (hot)
+![Figure 2.6 - Latte (hot)](figures/png/fig-230-latte.png)
+Figure 2.6 shows: Medium latte: 2 shots of espresso, 12 oz of steamed milk, and about 1/4 inch of foam. Syrup goes in first if flavored.
+
 ## 3 Cappuccino
 
 ### 3.1 Cappuccino specifications
@@ -72,6 +80,10 @@ Steam the milk to its target temperature, stretching for 6 to 8 seconds to build
 ### 3.4 Cappuccino: pour
 <!-- step -->
 Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid.
+
+### 3.5 Diagram - Cappuccino
+![Figure 3.5 - Cappuccino](figures/png/fig-230-cappuccino.png)
+Figure 3.5 shows: Medium cappuccino: 2 shots of espresso, 7 oz of steamed milk, and 3/4 inch of foam.
 
 ## 4 Flat White
 
@@ -95,6 +107,10 @@ Steam the milk to its target temperature, stretching for only 1 to 2 seconds.
 <!-- step -->
 Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid.
 
+### 4.5 Diagram - Flat White (S and M only)
+![Figure 4.5 - Flat White (S and M only)](figures/png/fig-230-flat-white.png)
+Figure 4.5 shows: Medium flat white: 3 shots of espresso, 8 oz of steamed milk, and 1/8 inch of microfoam. Made in Small and Medium only.
+
 ## 5 Americano
 
 ### 5.1 Americano specifications
@@ -112,6 +128,10 @@ Fill the cup with the hot water first.
 ### 5.3 Americano: add espresso
 <!-- step -->
 Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface.
+
+### 5.4 Diagram - Americano
+![Figure 5.4 - Americano](figures/png/fig-230-americano.png)
+Figure 5.4 shows: Medium americano: 12 oz of hot water at 195°F goes in first, then 2 shots of espresso poured gently on top.
 
 ## 6 Iced Latte
 
@@ -132,6 +152,10 @@ Fill the cup with ice up to the ice line.
 ### 6.4 Iced latte: add espresso
 <!-- step -->
 Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid.
+
+### 6.5 Diagram - Iced Latte
+![Figure 6.5 - Iced Latte](figures/png/fig-230-iced-latte.png)
+Figure 6.5 shows: Medium iced latte: 8 oz of cold milk, ice up to the ice line, then 2 shots of espresso on top. Stir.
 
 ## 7 Mocha
 
@@ -156,6 +180,10 @@ Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved.
 <!-- step -->
 Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.
 
+### 7.5 Diagram - Mocha
+![Figure 7.5 - Mocha](figures/png/fig-230-mocha.png)
+Figure 7.5 shows: Medium mocha: 3 pumps of mocha sauce, 2 shots of espresso, 10 oz of steamed milk, and optional whipped cream.
+
 ## 8 Cold Brew
 
 ### 8.1 Cold brew specifications
@@ -173,6 +201,10 @@ Fill the cup with ice up to the ice line, pour in the concentrate and then the w
 ### 8.3 Cold brew batch recipe
 <!-- step -->
 Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41°F or below. Filter, label with the date, and use within 14 days.
+
+### 8.4 Diagram - Cold Brew
+![Figure 8.4 - Cold Brew](figures/png/fig-230-cold-brew.png)
+Figure 8.4 shows: Medium cold brew: ice up to the ice line, 6 oz of concentrate, then 6 oz of water, and stir once.
 
 ## 9 Matcha Latte
 
@@ -197,6 +229,10 @@ Add 2 oz of 175°F water and whisk in a W motion until the slurry is smooth with
 ### 9.4 Matcha: add milk
 <!-- step -->
 For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid.
+
+### 9.5 Diagram - Matcha Latte
+![Figure 9.5 - Matcha Latte](figures/png/fig-230-matcha.png)
+Figure 9.5 shows: Medium matcha latte: 4 g of matcha whisked with 2 oz of 175°F water, then 12 oz of steamed milk.
 
 ## 10 Drip Coffee
 

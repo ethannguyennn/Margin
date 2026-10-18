@@ -38,8 +38,8 @@
 {"id":"o02","category":"off-domain","q":"What is the wifi password?","expect":"not_found"}
 {"id":"o03","category":"off-domain","q":"How much do baristas get paid?","expect":"not_found"}
 {"id":"n01","category":"near-miss","q":"How do I make a pumpkin spice latte?","expect":"not_found"}
-{"id":"n02","category":"near-miss","q":"How do I clean the ice machine?","expect":"not_found"}
-{"id":"o04","category":"off-domain","q":"How do I request time off?","expect":"not_found"}
+{"id":"n02","category":"answerable","q":"How do I clean the ice machine?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"3.3","must_contain":["20 minutes"]}
+{"id":"o04","category":"answerable","q":"How do I request time off?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"4.1","must_contain":["14 days"]}
 {"id":"n03","category":"near-miss","q":"What concentration of bleach should I use to sanitize?","expect":"not_found"}
 {"id":"c01","category":"ambiguous","q":"How long does it last?","expect":"not_found","needs_clarification":true}
 {"id":"c02","category":"ambiguous","q":"What temperature?","expect":"not_found","needs_clarification":true}
@@ -61,3 +61,79 @@
 {"id":"v3-p1","category":"answerable","q":"What does the steam wand look like?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.4","must_contain":["wand"],"graphic_id":"milk-steaming"}
 {"id":"v3-p2","category":"answerable","q":"Show me the sanitizer test strip","expect":"answered","doc_id":"SOP-210","revision":"C","section":"3.7","must_contain":["Sanitizer"],"graphic_id":"sanitizer-test"}
 {"id":"v3-p3","category":"answerable","q":"Picture of the cash drawer","expect":"answered","doc_id":"SOP-202","revision":"C","section":"3.1","must_contain":["Cash drawer"],"graphic_id":"cash-handling"}
+{"id":"e001","category":"near-miss","q":"What is the recipe for croissant dough?","expect":"not_found"}
+{"id":"e002","category":"answerable","q":"How much is a medium chai latte?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"1.2","must_contain":["$5.70"]}
+{"id":"e003","category":"answerable","q":"What temperature water for green tea?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"2.1","must_contain":["175°F"]}
+{"id":"e004","category":"answerable","q":"How long do I steep black tea?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"2.1","must_contain":["4 minutes"]}
+{"id":"e005","category":"answerable","q":"How much chai concentrate goes in a large chai?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"3.1","must_contain":["8 oz"]}
+{"id":"e006","category":"answerable","q":"How do I make a dirty chai?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"3.5","must_contain":["extra shot"]}
+{"id":"e007","category":"answerable","q":"How hot should a kid's hot chocolate be?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"4.5","must_contain":["130°F"]}
+{"id":"e008","category":"answerable","q":"How many pumps of syrup in a medium steamer?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"5.1","must_contain":["3 pumps"]}
+{"id":"e009","category":"answerable","q":"How long do I blend a frappe?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"6.1","must_contain":["30 seconds"]}
+{"id":"e010","category":"answerable","q":"How much ice goes in a large frappe?","expect":"answered","doc_id":"SOP-231","revision":"C","section":"6.1","must_contain":["2 cups"]}
+{"id":"e011","category":"answerable","q":"How much is a breakfast sandwich?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"2.1","must_contain":["$6.95"]}
+{"id":"e012","category":"answerable","q":"What temperature does the cold case need?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"2.2","must_contain":["41°F"]}
+{"id":"e013","category":"answerable","q":"How long do I warm a croissant?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"4.1","must_contain":["3 minutes"]}
+{"id":"e014","category":"answerable","q":"What temperature should a breakfast sandwich reach?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"4.3","must_contain":["165°F"]}
+{"id":"e015","category":"answerable","q":"When do pastries go on markdown?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"5.1","must_contain":["6:00 PM","50 percent"]}
+{"id":"e016","category":"answerable","q":"Can I sell day-old pastries?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"5.2","must_contain":["Never sell day-old pastries"]}
+{"id":"e017","category":"answerable","q":"Do we have gluten free options?","expect":"answered","doc_id":"SOP-240","revision":"C","section":"6.1","must_contain":["do not have a gluten-free"]}
+{"id":"e018","category":"answerable","q":"How much can a cashier comp?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"4.1","must_contain":["$5.00"]}
+{"id":"e019","category":"answerable","q":"What do I offer first when a guest complains?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"3.3","must_contain":["free remake"]}
+{"id":"e020","category":"answerable","q":"How long do we keep lost and found items?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"6.3","must_contain":["30 days"]}
+{"id":"e021","category":"answerable","q":"Where do lost phones and wallets go?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"6.2","must_contain":["safe"]}
+{"id":"e022","category":"answerable","q":"Can a guest bring a dog inside?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"7.1","must_contain":["service animals"]}
+{"id":"e023","category":"answerable","q":"Who can comp up to fifteen dollars?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"4.1","must_contain":["Shift lead","$15.00"]}
+{"id":"e024","category":"answerable","q":"How fast should I answer the café phone?","expect":"answered","doc_id":"SOP-250","revision":"C","section":"2.1","must_contain":["3 rings"]}
+{"id":"e025","category":"answerable","q":"What volume is the music?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"3.1","must_contain":["volume level 3"]}
+{"id":"e026","category":"answerable","q":"When do I unlock the front door?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"3.5","must_contain":["6:00 AM"]}
+{"id":"e027","category":"answerable","q":"How often do I do a lobby check?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"4.1","must_contain":["every 30 minutes"]}
+{"id":"e028","category":"answerable","q":"When do I empty the lobby trash?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"4.1","must_contain":["3/4 full"]}
+{"id":"e029","category":"answerable","q":"When is the front door locked at close?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"6.1","must_contain":["8:00 PM"]}
+{"id":"e030","category":"answerable","q":"What do I wipe tables with?","expect":"answered","doc_id":"SOP-260","revision":"C","section":"5.2","must_contain":["sanitizer bucket"]}
+{"id":"e031","category":"answerable","q":"How long does the ice machine clean cycle run?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"3.3","must_contain":["20 minutes"]}
+{"id":"e032","category":"answerable","q":"How often do I clean the ice machine?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"2.1","must_contain":["first Monday"]}
+{"id":"e033","category":"answerable","q":"How long do I blend when washing the blender?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"5.2","must_contain":["10 seconds"]}
+{"id":"e034","category":"answerable","q":"When is the grinder deep cleaned?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"6.2","must_contain":["Sunday"]}
+{"id":"e035","category":"answerable","q":"How often is the water filter replaced?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"7.2","must_contain":["6 months"]}
+{"id":"e036","category":"answerable","q":"What day do I wipe the fridge shelves?","expect":"answered","doc_id":"SOP-270","revision":"C","section":"7.1","must_contain":["Wednesday"]}
+{"id":"e037","category":"answerable","q":"When does the milk delivery come?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"2.1","must_contain":["Monday and Thursday"]}
+{"id":"e038","category":"answerable","q":"What temperature must delivered dairy be?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"3.2","must_contain":["41°F"]}
+{"id":"e039","category":"answerable","q":"Can I accept milk with a use-by date tomorrow?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"3.3","must_contain":["within 2 days"]}
+{"id":"e040","category":"answerable","q":"When do I reorder oat milk?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"5.2","must_contain":["4 cartons"]}
+{"id":"e041","category":"answerable","q":"When is inventory counted?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"5.1","must_contain":["Sunday at close"]}
+{"id":"e042","category":"answerable","q":"What goes on the waste log?","expect":"answered","doc_id":"SOP-280","revision":"C","section":"7.1","must_contain":["date, item, quantity, reason"]}
+{"id":"e043","category":"answerable","q":"Where is the fire extinguisher?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"2.1","must_contain":["wall by the back door"]}
+{"id":"e044","category":"answerable","q":"What does PASS stand for?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"6.1","must_contain":["Pull the pin"]}
+{"id":"e045","category":"answerable","q":"How long do I cool a burn?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"3.1","must_contain":["10 minutes"]}
+{"id":"e046","category":"answerable","q":"What do I do if the power goes out?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"7.2","must_contain":["Take cash only"]}
+{"id":"e047","category":"answerable","q":"How long can the power be out before the manager decides to close?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"7.4","must_contain":["30 minutes"]}
+{"id":"e048","category":"answerable","q":"What do I do with broken glass?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"5.5","must_contain":["dustpan"]}
+{"id":"e049","category":"answerable","q":"Where do we meet in a fire?","expect":"answered","doc_id":"SOP-290","revision":"C","section":"6.2","must_contain":["parking lot corner"]}
+{"id":"e050","category":"answerable","q":"How far ahead must I ask for time off?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"4.1","must_contain":["14 days"]}
+{"id":"e051","category":"answerable","q":"When is the schedule posted?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"2.1","must_contain":["Thursday"]}
+{"id":"e052","category":"answerable","q":"How long before my shift do I call if I'm sick?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"3.2","must_contain":["2 hours"]}
+{"id":"e053","category":"answerable","q":"How long is the meal break?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"6.2","must_contain":["30-minute"]}
+{"id":"e054","category":"answerable","q":"How many shifts are shadow shifts?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"8.1","must_contain":["3 shifts"]}
+{"id":"e055","category":"answerable","q":"When does the manager need to approve a shift swap?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"5.3","must_contain":["24 hours"]}
+{"id":"e056","category":"answerable","q":"What shoes do I wear?","expect":"answered","doc_id":"SOP-300","revision":"C","section":"7.1","must_contain":["non-slip shoes"]}
+{"id":"e057","category":"answerable","q":"Show me how to check a fifty dollar bill","expect":"answered","doc_id":"SOP-202","revision":"C","section":"2.4","must_contain":["Mark every $50"],"figure":"fig-202-bill-check"}
+{"id":"e058","category":"answerable","q":"Show me the refund approval ladder","expect":"answered","doc_id":"SOP-202","revision":"C","section":"5.6","must_contain":["Shift lead (PIN)"],"figure":"fig-202-refund-ladder"}
+{"id":"e059","category":"answerable","q":"Show me the temperature cheat sheet","expect":"answered","doc_id":"SOP-210","revision":"C","section":"4.6","must_contain":["160°F"],"figure":"fig-210-temps"}
+{"id":"e060","category":"answerable","q":"Show me the three-compartment sink steps","expect":"answered","doc_id":"SOP-210","revision":"C","section":"6.6","must_contain":["110°F"],"figure":"fig-210-sink"}
+{"id":"e061","category":"answerable","q":"Show me the shot time chart","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.9","must_contain":["grind finer"],"figure":"fig-220-dialin-scale"}
+{"id":"e062","category":"answerable","q":"Show me the milk temperature chart","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.10","must_contain":["almond 130 to 140°F"],"figure":"fig-220-milk-temps"}
+{"id":"e063","category":"answerable","q":"Show me what a latte looks like","expect":"answered","doc_id":"SOP-230","revision":"C","section":"2.6","must_contain":["12 oz"],"figure":"fig-230-latte"}
+{"id":"e064","category":"answerable","q":"Show me the tea chart","expect":"answered","doc_id":"SOP-231","revision":"C","section":"2.5","must_contain":["205°F"],"figure":"fig-231-tea"}
+{"id":"e065","category":"answerable","q":"Show me the display cases","expect":"answered","doc_id":"SOP-240","revision":"C","section":"2.3","must_contain":["41°F"],"figure":"fig-240-case"}
+{"id":"e066","category":"answerable","q":"Show me the floor plan","expect":"answered","doc_id":"SOP-260","revision":"C","section":"2.2","must_contain":["front door"],"figure":"fig-260-floorplan"}
+{"id":"e067","category":"answerable","q":"Show me the grinder parts","expect":"answered","doc_id":"SOP-270","revision":"C","section":"6.3","must_contain":["burr chamber"],"figure":"fig-270-grinder"}
+{"id":"e068","category":"answerable","q":"Show me the par levels","expect":"answered","doc_id":"SOP-280","revision":"C","section":"5.3","must_contain":["whole milk 8 gallons"],"figure":"fig-280-par"}
+{"id":"e069","category":"answerable","q":"Show me the fire exit map","expect":"answered","doc_id":"SOP-290","revision":"C","section":"6.5","must_contain":["parking lot corner"],"figure":"fig-290-evac"}
+{"id":"e070","category":"answerable","q":"Show me the uniform checklist","expect":"answered","doc_id":"SOP-300","revision":"C","section":"7.3","must_contain":["non-slip shoes"],"figure":"fig-300-uniform"}
+{"id":"e071","category":"near-miss","q":"How do I descale the espresso machine boiler?","expect":"not_found"}
+{"id":"e072","category":"near-miss","q":"How do I change the menu prices in the POS?","expect":"not_found"}
+{"id":"e073","category":"near-miss","q":"What is the tip pooling policy?","expect":"not_found"}
+{"id":"e074","category":"off-domain","q":"Can I bring my dog to work?","expect":"not_found"}
+{"id":"e075","category":"near-miss","q":"How do I make a chai concentrate from scratch?","expect":"not_found"}
+{"id":"e076","category":"ambiguous","q":"How long do I steep it?","expect":"not_found","needs_clarification":true}

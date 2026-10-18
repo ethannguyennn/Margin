@@ -1,0 +1,121 @@
+{"q": "How much money is in the opening float?", "expect": "answered", "doc_id": "SOP-201", "section": "2.2", "must_contain": ["$150.00"]}
+{"q": "How fast do I have to greet a guest?", "expect": "answered", "doc_id": "SOP-201", "section": "3.1", "must_contain": ["10 seconds"]}
+{"q": "How much extra is oat milk?", "expect": "answered", "doc_id": "SOP-201", "section": "4.3", "must_contain": ["$0.75"]}
+{"q": "How much is a medium cappuccino?", "expect": "answered", "doc_id": "SOP-201", "section": "4.2", "must_contain": ["$5.50"]}
+{"q": "Can I sell a large flat white?", "expect": "answered", "doc_id": "SOP-201", "section": "4.1", "must_contain": ["Small and Medium only"]}
+{"q": "What do I do when a guest mentions an allergy?", "expect": "answered", "doc_id": "SOP-201", "section": "5.1", "must_contain": ["ALLERGY button"]}
+{"q": "What is the biggest bill we accept?", "expect": "answered", "doc_id": "SOP-202", "section": "2.2", "must_contain": ["$50"]}
+{"q": "What does a black mark from the pen mean on a fifty?", "expect": "answered", "doc_id": "SOP-202", "section": "2.3", "must_contain": ["dark brown or black"]}
+{"q": "When do I need to do a cash drop?", "expect": "answered", "doc_id": "SOP-202", "section": "3.2", "must_contain": ["$400.00", "$200.00"]}
+{"q": "Who has to approve a fifteen dollar refund?", "expect": "answered", "doc_id": "SOP-202", "section": "5.2", "must_contain": ["$10.01 to $25.00", "Shift lead"]}
+{"q": "How long after purchase can I give a refund?", "expect": "answered", "doc_id": "SOP-202", "section": "5.3", "must_contain": ["24 hours"]}
+{"q": "How long can I void an order after payment?", "expect": "answered", "doc_id": "SOP-202", "section": "5.1", "must_contain": ["5 minutes"]}
+{"q": "What is the maximum gift card load?", "expect": "answered", "doc_id": "SOP-202", "section": "6.1", "must_contain": ["$200.00"]}
+{"q": "When does a till variance need a manager signature?", "expect": "answered", "doc_id": "SOP-202", "section": "7.4", "must_contain": ["$5.00", "manager signature"]}
+{"q": "How much do I leave in the drawer when closing?", "expect": "answered", "doc_id": "SOP-202", "section": "7.3", "must_contain": ["$150.00"]}
+{"q": "How cold does the milk fridge need to be?", "expect": "answered", "doc_id": "SOP-210", "section": "3.2", "must_contain": ["41°F"]}
+{"q": "How long do I wash my hands?", "expect": "answered", "doc_id": "SOP-210", "section": "2.1", "must_contain": ["20 seconds"]}
+{"q": "What strength should the sanitizer bucket be?", "expect": "answered", "doc_id": "SOP-210", "section": "3.7", "must_contain": ["200 to 400 ppm"]}
+{"q": "How long does opened oat milk last?", "expect": "answered", "doc_id": "SOP-210", "section": "4.2", "must_contain": ["7 days"]}
+{"q": "When do I throw out drip coffee?", "expect": "answered", "doc_id": "SOP-210", "section": "4.3", "must_contain": ["60 minutes"]}
+{"q": "How do I backflush the group heads?", "expect": "answered", "doc_id": "SOP-210", "section": "5.1", "must_contain": ["10 seconds on"]}
+{"q": "How long do I soak the portafilters?", "expect": "answered", "doc_id": "SOP-210", "section": "5.2", "must_contain": ["20 minutes"]}
+{"q": "What temperature is the wash sink water?", "expect": "answered", "doc_id": "SOP-210", "section": "6.3", "must_contain": ["110°F"]}
+{"q": "Where is the first aid kit?", "expect": "answered", "doc_id": "SOP-210", "section": "7.2", "must_contain": ["under the back counter"]}
+{"q": "How long should an espresso shot take?", "expect": "answered", "doc_id": "SOP-220", "section": "3.5", "must_contain": ["25 to 30 seconds"]}
+{"q": "What is the espresso dose?", "expect": "answered", "doc_id": "SOP-220", "section": "2.1", "must_contain": ["18.0 g"]}
+{"q": "My shot ran twenty seconds, what do I do?", "expect": "answered", "doc_id": "SOP-220", "section": "3.6", "must_contain": ["grind finer"]}
+{"q": "What temperature do I steam almond milk to?", "expect": "answered", "doc_id": "SOP-220", "section": "4.1", "must_contain": ["130 to 140°F"]}
+{"q": "How hot is extra hot?", "expect": "answered", "doc_id": "SOP-220", "section": "4.2", "must_contain": ["160°F"]}
+{"q": "How much foam goes on a cappuccino?", "expect": "answered", "doc_id": "SOP-220", "section": "4.3", "must_contain": ["3/4 inch"]}
+{"q": "What should the steam boiler pressure read?", "expect": "answered", "doc_id": "SOP-220", "section": "6.1", "must_contain": ["1.0 to 1.5 bar"]}
+{"q": "How much steamed milk goes in a medium latte?", "expect": "answered", "doc_id": "SOP-230", "section": "2.1", "must_contain": ["12 oz"]}
+{"q": "How many grams of matcha for a large?", "expect": "answered", "doc_id": "SOP-230", "section": "9.1", "must_contain": ["5 g"]}
+{"q": "How much concentrate goes in a medium cold brew?", "expect": "answered", "doc_id": "SOP-230", "section": "8.1", "must_contain": ["6 oz"]}
+{"q": "How long do I steep cold brew?", "expect": "answered", "doc_id": "SOP-230", "section": "8.3", "must_contain": ["18 hours"]}
+{"q": "How many pumps of mocha sauce in a large?", "expect": "answered", "doc_id": "SOP-230", "section": "7.1", "must_contain": ["4 pumps"]}
+{"q": "What is the recipe for croissant dough?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What is the wifi password?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How much do baristas get paid?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I make a pumpkin spice latte?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I clean the ice machine?", "expect": "answered", "doc_id": "SOP-270", "section": "3.3", "must_contain": ["20 minutes"]}
+{"q": "How do I request time off?", "expect": "answered", "doc_id": "SOP-300", "section": "4.1", "must_contain": ["14 days"]}
+{"q": "What concentration of bleach should I use to sanitize?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How long does it last?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What temperature?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How much is a medium chai latte?", "expect": "answered", "doc_id": "SOP-231", "section": "1.2", "must_contain": ["$5.70"]}
+{"q": "What temperature water for green tea?", "expect": "answered", "doc_id": "SOP-231", "section": "2.1", "must_contain": ["175°F"]}
+{"q": "How long do I steep black tea?", "expect": "answered", "doc_id": "SOP-231", "section": "2.1", "must_contain": ["4 minutes"]}
+{"q": "How much chai concentrate goes in a large chai?", "expect": "answered", "doc_id": "SOP-231", "section": "3.1", "must_contain": ["8 oz"]}
+{"q": "How do I make a dirty chai?", "expect": "answered", "doc_id": "SOP-231", "section": "3.5", "must_contain": ["extra shot"]}
+{"q": "How hot should a kid's hot chocolate be?", "expect": "answered", "doc_id": "SOP-231", "section": "4.5", "must_contain": ["130°F"]}
+{"q": "How many pumps of syrup in a medium steamer?", "expect": "answered", "doc_id": "SOP-231", "section": "5.1", "must_contain": ["3 pumps"]}
+{"q": "How long do I blend a frappe?", "expect": "answered", "doc_id": "SOP-231", "section": "6.1", "must_contain": ["30 seconds"]}
+{"q": "How much ice goes in a large frappe?", "expect": "answered", "doc_id": "SOP-231", "section": "6.1", "must_contain": ["2 cups"]}
+{"q": "How much is a breakfast sandwich?", "expect": "answered", "doc_id": "SOP-240", "section": "2.1", "must_contain": ["$6.95"]}
+{"q": "What temperature does the cold case need?", "expect": "answered", "doc_id": "SOP-240", "section": "2.2", "must_contain": ["41°F"]}
+{"q": "How long do I warm a croissant?", "expect": "answered", "doc_id": "SOP-240", "section": "4.1", "must_contain": ["3 minutes"]}
+{"q": "What temperature should a breakfast sandwich reach?", "expect": "answered", "doc_id": "SOP-240", "section": "4.3", "must_contain": ["165°F"]}
+{"q": "When do pastries go on markdown?", "expect": "answered", "doc_id": "SOP-240", "section": "5.1", "must_contain": ["6:00 PM", "50 percent"]}
+{"q": "Can I sell day-old pastries?", "expect": "answered", "doc_id": "SOP-240", "section": "5.2", "must_contain": ["Never sell day-old pastries"]}
+{"q": "Do we have gluten free options?", "expect": "answered", "doc_id": "SOP-240", "section": "6.1", "must_contain": ["do not have a gluten-free"]}
+{"q": "How much can a cashier comp?", "expect": "answered", "doc_id": "SOP-250", "section": "4.1", "must_contain": ["$5.00"]}
+{"q": "What do I offer first when a guest complains?", "expect": "answered", "doc_id": "SOP-250", "section": "3.3", "must_contain": ["free remake"]}
+{"q": "How long do we keep lost and found items?", "expect": "answered", "doc_id": "SOP-250", "section": "6.3", "must_contain": ["30 days"]}
+{"q": "Where do lost phones and wallets go?", "expect": "answered", "doc_id": "SOP-250", "section": "6.2", "must_contain": ["safe"]}
+{"q": "Can a guest bring a dog inside?", "expect": "answered", "doc_id": "SOP-250", "section": "7.1", "must_contain": ["service animals"]}
+{"q": "Who can comp up to fifteen dollars?", "expect": "answered", "doc_id": "SOP-250", "section": "4.1", "must_contain": ["Shift lead", "$15.00"]}
+{"q": "How fast should I answer the café phone?", "expect": "answered", "doc_id": "SOP-250", "section": "2.1", "must_contain": ["3 rings"]}
+{"q": "What volume is the music?", "expect": "answered", "doc_id": "SOP-260", "section": "3.1", "must_contain": ["volume level 3"]}
+{"q": "When do I unlock the front door?", "expect": "answered", "doc_id": "SOP-260", "section": "3.5", "must_contain": ["6:00 AM"]}
+{"q": "How often do I do a lobby check?", "expect": "answered", "doc_id": "SOP-260", "section": "4.1", "must_contain": ["every 30 minutes"]}
+{"q": "When do I empty the lobby trash?", "expect": "answered", "doc_id": "SOP-260", "section": "4.1", "must_contain": ["3/4 full"]}
+{"q": "When is the front door locked at close?", "expect": "answered", "doc_id": "SOP-260", "section": "6.1", "must_contain": ["8:00 PM"]}
+{"q": "What do I wipe tables with?", "expect": "answered", "doc_id": "SOP-260", "section": "5.2", "must_contain": ["sanitizer bucket"]}
+{"q": "How long does the ice machine clean cycle run?", "expect": "answered", "doc_id": "SOP-270", "section": "3.3", "must_contain": ["20 minutes"]}
+{"q": "How often do I clean the ice machine?", "expect": "answered", "doc_id": "SOP-270", "section": "2.1", "must_contain": ["first Monday"]}
+{"q": "How long do I blend when washing the blender?", "expect": "answered", "doc_id": "SOP-270", "section": "5.2", "must_contain": ["10 seconds"]}
+{"q": "When is the grinder deep cleaned?", "expect": "answered", "doc_id": "SOP-270", "section": "6.2", "must_contain": ["Sunday"]}
+{"q": "How often is the water filter replaced?", "expect": "answered", "doc_id": "SOP-270", "section": "7.2", "must_contain": ["6 months"]}
+{"q": "What day do I wipe the fridge shelves?", "expect": "answered", "doc_id": "SOP-270", "section": "7.1", "must_contain": ["Wednesday"]}
+{"q": "When does the milk delivery come?", "expect": "answered", "doc_id": "SOP-280", "section": "2.1", "must_contain": ["Monday and Thursday"]}
+{"q": "What temperature must delivered dairy be?", "expect": "answered", "doc_id": "SOP-280", "section": "3.2", "must_contain": ["41°F"]}
+{"q": "Can I accept milk with a use-by date tomorrow?", "expect": "answered", "doc_id": "SOP-280", "section": "3.3", "must_contain": ["within 2 days"]}
+{"q": "When do I reorder oat milk?", "expect": "answered", "doc_id": "SOP-280", "section": "5.2", "must_contain": ["4 cartons"]}
+{"q": "When is inventory counted?", "expect": "answered", "doc_id": "SOP-280", "section": "5.1", "must_contain": ["Sunday at close"]}
+{"q": "What goes on the waste log?", "expect": "answered", "doc_id": "SOP-280", "section": "7.1", "must_contain": ["date, item, quantity, reason"]}
+{"q": "Where is the fire extinguisher?", "expect": "answered", "doc_id": "SOP-290", "section": "2.1", "must_contain": ["wall by the back door"]}
+{"q": "What does PASS stand for?", "expect": "answered", "doc_id": "SOP-290", "section": "6.1", "must_contain": ["Pull the pin"]}
+{"q": "How long do I cool a burn?", "expect": "answered", "doc_id": "SOP-290", "section": "3.1", "must_contain": ["10 minutes"]}
+{"q": "What do I do if the power goes out?", "expect": "answered", "doc_id": "SOP-290", "section": "7.2", "must_contain": ["Take cash only"]}
+{"q": "How long can the power be out before the manager decides to close?", "expect": "answered", "doc_id": "SOP-290", "section": "7.4", "must_contain": ["30 minutes"]}
+{"q": "What do I do with broken glass?", "expect": "answered", "doc_id": "SOP-290", "section": "5.5", "must_contain": ["dustpan"]}
+{"q": "Where do we meet in a fire?", "expect": "answered", "doc_id": "SOP-290", "section": "6.2", "must_contain": ["parking lot corner"]}
+{"q": "How far ahead must I ask for time off?", "expect": "answered", "doc_id": "SOP-300", "section": "4.1", "must_contain": ["14 days"]}
+{"q": "When is the schedule posted?", "expect": "answered", "doc_id": "SOP-300", "section": "2.1", "must_contain": ["Thursday"]}
+{"q": "How long before my shift do I call if I'm sick?", "expect": "answered", "doc_id": "SOP-300", "section": "3.2", "must_contain": ["2 hours"]}
+{"q": "How long is the meal break?", "expect": "answered", "doc_id": "SOP-300", "section": "6.2", "must_contain": ["30-minute"]}
+{"q": "How many shifts are shadow shifts?", "expect": "answered", "doc_id": "SOP-300", "section": "8.1", "must_contain": ["3 shifts"]}
+{"q": "When does the manager need to approve a shift swap?", "expect": "answered", "doc_id": "SOP-300", "section": "5.3", "must_contain": ["24 hours"]}
+{"q": "What shoes do I wear?", "expect": "answered", "doc_id": "SOP-300", "section": "7.1", "must_contain": ["non-slip shoes"]}
+{"q": "Show me how to check a fifty dollar bill", "expect": "answered", "doc_id": "SOP-202", "section": "2.4", "must_contain": ["Mark every $50"], "figure": "fig-202-bill-check"}
+{"q": "Show me the refund approval ladder", "expect": "answered", "doc_id": "SOP-202", "section": "5.6", "must_contain": ["Shift lead (PIN)"], "figure": "fig-202-refund-ladder"}
+{"q": "Show me the temperature cheat sheet", "expect": "answered", "doc_id": "SOP-210", "section": "4.6", "must_contain": ["160°F"], "figure": "fig-210-temps"}
+{"q": "Show me the three-compartment sink steps", "expect": "answered", "doc_id": "SOP-210", "section": "6.6", "must_contain": ["110°F"], "figure": "fig-210-sink"}
+{"q": "Show me the shot time chart", "expect": "answered", "doc_id": "SOP-220", "section": "3.9", "must_contain": ["grind finer"], "figure": "fig-220-dialin-scale"}
+{"q": "Show me the milk temperature chart", "expect": "answered", "doc_id": "SOP-220", "section": "4.10", "must_contain": ["almond 130 to 140°F"], "figure": "fig-220-milk-temps"}
+{"q": "Show me what a latte looks like", "expect": "answered", "doc_id": "SOP-230", "section": "2.6", "must_contain": ["12 oz"], "figure": "fig-230-latte"}
+{"q": "Show me the tea chart", "expect": "answered", "doc_id": "SOP-231", "section": "2.5", "must_contain": ["205°F"], "figure": "fig-231-tea"}
+{"q": "Show me the display cases", "expect": "answered", "doc_id": "SOP-240", "section": "2.3", "must_contain": ["41°F"], "figure": "fig-240-case"}
+{"q": "Show me the floor plan", "expect": "answered", "doc_id": "SOP-260", "section": "2.2", "must_contain": ["front door"], "figure": "fig-260-floorplan"}
+{"q": "Show me the grinder parts", "expect": "answered", "doc_id": "SOP-270", "section": "6.3", "must_contain": ["burr chamber"], "figure": "fig-270-grinder"}
+{"q": "Show me the par levels", "expect": "answered", "doc_id": "SOP-280", "section": "5.3", "must_contain": ["whole milk 8 gallons"], "figure": "fig-280-par"}
+{"q": "Show me the fire exit map", "expect": "answered", "doc_id": "SOP-290", "section": "6.5", "must_contain": ["parking lot corner"], "figure": "fig-290-evac"}
+{"q": "Show me the uniform checklist", "expect": "answered", "doc_id": "SOP-300", "section": "7.3", "must_contain": ["non-slip shoes"], "figure": "fig-300-uniform"}
+{"q": "How do I descale the espresso machine boiler?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I change the menu prices in the POS?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What is the tip pooling policy?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "Can I bring my dog to work?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I make a chai concentrate from scratch?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How many pumps?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How long do I steep it?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}

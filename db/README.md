@@ -1,10 +1,10 @@
 # Part 5 integration handoff
 
-**Demo bank (2026-10-17):** corpus/ now holds five fictional Ember & Oak Coffee SOPs
-(SOP-201, 202, 210, 220, 230, revision C): 134 chunks, 72 steps. Steps are marked with a
+**Demo bank (2026-10-18):** corpus/ holds thirteen fictional Ember & Oak Coffee SOPs
+(SOP-201 through SOP-300, revision C): 353 chunks, 149 steps. Steps are marked with a
 `<!-- step -->` line opening the section (the seeder also still accepts one numbered item
-per section). The supplied originals are at the repo root; the corpus copies differ only
-by the required `synthetic: true` flag. The HX-2 bank described below moved to
+per section). The corpus files are the team's supplied SOPs plus the required
+`synthetic: true` flag. Their figures are in corpus/figures/ (svg, png, and 288x144 g2). The HX-2 bank described below moved to
 relay/tests/fixtures/hx2-corpus/ and still backs the unit tests.
 
 All corpus content is fictional, synthetic training data. No employer SOPs,
