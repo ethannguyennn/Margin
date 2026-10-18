@@ -43,6 +43,9 @@ Rules:
 7. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
 8. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
    Choose the most useful equipment view for this instruction; otherwise return null. Never invent a URL.
+9. Count every character in glance, including spaces: at most {GLANCE_MAX}. Copy numbers with
+   their units exactly from the quote. Preserve inner quotation marks and degree/unit glyphs
+   in citations; JSON-escape quotation marks rather than rewriting or shortening the quote.
 Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}], graphic_id}}
 When answerable=false, return empty glance, body and citations."""
 

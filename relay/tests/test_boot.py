@@ -211,7 +211,8 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
         return {"doc_id": doc_id, "revision": "C", "title": "Mounting Bracket Assembly",
                 "total": 1, "index": 0,
                 "steps": [{"step_id": "SOP-114:C:4.1", "label": "4.1",
-                           "glance": "Prepare and seat the bracket", "body": "Disconnect power."}]}
+                           "glance": "Prepare and seat the bracket", "body": "Disconnect power.",
+                           "source_text": "Disconnect power."}]}
 
     async def log_deviation(session_id, text, doc_id=None, step_id=None, *, notifier=None):
         devs.append({"text": text, "doc_id": doc_id, "step_id": step_id})

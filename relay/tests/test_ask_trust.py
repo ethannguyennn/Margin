@@ -128,7 +128,7 @@ RINSE = "Rinse the wetted path with purified water at 60°C for 5 min."
 class StepRetriever(FakeRetriever):
     async def steps_for(self, doc_id, revision):
         from specs_relay.schemas import Step
-        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE)] if doc_id == "SOP-120" else []
+        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE, source_text=RINSE)] if doc_id == "SOP-120" else []
 
 
 class RecordingGenerator(ScriptedGenerator):
@@ -176,7 +176,7 @@ class TillRetriever:
 
     async def steps_for(self, doc_id, revision):
         from specs_relay.schemas import Step
-        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.")
+        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.", source_text=f"Do {s}.")
                 for s in ("2.3", "5.1", "7.1", "7.2", "7.3")]
 
 

@@ -161,6 +161,7 @@ def step_from_row(row: Any) -> dict:
         "label": str(_get(row, "section")),
         "glance": glance,
         "body": _fit_sentences(text, BODY_MAX),
+        "source_text": _get(row, "text"),
         "graphic_id": graphic_for_chunk({"chunk_id": _get(row, "chunk_id"), "text": _get(row, "text") or ""}),
     }
 
@@ -194,16 +195,29 @@ class GeminiEmbedder:
 
     async def _embed(self, contents: list[str], task_type: str) -> list[list[float]]:
         from google.genai import types
+        from .generate import TRANSIENT_CODES
 
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.timeout
         try:
-            resp = await asyncio.wait_for(
-                self.client.aio.models.embed_content(
-                    # One Content per text: Embedding 2 aggregates a bare list into one vector.
-                    model=self.model, contents=[types.Content(parts=[types.Part.from_text(text=c)]) for c in contents],
-                    config=self._config(task_type),
-                ),
-                timeout=self.timeout,
-            )
+            for attempt in range(2):
+                try:
+                    resp = await asyncio.wait_for(
+                        self.client.aio.models.embed_content(
+                            # One Content per text: Embedding 2 aggregates a bare list into one vector.
+                            model=self.model, contents=[types.Content(parts=[types.Part.from_text(text=c)]) for c in contents],
+                            config=self._config(task_type),
+                        ),
+                        timeout=deadline - loop.time(),
+                    )
+                    break
+                except asyncio.TimeoutError:
+                    raise
+                except Exception as e:
+                    if (attempt or getattr(e, "code", None) not in TRANSIENT_CODES
+                            or deadline - loop.time() <= 0.4):
+                        raise
+                    await asyncio.sleep(0.4)
         except asyncio.TimeoutError as e:
             raise EmbeddingError("embedding timed out") from e
         except Exception as e:  # SDK/network errors: typed, no prompt or key in the message

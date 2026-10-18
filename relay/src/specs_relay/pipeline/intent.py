@@ -94,7 +94,7 @@ def _loose_command(transcript: str) -> str | None:
 _WALKTHROUGH = re.compile(
     r"\b(?:guide me|walk (?:me )?through|step by step|take me through|start (?:the )?procedure|"
     r"show me how to|teach me(?: how)? to|what are the steps (?:for|to))\b|"
-    r"^(?:open|pull up|bring up|load|start|begin|let['\u2019]s (?:do|start|begin))\b"
+    r"^(?:open|pull up|bring up|load|start|begin|let['\u2019]s (?:do|start|begin)|i need to (?:do|start|begin))\b"
     r"[^.!?]*\b(?:procedure|checklist|sop|steps|standards|routine|process|opening|closing)\b", re.I
 )
 # README pattern is `report (an )?(...)`; `an?` also accepts "report a problem".
@@ -109,6 +109,10 @@ _REPEAT = re.compile(
 )
 _HAS_WORD = re.compile(r"\w")
 _DEVIATION_LEAD = re.compile(r"^[\s:;,.\-]*(?:that\b)?[\s:;,\-]*", re.I)
+
+
+def is_picture_request(transcript: str) -> bool:
+    return bool(re.search(r"\bwhat does .+ look like\b|^show me (?:the|an?) .+|\bpicture of\b", transcript, re.I))
 
 
 def classify_intent(transcript: str | None) -> str:
