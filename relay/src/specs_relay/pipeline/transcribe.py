@@ -57,17 +57,30 @@ class GeminiTranscriber:
 
     async def transcribe(self, pcm: bytes, sample_rate: int) -> str:
         from google.genai import types
+        from .generate import TRANSIENT_CODES
 
         audio = types.Part.from_bytes(data=pcm_to_wav(pcm, sample_rate), mime_type="audio/wav")
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + self.timeout
         try:
-            resp = await asyncio.wait_for(
-                self.client.aio.models.generate_content(
-                    model=self.model,
-                    contents=[TRANSCRIBE_PROMPT, audio],
-                    config=types.GenerateContentConfig(temperature=0.0),
-                ),
-                timeout=self.timeout,
-            )
+            for attempt in range(2):
+                try:
+                    resp = await asyncio.wait_for(
+                        self.client.aio.models.generate_content(
+                            model=self.model,
+                            contents=[TRANSCRIBE_PROMPT, audio],
+                            config=types.GenerateContentConfig(temperature=0.0),
+                        ),
+                        timeout=deadline - loop.time(),
+                    )
+                    break
+                except asyncio.TimeoutError:
+                    raise
+                except Exception as e:
+                    if (attempt or getattr(e, "code", None) not in TRANSIENT_CODES
+                            or deadline - loop.time() <= 0.4):
+                        raise
+                    await asyncio.sleep(0.4)
         except asyncio.TimeoutError as e:
             raise TranscriptionError("transcription timed out") from e
         except Exception as e:
