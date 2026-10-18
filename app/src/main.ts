@@ -89,9 +89,9 @@ async function boot() {
     if (typeof io.api.pair !== 'function' || typeof io.motion.startHeadGestures !== 'function')
         throw new Error('Part 2 v2 interfaces are incomplete');
     mode.textContent = mock ? 'Part 2 v2 mocks: synthetic commands, assignment, calibration and PNG tiles. No microphone, relay or IMU.' : 'Live mode';
-    // Mock dev panel: the utterance box is what mock STT "hears"; ?scenario=m1 hands out no task.
+    // Mock dev panel: the utterance box is what mock STT "hears". Only an explicit ?scenario=m1 hands out no task (a packed build has no URL params).
     const mockApi = mock ? await import('./mock/index.ts') : null;
-    if (mockApi && (params.get('scenario') ?? 'm1') === 'm1')
+    if (mockApi && params.get('scenario') === 'm1')
         mockApi.setMockAssignment(false);
     const DEV_UTTERANCES: Record<string, string> = { question: 'how tight is the m5 on the mounting bracket', 'not found': 'where is the good coffee',
         error: 'boom', walkthrough: 'walk me through the bracket replacement', logged: 'log deviation bracket arrived pre-drilled' };
