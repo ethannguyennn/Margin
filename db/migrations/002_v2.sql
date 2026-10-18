@@ -88,3 +88,5 @@ SELECT create_hypertable('progress', 'ts', if_not_exists => TRUE);
 CREATE UNIQUE INDEX IF NOT EXISTS progress_idempotency
     ON progress(assignment_id, coalesce(step_id, ''), kind, ts);
 CREATE INDEX IF NOT EXISTS progress_assignment_ts ON progress(assignment_id, ts DESC);
+-- Asks made inside an assigned task carry its id (BUILD-PLAN-V2 §5 AskRequest.context).
+ALTER TABLE events ADD COLUMN IF NOT EXISTS assignment_id text;

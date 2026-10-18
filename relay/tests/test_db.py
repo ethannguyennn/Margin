@@ -125,6 +125,7 @@ async def test_event_writes_latency_json_without_audio(monkeypatch):
     assert "INSERT INTO events" in query and "latency_ms" in query
     assert params[-1].obj == {"stt": 0, "total": 12.5}
     assert params[-2] == "M5 torque" and "audio" not in query
+    assert params[-3] is None, "no task context -> NULL assignment_id"
     assert pool.conn.committed
 
 
