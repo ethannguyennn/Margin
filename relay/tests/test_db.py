@@ -240,3 +240,20 @@ async def test_latency_can_split_commands_from_answers(monkeypatch):
     assert rows.await_args.args[1] == ("command",)
     await db.latency_summary()
     assert "intent" not in rows.await_args.args[0] and rows.await_args.args[1] == ()
+
+
+def test_parameterised_sql_escapes_literal_percent_signs():
+    # psycopg reads every % in a query that takes parameters as a placeholder, so a literal
+    # wildcard must be written %% (LIKE 'x:%%'). A bare % raised ProgrammingError on every
+    # GET /v1/progress and left the portal board empty. The mocked _rows above never parses SQL.
+    import ast
+    import re
+    from pathlib import Path
+
+    src = Path(db.__file__).read_text(encoding="utf-8")
+    queries = [(node.lineno, node.value.replace("%%", ""))  # drop escaped pairs first
+               for node in ast.walk(ast.parse(src))
+               if isinstance(node, ast.Constant) and isinstance(node.value, str) and "%s" in node.value]
+    bad = [(line, sql[max(0, m.start() - 30):m.start() + 3])
+           for line, sql in queries for m in re.finditer(r"%(?![sbt(])", sql)]
+    assert bad == []
