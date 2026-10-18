@@ -100,6 +100,21 @@ export function traceSpan<T>(name: 'capture' | 'upload' | 'render', fn: () => T)
   return openAsk ? s.withActiveSpan(openAsk, () => s.startSpan({ name, op: name }, fn)) : s.startSpan({ name, op: name }, fn);
 }
 
+/** v2 phases outside the press-to-glance ask. startMs is epoch ms when the phase began
+ * (omit for an instant marker, e.g. a gesture). Nested under the open ask when there is one. */
+export function span(name: 'gesture' | 'endpoint' | 'diagram_fetch', startMs?: number, attrs: Record<string, string> = {}): void {
+  const s = sentry;
+  if (!s) return;
+  const sp = s.startInactiveSpan({
+    name,
+    op: name,
+    ...(startMs ? { startTime: startMs / 1000 } : {}),
+    ...(openAsk ? { parentSpan: openAsk } : { forceTransaction: true }),
+  });
+  for (const [k, v] of Object.entries(attrs)) sp.setAttribute(k, v);
+  sp.end();
+}
+
 /** sentry-trace + baggage for the current span, set explicitly on the relay call.
  * Not left to fetch auto-instrumentation: in the simulator WebView it never attached
  * them, so the relay started a new trace instead of continuing ours. */
