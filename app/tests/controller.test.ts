@@ -28,9 +28,9 @@ describe('controller effects and races', () => {
   });
   it('never calls the network during walkthrough step/page navigation', async () => {
     const p = ports(); const c = new LensController(stateFor('WALKTHROUGH'), p); await c.start();
-    for (const type of ['DOWN','PRESS','DOWN','UP','PRESS','DOWN'] as const) c.dispatch({ type });
+    for (const type of ['DOWN','PRESS','DOWN','UP','DOUBLE_PRESS','DOWN'] as const) c.dispatch({ type });
     await vi.advanceTimersByTimeAsync(31 * 60_000);
-    expect(c.state.screen).toBe('WALKTHROUGH'); expect(c.state.walkthrough!.index).toBe(2);
+    expect(c.state.screen).toBe('STEP'); expect(c.state.walkthrough!.index).toBe(2);
     expect(p.ask).not.toHaveBeenCalled(); expect(p.startCapture).not.toHaveBeenCalled(); await c.dispose();
   });
   it('drops late responses after cancel and after another request begins', async () => {

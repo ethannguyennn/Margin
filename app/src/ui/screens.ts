@@ -6,12 +6,11 @@ export interface ScreenText { header: string; main: string; footer: string; }
 const short = (text: string, cap: number) => paginate(sanitizeForG2(text), cap)[0];
 const safe = (text: ScreenText): ScreenText => ({ header: sanitizeForG2(text.header),
   main: sanitizeForG2(text.main), footer: sanitizeForG2(text.footer) });
-const pressToAsk = 'press: ask   double: exit';
 
 export function privacyScreen(): ScreenText {
-  return { header: 'PRIVACY', main: 'Audio is processed to answer, not stored. Ask before recording others.', footer: 'press: continue   double: exit' };
+  return { header: 'PRIVACY', main: 'Audio is processed to answer, not stored. Ask before recording others.\nNod twice to talk. The mic closes when you stop speaking.', footer: 'press: continue   double: exit' };
 }
-export function idleScreen(): ScreenText { return { header: '', main: '', footer: pressToAsk }; }
+export function idleScreen(): ScreenText { return { header: '', main: '', footer: 'nod twice: speak   double: exit' }; }
 export function listeningScreen(level = 0): ScreenText {
   const bars = '▁▂▃▄▅▆▇█';
   const index = Math.round(Math.max(0, Math.min(1, Number.isFinite(level) ? level : 0)) * 7);
@@ -43,11 +42,26 @@ export function walkthroughScreen(state: LensState): ScreenText {
     main: `${'━'.repeat(progress)}${'─'.repeat(10 - progress)}\n${short(step.glance, 130)}`,
     footer: 'swipe: step   press: details' };
 }
+export function stepScreen(state: LensState): ScreenText {
+  const w=state.walkthrough, current=w?.steps[w.index];
+  if (!w || !current) return errorScreen();
+  const progress=Math.max(1,Math.round((w.index+1)/w.total*10));
+  return {header:`${short(`${w.doc_id} rev ${w.revision}`,22)}  ${w.index+1}/${w.total} ${'━'.repeat(progress)}${'─'.repeat(10-progress)}`,
+    main:[short(current.glance,60),current.warning?`! ${short(current.warning,80)}`:'',current.checkpoint?`> ${short(current.checkpoint,60)}`:''].filter(Boolean).join('\n\n'),
+    footer:state.notice || `nod: speak${current.diagram?'   [diagram]':''}`};
+}
 export function renderScreen(state: LensState, level = 0): ScreenText {
   try {
     switch (state.screen) {
       case 'PRIVACY': return safe(privacyScreen());
-      case 'IDLE': return safe(idleScreen());
+      case 'CALIBRATE': return safe({header:'CALIBRATE',main:`Nod twice now (${state.calibrationDone}/${state.calibrationNeeded})`,footer:state.notice || 'tap: use default gestures'});
+      case 'PAIRING': return safe({header:'PAIRING',main:state.pairing?`Pair code ${short(state.pairing.pair_code,16)}\nEnter it in the Margin portal.`:'Getting pair code...',footer:'waiting for supervisor'});
+      case 'TASK_READY': return safe({header:'TASK READY',main:`Task ready: ${short(state.walkthrough?.title ?? '',90)}\n${state.walkthrough?.total ?? 0} steps`,footer:'nod twice to start'});
+      case 'STEP': return safe(stepScreen(state));
+      case 'STEP_DETAILS': return safe({header:`STEP DETAILS ${state.page+1}/${state.pages.length}`,main:state.pages[state.page] ?? '',footer:'swipe: page   shake: back'});
+      case 'DIAGRAM': return safe({header:`${short(state.walkthrough?.doc_id ?? '',24)}  diagram`,main:'',footer:state.diagramReady?`${short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '',45)}  shake: back`:'loading diagram'});
+      case 'TASK_DONE': return safe({header:'TASK COMPLETE',main:`Task complete. ${state.walkthrough?.total ?? 0}/${state.walkthrough?.total ?? 0} steps`,footer:'nod: speak   tap: done'});
+      case 'IDLE': return safe({...idleScreen(),footer:state.notice || (state.assignment_id?'nod: say resume   double: exit':idleScreen().footer)});
       case 'LISTENING': return safe(listeningScreen(level));
       case 'THINKING': return safe(thinkingScreen());
       case 'ANSWER_GLANCE': return safe(glanceScreen(state));

@@ -7,14 +7,14 @@ import { stateFor } from './support';
 
 // Every state x gesture, including intentional no-ops. Columns: press, double, up, down, long.
 const map: Record<Screen, Screen[]> = {
-  PRIVACY: ['IDLE','PRIVACY','PRIVACY','PRIVACY','PRIVACY'],
+  PRIVACY: ['CALIBRATE','PRIVACY','PRIVACY','PRIVACY','PRIVACY'],
   IDLE: ['LISTENING','IDLE','IDLE','IDLE','IDLE'],
   LISTENING: ['THINKING','IDLE','LISTENING','LISTENING','LISTENING'],
   THINKING: ['THINKING','IDLE','THINKING','THINKING','THINKING'],
   ANSWER_GLANCE: ['ANSWER_EXPANDED','IDLE','ANSWER_GLANCE','ANSWER_GLANCE','ANSWER_GLANCE'],
   ANSWER_EXPANDED: ['ANSWER_GLANCE','ANSWER_GLANCE','ANSWER_EXPANDED','ANSWER_EXPANDED','ANSWER_EXPANDED'],
   NOT_FOUND: ['LISTENING','IDLE','NOT_FOUND','NOT_FOUND','NOT_FOUND'],
-  WALKTHROUGH: ['ANSWER_EXPANDED','IDLE','WALKTHROUGH','WALKTHROUGH','WALKTHROUGH'],
+  WALKTHROUGH: ['STEP_DETAILS','IDLE','STEP','STEP','STEP'],
   LOGGED: ['IDLE','IDLE','LOGGED','LOGGED','LOGGED'],
   ERROR: ['LISTENING','IDLE','ERROR','ERROR','ERROR'],
 };
@@ -33,7 +33,8 @@ describe('state/gesture matrix', () => {
   for (const screen of Object.keys(map) as Screen[]) {
     it(`${screen} times out and cancels in-flight work`, () => {
       const result = transition(stateFor(screen), { type: 'TIMEOUT' });
-      expect(result.state.screen).toBe('IDLE'); expect(result.effects).toEqual(['CANCEL']);
+      if (timeoutFor(stateFor(screen)) === null) { expect(result.state.screen).toBe(stateFor(screen).screen); expect(result.effects).toEqual([]); }
+      else { expect(result.state.screen).toBe('IDLE'); expect(result.effects).toEqual(['CANCEL']); }
     });
     it(`${screen} fails safely`, () => expect(transition(stateFor(screen), { type: 'FAIL' }).state.screen).toBe('ERROR'));
     if (screen !== 'THINKING') it(`${screen} ignores late responses`, () => {
@@ -44,7 +45,7 @@ describe('state/gesture matrix', () => {
 });
 
 describe('response trust routing', () => {
-  it.each([['answer','ANSWER_GLANCE'],['not_found','NOT_FOUND'],['error','ERROR'],['walkthrough','WALKTHROUGH'],['logged','LOGGED']] as const)('%s -> %s', (fixture, screen) => {
+  it.each([['answer','ANSWER_GLANCE'],['not_found','NOT_FOUND'],['error','ERROR'],['walkthrough','STEP'],['logged','LOGGED']] as const)('%s -> %s', (fixture, screen) => {
     expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response: UI_FIXTURES[fixture], now: 1000 }).state.screen).toBe(screen);
   });
   for (const name of ['answer','walkthrough','logged'] as const) it(`refuses unverified ${name}`, () => {
@@ -73,15 +74,14 @@ describe('local navigation', () => {
     state = transition(state, { type: 'UP' }).state; expect(state.walkthrough!.index).toBe(0);
     state = transition(state, { type: 'DOWN' }).state;
     state = transition(state, { type: 'PRESS' }).state;
-    expect(state.screen).toBe('ANSWER_EXPANDED'); expect(state.pages.length).toBeGreaterThan(1);
+    expect(state.screen).toBe('STEP_DETAILS'); expect(state.pages.length).toBeGreaterThan(1);
     state = transition(state, { type: 'DOWN' }).state; expect(state.page).toBe(1);
     state = transition(state, { type: 'UP' }).state; expect(state.page).toBe(0);
     state = transition(state, { type: 'DOUBLE_PRESS' }).state;
-    expect(state.screen).toBe('WALKTHROUGH'); expect(state.walkthrough!.index).toBe(1);
-    state = transition(state, { type: 'DOWN' }).state;
+    expect(state.screen).toBe('STEP'); expect(state.walkthrough!.index).toBe(1);
     state = transition(state, { type: 'DOWN' }).state; expect(state.walkthrough!.index).toBe(2);
     state = transition(state, { type: 'PRESS' }).state;
-    state = transition(state, { type: 'PRESS' }).state; expect(state.screen).toBe('WALKTHROUGH');
+    state = transition(state, { type: 'DOUBLE_PRESS' }).state; expect(state.screen).toBe('STEP');
   });
   it('clamps ordinary detail pages', () => {
     const state = { ...stateFor('ANSWER_EXPANDED'), pages: ['one', 'two'] };
@@ -96,16 +96,16 @@ describe('persistence and lifecycle policy', () => {
     let state = stateFor('WALKTHROUGH');
     state = { ...transition(state, { type: 'DOWN' }).state, micSource: 'phone' };
     const restored = restoreSession(serializeSession(state), 2000, 'replacement-session');
-    expect(restored.screen).toBe('WALKTHROUGH'); expect(restored.session_id).toBe('session-test');
+    expect(restored.screen).toBe('STEP'); expect(restored.session_id).toBe('session-test');
     expect(restored.privacySeen).toBe(true); expect(restored.micSource).toBe('phone');
     expect(restored.walkthrough).toEqual(state.walkthrough);
-    expect(transition(restored, { type: 'PRESS' }).state.screen).toBe('ANSWER_EXPANDED');
+    expect(transition(restored, { type: 'PRESS' }).state.screen).toBe('STEP_DETAILS');
   });
   it.each([WALKTHROUGH_TTL_MS, WALKTHROUGH_TTL_MS + 1, -1])('discards stale or future walkthrough at age %i', age => {
     expect(restoreSession(serializeSession(stateFor('WALKTHROUGH')), 1000 + age, 'new').screen).toBe('IDLE');
   });
   it('restores a walkthrough just inside the 30 minute boundary', () => {
-    expect(restoreSession(serializeSession(stateFor('WALKTHROUGH')), 1000 + WALKTHROUGH_TTL_MS - 1, 'new').screen).toBe('WALKTHROUGH');
+    expect(restoreSession(serializeSession(stateFor('WALKTHROUGH')), 1000 + WALKTHROUGH_TTL_MS - 1, 'new').screen).toBe('STEP');
   });
   it('shows privacy once, never marks it seen on exit', () => {
     const fresh = initialState('session');
