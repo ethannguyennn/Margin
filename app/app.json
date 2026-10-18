@@ -2,7 +2,7 @@
   "package_id": "com.margin.lens",
   "edition": "202601",
   "name": "Specs",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "min_app_version": "2.2.10",
   "min_sdk_version": "0.0.16",
   "entrypoint": "index.html",
@@ -13,7 +13,7 @@
     },
     {
       "name": "network",
-      "desc": "Ask the approved Specs relay for verified procedures.",
+      "desc": "Ask for verified procedures and share the current lens display with your workspace.",
       "whitelist": [
         "https://45-32-88-132.sslip.io",
         "https://getyourassto.work",

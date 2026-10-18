@@ -25,6 +25,10 @@ export class LensDisplay {
     private failed: string | undefined; // this picture failed on the screen showing it now; retried on a later visit
     rebuildCount = 0;
     constructor(private readonly bridge: DisplayBridge, private readonly encode = graphicPng) { }
+    get acknowledgedFrame(): ScreenText | null {
+        return this.previous ? { ...this.previous, graphic_id: this.layout === 'REFERENCE' ? this.graphicId : undefined } : null;
+    }
+    get acknowledgedDiagram(): DiagramImage | undefined { return this.layout === 'DIAGRAM' ? this.image : undefined; }
     async render(text: ScreenText, layout: Layout = 'TEXT', image?: DiagramImage): Promise<void> {
         if (text.graphic_id !== this.failed) this.failed = undefined;
         if (layout === 'TEXT' && text.graphic_id && text.graphic_id !== this.failed) layout = 'REFERENCE';

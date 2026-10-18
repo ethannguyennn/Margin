@@ -371,6 +371,19 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
     app.state.pipeline = pipe
     app.state.jobs = JobRunner(pipe, settings)
     app.state.pair_limiter = RateLimiter(settings.pair_rate_per_min)
+    from .routes.lens_display import DisplayFeeds
+    app.state.display_feeds = DisplayFeeds()
+
+    @app.middleware("http")
+    async def bound_display_payload(request: Request, call_next):
+        if request.method == "PUT" and request.url.path == "/v1/lens/display":
+            data = bytearray()
+            async for chunk in request.stream():
+                data.extend(chunk)
+                if len(data) > 200_000:
+                    return JSONResponse({"error": {"code": "payload_too_large", "message": "Display frame too large."}}, status_code=413)
+            request._body = bytes(data)
+        return await call_next(request)
 
     @app.exception_handler(PipelineError)
     async def _pipeline_error(request: Request, exc: PipelineError) -> JSONResponse:
@@ -407,11 +420,12 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         progress,
         sentry_tunnel,
         simulator,
+        lens_display,
     )
 
     for module in (health, ask, deviation, procedures, ingest,  # v1
                    devices, assignments, progress, diagrams, materials, drafts, orgs,  # v2
-                   sentry_tunnel, simulator):
+                   sentry_tunnel, simulator, lens_display):
         app.include_router(module.router)
 
     # Added innermost first: CORS is outermost, so even error responses carry CORS headers.

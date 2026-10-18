@@ -37,7 +37,7 @@ const bar = (index: number, total: number) => {
     return `${'━'.repeat(done)}${'─'.repeat(10 - done)}`;
 };
 export function privacyScreen(o: RenderOptions = {}): ScreenText {
-    return { header: 'PRIVACY', main: 'Audio not stored.\nAsk before recording others.\nNod twice or hold to talk.', footer: o.hints === false ? '' : 'press: ok   double: exit' };
+    return { header: 'PRIVACY', main: 'Audio not stored.\nAsk before recording others.\nDisplay shared with your workspace while open.\nNod twice or hold to talk.', footer: o.hints === false ? '' : 'press: ok   double: exit' };
 }
 export function idleScreen(o: RenderOptions = {}): ScreenText { return { header: '', main: '', footer: o.hints === false ? '' : 'nod twice: speak' }; }
 export function listeningScreen(level = 0, o: RenderOptions = {}): ScreenText {
