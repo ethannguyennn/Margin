@@ -1,3 +1,4 @@
+from pathlib import Path
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
@@ -6,6 +7,10 @@ import pytest
 
 from part5_support import RecordingConnection, RecordingPool, Cursor
 from specs_relay import db
+
+# The industrial HX-2 bank these tests were written against (the demo bank in corpus/ is coffee).
+HX2_CORPUS = Path(__file__).parent / "fixtures" / "hx2-corpus"
+HX2_QA = HX2_CORPUS.parent / "hx2-qa.jsonl"
 
 
 @pytest.mark.asyncio
@@ -209,7 +214,7 @@ async def test_migrate_only_never_embeds_or_seeds(monkeypatch):
 @pytest.mark.asyncio
 async def test_v1_reseed_cannot_replace_portal_published_revision(monkeypatch):
     from db.seed import load_corpus
-    documents, chunks = load_corpus()
+    documents, chunks = load_corpus(HX2_CORPUS)
     documents = [d for d in documents if d['doc_id'] == 'SOP-114']
     chunks = [dict(c, embedding=[1, 0]) for c in chunks if c['doc_id'] == 'SOP-114']
     conn = RecordingConnection()

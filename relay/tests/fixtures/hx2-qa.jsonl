@@ -1,0 +1,36 @@
+{"id":"a01","category":"answerable","q":"How tight is the M5 on the mounting bracket?","expect":"answered","doc_id":"SOP-114","revision":"C","section":"4.2","must_contain":["4 N-m","star"]}
+{"id":"a02","category":"answerable","q":"How many M5 x 12 screws belong in an HX-2 receiving kit?","expect":"answered","doc_id":"SOP-101","revision":"A","section":"4.3","must_contain":["4","M5"]}
+{"id":"a03","category":"answerable","q":"What locating bore diameter passes HX-2 receiving inspection?","expect":"answered","doc_id":"SOP-101","revision":"A","section":"4.4","must_contain":["8.00 mm","8.10 mm"]}
+{"id":"a04","category":"answerable","q":"How deep a carton dent triggers quarantine during receiving?","expect":"answered","doc_id":"SOP-101","revision":"A","section":"4.2","must_contain":["10 mm"]}
+{"id":"a05","category":"answerable","q":"Which feeler gauge checks the mounting bracket gap?","expect":"answered","doc_id":"SOP-114","revision":"C","section":"4.3","must_contain":["0.20 mm"]}
+{"id":"a06","category":"answerable","q":"What minimum clearance is required between the HX-2 bracket edge and outlet collar?","expect":"answered","doc_id":"SOP-114","revision":"C","section":"4.5","must_contain":["6 mm"]}
+{"id":"a07","category":"answerable","q":"How long must the housing stay wet with the disinfectant wipe?","expect":"answered","doc_id":"SOP-120","revision":"B","section":"4.3","must_contain":["70 %","60 s"]}
+{"id":"a08","category":"answerable","q":"Below what temperature should the housing cool before wiping?","expect":"answered","doc_id":"SOP-120","revision":"B","section":"4.1","must_contain":["35 degC"]}
+{"id":"a09","category":"answerable","q":"What filter rating is required for water used to remove visible soil?","expect":"answered","doc_id":"SOP-120","revision":"B","section":"4.2","must_contain":["5 um"]}
+{"id":"a10","category":"answerable","q":"How long must the housing air dry after disinfection contact time?","expect":"answered","doc_id":"SOP-120","revision":"B","section":"4.4","must_contain":["5 min"]}
+{"id":"a11","category":"answerable","q":"What range must each recorded torque wrench check reading fall within?","expect":"answered","doc_id":"SOP-131","revision":"A","section":"4.4","must_contain":["3.84 N-m","4.16 N-m"]}
+{"id":"a12","category":"answerable","q":"How many conditioning pulls precede the recorded wrench readings?","expect":"answered","doc_id":"SOP-131","revision":"A","section":"4.3","must_contain":["3","clockwise"]}
+{"id":"a13","category":"answerable","q":"What setting should the wrench be returned to for storage?","expect":"answered","doc_id":"SOP-131","revision":"A","section":"5","must_contain":["1 N-m"]}
+{"id":"a14","category":"answerable","q":"Where should an affected HX-2 item be contained when a nonconformance is found?","expect":"answered","doc_id":"SOP-140","revision":"A","section":"4.1","must_contain":["HOLD","Q2"]}
+{"id":"a15","category":"answerable","q":"How soon must the training supervisor be notified after a deviation is saved?","expect":"answered","doc_id":"SOP-140","revision":"A","section":"4.4","must_contain":["10 min"]}
+{"id":"a16","category":"answerable","q":"Who may remove the HOLD tag after written disposition is complete?","expect":"answered","doc_id":"SOP-140","revision":"A","section":"4.5","must_contain":["release inspector"]}
+{"id":"n01","category":"near-miss","q":"What is the torque on the M6 bracket screws?","expect":"not_found","reason":"Only M5 bracket screws are specified."}
+{"id":"n02","category":"near-miss","q":"What is the cleaning interval for the HX-3?","expect":"not_found","reason":"The corpus only covers HX-2."}
+{"id":"n03","category":"near-miss","q":"What torque should I use on the HX-2 outlet collar?","expect":"not_found","reason":"Outlet clearance is specified; collar torque is not."}
+{"id":"n04","category":"near-miss","q":"What peroxide concentration disinfects the HX-2 housing?","expect":"not_found","reason":"Only premixed isopropyl alcohol wipes are specified."}
+{"id":"n05","category":"near-miss","q":"What is the counterclockwise wrench check acceptance range?","expect":"not_found","reason":"Only clockwise readings are specified."}
+{"id":"n06","category":"near-miss","q":"What is the maximum vibration level after bracket assembly?","expect":"not_found","reason":"No vibration test is specified."}
+{"id":"n07","category":"near-miss","q":"What is the torque wrench recalibration interval in months?","expect":"not_found","reason":"A shift check is specified, not a calibration interval."}
+{"id":"n08","category":"near-miss","q":"What is the allowed torque overshoot percentage for the mounting bracket screws?","expect":"not_found","reason":"A target setting is specified, but no overshoot percentage is defined."}
+{"id":"n09","category":"near-miss","q":"What is the acceptance limit for the pump's operating flow rate?","expect":"not_found","reason":"No powered performance limits are specified."}
+{"id":"n10","category":"near-miss","q":"What autoclave temperature sterilizes the HX-2 internal fluid path?","expect":"not_found","reason":"External disinfection does not cover internal sterilization."}
+{"id":"c01","category":"ambiguous","q":"What is the inspection limit?","expect":"not_found","needs_clarification":true,"candidate_docs":["SOP-101","SOP-131"]}
+{"id":"c02","category":"ambiguous","q":"Which form do I record the serial number on?","expect":"not_found","needs_clarification":true,"candidate_docs":["SOP-101","SOP-114","SOP-120"]}
+{"id":"c03","category":"ambiguous","q":"How do I check the torque?","expect":"not_found","needs_clarification":true,"candidate_docs":["SOP-114","SOP-131"]}
+{"id":"c04","category":"ambiguous","q":"Which parts must I check before release?","expect":"not_found","needs_clarification":true,"candidate_docs":["SOP-101","SOP-114"]}
+{"id":"u01","category":"off-domain","q":"What is the Wi-Fi password?","expect":"not_found"}
+{"id":"u02","category":"off-domain","q":"Who won yesterday's baseball game?","expect":"not_found"}
+{"id":"u03","category":"off-domain","q":"What is the supervisor's personal phone number?","expect":"not_found"}
+{"id":"u04","category":"off-domain","q":"Can you recommend a restaurant near the factory?","expect":"not_found"}
+{"id":"u05","category":"off-domain","q":"What is the payroll approval password?","expect":"not_found"}
+{"id":"u06","category":"off-domain","q":"Write a poem about the ocean.","expect":"not_found"}

@@ -2,12 +2,18 @@
 
 Run python eval/run_eval.py against a running relay. The default origin is
 http://127.0.0.1:8000; use --base-url for another origin and --output for a JSON
-report. There are 36 synthetic questions:
+report. qa.jsonl is the demo bank's 45 questions (the team's list, kept verbatim at the
+repo root as qa.jsonl; the Ember & Oak SOPs it asks about are in corpus/):
 
-- 16 answerable lookups spanning all five procedures.
-- 10 near-misses with details genuinely absent from the corpus.
-- 4 ambiguous questions requiring not_found plus needs_clarification=true.
-- 6 off-domain questions requiring not_found.
+- 36 answerable lookups spanning SOP-201, 202, 210, 220 and 230 (all revision C).
+- 3 near-misses whose topic is nearby but whose answer is absent (pumpkin spice latte,
+  ice machine cleaning, bleach concentration).
+- 2 ambiguous questions requiring not_found plus needs_clarification=true (the supplied
+  list says "clarify"; the relay reports ambiguity this way).
+- 4 off-domain questions requiring not_found.
+
+The previous industrial HX-2 bank (36 questions over SOP-101..140) is kept as a test
+fixture in relay/tests/fixtures/ (hx2-qa.jsonl, hx2-corpus/) for the relay's unit tests.
 
 Every request uses text with audio=null and a fresh UUID session. The expected
 revision in qa.jsonl is an assertion, not a forced retrieval revision; an
