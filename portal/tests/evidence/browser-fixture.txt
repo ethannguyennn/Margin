@@ -1,0 +1,81 @@
+[browse] Starting server...
+[goto] Navigated to http://127.0.0.1:5177/portal/ (200)
+
+[fill] Filled input[name=token]
+
+[click] Clicked form.login button → now at http://127.0.0.1:5177/portal/
+
+[wait] Element form.upload appeared
+
+[fill] Filled input[name=doc_id]
+
+[fill] Filled input[name=title]
+
+[upload] Uploaded: synthetic-sop.txt (98B)
+
+[click] Clicked form.upload button → now at http://127.0.0.1:5177/portal/
+
+[wait] Element article appeared
+
+[is] true
+
+[fill] Filled input[name=glance]
+
+[fill] Filled textarea[name=body]
+
+[click] Clicked article form button → now at http://127.0.0.1:5177/portal/#review/SOP-150/A
+
+[wait] Element article > p.pass appeared
+
+[click] Clicked button:has-text('Approve diagram') → now at http://127.0.0.1:5177/portal/#review/SOP-150/A
+
+[wait] Element .approval button:not([disabled]) appeared
+
+[screenshot] Screenshot saved: portal/tests/evidence/review-fixture.png
+
+[click] Clicked .approval button → now at http://127.0.0.1:5177/portal/#review/SOP-150/A
+
+[wait] Element select[name=device_id] appeared
+
+[click] Clicked nav a[href='#devices'] → now at http://127.0.0.1:5177/portal/#devices
+
+[wait] Element form.pair appeared
+
+[fill] Filled input[name=pair_code]
+
+[fill] Filled input[name=worker_name]
+
+[click] Clicked form.pair button → now at http://127.0.0.1:5177/portal/#devices
+
+[wait] Element td:has-text('Bay 3') appeared
+
+[click] Clicked nav a[href='#assign'] → now at http://127.0.0.1:5177/portal/#assign
+
+[wait] Element select[name=device_id] appeared
+
+[select] Selected "LNS-1" in select[name=device_id]
+
+[select] Selected "SOP-150/A" in select[name=procedure]
+
+[click] Clicked button:has-text('Assign task') → now at http://127.0.0.1:5177/portal/#board
+
+[wait] Element .board-table td:has-text('1/6') appeared
+
+[js] {
+  "ok": true
+}
+
+[wait] Element .board-table td:has-text('2/6') appeared
+
+[js] {"fixtureBoardUpdateMs":3448,"hasDeviation":true,"syntheticBanner":true}
+
+[screenshot] Screenshot saved: portal/tests/evidence/board-fixture.png
+
+[viewport] Viewport set to 375x812
+
+[screenshot] Screenshot saved: portal/tests/evidence/board-mobile-fixture.png
+
+[console] --- BEGIN UNTRUSTED EXTERNAL CONTENT (source: http://127.0.0.1:5177/portal/#board) ---
+(no console errors)
+--- END UNTRUSTED EXTERNAL CONTENT ---
+
