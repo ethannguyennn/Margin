@@ -71,3 +71,95 @@ describe.skipIf(!RELAY)('real relay contract', () => {
     for (const h of ['content-type', 'x-session-id', 'sentry-trace', 'baggage']) assert.ok(allowed.includes(h), `${h} not allowed: ${allowed}`);
   });
 });
+
+// --- v2 lens routes against Part 3's relay (MOCK_MODE=1 with PORTAL_TOKEN set) ---------
+// MARGIN_E2E_PORTAL_TOKEN=<the relay's PORTAL_TOKEN> drives the supervisor side (claim, assign, board).
+const PORTAL = process.env.MARGIN_E2E_PORTAL_TOKEN;
+describe.skipIf(!RELAY || !PORTAL)('real relay contract v2 (client v2)', () => {
+  const store: Record<string, string> = {};
+  (globalThis as any).localStorage ??= {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => void (store[k] = String(v)),
+    removeItem: (k: string) => void delete store[k],
+  };
+  const portal = async (method: string, path: string, body?: unknown) => {
+    const res = await fetch(`${RELAY}${path}`, {
+      method,
+      headers: { authorization: `Bearer ${PORTAL}`, ...(body ? { 'content-type': 'application/json' } : {}) },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+    });
+    assert.ok(res.ok, `${method} ${path}: HTTP ${res.status} ${await res.clone().text()}`);
+    return res.json();
+  };
+  const ctx: { device_id?: string; assignment_id?: string; step_id?: string; diagram_id?: string } = {};
+
+  test('pair -> unclaimed -> supervisor claims -> claimed', async () => {
+    const client = await import('../src/api/client.ts');
+    const p = await client.pair();
+    assert.ok(p.device_token && p.pair_code, JSON.stringify(p));
+    ctx.device_id = p.device_id;
+    assert.equal((await client.pairingStatus()).claimed, false);
+    await portal('POST', '/v1/devices/claim', { pair_code: p.pair_code, worker_name: 'Bay 3' });
+    const me = await client.pairingStatus();
+    assert.equal(me.claimed, true);
+    assert.equal(me.worker_name, 'Bay 3');
+  });
+
+  test('no task -> 204 -> null; assigned -> the walkthrough arrives', async () => {
+    const client = await import('../src/api/client.ts');
+    assert.equal(await client.nextAssignment(), null);
+    await portal('POST', '/v1/assignments', { device_id: ctx.device_id, doc_id: 'SOP-114', revision: 'C' });
+    const a = await client.nextAssignment();
+    assert.ok(a, 'assignment');
+    assert.equal(a!.walkthrough.doc_id, 'SOP-114');
+    assert.equal(a!.walkthrough.assignment_id, a!.assignment_id);
+    ctx.assignment_id = a!.assignment_id;
+    const withDiagram = a!.walkthrough.steps.find((s) => s.diagram);
+    ctx.step_id = withDiagram?.step_id ?? a!.walkthrough.steps[0].step_id;
+    ctx.diagram_id = withDiagram?.diagram?.diagram_id;
+    console.info(`[e2e] assignment ${a!.assignment_id}: ${a!.walkthrough.steps.length} steps, diagram ${ctx.diagram_id}`);
+  });
+
+  test('the step diagram arrives as two decoded PNG tiles, cached', async () => {
+    const client = await import('../src/api/client.ts');
+    assert.ok(ctx.diagram_id, 'the mock relay serves one approved diagram on SOP-114 4.2');
+    const d = await client.getDiagram(ctx.diagram_id!);
+    assert.deepEqual(d.tiles.map((t) => [t.slot, t.width, t.height]), [[0, 288, 144], [1, 288, 144]]);
+    for (const t of d.tiles) assert.deepEqual(t.bytes.slice(0, 4), [137, 80, 78, 71], 'PNG');
+    assert.equal(await client.getDiagram(ctx.diagram_id!), d, 'second call is the cache');
+  });
+
+  test('progress batch lands on the board; resending it does not duplicate', async () => {
+    const client = await import('../src/api/client.ts');
+    const t0 = Date.now();
+    const events = [
+      { assignment_id: ctx.assignment_id!, step_id: null, kind: 'task_started' as const, ts: t0 },
+      { assignment_id: ctx.assignment_id!, step_id: ctx.step_id!, kind: 'step_started' as const, ts: t0 + 1 },
+    ];
+    for (const e of events) client.reportProgress(e);
+    await client.flushProgress();
+    assert.equal(client.pendingProgress().length, 0);
+    const rows = async () => ((await portal('GET', '/v1/progress?since=0')) as Array<{ assignment_id: string }>).filter((r) => r.assignment_id === ctx.assignment_id);
+    const before = await rows();
+    assert.ok(before.length >= 1, 'board shows the task');
+    for (const e of events) client.reportProgress(e); // a retry after a lost response
+    await client.flushProgress();
+    assert.deepEqual(await rows(), before, 'idempotent on (assignment_id, step_id, kind, ts)');
+  });
+
+  test('"next" inside the task takes the command fast path', async () => {
+    const res = await ask({ session_id: uuid(), text: 'next', context: { doc_id: 'SOP-114', step_id: ctx.step_id!, assignment_id: ctx.assignment_id } });
+    assert.equal(res.outcome, 'command', JSON.stringify(res));
+    assert.equal(res.command, 'next');
+    assert.equal(res.glance, '');
+  });
+
+  test('a rejected token is dropped (401) and the next call says unauthorized', async () => {
+    const client = await import('../src/api/client.ts');
+    const settings = await import('../src/settings.ts');
+    settings.setDevice({ device_id: ctx.device_id!, device_token: 'not-a-real-token' });
+    await assert.rejects(client.nextAssignment(), (e: any) => e.code === 'unauthorized' && e.status === 401);
+    assert.equal(settings.getDevice(), null);
+    await assert.rejects(client.nextAssignment(), (e: any) => e.code === 'unauthorized');
+  });
+});
