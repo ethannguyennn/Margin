@@ -6,7 +6,6 @@ import { ContextPicker } from '../components/ContextPicker';
 import { ChevronIcon } from '../components/Icons';
 import { OutcomePill } from '../components/Pills';
 import { glassesStatus, shortId } from '../copy';
-import { QUICK_ASKS } from '../quick-asks';
 import { relayOrigin } from '../relay';
 import { useStore } from '../store';
 import { toast } from '../toast';
@@ -110,13 +109,6 @@ export default function LensPage() {
           <button className="ghost" disabled={busy === 'ask'} onClick={() => void repeatLast()}>
             Repeat last
           </button>
-        </div>
-        <div className="row wrap">
-          {QUICK_ASKS.slice(0, 3).map((q) => (
-            <button key={q.label} className="chip" disabled={busy === 'ask'} onClick={() => void askNow(q.text)}>
-              {q.label}
-            </button>
-          ))}
         </div>
         <p className="meta">
           {lens.connected

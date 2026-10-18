@@ -25,9 +25,12 @@ export interface DetectorParams {
   pitchSign: 1 | -1; // so that looking down is negative
   yawAxis: Axis;
   yawSign: 1 | -1;
-  signal: 'angle' | 'rate'; // 'angle' is differentiated; 'rate' is used as is
+  // 'angle' is differentiated; 'rate' is used as is; 'accel' is a gravity vector turned into
+  // degrees of tilt; 'auto' picks 'accel' when the first sample has gravity's magnitude.
+  signal: 'auto' | 'angle' | 'rate' | 'accel';
   scale: number; // raw units -> degrees (or deg/s for 'rate')
   wrap: number; // angle period after scale (360); 0 = no wrap handling
+  restMs: number; // 'accel': how slowly the rest (posture) direction follows the head
   // --- filtering
   lpMs: number; // low-pass time constant
   hpMs: number; // bias removal for a gyro; 0 = off
@@ -52,16 +55,18 @@ export interface DetectorParams {
   single: boolean; // emit NOD on a single nod (off until M4 says it is safe)
 }
 
-// PROVISIONAL until the G2 characterisation: axis mapping, signal and scale are
-// placeholders matching the synthetic fixtures; thresholds are a starting point.
+// The G2 reports a gravity-normalised accelerometer (|v| ~ 1 g at rest; reverse-engineered
+// in github.com/mmirman/open-g2-companion), so 'auto' lands on 'accel', which needs no axis
+// mapping. The axis knobs only matter for 'angle'/'rate' data (the synthetic fixtures).
 export const DEFAULT_PARAMS: DetectorParams = {
   pitchAxis: 'x',
   pitchSign: 1,
   yawAxis: 'y',
   yawSign: 1,
-  signal: 'angle',
+  signal: 'auto',
   scale: 1,
   wrap: 360,
+  restMs: 3000,
   lpMs: 40,
   hpMs: 0,
   maxGapMs: 300,
@@ -87,6 +92,12 @@ type Filtered = { t: number; p: number; y: number; r: number };
 export type NodInfo = { t: number; down: number; up: number };
 
 const HISTORY_MS = 3000;
+type Vec = { x: number; y: number; z: number };
+/** 1 g, in g or in m/s^2. Euler angles or gyro rates of a still head are near 0 instead. */
+const gravityLike = (s: Vec): boolean => {
+  const m = Math.hypot(s.x, s.y, s.z);
+  return (m > 0.75 && m < 1.25) || (m > 7.5 && m < 12);
+};
 
 export class Detector {
   private prev: { t: number; p: number; y: number; r: number } | null = null;
@@ -100,6 +111,8 @@ export class Detector {
   private lastNod: { start: number; t: number } | null = null;
   private lastEmit = -Infinity;
   private readonly roll: Axis;
+  private mode: Exclude<DetectorParams['signal'], 'auto'> | null = null;
+  private rest: Vec | null = null;
 
   /** onNod reports every single nod's peak rates once its return lobe ends (calibration). */
   constructor(
@@ -116,19 +129,40 @@ export class Detector {
     this.hist = [];
     this.pitch = this.yawCur = this.lastNod = null;
     this.yawLobes = [];
+    this.rest = null;
+  }
+
+  /** Degrees between gravity now and the slow rest direction, negated so a nod reads as a
+   * down lobe then its return. No axis or sign mapping; yaw is invisible to gravity, so an
+   * accelerometer gives no SHAKE (double press covers "back"). */
+  private tilt(s: ImuSample): number {
+    const m = Math.hypot(s.x, s.y, s.z) || 1;
+    const u = { x: s.x / m, y: s.y / m, z: s.z / m };
+    const rest = this.rest ?? u;
+    const deg = (Math.acos(Math.min(1, Math.max(-1, u.x * rest.x + u.y * rest.y + u.z * rest.z))) * 180) / Math.PI;
+    const k = this.rest && this.prev ? Math.min(1, Math.max(0, s.t - this.prev.t) / this.params.restMs) : 1;
+    const v = { x: rest.x + k * (u.x - rest.x), y: rest.y + k * (u.y - rest.y), z: rest.z + k * (u.z - rest.z) };
+    const n = Math.hypot(v.x, v.y, v.z) || 1;
+    this.rest = { x: v.x / n, y: v.y / n, z: v.z / n };
+    return -deg;
   }
 
   push(s: ImuSample): HeadGesture | null {
     const P = this.params;
-    const raw = {
+    if (!this.mode) {
+      this.mode = P.signal !== 'auto' ? P.signal : gravityLike(s) ? 'accel' : 'angle';
+      console.info(`[motion] IMU signal: ${this.mode}`);
+    }
+    const prev = this.prev;
+    const gap = !prev || s.t - prev.t > P.maxGapMs || s.t < prev.t;
+    if (gap) this.reset();
+    const raw = this.mode === 'accel' ? { t: s.t, p: this.tilt(s), y: 0, r: 0 } : {
       t: s.t,
       p: s[P.pitchAxis] * P.scale * P.pitchSign,
       y: s[P.yawAxis] * P.scale * P.yawSign,
       r: s[this.roll] * P.scale,
     };
-    const prev = this.prev;
-    if (!prev || s.t - prev.t > P.maxGapMs || s.t < prev.t) {
-      this.reset();
+    if (!prev || gap) {
       this.prev = raw;
       return null;
     }
@@ -142,7 +176,7 @@ export class Detector {
     }
     this.prev = raw;
     const rate = (k: 'p' | 'y' | 'r'): number => {
-      if (P.signal === 'rate') return raw[k];
+      if (this.mode === 'rate') return raw[k];
       let d = raw[k] - prev[k];
       if (P.wrap) d -= P.wrap * Math.round(d / P.wrap); // 179 -> -179 is +2, not -358
       return (d / dt) * 1000;

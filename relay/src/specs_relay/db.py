@@ -285,15 +285,25 @@ async def set_deviation_notified(deviation_id: str, notified: bool) -> None:
             raise LookupError("Deviation does not exist")
 
 
-async def latency_summary() -> list[dict]:
-    """Part 3's make latency can call this; no second connection owner needed."""
+async def latency_summary(intent: str | None = None, *, exclude_intent: str | None = None) -> list[dict]:
+    """Part 3's make latency can call this; no second connection owner needed.
+
+    ``intent`` keeps only that intent's events; ``exclude_intent`` drops one
+    (``make latency`` reports voice commands apart from answers).
+    """
+    where, params = "", []
+    if intent is not None:
+        where, params = " AND intent = %s", [intent]
+    elif exclude_intent is not None:
+        where, params = " AND intent IS DISTINCT FROM %s", [exclude_intent]
     return await _rows(
         """SELECT stage, count(*) AS samples,
         percentile_cont(0.5) WITHIN GROUP (ORDER BY value::double precision) AS p50_ms,
         percentile_cont(0.95) WITHIN GROUP (ORDER BY value::double precision) AS p95_ms
         FROM events CROSS JOIN LATERAL jsonb_each(latency_ms) AS metric(stage, value)
-        WHERE CASE WHEN jsonb_typeof(value) = 'number' THEN value::double precision > 0 ELSE false END
-        GROUP BY stage ORDER BY stage"""
+        WHERE CASE WHEN jsonb_typeof(value) = 'number' THEN value::double precision > 0 ELSE false END"""
+        + where + "\n        GROUP BY stage ORDER BY stage",
+        tuple(params),
     )
 
 

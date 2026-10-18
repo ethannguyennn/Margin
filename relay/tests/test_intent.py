@@ -51,7 +51,6 @@ DEVIATION = [
 ]
 # v1 repeat phrases that are not v2 commands keep the v1 `repeat` intent.
 REPEAT = [
-    "can you say that again?",
     "what was that",
     "sorry, what was that?",
 ]
@@ -99,6 +98,55 @@ def test_filler_case_and_punctuation(phrase, command):
 def test_must_not_match_is_not_a_command(t):
     assert parse_command(t) is None
     assert classify_intent(t) == "question"
+
+
+@pytest.mark.parametrize("phrase, command", [
+    ("Go to the next step.", "next"),
+    ("Okay, I'm done with this step.", "next"),
+    ("all done", "next"),
+    ("got it, move on", "next"),
+    ("What's next?", "next"),
+    ("next one please", "next"),
+    ("go back a step", "back"),
+    ("previous step", "back"),
+    ("can you say that again?", "repeat"),
+    ("read it again", "repeat"),
+    ("one more time, repeat that", "repeat"),
+    ("tell me more", "details"),
+    ("show me the details", "details"),
+    ("can you show me the picture?", "diagram"),
+    ("let me see the diagram", "diagram"),
+    ("hold on", "pause"),
+    ("stop the task", "pause"),
+    ("let's keep going", "resume"),
+    ("I'm ready, start the task", "resume"),
+    ("close the app", "exit"),
+])
+def test_natural_phrasing_is_a_command(phrase, command):
+    assert parse_command(phrase) == command
+    assert classify_intent(phrase) == "command"
+
+
+@pytest.mark.parametrize("t", [
+    "what's the next step for the milk",
+    "how long do I steam the milk",
+    "stop the grinder before cleaning?",
+    "is the shot done at 36 grams",
+    "do I need to hold the portafilter",
+    "show me where the sanitizer goes",
+    "more milk or less",
+    "close the till at what time",
+    "back of the machine",
+])
+def test_natural_phrasing_keeps_questions(t):
+    assert parse_command(t) is None
+    assert classify_intent(t) == "question"
+
+
+@pytest.mark.parametrize("t", ["show me how to steam milk", "walk through closing the till",
+                               "teach me how to pull a shot", "what are the steps for opening"])
+def test_natural_walkthrough(t):
+    assert classify_intent(t) == "walkthrough"
 
 
 @pytest.mark.parametrize("t", ["", "  ", "...", None, "please", "um uh ok", "specs"])

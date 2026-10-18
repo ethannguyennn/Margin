@@ -39,9 +39,9 @@ def test_fetch_reads_through_db_latency_summary(monkeypatch):
     async def close_pool():
         calls.append("close")
 
-    async def latency_summary():
-        calls.append("summary")
-        return ROWS
+    async def latency_summary(intent=None, *, exclude_intent=None):
+        calls.append(("summary", intent, exclude_intent))
+        return ROWS if intent is None else ROWS[:1]
 
     fake = types.ModuleType("specs_relay.db")
     fake.init_pool, fake.close_pool, fake.latency_summary = init_pool, close_pool, latency_summary
@@ -49,4 +49,19 @@ def test_fetch_reads_through_db_latency_summary(monkeypatch):
     monkeypatch.setattr(sys.modules["specs_relay"], "db", fake, raising=False)
     import asyncio
     assert asyncio.run(latency.fetch()) == ROWS
-    assert calls == ["init", "summary", "close"]
+    assert calls == ["init", ("summary", None, None), ("summary", None, "command"),
+                     ("summary", "command", None), "close"]
+    calls.clear()
+    report = asyncio.run(latency.fetch_report())
+    assert report == {"all": ROWS, "answers": ROWS, "commands": ROWS[:1]}
+
+
+def test_main_prints_answers_and_commands_separately(monkeypatch, capsys):
+    async def fetch_report():
+        return {"all": ROWS, "answers": ROWS, "commands": ROWS[:1]}
+
+    monkeypatch.setattr(latency, "fetch_report", fetch_report)
+    assert latency.main() == 0
+    out = capsys.readouterr().out
+    assert "all events" in out and "every intent except command" in out and "voice commands" in out
+    assert out.count("relay p50 total") == 2  # no budget verdict on the command table

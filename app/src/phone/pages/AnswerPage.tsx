@@ -1,12 +1,12 @@
+import { Link } from 'react-router-dom';
 import { AnswerDetail } from '../components/AnswerDetail';
 import { OutcomePill } from '../components/Pills';
 import { clockTime, errorTitle, shortId } from '../copy';
-import { QUICK_ASKS } from '../quick-asks';
 import { useStore } from '../store';
 
 /** Everything the glance line had to leave out: full text, citations, walkthrough. */
 export default function AnswerPage() {
-  const { state, sessionId, askNow, busy, error, clearError, setContext, repeatLast } = useStore();
+  const { state, sessionId, busy, error, clearError, setContext, repeatLast } = useStore();
   const res = state.lastAnswer;
 
   return (
@@ -28,17 +28,14 @@ export default function AnswerPage() {
       {!res && (
         <section className="card">
           <h2 className="section-title">No answer yet</h2>
-          <p className="body">
-            The lens shows one glance line. The phone keeps the whole answer: full text, citations,
-            the walkthrough and where the time went.
-          </p>
-          <p className="meta">Ask from the Lens tab, or try one of these:</p>
+          <p className="body">Ask on your glasses or here. The full answer and its sources show up on this page.</p>
           <div className="row wrap">
-            {QUICK_ASKS.map((q) => (
-              <button key={q.label} className="chip" disabled={busy === 'ask'} onClick={() => void askNow(q.text)}>
-                {q.label}
-              </button>
-            ))}
+            <Link className="ghost with-icon" to="/lens">
+              Ask a question
+            </Link>
+            <Link className="ghost with-icon" to="/sops">
+              Browse procedures
+            </Link>
           </div>
         </section>
       )}

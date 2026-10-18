@@ -10,7 +10,7 @@ import sentry_sdk
 from sentry_sdk.transport import Transport
 
 from _relay_helpers import make_client, make_settings, sid
-from specs_relay import obs
+from specs_relay import __version__, obs
 
 APP_TRACE = "771a43a4192642f0b136d5159a501700"
 APP_SPAN = "b0e6f15b45c36b12"
@@ -82,7 +82,7 @@ def test_init_sentry_options(monkeypatch):
                                          sentry_environment="demo", git_sha="abc123"))
     assert seen["traces_sample_rate"] == 1.0 and seen["enable_logs"] is True
     assert seen["send_default_pii"] is False and seen["environment"] == "demo"
-    assert seen["release"] == "specs-relay@0.1.0+abc123"
+    assert seen["release"] == f"specs-relay@{__version__}+abc123"
     assert seen["trace_propagation_targets"] == []
     names = {type(i).__name__ for i in seen["integrations"]}
     assert {"FastApiIntegration", "StarletteIntegration", "LoggingIntegration"} <= names

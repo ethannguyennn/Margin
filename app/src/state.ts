@@ -236,8 +236,9 @@ export function transition(s: LensState, a: Action): Transition {
         const from = s.screen === 'LISTENING' ? s : { ...s, returnTo: s.screen, returnState: s };
         return result({ ...from, screen: 'THINKING', response: null, notice: '' }, ['CANCEL', 'SEND_TEXT']);
     }
+    // Press-and-hold talks exactly like a nod, so speech never depends on the IMU alone.
     if (a.type === 'LONG_PRESS')
-        return result(s);
+        return transition(s, { type: 'NOD' });
     if (a.type === 'TIMEOUT' || a.type === 'DISMISS') {
         if (a.type === 'TIMEOUT' && timeoutFor(s) === null)
             return result(s);

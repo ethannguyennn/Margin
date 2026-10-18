@@ -188,6 +188,7 @@ async def test_latency_reads_events_instead_of_a_separate_store(monkeypatch):
     query = rows.await_args.args[0]
     assert "FROM events" in query and "jsonb_each(latency_ms)" in query
     assert "percentile_cont(0.5)" in query and "percentile_cont(0.95)" in query
+    assert "value::double precision > 0" in query  # a stage that did not run is not a 0 ms sample
 
 
 @pytest.mark.asyncio
@@ -226,3 +227,16 @@ async def test_migration_refuses_to_silently_change_existing_vector_dimension(mo
     with pytest.raises(ValueError, match="dimension"):
         await db.apply_migrations()
     assert not any("CREATE TABLE" in q for q, _, _ in pool.conn.calls)
+
+
+@pytest.mark.asyncio
+async def test_latency_can_split_commands_from_answers(monkeypatch):
+    rows = AsyncMock(return_value=[])
+    monkeypatch.setattr(db, "_rows", rows)
+    await db.latency_summary(intent="command")
+    assert "AND intent = %s" in rows.await_args.args[0] and rows.await_args.args[1] == ("command",)
+    await db.latency_summary(exclude_intent="command")
+    assert "AND intent IS DISTINCT FROM %s" in rows.await_args.args[0]
+    assert rows.await_args.args[1] == ("command",)
+    await db.latency_summary()
+    assert "intent" not in rows.await_args.args[0] and rows.await_args.args[1] == ()
