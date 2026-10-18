@@ -12,7 +12,7 @@ export const FIXTURE_NAMES = ['answer', 'not_found', 'error', 'walkthrough', 'lo
 export const UI_FIXTURES: Readonly<Record<typeof FIXTURE_NAMES[number], AskResponse>> = {
     answer: answered,
     not_found: { ...answered, trace_id: 'fixture-not-found', outcome: 'not_found', verified: false,
-        glance: 'Not in approved SOPs', body: 'No matching procedure. Try rephrasing or ask your supervisor.', citations: [] },
+        glance: 'Not in your SOPs. Ask your manager to add it.', body: 'No approved SOP covers this yet. Contact your manager so they can add the procedure in the Specs portal.', citations: [] },
     error: { ...answered, trace_id: 'fixture-error', outcome: 'error', verified: false, glance: '', body: '', citations: [],
         error: { code: 'FIXTURE_ERROR', message: 'Synthetic relay error' } },
     walkthrough: { ...answered, trace_id: 'fixture-walkthrough', intent: 'walkthrough',

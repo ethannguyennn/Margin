@@ -154,8 +154,8 @@ const NOT_FOUND: AskResponse = base({
   transcript: 'where is the good coffee',
   intent: 'unknown',
   outcome: 'not_found',
-  glance: 'Not in approved SOPs',
-  body: 'No matching procedure. Try rephrasing or ask your supervisor.',
+  glance: 'Not in your SOPs. Ask your manager to add it.',
+  body: 'No approved SOP covers this yet. Contact your manager so they can add the procedure in the Specs portal.',
   citations: [],
   verified: false,
 });
@@ -228,7 +228,7 @@ const PUMP_RULE = 'Flavored drinks (vanilla, caramel, or hazelnut) get 2 pumps i
 const PUMPS: Record<string, number> = { small: 2, medium: 3, large: 4 };
 const CLARIFY_PUMPS: AskResponse = base({
   transcript: 'how many pumps of syrup', outcome: 'not_found', needs_clarification: true,
-  glance: 'Not in approved SOPs', body: 'No matching procedure. Try rephrasing or ask your supervisor.',
+  glance: 'Not in your SOPs. Ask your manager to add it.', body: 'No approved SOP covers this yet. Contact your manager so they can add the procedure in the Specs portal.',
   clarify: { prompt: 'Which size?', options: ['Small', 'Medium', 'Large'] },
 });
 function pumpsFor(size: string): AskResponse {

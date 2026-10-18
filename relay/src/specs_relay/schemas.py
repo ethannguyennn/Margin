@@ -52,8 +52,8 @@ ErrorCode = Literal["stt_failed", "db_down", "llm_timeout", "bad_request", "inte
                     "unauthorized", "not_found", "conflict", "rate_limited",
                     "payload_too_large", "unsupported_media_type"]
 
-NOT_FOUND_GLANCE = "Not in approved SOPs"
-NOT_FOUND_BODY = "No matching procedure. Try rephrasing or ask your supervisor."
+NOT_FOUND_GLANCE = "Not in your SOPs. Ask your manager to add it."
+NOT_FOUND_BODY = "No approved SOP covers this yet. Contact your manager so they can add the procedure in the Specs portal."
 
 GlanceText = Annotated[str, Field(max_length=GLANCE_MAX)]
 BodyText = Annotated[str, Field(max_length=BODY_MAX)]

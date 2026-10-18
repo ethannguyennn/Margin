@@ -46,7 +46,7 @@ export function listeningScreen(level = 0, o: RenderOptions = {}): ScreenText {
     return { header: 'LISTENING', main: bars[index].repeat(10), footer: o.hints === false ? '' : 'press: send   double: cancel' };
 }
 export function thinkingScreen(): ScreenText { return { header: '', main: '...', footer: '' }; }
-export function notFoundScreen(o: RenderOptions = {}): ScreenText { return { header: '', main: 'Not in approved SOPs', footer: o.hints === false ? '' : 'press: ask again' }; }
+export function notFoundScreen(o: RenderOptions = {}): ScreenText { return { header: '', main: 'Not in your SOPs. Ask your manager to add it.', footer: o.hints === false ? '' : 'press: ask again' }; }
 export function errorScreen(o: RenderOptions = {}): ScreenText { return { header: 'ERROR', main: 'No verified answer', footer: o.hints === false ? '' : 'press: retry' }; }
 export function loggedScreen(): ScreenText { return { header: '', main: 'Deviation logged', footer: '' }; }
 export function glanceScreen(state: LensState, o: RenderOptions = {}): ScreenText {

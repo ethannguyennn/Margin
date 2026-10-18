@@ -18,7 +18,7 @@ const OUTCOME_TONE: Record<Outcome, Tone> = {
 
 const OUTCOME_LABEL: Record<Outcome, string> = {
   answered: 'Answered',
-  not_found: 'Not in approved SOPs',
+  not_found: 'Not in SOPs: contact your manager',
   logged: 'Deviation logged',
   clarify: 'Asking to clarify',
   command: 'Voice command',
