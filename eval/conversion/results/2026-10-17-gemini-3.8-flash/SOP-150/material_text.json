@@ -1,0 +1,26 @@
+{
+  "material_id": "SOP-150",
+  "pages": [
+    {
+      "page": 1,
+      "text": "SOP-150 Pump Seal Swap\nHalcyon HX-2 portable fluid pump. Revision A. Effective 2026-10-01. SYNTHETIC TRAINING\nDOCUMENT: all names, parts, limits and records are fictional demo data.\n1 Scope\nReplace the shaft seal O-ring on an HX-2 pump that failed the leak check under SOP-140. No\nother seal or pump model is covered.\n2 Tools and parts\n10 mm socket. Torque wrench, 1 N-m to 10 N-m range, checked under SOP-131. 0.20 mm feeler\ngauge. New O-ring HX2-311.\nWARNING: Isolate power and drain the pump before opening the seal housing.\nDo not reuse the old O-ring. Do not lubricate the new O-ring.\nFigure 1. Seal housing: exploded view (left) and gland nut tightening order (right).\n3 Procedure\n3.1 Remove the four M6 gland nuts with the 10 mm socket. Keep the nuts for reuse.\n3.2 Lift the gland plate off the shaft and discard the old O-ring.\n3.3 Fit the new O-ring HX2-311 into the groove of the seal housing. Fit it dry."
+    },
+    {
+      "page": 2,
+      "text": "3.4 Refit the gland plate and torque the four M6 gland nuts to 4 N-m in the order shown in\nFigure 1: upper left, lower right, upper right, lower left.\n3.5 Check the gap under the gland plate with the 0.20 mm feeler gauge at all four corners.\nThe gauge must not enter.\n3.6 Restore power and run the pump for 30 s at 1200 rpm. Check the seal for drips. Any drip\nis a nonconformance: report it under SOP-140.\n4 Records\nForm SW-150 is retained for 12 months. This procedure contains no pressure test."
+    }
+  ],
+  "figures": [
+    {
+      "page": 1,
+      "bbox": [
+        0.118,
+        0.363,
+        0.749,
+        0.574
+      ],
+      "caption": "Figure 1. Seal housing: exploded view (left) and gland nut tightening order (right).",
+      "figure_id": "F1"
+    }
+  ]
+}

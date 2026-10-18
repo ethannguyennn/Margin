@@ -5,22 +5,24 @@ when ``MOCK_MODE=0`` (each import is lazy; a missing module falls back to the
 mock in ``pipeline/mock.py`` with a WARN log and ``/v1/health`` reporting
 ``mock: true``):
 
-  Part 4  pipeline/transcribe.py  GeminiTranscriber(settings)            -> Transcriber
-          pipeline/intent.py      classify_intent(transcript)            -> Intent | IntentResult
-          pipeline/retrieve.py    HybridRetriever(settings=..., db=...)  -> Retriever
-          pipeline/generate.py    GeminiGenerator(settings)              -> Generator
+  Part 4  pipeline/transcribe.py  GeminiTranscriber.from_settings(settings, client=) -> Transcriber
+          pipeline/intent.py      classify_intent(t) -> Intent, deviation_text(t),
+                                  parse_command(t) -> Command | None    (v2)
+          pipeline/retrieve.py    Retriever(db.RetrievalStore(), GeminiEmbedder(...))
+          pipeline/generate.py    GeminiGenerator.from_settings(settings, client=)    -> Generator
           pipeline/verify.py      verify(draft, chunks)                  -> VerifyResult
           pipeline/sanitize.py    sanitize(text)                         -> str
-  Part 5  db.py                   module with init_pool, ping, vector_top, fts_top,
-                                  steps_for, list_procedures, write_event,
-                                  next_deviation_id, insert_deviation (+ optional
-                                  close_pool, ingest_corpus)
-          notify/console.py       ConsoleNotifier()                      -> Notifier
-          notify/photon.py        PhotonNotifier(settings)               -> Notifier
+          convert/structure.py    GeminiConverter.from_settings(settings, client=)    -> Converter  (v2)
+          convert/verify_step.py  verify_step(step, material_text)       -> VerifyResult (v2)
+          diagrams/render.py      DiagramRenderer()                      -> DiagramRenderer (v2)
+  Part 5  db.py                   v1 queries + every v2 query (materials, drafts,
+                                  diagrams, devices, assignments, progress)
+          walkthrough.py          build_walkthrough, log_deviation, publish_draft (v2)
+          notify/__init__.py      get_notifier(settings)                 -> Notifier
 
-``db`` passed to ``HybridRetriever`` is Part 5's ``db`` module (or the mock
-DB), so retrieval calls ``await db.vector_top(...)`` / ``await db.fts_top(...)``
-and never opens its own connection.
+Retrieval goes through Part 5's ``db.RetrievalStore``, so it never opens its
+own connection. Every v2 route and the conversion job (``jobs.py``) call
+Part 5's ``db`` functions; nobody else runs SQL.
 
 Errors: raise the typed errors below. ``/v1/ask`` maps them to the contract
 error codes. Anything else raised by a stage is mapped by stage (stt ->
@@ -36,7 +38,20 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from ..schemas import Chunk, Draft, Intent, IntentResult, RetrievalResult, Step, VerifyResult
+from ..schemas import (
+    Chunk,
+    Command,
+    DiagramSpec,
+    Draft,
+    DraftStep,
+    Intent,
+    IntentResult,
+    MaterialText,
+    ProcedureDraft,
+    RetrievalResult,
+    Step,
+    VerifyResult,
+)
 
 
 class PipelineError(Exception):
@@ -101,10 +116,59 @@ class Notifier(Protocol):
     async def notify(self, deviation_id: str, text: str) -> bool: ...
 
 
+# --- v2 (BUILD-PLAN-V2 section 5) -------------------------------------------------
+
+
+class ConversionError(PipelineError):
+    """A conversion stage failed; ``message`` is shown to the supervisor verbatim."""
+
+    code = "internal"
+
+
+class CommandParser(Protocol):
+    def __call__(self, transcript: str) -> Command | None:
+        """Whole-utterance match only: "next" is a command, "what's the next step" is not."""
+        ...
+
+
+@runtime_checkable
+class Converter(Protocol):
+    async def extract(self, data: bytes, mime: str, material_id: str) -> MaterialText: ...
+
+    async def convert(self, text: MaterialText, doc_id: str, revision: str,
+                      title: str) -> ProcedureDraft: ...
+
+
+class StepVerifier(Protocol):
+    def __call__(self, step: DraftStep, text: MaterialText) -> VerifyResult:
+        """Deterministic, no LLM: quotes in the material, values in the quotes, caps."""
+        ...
+
+
+@runtime_checkable
+class DiagramRenderer(Protocol):
+    def render(self, spec: DiagramSpec, page_image: bytes | None) -> list[bytes]:
+        """1-2 tiles (slot 0 left, slot 1 right) in the lens byte format."""
+        ...
+
+    def preview_png(self, tiles: list[bytes]) -> bytes:
+        """576x144 PNG that looks exactly like the lens, for the portal."""
+        ...
+
+    def page_image(self, data: bytes, mime: str, page: int) -> bytes:
+        """PNG of one (1-based) page of the material, for crops."""
+        ...
+
+
 __all__ = [
     "BadRequest",
+    "CommandParser",
+    "ConversionError",
+    "Converter",
     "DbDown",
+    "DiagramRenderer",
     "Generator",
+    "StepVerifier",
     "IntentClassifier",
     "LlmTimeout",
     "Notifier",

@@ -1,0 +1,383 @@
+// Head gestures from the G2 IMU. One streaming Detector does all the work; detect() runs
+// it over an array (tests, fixtures) and startHeadGestures() feeds it live samples.
+//
+// Everything the hardware decides (which axis is pitch, whether x/y/z are angles or
+// rates, units) is a knob in DetectorParams, set from the recordings - see
+// docs/handoffs/PART-2.md. Every threshold is a knob too, persisted per wearer by
+// calibrate() through settings.ts. Nothing here leaves the phone.
+import type { ImuSample } from './imu.ts';
+import { startImu } from './imu.ts';
+import {
+  getDetectorOverrides,
+  getNodMode,
+  getSensitivity,
+  setDetectorOverrides,
+} from '../settings.ts';
+import { span } from '../obs/sentry.ts';
+
+export type HeadGesture = 'NOD' | 'SHAKE';
+export type Axis = 'x' | 'y' | 'z';
+
+export interface DetectorParams {
+  // --- what the IMU reports (hardware facts from the characterisation, not guesses)
+  pitchAxis: Axis;
+  pitchSign: 1 | -1; // so that looking down is negative
+  yawAxis: Axis;
+  yawSign: 1 | -1;
+  signal: 'angle' | 'rate'; // 'angle' is differentiated; 'rate' is used as is
+  scale: number; // raw units -> degrees (or deg/s for 'rate')
+  wrap: number; // angle period after scale (360); 0 = no wrap handling
+  // --- filtering
+  lpMs: number; // low-pass time constant
+  hpMs: number; // bias removal for a gyro; 0 = off
+  maxGapMs: number; // a gap longer than this resets the detector
+  lobeEnd: number; // a lobe ends when |rate| falls below lobeEnd x its threshold
+  // --- nod (deg/s on the pitch rate)
+  down: number; // down-movement lobe threshold
+  up: number; // return lobe threshold
+  nodMinMs: number; // down-lobe onset -> up-lobe onset
+  nodMaxMs: number;
+  doubleMinMs: number; // nod -> nod, for the double nod
+  doubleMaxMs: number;
+  // --- shake (deg/s on the yaw rate)
+  yaw: number;
+  shakeMs: number; // 3 alternating yaw lobes (>= 2 reversals) within this window
+  // --- rejection
+  quietRatio: number; // off-axis peak must stay below this x the gesture axis peak
+  gate: number; // RMS rate (all axes) in the window before onset above this = whole-body motion
+  gateMs: number;
+  gateLeadMs: number; // the window ends this long before onset: a gesture moves before it crosses a threshold
+  cooldownMs: number;
+  single: boolean; // emit NOD on a single nod (off until M4 says it is safe)
+}
+
+// PROVISIONAL until the G2 characterisation: axis mapping, signal and scale are
+// placeholders matching the synthetic fixtures; thresholds are a starting point.
+export const DEFAULT_PARAMS: DetectorParams = {
+  pitchAxis: 'x',
+  pitchSign: 1,
+  yawAxis: 'y',
+  yawSign: 1,
+  signal: 'angle',
+  scale: 1,
+  wrap: 360,
+  lpMs: 40,
+  hpMs: 0,
+  maxGapMs: 300,
+  lobeEnd: 0.3,
+  down: 50,
+  up: 40,
+  nodMinMs: 60,
+  nodMaxMs: 600,
+  doubleMinMs: 250,
+  doubleMaxMs: 1200,
+  yaw: 50,
+  shakeMs: 1000,
+  quietRatio: 0.6,
+  gate: 20,
+  gateMs: 700,
+  gateLeadMs: 200,
+  cooldownMs: 1500,
+  single: false,
+};
+
+type Lobe = { sign: 1 | -1; t0: number; open: boolean; peak: number; nod?: { down: number } };
+type Filtered = { t: number; p: number; y: number; r: number };
+export type NodInfo = { t: number; down: number; up: number };
+
+const HISTORY_MS = 3000;
+
+export class Detector {
+  private prev: { t: number; p: number; y: number; r: number } | null = null;
+  private dtAvg = 0;
+  private lp = { p: 0, y: 0, r: 0 };
+  private bias = { p: 0, y: 0, r: 0 };
+  private hist: Filtered[] = [];
+  private pitch: Lobe | null = null;
+  private yawCur: Lobe | null = null;
+  private yawLobes: Lobe[] = [];
+  private lastNod: { start: number; t: number } | null = null;
+  private lastEmit = -Infinity;
+  private readonly roll: Axis;
+
+  /** onNod reports every single nod's peak rates once its return lobe ends (calibration). */
+  constructor(
+    readonly params: DetectorParams,
+    private readonly onNod?: (n: NodInfo) => void,
+  ) {
+    this.roll = (['x', 'y', 'z'] as const).find((a) => a !== params.pitchAxis && a !== params.yawAxis)!;
+  }
+
+  private reset(): void {
+    this.prev = null;
+    this.lp = { p: 0, y: 0, r: 0 };
+    this.bias = { p: 0, y: 0, r: 0 };
+    this.hist = [];
+    this.pitch = this.yawCur = this.lastNod = null;
+    this.yawLobes = [];
+  }
+
+  push(s: ImuSample): HeadGesture | null {
+    const P = this.params;
+    const raw = {
+      t: s.t,
+      p: s[P.pitchAxis] * P.scale * P.pitchSign,
+      y: s[P.yawAxis] * P.scale * P.yawSign,
+      r: s[this.roll] * P.scale,
+    };
+    const prev = this.prev;
+    if (!prev || s.t - prev.t > P.maxGapMs || s.t < prev.t) {
+      this.reset();
+      this.prev = raw;
+      return null;
+    }
+    let dt = s.t - prev.t;
+    // BLE delivers in bursts: several samples can share one arrival time.
+    if (dt < 1) {
+      if (!this.dtAvg) return null;
+      dt = this.dtAvg;
+    } else {
+      this.dtAvg = this.dtAvg ? 0.9 * this.dtAvg + 0.1 * dt : dt;
+    }
+    this.prev = raw;
+    const rate = (k: 'p' | 'y' | 'r'): number => {
+      if (P.signal === 'rate') return raw[k];
+      let d = raw[k] - prev[k];
+      if (P.wrap) d -= P.wrap * Math.round(d / P.wrap); // 179 -> -179 is +2, not -358
+      return (d / dt) * 1000;
+    };
+    const a = dt / (P.lpMs + dt);
+    const b = P.hpMs > 0 ? dt / (P.hpMs + dt) : 0;
+    const f: Filtered = { t: s.t, p: 0, y: 0, r: 0 };
+    for (const k of ['p', 'y', 'r'] as const) {
+      this.lp[k] += a * (rate(k) - this.lp[k]);
+      this.bias[k] += b * (this.lp[k] - this.bias[k]);
+      f[k] = this.lp[k] - this.bias[k];
+    }
+    this.hist.push(f);
+    while (this.hist[0].t < s.t - HISTORY_MS) this.hist.shift();
+
+    return this.pitchStep(f) ?? this.yawStep(f);
+  }
+
+  /** Max |value| per axis over [from, to]. */
+  private peaks(from: number, to: number): Filtered {
+    const m: Filtered = { t: 0, p: 0, y: 0, r: 0 };
+    for (const h of this.hist) {
+      if (h.t < from || h.t > to) continue;
+      m.p = Math.max(m.p, Math.abs(h.p));
+      m.y = Math.max(m.y, Math.abs(h.y));
+      m.r = Math.max(m.r, Math.abs(h.r));
+    }
+    return m;
+  }
+
+  private pitchStep(f: Filtered): HeadGesture | null {
+    const P = this.params;
+    const cur = this.pitch;
+    if (cur?.open) {
+      if (f.p * cur.sign < P.lobeEnd * (cur.sign < 0 ? P.down : P.up)) {
+        cur.open = false;
+        if (cur.nod) this.onNod?.({ t: f.t, down: cur.nod.down, up: cur.peak });
+      } else {
+        cur.peak = Math.max(cur.peak, Math.abs(f.p));
+        return null;
+      }
+    }
+    const sign = f.p <= -P.down ? -1 : f.p >= P.up ? 1 : 0;
+    if (!sign) return null;
+    const lobe: Lobe = { sign, t0: f.t, open: true, peak: Math.abs(f.p) };
+    this.pitch = lobe;
+    // A nod: a down lobe, then the return lobe soon after, with yaw and roll quiet.
+    if (sign !== 1 || cur?.sign !== -1) return null;
+    const gap = f.t - cur.t0;
+    if (gap < P.nodMinMs || gap > P.nodMaxMs) return null;
+    const pk = this.peaks(cur.t0, f.t);
+    if (Math.max(pk.y, pk.r) >= P.quietRatio * pk.p) return null;
+    lobe.nod = { down: cur.peak };
+    const nod = { start: cur.t0, t: f.t };
+    if (P.single) return this.emit('NOD', nod.start, f.t);
+    const first = this.lastNod;
+    this.lastNod = nod;
+    if (!first) return null;
+    const between = nod.t - first.t;
+    if (between < P.doubleMinMs || between > P.doubleMaxMs) return null;
+    this.lastNod = null;
+    return this.emit('NOD', first.start, f.t);
+  }
+
+  private yawStep(f: Filtered): HeadGesture | null {
+    const P = this.params;
+    const cur = this.yawCur;
+    if (cur?.open) {
+      if (f.y * cur.sign < P.lobeEnd * P.yaw) cur.open = false;
+      else return null;
+    }
+    const sign = f.y <= -P.yaw ? -1 : f.y >= P.yaw ? 1 : 0;
+    if (!sign) return null;
+    const lobe: Lobe = { sign, t0: f.t, open: true, peak: Math.abs(f.y) };
+    this.yawCur = lobe;
+    this.yawLobes = [...this.yawLobes.filter((l) => l.t0 >= f.t - P.shakeMs), lobe].slice(-3);
+    const [l1, l2, l3] = this.yawLobes;
+    if (!l3 || l1.sign === l2.sign || l2.sign === l3.sign) return null;
+    const pk = this.peaks(l1.t0, f.t);
+    if (pk.p >= P.quietRatio * pk.y) return null;
+    this.yawLobes = [];
+    return this.emit('SHAKE', l1.t0, f.t);
+  }
+
+  /** Cooldown and the whole-body motion gate apply to every gesture. */
+  private emit(g: HeadGesture, onset: number, t: number): HeadGesture | null {
+    const P = this.params;
+    if (t - this.lastEmit < P.cooldownMs) return null;
+    let sum = 0;
+    let n = 0;
+    for (const h of this.hist) {
+      if (h.t < onset - P.gateLeadMs - P.gateMs || h.t >= onset - P.gateLeadMs) continue;
+      sum += h.p * h.p + h.y * h.y + h.r * h.r;
+      n++;
+    }
+    if (n && Math.sqrt(sum / n) > P.gate) return null;
+    this.lastEmit = t;
+    return g;
+  }
+}
+
+/** Pure: samples -> gestures. The test suite runs this over the committed fixtures. */
+export function detect(samples: ImuSample[], params: DetectorParams): { t: number; g: HeadGesture }[] {
+  const d = new Detector(params);
+  const out: { t: number; g: HeadGesture }[] = [];
+  for (const s of samples) {
+    const g = d.push(s);
+    if (g) out.push({ t: s.t, g });
+  }
+  return out;
+}
+
+const KNOBS = Object.keys(DEFAULT_PARAMS) as (keyof DetectorParams)[];
+
+/** Defaults, then this wearer's persisted overrides, then the sensitivity slider and nod mode. */
+export function currentParams(): DetectorParams {
+  const p: DetectorParams = { ...DEFAULT_PARAMS };
+  const o = getDetectorOverrides() ?? {};
+  for (const k of KNOBS) {
+    if (typeof o[k] === typeof p[k]) (p as unknown as Record<string, unknown>)[k] = o[k];
+  }
+  const s = getSensitivity();
+  p.down /= s;
+  p.up /= s;
+  p.yaw /= s;
+  p.single = getNodMode() === 'single';
+  return p;
+}
+
+// --- stateful wrapper: the surface Part 1 codes against ----------------------
+let listener: ((g: HeadGesture) => void) | null = null;
+let sink: ((s: ImuSample) => void) | null = null;
+let stopImu: (() => Promise<void>) | null = null;
+let starting: Promise<void> | null = null;
+
+function fire(g: HeadGesture, source: 'imu' | 'simulated', onsetMs?: number): void {
+  console.info(`[motion] gesture ${g} (${source})`);
+  span('gesture', onsetMs, { gesture: g, source });
+  listener?.(g);
+}
+
+function liveSink(): (s: ImuSample) => void {
+  const d = new Detector(currentParams());
+  return (s) => {
+    const g = d.push(s);
+    if (g) fire(g, 'imu');
+  };
+}
+
+async function ensureImu(): Promise<void> {
+  if (stopImu) return;
+  starting ??= startImu((s) => sink?.(s)).then((stop) => {
+    stopImu = stop;
+  });
+  try {
+    await starting;
+  } finally {
+    starting = null;
+  }
+}
+
+export async function startHeadGestures(onGesture: (g: HeadGesture) => void): Promise<void> {
+  listener = onGesture;
+  sink = liveSink();
+  await ensureImu();
+}
+
+export async function stopHeadGestures(): Promise<void> {
+  listener = null;
+  sink = null;
+  const stop = stopImu;
+  stopImu = null;
+  await stop?.();
+}
+
+/** Dev buttons and tests: delivered like a detected gesture, no cooldown. */
+export function simulateGesture(g: HeadGesture): void {
+  fire(g, 'simulated');
+}
+
+export function isCalibrated(): boolean {
+  return getDetectorOverrides()?.calibrated === true;
+}
+
+const median = (xs: number[]): number => {
+  const s = [...xs].sort((a, b) => a - b);
+  return s.length % 2 ? s[(s.length - 1) / 2] : (s[s.length / 2 - 1] + s[s.length / 2]) / 2;
+};
+
+/**
+ * Prompt for 3 double nods (Part 1 shows the prompt), then set down/up to 60 % of this
+ * wearer's median peak rates. Nods too weak to clear the floor (60 % of the defaults)
+ * keep the defaults and return ok: false. Gestures are not emitted while calibrating.
+ */
+export async function calibrate(
+  onProgress: (done: number, needed: number) => void,
+  opts: { timeoutMs?: number } = {},
+): Promise<{ ok: boolean }> {
+  const needed = 3;
+  const base = { ...currentParams(), single: false };
+  // Relaxed detection: half the thresholds, no gate, no cooldown, so weak nods still count.
+  const relaxed: DetectorParams = { ...base, down: base.down / 2, up: base.up / 2, gate: Infinity, cooldownMs: 0 };
+  const nods: NodInfo[] = [];
+  let done = 0;
+  const wasRunning = stopImu !== null || starting !== null;
+  const restore = sink;
+  const result = await new Promise<{ ok: boolean }>((resolve) => {
+    const finish = (ok: boolean) => {
+      clearTimeout(timer);
+      resolve({ ok });
+    };
+    const timer = setTimeout(() => finish(false), opts.timeoutMs ?? 30000);
+    const d = new Detector(relaxed, (n) => {
+      nods.push(n);
+      // The 3rd double nod's return lobe has ended: its amplitude is in.
+      if (done >= needed && nods.length >= needed * 2) finish(true);
+    });
+    sink = (s) => {
+      if (d.push(s) === 'NOD' && done < needed) onProgress(++done, needed);
+    };
+    onProgress(0, needed);
+    void ensureImu().catch(() => finish(false));
+  });
+  sink = restore;
+  if (!wasRunning) await stopHeadGestures();
+  if (!result.ok) return result;
+  const s = getSensitivity();
+  // Persist unscaled values: the sensitivity slider applies on top at load time.
+  const down = 0.6 * median(nods.map((n) => n.down)) * s;
+  const up = 0.6 * median(nods.map((n) => n.up)) * s;
+  if (down < 0.6 * DEFAULT_PARAMS.down || up < 0.6 * DEFAULT_PARAMS.up) {
+    console.info('[motion] calibration: nods too weak, keeping defaults', { down, up });
+    return { ok: false };
+  }
+  setDetectorOverrides({ ...(getDetectorOverrides() ?? {}), down, up, calibrated: true, calibratedAt: Date.now() });
+  console.info('[motion] calibrated', { down: +down.toFixed(1), up: +up.toFixed(1) });
+  if (listener) sink = liveSink(); // pick up the new thresholds
+  return { ok: true };
+}

@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     gemini_model_generate: str = ""
     gemini_model_transcribe: str = ""
     gemini_model_embed: str = ""
+    gemini_model_convert: str = ""  # v2: material extraction + structuring (Part 4 picks)
     embed_dim: int = 768
 
     # --- Tiger Cloud / Postgres (Part 5 consumes) -----------------------------
@@ -67,6 +68,14 @@ class Settings(BaseSettings):
     max_audio_seconds: float = 8.0
     admin_token: SecretStr | None = None
     corpus_dir: str = ""  # default: <repo>/corpus
+
+    # --- v2 portal, devices, uploads, conversion --------------------------------
+    portal_token: SecretStr | None = None  # one shared supervisor token; empty = portal off
+    max_upload_mb: int = 20
+    convert_timeout_s: float = 180.0
+    convert_concurrency: int = 2
+    pair_code_ttl_s: int = 15 * 60
+    pair_rate_per_min: int = 10  # POST /v1/devices/pair per client IP
     stt_timeout_s: float = 5.0  # outer guard; Part 4 times out at ~4 s itself
     generate_timeout_s: float = 7.0  # outer guard; Part 4 times out at ~6 s itself
     log_level: str = "INFO"

@@ -12,6 +12,7 @@ const OUTCOME_TONE: Record<Outcome, Tone> = {
   not_found: 'warn',
   logged: 'info',
   clarify: 'warn',
+  command: 'info',
   error: 'bad',
 };
 
@@ -20,6 +21,7 @@ const OUTCOME_LABEL: Record<Outcome, string> = {
   not_found: 'Not in approved SOPs',
   logged: 'Deviation logged',
   clarify: 'Asking to clarify',
+  command: 'Voice command',
   error: 'Error',
 };
 

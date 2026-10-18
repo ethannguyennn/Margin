@@ -247,7 +247,7 @@ def test_embedder_normalizes_and_checks_dim():
     model, contents, config = client.aio.models.requests[0]
     assert config.output_dimensionality == 768
     assert config.task_type == "RETRIEVAL_QUERY"
-    assert contents == ["m5 torque"]
+    assert [c.parts[0].text for c in contents] == ["m5 torque"]
 
 
 def test_embedder_v2_uses_prefix_not_task_type():
@@ -255,7 +255,7 @@ def test_embedder_v2_uses_prefix_not_task_type():
     asyncio.run(GeminiEmbedder(client, "gemini-embedding-2", 768).embed_query("m5 torque"))
     _, contents, config = client.aio.models.requests[0]
     assert config.task_type is None
-    assert contents == ["task: search result | query: m5 torque"]
+    assert [c.parts[0].text for c in contents] == ["task: search result | query: m5 torque"]
 
 
 def test_embedder_rejects_wrong_dimension():

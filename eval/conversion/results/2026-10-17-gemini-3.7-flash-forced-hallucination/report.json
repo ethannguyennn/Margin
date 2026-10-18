@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-17",
+  "model": "gemini-3.7-flash",
+  "commit": "bc08066",
+  "source": "live Gemini",
+  "forced_hallucination": true,
+  "results": [
+    {
+      "doc_id": "SOP-150",
+      "material": "corpus/materials/SOP-150-pump-seal-swap.pdf",
+      "seconds": 227.1,
+      "gemini_calls": {
+        "extract": 1,
+        "structure": 2
+      },
+      "pages": 2,
+      "failed_pages": 0,
+      "figures": 0,
+      "steps_expected": 6,
+      "steps_found": 6,
+      "labels": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5",
+        "3.6"
+      ],
+      "values_total": 9,
+      "values_preserved": 8,
+      "values_missing": [
+        {
+          "label": "3.4",
+          "value": "4 N-m",
+          "ok": false
+        }
+      ],
+      "failing_steps": [
+        {
+          "label": "3.4",
+          "reason": "glance says 5 N-m; no quote contains 5 N-m; body says 5 N-m; no quote contains 5 N-m"
+        }
+      ],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 0,
+      "diagrams_detail": [
+        {
+          "step": 4,
+          "kind": "crop",
+          "label": "3.4",
+          "ok": false
+        }
+      ],
+      "diagrams_rendered": {},
+      "doc_warnings": [
+        "WARNING: Isolate power and drain the pump before opening the seal housing.",
+        "Do not reuse the old O-ring. Do not lubricate the new O-ring."
+      ],
+      "fabricated": [
+        {
+          "label": "3.4",
+          "passing": false,
+          "values": [
+            "5 N-m"
+          ]
+        }
+      ],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    }
+  ]
+}

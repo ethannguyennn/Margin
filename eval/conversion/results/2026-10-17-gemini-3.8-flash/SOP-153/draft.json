@@ -1,0 +1,147 @@
+{
+  "doc_id": "SOP-153",
+  "revision": "A",
+  "title": "Cover Plate Quick Start",
+  "material_id": "SOP-153",
+  "status": "ready",
+  "steps": [
+    {
+      "label": "1",
+      "glance": "Place cover plate on housing with arrow to outlet",
+      "body": "Place the cover plate on the housing with the arrow pointing to the outlet.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Place the cover plate on the housing with the arrow pointing to the outlet."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "2",
+      "glance": "Start all six M5 cover screws by hand",
+      "body": "Start all six M5 cover screws by hand.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Start all six M5 cover screws by hand."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3",
+      "glance": "Tighten six M5 cover screws to 3 N-m in star pattern",
+      "body": "Tighten the six M5 cover screws to 3 N-m in a star pattern: top (1), bottom (2), upper right (3), lower left (4), lower right (5), upper left (6).",
+      "warning": "Do not overtighten the cover screws; the plastic cover cracks.",
+      "checkpoint": null,
+      "quotes": [
+        "Tighten the six M5 cover screws to 3 N-m in a star pattern: top (1), bottom (2),",
+        "upper right (3), lower left (4), lower right (5), upper left (6).",
+        "Do not overtighten the cover screws; the plastic cover cracks."
+      ],
+      "diagram": {
+        "kind": "schematic",
+        "figure_id": null,
+        "bbox": null,
+        "elements": [
+          {
+            "type": "callout",
+            "x": 288,
+            "y": 22,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "1"
+          },
+          {
+            "type": "callout",
+            "x": 288,
+            "y": 122,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "2"
+          },
+          {
+            "type": "callout",
+            "x": 375,
+            "y": 47,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "3"
+          },
+          {
+            "type": "callout",
+            "x": 201,
+            "y": 97,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "4"
+          },
+          {
+            "type": "callout",
+            "x": 375,
+            "y": 97,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "5"
+          },
+          {
+            "type": "callout",
+            "x": 201,
+            "y": 47,
+            "x2": null,
+            "y2": null,
+            "r": 15,
+            "label": "6"
+          }
+        ],
+        "alt": "Star pattern tightening order for cover screws"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "4",
+      "glance": "Check gap under cover plate edge with 0.10 mm gauge",
+      "body": "Check the gap under the cover plate edge with a 0.10 mm feeler gauge. The gauge must not enter.",
+      "warning": null,
+      "checkpoint": "The gauge must not enter.",
+      "quotes": [
+        "Check the gap under the cover plate edge with a 0.10 mm feeler gauge. The gauge must not enter."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    }
+  ],
+  "warnings": [
+    "Do not overtighten the cover screws; the plastic cover cracks."
+  ]
+}

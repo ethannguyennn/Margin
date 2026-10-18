@@ -1,0 +1,22 @@
+{
+  "material_id": "SOP-152",
+  "pages": [
+    {
+      "page": 1,
+      "text": "# SOP-152 Valve Lineup for Flushing\n\nHalcyon HX-2 portable fluid pump. Revision A. SYNTHETIC TRAINING DOCUMENT.\nAll names, parts and limits are fictional demo data.\n\nWARNING: Wear splash goggles. Never open V2 before V4 is set.\n\n1. Close suction valve V1 (handle across the pipe).\n2. Open bypass valve V3 (handle along the pipe).\n3. Set flush valve V4 to 45°.\n4. Confirm gauge PG-1 reads below 0.5 bar.\n5. Open discharge valve V2 slowly over 10 s.\n\nFigure 1. Valve handle positions for flushing."
+    }
+  ],
+  "figures": [
+    {
+      "page": 1,
+      "bbox": [
+        0.114,
+        0.373,
+        0.882,
+        0.577
+      ],
+      "caption": "Figure 1. Valve handle positions for flushing.",
+      "figure_id": "F1"
+    }
+  ]
+}

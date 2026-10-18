@@ -21,13 +21,14 @@
   {"name": "zwj emoji sequence dropped", "in": "x👨‍🔧y", "out": "xy"},
   {"name": "accented letter dropped", "in": "café", "out": "caf"},
   {"name": "greek mu is not the micro sign", "in": "5 μm", "out": "5 m"},
-  {"name": "greek omega is not the ohm sign", "in": "10 Ω", "out": "10 "},
+  {"name": "greek omega maps to ohm (as in the app)", "in": "10 Ω", "out": "10  ohm"},
   {"name": "non-breaking space dropped", "in": "4 N-m", "out": "4N-m"},
   {"name": "allow-listed triangles kept", "in": "▲△▶▷▼▽◀◁", "out": "▲△▶▷▼▽◀◁"},
   {"name": "allow-listed shapes kept", "in": "●○■□★☆", "out": "●○■□★☆"},
   {"name": "allow-listed rules and blocks kept", "in": "━─█▇▆▅▄▃▂▁", "out": "━─█▇▆▅▄▃▂▁"},
   {"name": "allow-listed rounded box kept", "in": "╭╮╯╰│", "out": "╭╮╯╰│"},
   {"name": "newline and tab kept", "in": "a\nb\tc", "out": "a\nb\tc"},
+  {"name": "control characters dropped (as in the app)", "in": "a\u0000b\u007fc\rd\u001be", "out": "abcde"},
   {"name": "empty string", "in": "", "out": ""},
   {"name": "combined spec line", "in": "§4.2 — torque 4 N·m ± 0.2 at ≤20°C → “OK” ✅", "out": "Sec 4.2 - torque 4 N-m +/- 0.2 at <=20 degC -> \"OK\" "}
 ]

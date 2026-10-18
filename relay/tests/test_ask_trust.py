@@ -106,7 +106,9 @@ def test_audio_path_with_recorded_fixture():
 
 @pytest.mark.parametrize("text, intent", [
     ("what was that torque spec", "question"),
-    ("say that again", "repeat"),
+    pytest.param("say that again", "command", marks=pytest.mark.xfail(
+        strict=True, reason="v2 Intent 'command' arrives with v2-scaffold-relay; v1 schemas reject it")),
+    ("what was that", "repeat"),
     ("log a deviation the bracket hole is out of round", "deviation"),
 ])
 def test_real_intent_routes(text, intent):

@@ -21,6 +21,8 @@ BLOCKED = [
     *[f"margin_relay.pipeline.{m}" for m in
       ("transcribe", "intent", "retrieve", "generate", "verify", "sanitize")],
     "google.genai", "psycopg", "psycopg_pool", "pgvector",
+    # v2: Part 4's conversion + diagrams and their libraries are not needed on mocks.
+    "margin_relay.convert", "margin_relay.diagrams", "PIL", "pypdf", "pypdfium2", "docx",
 ]
 
 BOOT_SCRIPT = textwrap.dedent("""
@@ -43,9 +45,12 @@ BOOT_SCRIPT = textwrap.dedent("""
     health = c.get("/v1/health").json()
     answer = c.post("/v1/ask", json={"session_id": str(uuid.uuid4()),
                                      "text": "how tight is the m5 on the mounting bracket"}).json()
+    pairing = c.post("/v1/devices/pair", json={"session_id": str(uuid.uuid4())})
+    command = c.post("/v1/ask", json={"session_id": str(uuid.uuid4()), "text": "next"}).json()
     leaked = sorted(m for m in sys.modules if any(m == b or m.startswith(b + ".") for b in BLOCKED))
     print(json.dumps({"health": health, "outcome": answer.get("outcome"), "leaked": leaked,
-                      "mocked": app.state.pipeline.mocked}))
+                      "mocked": app.state.pipeline.mocked, "pair_status": pairing.status_code,
+                      "pair_code": pairing.json().get("pair_code"), "command": command.get("command")}))
 """)
 
 
@@ -65,6 +70,8 @@ def test_mock_mode_boots_with_no_db_no_key_no_pipeline_modules():
     assert r["health"] == {"ok": True, "mock": True, "db": "mock", "version": r["health"]["version"]}
     assert r["outcome"] == "answered"
     assert r["leaked"] == []  # nothing real was even imported
+    assert r["pair_status"] == 200 and len(r["pair_code"]) == 4  # v2 routes answer on mocks
+    assert r["command"] == "next"
 
 
 def test_real_mode_with_nothing_present_still_boots_on_mocks():
@@ -105,7 +112,8 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
                  classify_intent=lambda t: ("deviation" if "log deviation" in t else
                                             "walkthrough" if "walk me through" in t else
                                             "question"),
-                 deviation_text=lambda t: t.replace("log deviation", "").strip())
+                 deviation_text=lambda t: t.replace("log deviation", "").strip(),
+                 parse_command=lambda t: "next" if t.strip().lower() == "next" else None)
     mod("pipeline.sanitize", sanitize=lambda s: s.replace("·", "-"))
     mod("pipeline.verify", verify=lambda d, c: VerifyResult(ok=True, citations=[
         __import__("margin_relay.schemas", fromlist=["Citation"]).Citation(
@@ -209,8 +217,37 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
         devs.append({"text": text, "doc_id": doc_id, "step_id": step_id})
         return {"deviation_id": "DEV-0042", "notified": await notifier.notify("DEV-0042", text)}
 
-    mod("walkthrough", build_walkthrough=build_walkthrough, log_deviation=log_deviation)
-    seen.update(events=events, devs=devs, intent=intent)
+    async def publish_draft(doc_id, revision=None, *, settings=None, embedder=None):
+        seen["published"] = (doc_id, revision)
+        return {"doc_id": doc_id, "revision": revision, "steps": 1}
+
+    mod("walkthrough", build_walkthrough=build_walkthrough, log_deviation=log_deviation,
+        publish_draft=publish_draft)
+
+    # Part 4 v2 surfaces: convert/structure.py, convert/verify_step.py, diagrams/render.py
+    for pkg in ("convert", "diagrams"):
+        mod(pkg).__path__ = []
+
+    class GeminiConverter:
+        def __init__(self, client, model):
+            self.client, self.model = client, model
+
+        @classmethod
+        def from_settings(cls, settings, client=None):
+            seen["converter_client"] = client
+            return cls(client, settings.gemini_model_convert)
+
+    class DiagramRenderer:
+        pass
+
+    def real_verify_step(step, text):
+        return VerifyResult(ok=True)
+
+    mod("convert.structure", GeminiConverter=GeminiConverter)
+    mod("convert.verify_step", verify_step=real_verify_step)
+    mod("diagrams.render", DiagramRenderer=DiagramRenderer)
+    seen.update(events=events, devs=devs, intent=intent, verify_step=real_verify_step,
+                DiagramRenderer=DiagramRenderer, GeminiConverter=GeminiConverter)
     return seen
 
 
@@ -227,6 +264,14 @@ def test_real_mode_wires_part4_and_part5(monkeypatch):
     assert (p.min_sim, p.min_rrf) == (0.5, 0.02)
     assert p.classify("log deviation gap too wide") == IntentResult(intent="deviation",
                                                                    text="gap too wide")
+    # v2 wiring: Part 4's command parser, step verifier, converter and renderer, and
+    # Part 5's publish_draft -- with the same shared Gemini client.
+    assert p.parse_command("next") == "next"
+    assert p.verify_step is seen["verify_step"]
+    assert isinstance(p.converter, seen["GeminiConverter"]) and seen["converter_client"] is seen["client"]
+    assert isinstance(p.renderer, seen["DiagramRenderer"])
+    import asyncio
+    assert asyncio.run(p.publisher("SOP-150", "A"))["steps"] == 1 and seen["published"] == ("SOP-150", "A")
 
     client, app = make_client(pipeline=p, mock_mode=False)
     with client:

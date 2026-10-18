@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import re
 from difflib import SequenceMatcher
-from typing import Any
+from typing import Any, Iterator
 
 from .sanitize import sanitize
 
@@ -85,16 +85,26 @@ def quote_in_text(quote: str, text: str) -> bool:
     return False
 
 
-def number_tokens(text: str) -> set[str]:
-    """``{"4|nm", "70|%", "4.2|", "code:m5", ...}`` for every value in ``text``."""
-    t = sanitize(text).casefold()
-    tokens = {f"code:{m.group(0)}" for m in _CODE.finditer(t)}
-    t = _CODE.sub(" ", t)
+def iter_number_tokens(text: str) -> Iterator[tuple[str, str]]:
+    """``(token, as written)`` for every value in ``text``, e.g. ``("4|nm", "4 N-m")``.
+
+    The spelling is sliced from the sanitized text, so reasons shown to people
+    quote the value the way the material or the draft wrote it.
+    """
+    shown = sanitize(text)
+    t = shown.casefold()  # sanitized text is ASCII + box glyphs: same length
+    for m in _CODE.finditer(t):
+        yield f"code:{m.group(0)}", shown[m.start():m.end()]
+    t = _CODE.sub(lambda m: " " * len(m.group(0)), t)  # keep offsets aligned
     for m in _NUMBER.finditer(t):
         num = m.group(1).replace(",", "")
         unit = re.sub(r"[\s-]", "", m.group(2) or "")
-        tokens.add(f"{num}|{_UNIT_ALIASES.get(unit, unit)}")
-    return tokens
+        yield f"{num}|{_UNIT_ALIASES.get(unit, unit)}", shown[m.start():m.end()]
+
+
+def number_tokens(text: str) -> set[str]:
+    """``{"4|nm", "70|%", "4.2|", "code:m5", ...}`` for every value in ``text``."""
+    return {tok for tok, _ in iter_number_tokens(text)}
 
 
 def _unsupported(answer: str, quotes: list[str], sections: list[str]) -> str | None:
