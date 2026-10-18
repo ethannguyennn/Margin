@@ -79,7 +79,7 @@ class Canvas {
 const b64 = (b: Uint8Array): string => {
   let s = '';
   for (const x of b) s += String.fromCharCode(x);
-  return (globalThis as { btoa?: (s: string) => string }).btoa?.(s) ?? Buffer.from(b).toString('base64');
+  return btoa(s); // global in browsers, the Even WebView and Node 16+
 };
 
 const DRAW: Record<string, (c: Canvas) => void> = {

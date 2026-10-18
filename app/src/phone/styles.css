@@ -2,7 +2,8 @@
    at phone width, so the same build reads as an iPhone app and as a panel in a
    tablet preview. Light and dark come from data-theme on <html> (see theme.ts),
    falling back to the OS preference before it is set. State is carried by fill,
-   outline and weight, never by hue. */
+   outline and weight, never by hue. Type is Arial for the interface and Georgia
+   for headings and answers: both ship on iOS, Android and Windows. */
 
 :root {
   color-scheme: light;
@@ -21,8 +22,10 @@
   --hover: rgba(0, 0, 0, 0.04);
   --radius: 3px;
   --radius-sm: 2px;
-  --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --sans: Arial, Calibri, sans-serif;
+  --serif: Georgia, Garamond, 'Times New Roman', serif;
+  /* Labels and ids: Arial too, set apart by caps and tracking rather than a mono face. */
+  --mono: Arial, Calibri, sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -82,6 +85,7 @@ body {
 }
 
 .shell {
+  min-height: 100vh; /* fallback for WebViews without dvh (iOS < 15.4) */
   min-height: 100dvh;
   display: flex;
   justify-content: center;
@@ -91,6 +95,7 @@ body {
 .app {
   width: 100%;
   max-width: 460px;
+  min-height: 100vh; /* fallback for WebViews without dvh (iOS < 15.4) */
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -141,8 +146,9 @@ body {
 
 h1 {
   margin: 4px 0 0;
-  font-size: 24px;
-  font-weight: 600;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 400;
   letter-spacing: -0.015em;
   line-height: 1.15;
 }
@@ -196,9 +202,10 @@ h1 {
 
 .glance {
   margin: 0;
-  font-size: 19px;
+  font-family: var(--serif);
+  font-size: 20px;
   line-height: 1.35;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: -0.01em;
   color: var(--ink);
 }
