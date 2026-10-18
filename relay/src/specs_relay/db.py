@@ -233,7 +233,8 @@ async def list_procedures() -> list[dict]:
     )
 
 
-async def write_event(session_id, trace_id, intent, outcome, doc_ids, transcript, latency_ms) -> None:
+async def write_event(session_id, trace_id, intent, outcome, doc_ids, transcript, latency_ms,
+                      assignment_id: str | None = None) -> None:
     """Best effort, bounded analytics; a broken database never breaks an answer."""
     try:
         # Neither raw audio nor arbitrary request objects are accepted.
@@ -247,9 +248,10 @@ async def write_event(session_id, trace_id, intent, outcome, doc_ids, transcript
             async with pool().connection() as conn:
                 await conn.execute(
                     """INSERT INTO events
-                    (session_id, trace_id, intent, outcome, doc_ids, transcript, latency_ms)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s)""",
-                    (session_id, trace_id, intent, outcome, list(doc_ids or []), transcript, Jsonb(metrics)),
+                    (session_id, trace_id, intent, outcome, doc_ids, assignment_id, transcript, latency_ms)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (session_id, trace_id, intent, outcome, list(doc_ids or []), assignment_id, transcript,
+                     Jsonb(metrics)),
                 )
     except Exception as exc:
         # Exception messages can contain a DSN or transcript. Log only the class.
@@ -687,11 +689,21 @@ async def create_assignment(device_id: str, doc_id: str, revision: str | None = 
     return assignment_id
 
 
+# A delivered task the lens never acted on (no progress) is handed out again after this
+# long: the first response may have been lost on a Wi-Fi drop. Only within the lens's own
+# 12 h assignment TTL, so a stale task the lens refuses cannot block newer ones.
+REDELIVER_AFTER = "30 seconds"
+LENS_ASSIGNMENT_TTL = "12 hours"
+
+
 async def next_assignment(device_id: str) -> dict | None:
     rows = await _rows(
-        """WITH pending AS (
-            SELECT assignment_id FROM assignments WHERE device_id = %s AND delivered_at IS NULL
-            AND completed_at IS NULL ORDER BY assigned_at, assignment_id FOR UPDATE SKIP LOCKED LIMIT 1
+        f"""WITH pending AS (
+            SELECT a.assignment_id FROM assignments a WHERE a.device_id = %s AND a.completed_at IS NULL
+            AND (a.delivered_at IS NULL OR (a.delivered_at < now() - interval '{REDELIVER_AFTER}'
+                 AND a.assigned_at > now() - interval '{LENS_ASSIGNMENT_TTL}'
+                 AND NOT EXISTS (SELECT 1 FROM progress pr WHERE pr.assignment_id = a.assignment_id)))
+            ORDER BY a.assigned_at, a.assignment_id FOR UPDATE SKIP LOCKED LIMIT 1
         ) UPDATE assignments a SET delivered_at = now() FROM pending p
         WHERE a.assignment_id = p.assignment_id RETURNING a.*""", (device_id,))
     return rows[0] if rows else None

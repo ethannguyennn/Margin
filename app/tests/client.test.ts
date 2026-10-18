@@ -456,6 +456,7 @@ test('mock pairing: code 4F7K, claimed 5 s after the first pair(); then the 5-st
     const steps = a.walkthrough.steps;
     assert.equal(a.walkthrough.doc_id, 'SOP-114');
     assert.equal(a.walkthrough.revision, 'C');
+    assert.ok(Math.abs(Date.parse(a.assigned_at) - new Date().getTime()) < 60_000, 'fresh, or the lens rejects it (12 h TTL)');
     assert.equal(steps.length, 5);
     assert.ok(steps[0].warning && steps[0].warning.length <= 80 && /^[\x20-\x7e]+$/.test(steps[0].warning));
     assert.ok(steps[2].checkpoint && steps[2].checkpoint.length <= 60);

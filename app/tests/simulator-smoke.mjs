@@ -43,7 +43,7 @@ if(process.argv.includes('--launch')){launch('m1');}else{
     await dev(session,'dev-nod');await screen('LISTENING');await capture('m1-listening');
     await screen('THINKING');await screen('ANSWER_GLANCE');await capture('m1-answer');
     await screen('IDLE',undefined,23000);await capture('m1-dim');
-    let log=await entries();assert.equal(log.filter(e=>e.message.includes('[Specs] stub-ask=')).length,1);
+    let log=await entries();assert.equal(log.filter(e=>e.message.includes('[Specs] mock-ask=')).length,1);
     assert.equal(log.filter(e=>e.message.includes('[Specs] layout=')).length,0);
     runs.push({flow:'M1',input:'dev Nod button only after setup',taps:0,rebuilds:0});
     await writeFile(new URL('m1-console.json',output),JSON.stringify(log,null,2));
@@ -56,10 +56,10 @@ if(process.argv.includes('--launch')){launch('m1');}else{
     await until(async()=> (await entries()).filter(e=>e.message.includes('tile=') && e.message.includes('status=success')).length===2,'two rendered tiles');
     await capture('m2-diagram');await dev(session,'dev-shake');await screen('STEP',2);await capture('m2-return-step-3');
     log=await entries();const progress=log.filter(e=>e.message.includes('[Specs] progress=')).map(e=>JSON.parse(e.message.split('progress=')[1]));
-    assert.deepEqual(progress.map(e=>[e.kind,e.step_id]),[['task_started',null],['step_started','1'],['step_completed','1'],['step_started','2'],['step_completed','2'],['step_started','3']]);
+    assert.deepEqual(progress.map(e=>[e.kind,e.step_id]),[['task_started',null],['step_started','SOP-114:C:5.1'],['step_completed','SOP-114:C:5.1'],['step_started','SOP-114:C:5.3'],['step_completed','SOP-114:C:5.3'],['step_started','SOP-114:C:5.4']]);
     assert.ok(progress.every((e,i)=>!i || e.ts>progress[i-1].ts));
     assert.equal(log.filter(e=>e.message.includes('[Specs] layout=')).length,2);
-    runs.push({flow:'M2',progress:progress.map(({kind,step_id})=>({kind,step_id})),tiles:2,rebuilds:2,input:'dev Nod/Shake; synthetic command fixtures'});
+    runs.push({flow:'M2',progress:progress.map(({kind,step_id})=>({kind,step_id})),tiles:2,rebuilds:2,input:'dev Nod/Shake; Part 2 mock commands'});
     for(const [utterance,answer] of [['question','ANSWER_GLANCE'],['not found','NOT_FOUND'],['error','ERROR']]){
       await say(session,utterance);await screen(answer,2);await capture('step-question-'+answer.toLowerCase());await dev(session,'dev-shake');await screen('STEP',2);
     }
@@ -72,7 +72,8 @@ if(process.argv.includes('--launch')){launch('m1');}else{
     await capture('cold-start-step-3');checks.push({screen:'STEP',step:2,coldStart:true});
     log=await entries();const errors=log.filter(e=>e.level==='error' || /\[uncaught\]|\[unhandledrejection\]/.test(e.message));assert.deepEqual(errors,[]);
     await writeFile(new URL('m2-console.json',output),JSON.stringify(log,null,2));
-    await writeFile(new URL('results.json',output),JSON.stringify({checks,runs,rootExit:true,coldStartStep:3,hardware:'not yet tested on hardware',integration:'temporary UI mocks; not Part 2 IMU replay or live relay',errors},null,2));
+    await writeFile(new URL('results.json',output),JSON.stringify({checks,runs,rootExit:true,coldStartStep:3,hardware:'not yet tested on hardware',integration:'Part 2 mocks (VITE_MOCK=1); not IMU replay or live relay',errors},null,2));
     console.log('PASS M1, M2, returnTo, native exit, cold start; '+checks.length+' screen assertions.');
-  }finally{session?.close();if(child)await stop(child);}
+  }catch(error){await writeFile(new URL('failure-console.json',output),JSON.stringify(await entries().catch(()=>[]),null,2));throw error;}
+  finally{session?.close();if(child)await stop(child);}
 }

@@ -235,6 +235,9 @@ const heard: string[] = [];
 export function queueMockTranscripts(...texts: string[]): void {
   heard.push(...texts);
 }
+export function clearMockTranscripts(): void {
+  heard.length = 0;
+}
 
 export async function mockAsk(req: AskRequest): Promise<AskResponse> {
   // Audio requests have no client-side transcript: use the queued one, else the torque question.
@@ -390,11 +393,18 @@ const ASSIGNMENT: Assignment = {
 export const mockProgressLog: ProgressEvent[] = [];
 
 /** The task, once the device is claimed, until it is reported task_completed. */
+/** Scenario m1 (hands-free ask, no task): the mock relay hands out nothing. */
+let assignmentEnabled = true;
+export function setMockAssignment(enabled: boolean): void {
+  assignmentEnabled = enabled;
+}
+
 export async function mockNextAssignment(): Promise<Assignment | null> {
   await sleep(MOCK_DELAY_MS / 3);
-  if (!pairing().claimed) return null;
+  if (!assignmentEnabled || !pairing().claimed) return null;
   const done = mockProgressLog.some((e) => e.assignment_id === ASSIGNMENT.assignment_id && e.kind === 'task_completed');
-  return done ? null : structuredClone(ASSIGNMENT);
+  // Stamped at hand-out: the lens refuses assignments older than 12 h (ASSIGNMENT_TTL_MS).
+  return done ? null : { ...structuredClone(ASSIGNMENT), assigned_at: new Date().toISOString() };
 }
 
 export async function mockPostProgress(events: ProgressEvent[]): Promise<{ accepted: number }> {
@@ -420,6 +430,7 @@ export function resetMockV2(): void {
   mockProgressLog.length = 0;
   heard.length = 0;
   endpointPlan = { reason: 'speech_end', ms: 1500 };
+  assignmentEnabled = true;
 }
 
 export const fixtures = { TORQUE, WALKTHROUGH, CLEAN, NOT_FOUND, LOGGED, ERROR, ASSIGNMENT };

@@ -645,9 +645,18 @@ class MockDB:
         return assignment_id
 
     async def next_assignment(self, device_id: str) -> dict | None:
-        pending = sorted((a for a in self.assignments.values() if a["device_id"] == device_id
-                          and a["delivered_at"] is None and a["completed_at"] is None),
-                         key=lambda a: (a["assigned_at"], a["assignment_id"]))
+        # Same rule as db.next_assignment: re-send a delivered task with no progress after 30 s.
+        now = _now()
+        acted = {k[0] for k in self.progress}
+
+        def due(a: dict) -> bool:
+            if a["device_id"] != device_id or a["completed_at"] is not None:
+                return False
+            return a["delivered_at"] is None or (
+                now - a["delivered_at"] > timedelta(seconds=30) and now - a["assigned_at"] < timedelta(hours=12)
+                and a["assignment_id"] not in acted)
+
+        pending = sorted(filter(due, self.assignments.values()), key=lambda a: (a["assigned_at"], a["assignment_id"]))
         if not pending:
             return None
         pending[0]["delivered_at"] = _now()

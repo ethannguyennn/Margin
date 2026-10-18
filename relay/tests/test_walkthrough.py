@@ -1,3 +1,4 @@
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
@@ -8,9 +9,13 @@ from db.seed import load_corpus
 from specs_relay import db, walkthrough
 from specs_relay.notify import ConsoleNotifier, get_notifier
 
+# The industrial HX-2 bank these tests were written against (the demo bank in corpus/ is coffee).
+HX2_CORPUS = Path(__file__).parent / "fixtures" / "hx2-corpus"
+HX2_QA = HX2_CORPUS.parent / "hx2-qa.jsonl"
+
 
 def test_every_corpus_step_preserves_its_full_sanitized_text(schema_dependencies):
-    _, chunks = load_corpus()
+    _, chunks = load_corpus(HX2_CORPUS)
     steps = [walkthrough.step_from_chunk(c) for c in chunks if c["is_step"]]
     assert len(steps) == 35
     assert all(0 < len(s.glance) < 60 and 0 < len(s.body) < 450 for s in steps)
@@ -31,7 +36,7 @@ def test_oversized_body_is_rejected_instead_of_cutting_off_a_warning(schema_depe
 
 @pytest.mark.asyncio
 async def test_walkthrough_returns_all_steps_and_pins_revision(monkeypatch, schema_dependencies):
-    _, chunks = load_corpus()
+    _, chunks = load_corpus(HX2_CORPUS)
     steps = [walkthrough.step_from_chunk(c) for c in chunks
              if c["doc_id"] == "SOP-114" and c["revision"] == "C" and c["is_step"]]
     monkeypatch.setattr(db, "document_for", AsyncMock(return_value={

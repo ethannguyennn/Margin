@@ -245,7 +245,7 @@ passed through.
 | `client.test.ts` | 35 passed (v1 + v2 routes, queue, diagrams, mocks) |
 | Mutation check | Breaking the queue's drop or setting silence to 700 ms fails 7 tests |
 | `relay.e2e.test.ts` against Part 3's current relay (`MOCK_MODE=1`, v1 routes) | **6 passed** with the v2 client |
-| Client v2 against Part 3's **v2** mock relay | **MISSING**: `POST /v1/devices/pair` returns 404 on the current relay; Part 3 has not pushed v2 routes |
+| Client v2 against Part 3's **v2** relay (`MOCK_MODE=1`, after the merge) | **12 passed** (`relay.e2e.test.ts`, 6 v1 + 6 v2): pair, claim, 204, assignment, PNG diagram + cache, progress de-dup on the board, `next` command, 401 drops the token |
 | M4 wearer A: 20 double nods / 30 min bench / nod→LISTENING | **MISSING** (no glasses) |
 | M4 wearer B: same | **MISSING** |
 | False trigger with nobody speaking makes no ask | tested in code (`audio.test.ts`, 0 fetches). **MISSING** on hardware |
@@ -276,9 +276,28 @@ the `[probe]` console lines and screenshot. Delete it afterwards.
 
 ---
 
-## 8. Limitations and open requests
+## 8. After the merge into main (2026-10-17)
 
-**Open requests to Part 1:**
+All five parts are on `main`. Part 1 had already wired these modules, and its temporary stubs are
+now deleted.
+
+- **Simulator, mock app (Part 1's v2 smoke on my mocks):** M1, M2, returnTo, native exit and cold
+  start all pass, 25 screen assertions, on two runs.
+- **Simulator, live app against Part 3's v2 relay (`MOCK_MODE=1`):** the full lens side of M3
+  works.
+  - PAIRING shows the relay's code; the supervisor claims and assigns over the portal API.
+  - TASK_READY, then STEP with progress on the board ("Bay 3, step 2/7").
+  - Swipe opens DIAGRAM DGM-0001: both tiles `success`, one rebuild.
+  - Evidence: `docs/handoffs/part-2/live-*.png`.
+  - In live mode the simulator's missing IMU is handled: `imuControl` throws, which is caught and
+    logged. Calibration then times out to "Calibration unavailable. Tap to continue."
+- **Bug found by the live run:** the mock assignment had a fixed `assigned_at`, which the lens's
+  12 h TTL rejects. It is now stamped when handed out.
+
+The requests below are kept for the record. Everything except the hardware items is done; see
+`TODO.md`.
+
+**Open requests to Part 1 (done at the merge):**
 - Take Part 1's `types.ts` at the `v2-scaffold-app` merge. Mine is a verbatim copy of §5.
 - Wiring:
   - `startCapture(onLevel, onEndpoint)`: on `speech_end`/`cap` call `stopCapture()` then
@@ -291,7 +310,7 @@ the `[probe]` console lines and screenshot. Delete it afterwards.
 - No new dependencies. No app.json changes are needed for v2. `phone-microphone` is only needed
   if the phone-mic A/B ships.
 
-**Open request to Part 3:** v2 routes on the mock relay so `pair` / `me` / `assignments/next` /
+**Open request to Part 3 (done):** v2 routes on the mock relay so `pair` / `me` / `assignments/next` /
 `progress` / `diagrams` can be run end to end. The relay must answer 204 on no assignment and 401
 on a bad token.
 

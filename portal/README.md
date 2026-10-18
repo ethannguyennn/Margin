@@ -11,7 +11,7 @@ From the repository root:
 
 ```powershell
 npm --prefix portal ci
-npm --prefix portal run dev       # http://127.0.0.1:5176/portal/
+npm --prefix portal run dev       # http://127.0.0.1:5178/portal/
 npm --prefix portal test
 npm --prefix portal run build
 ```

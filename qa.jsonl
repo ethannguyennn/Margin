@@ -1,0 +1,45 @@
+{"q": "How much money is in the opening float?", "expect": "answered", "doc_id": "SOP-201", "section": "2.2", "must_contain": ["$150.00"]}
+{"q": "How fast do I have to greet a guest?", "expect": "answered", "doc_id": "SOP-201", "section": "3.1", "must_contain": ["10 seconds"]}
+{"q": "How much extra is oat milk?", "expect": "answered", "doc_id": "SOP-201", "section": "4.3", "must_contain": ["$0.75"]}
+{"q": "How much is a medium cappuccino?", "expect": "answered", "doc_id": "SOP-201", "section": "4.2", "must_contain": ["$5.50"]}
+{"q": "Can I sell a large flat white?", "expect": "answered", "doc_id": "SOP-201", "section": "4.1", "must_contain": ["Small and Medium only"]}
+{"q": "What do I do when a guest mentions an allergy?", "expect": "answered", "doc_id": "SOP-201", "section": "5.1", "must_contain": ["ALLERGY button"]}
+{"q": "What is the biggest bill we accept?", "expect": "answered", "doc_id": "SOP-202", "section": "2.2", "must_contain": ["$50"]}
+{"q": "What does a black mark from the pen mean on a fifty?", "expect": "answered", "doc_id": "SOP-202", "section": "2.3", "must_contain": ["dark brown or black"]}
+{"q": "When do I need to do a cash drop?", "expect": "answered", "doc_id": "SOP-202", "section": "3.2", "must_contain": ["$400.00", "$200.00"]}
+{"q": "Who has to approve a fifteen dollar refund?", "expect": "answered", "doc_id": "SOP-202", "section": "5.2", "must_contain": ["$10.01 to $25.00", "Shift lead"]}
+{"q": "How long after purchase can I give a refund?", "expect": "answered", "doc_id": "SOP-202", "section": "5.3", "must_contain": ["24 hours"]}
+{"q": "How long can I void an order after payment?", "expect": "answered", "doc_id": "SOP-202", "section": "5.1", "must_contain": ["5 minutes"]}
+{"q": "What is the maximum gift card load?", "expect": "answered", "doc_id": "SOP-202", "section": "6.1", "must_contain": ["$200.00"]}
+{"q": "When does a till variance need a manager signature?", "expect": "answered", "doc_id": "SOP-202", "section": "7.4", "must_contain": ["$5.00", "manager signature"]}
+{"q": "How much do I leave in the drawer when closing?", "expect": "answered", "doc_id": "SOP-202", "section": "7.3", "must_contain": ["$150.00"]}
+{"q": "How cold does the milk fridge need to be?", "expect": "answered", "doc_id": "SOP-210", "section": "3.2", "must_contain": ["41°F"]}
+{"q": "How long do I wash my hands?", "expect": "answered", "doc_id": "SOP-210", "section": "2.1", "must_contain": ["20 seconds"]}
+{"q": "What strength should the sanitizer bucket be?", "expect": "answered", "doc_id": "SOP-210", "section": "3.7", "must_contain": ["200 to 400 ppm"]}
+{"q": "How long does opened oat milk last?", "expect": "answered", "doc_id": "SOP-210", "section": "4.2", "must_contain": ["7 days"]}
+{"q": "When do I throw out drip coffee?", "expect": "answered", "doc_id": "SOP-210", "section": "4.3", "must_contain": ["60 minutes"]}
+{"q": "How do I backflush the group heads?", "expect": "answered", "doc_id": "SOP-210", "section": "5.1", "must_contain": ["10 seconds on"]}
+{"q": "How long do I soak the portafilters?", "expect": "answered", "doc_id": "SOP-210", "section": "5.2", "must_contain": ["20 minutes"]}
+{"q": "What temperature is the wash sink water?", "expect": "answered", "doc_id": "SOP-210", "section": "6.3", "must_contain": ["110°F"]}
+{"q": "Where is the first aid kit?", "expect": "answered", "doc_id": "SOP-210", "section": "7.2", "must_contain": ["under the back counter"]}
+{"q": "How long should an espresso shot take?", "expect": "answered", "doc_id": "SOP-220", "section": "3.5", "must_contain": ["25 to 30 seconds"]}
+{"q": "What is the espresso dose?", "expect": "answered", "doc_id": "SOP-220", "section": "2.1", "must_contain": ["18.0 g"]}
+{"q": "My shot ran twenty seconds, what do I do?", "expect": "answered", "doc_id": "SOP-220", "section": "3.6", "must_contain": ["grind finer"]}
+{"q": "What temperature do I steam almond milk to?", "expect": "answered", "doc_id": "SOP-220", "section": "4.1", "must_contain": ["130 to 140°F"]}
+{"q": "How hot is extra hot?", "expect": "answered", "doc_id": "SOP-220", "section": "4.2", "must_contain": ["160°F"]}
+{"q": "How much foam goes on a cappuccino?", "expect": "answered", "doc_id": "SOP-220", "section": "4.3", "must_contain": ["3/4 inch"]}
+{"q": "What should the steam boiler pressure read?", "expect": "answered", "doc_id": "SOP-220", "section": "6.1", "must_contain": ["1.0 to 1.5 bar"]}
+{"q": "How much steamed milk goes in a medium latte?", "expect": "answered", "doc_id": "SOP-230", "section": "2.1", "must_contain": ["12 oz"]}
+{"q": "How many grams of matcha for a large?", "expect": "answered", "doc_id": "SOP-230", "section": "9.1", "must_contain": ["5 g"]}
+{"q": "How much concentrate goes in a medium cold brew?", "expect": "answered", "doc_id": "SOP-230", "section": "8.1", "must_contain": ["6 oz"]}
+{"q": "How long do I steep cold brew?", "expect": "answered", "doc_id": "SOP-230", "section": "8.3", "must_contain": ["18 hours"]}
+{"q": "How many pumps of mocha sauce in a large?", "expect": "answered", "doc_id": "SOP-230", "section": "7.1", "must_contain": ["4 pumps"]}
+{"q": "How do I make a croissant?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What is the wifi password?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How much do baristas get paid?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I make a pumpkin spice latte?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I clean the ice machine?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How do I request time off?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What concentration of bleach should I use to sanitize?", "expect": "not_found", "doc_id": null, "section": null, "must_contain": []}
+{"q": "How long does it last?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}
+{"q": "What temperature?", "expect": "clarify", "doc_id": null, "section": null, "must_contain": []}

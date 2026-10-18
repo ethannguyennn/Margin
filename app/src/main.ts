@@ -5,7 +5,6 @@ import { BridgeQueue } from './ui/bridge-queue';
 import { LensDisplay, DiagramRenderError, type Layout } from './ui/layout';
 import { renderScreen, type ScreenText } from './ui/screens';
 import { gestureFromEvent } from './ui/input';
-import { createLocalV2FixturePorts } from './ui/local-v2-stubs';
 import { SessionStore } from './ui/session-store';
 import { lensLink } from './lens-link';
 import { mountPhone } from './phone/mount';
@@ -83,21 +82,23 @@ async function boot() {
     await display.render({ header: 'SPECS', main: '', footer: 'starting...' });
     const report = (error: unknown) => { console.warn('[Specs] integration failure', error instanceof Error ? error.message : 'unknown'); };
     const paths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts', './motion/gestures.ts'];
-    let io: Runtime;
-    const hasV2 = paths.every(path => !!loaders[path]);
-    if (!hasV2 && mock) {
-        io = createLocalV2FixturePorts(() => utterance.value, params.get('scenario') ?? 'm1');
-        mode.textContent = 'Temporary v2 UI mocks: synthetic commands, assignment, calibration and PNG tiles. No microphone, relay or IMU.';
-    }
-    else {
-        if (!hasV2)
-            throw new Error('Part 2 v2 motion/client modules are not installed; use mock mode for independent UI testing.');
-        const [audio, api, obs, motion] = await Promise.all(paths.map(path => loaders[path]()));
-        io = { audio, api, obs, motion } as Runtime;
-        if (typeof io.api.pair !== 'function' || typeof io.motion.startHeadGestures !== 'function')
-            throw new Error('Part 2 v2 interfaces are incomplete');
-        mode.textContent = mock ? 'Part 2 v2 mocks' : 'Live mode';
-    }
+    if (!paths.every(path => !!loaders[path]))
+        throw new Error('Part 2 v2 motion/client modules are missing');
+    const [audio, api, obs, motion] = await Promise.all(paths.map(path => loaders[path]()));
+    const io = { audio, api, obs, motion } as Runtime;
+    if (typeof io.api.pair !== 'function' || typeof io.motion.startHeadGestures !== 'function')
+        throw new Error('Part 2 v2 interfaces are incomplete');
+    mode.textContent = mock ? 'Part 2 v2 mocks: synthetic commands, assignment, calibration and PNG tiles. No microphone, relay or IMU.' : 'Live mode';
+    // Mock dev panel: the utterance box is what mock STT "hears". Only an explicit ?scenario=m1 hands out no task (a packed build has no URL params).
+    const mockApi = mock ? await import('./mock/index.ts') : null;
+    if (mockApi && params.get('scenario') === 'm1')
+        mockApi.setMockAssignment(false);
+    const DEV_UTTERANCES: Record<string, string> = { question: 'how tight is the m5 on the mounting bracket', 'not found': 'where is the good coffee',
+        error: 'boom', walkthrough: 'walk me through the bracket replacement', logged: 'log deviation bracket arrived pre-drilled' };
+    const said = () => utterance.value.trim().toLowerCase();
+    // IMU recorder for the hardware characterisation (docs/handoffs/PART-2.md §1). Motion only, never sent.
+    if (dev && params.get('dev') === '1')
+        void import('./motion/record.ts').then(m => m.mountRecorder(app)).catch(report);
     await io.obs.initObs();
     const raw = await queue.run(() => bridge.getLocalStorage(STORAGE_KEY));
     const state = restoreSession(raw, Date.now(), crypto.randomUUID());
@@ -173,9 +174,17 @@ async function boot() {
         now: Date.now, onError: report, render, persist: value => store.save(serializeSession(value)),
         exit: async () => { await store.flush(); console.info('[Specs] native exit confirmation requested'); if (!await queue.run(() => bridge.shutDownPageContainer(1)))
             throw new Error('Native exit failed'); console.info('[Specs] native exit accepted'); },
-        startCapture: (onLevel, onEndpoint) => queue.run(() => io.audio.startCapture(onLevel, onEndpoint)),
+        startCapture: (onLevel, onEndpoint) => {
+            if (mockApi) {
+                mockApi.clearMockTranscripts();
+                mockApi.setMockEndpoint(said() === 'silence' ? 'no_speech' : 'speech_end');
+                if (said() !== 'silence')
+                    mockApi.queueMockTranscripts(DEV_UTTERANCES[said()] ?? said());
+            }
+            return queue.run(() => io.audio.startCapture(onLevel, onEndpoint));
+        },
         stopCapture: () => queue.run(() => io.audio.stopCapture()),
-        ask: async (req: AskRequest, opts): Promise<AskResponse> => { const span = io.obs.startAsk(); try {
+        ask: async (req: AskRequest, opts): Promise<AskResponse> => { if (mockApi && req.audio) console.info('[Specs] mock-ask=' + said()); const span = io.obs.startAsk(); try {
             const answer = await io.api.ask(req, opts);
             span.end(answer.outcome);
             // The phone screen shows the full answer the glance line had to compress.
@@ -186,7 +195,7 @@ async function boot() {
             span.end('error');
             throw error;
         } },
-        reportProgress: ev => io.api.reportProgress(ev),
+        reportProgress: ev => { console.info('[Specs] progress=' + JSON.stringify(ev)); io.api.reportProgress(ev); },
         // Controller prefetches current + next on every step change, using Part 2's cache.
         getDiagram: id => io.api.getDiagram(id), pollAssignment: () => { void poll(); },
         calibrate: onProgress => io.motion.calibrate(onProgress),

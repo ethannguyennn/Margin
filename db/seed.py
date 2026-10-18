@@ -19,6 +19,7 @@ from specs_relay import db
 
 HEADING = re.compile(r"^#{2,6}\s+(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.MULTILINE)
 ORDERED = re.compile(r"^\s*(\d+)\.\s+", re.MULTILINE)
+STEP_MARKER = "<!-- step -->"
 
 
 def parse_document(path: Path) -> tuple[dict, list[dict]]:
@@ -48,6 +49,7 @@ def parse_document(path: Path) -> tuple[dict, list[dict]]:
     chunks = []
     headings = list(HEADING.finditer(match[2]))
     sections = set()
+    markers = 0
     for index, heading in enumerate(headings):
         section, title = heading.groups()
         if section in sections:
@@ -57,16 +59,26 @@ def parse_document(path: Path) -> tuple[dict, list[dict]]:
         text = match[2][heading.end():stop].strip()
         if not text:  # A structural heading such as "4 Procedure" is not a chunk.
             continue
-        ordered = ORDERED.findall(text)
+        # Two ways to mark a procedural step: a "<!-- step -->" line opening the section
+        # (numbered in document order), or one numbered list item ("2. Torque ...").
+        marked = text.startswith(STEP_MARKER)
+        if marked:
+            text = text[len(STEP_MARKER):].strip()
+            if not text:
+                raise ValueError(f"{path.name}: step {section} has no text")
+            markers += 1
+        ordered = [] if marked else ORDERED.findall(text)
         if ordered and len(ordered) != 1:
             raise ValueError(f"{path.name}: use one numbered procedural step per section")
-        is_step = bool(ordered)
+        is_step = marked or bool(ordered)
         chunks.append({
             "chunk_id": f"{metadata['doc_id']}:{metadata['revision']}:{section}",
             "doc_id": metadata["doc_id"], "revision": metadata["revision"], "section": section,
             "heading": title, "text": text, "is_step": is_step,
-            "step_order": int(ordered[0]) if is_step else None,
+            "step_order": markers if marked else int(ordered[0]) if is_step else None,
         })
+    if markers and any(c["is_step"] for c in chunks) and markers != sum(c["is_step"] for c in chunks):
+        raise ValueError(f"{path.name}: mark steps one way, either <!-- step --> or numbered items")
     orders = [chunk["step_order"] for chunk in chunks if chunk["is_step"]]
     if not chunks or not orders or orders != list(range(1, len(orders) + 1)):
         raise ValueError(f"{path.name}: procedural steps must be contiguous and ordered from 1")
