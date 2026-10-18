@@ -8,6 +8,7 @@ const app = document.querySelector<HTMLElement>('#app')!;
 const nav = document.querySelector<HTMLElement>('nav')!;
 const logout = document.querySelector<HTMLButtonElement>('#logout')!;
 const notice = document.querySelector<HTMLElement>('#notice')!;
+const workspaceBadge = document.querySelector<HTMLElement>('#workspace');
 const draftKey = 'specs.portal.draft';
 let dispose: (() => void)[] = [];
 let generation = 0;
@@ -45,16 +46,44 @@ function formObject(form: HTMLFormElement): Record<string, FormDataEntryValue> {
 function draftPath(doc: string, rev: string) { return `/v1/drafts/${encodeURIComponent(doc)}/${encodeURIComponent(rev)}`; }
 
 function login() {
-  heading('Employer portal', 'Enter the shared portal token to review and assign procedures.');
+  heading('Admin portal', 'Open your workspace with its code, or create one. Workers enter the same code in the Even app, and their glasses answer from this workspace’s SOPs.');
   const form = el('form', undefined, 'login');
-  const token = field(form, 'token', 'Portal token', { type: 'password' });
+  const token = field(form, 'token', 'Workspace code');
   token.autocomplete = 'off';
-  submit(form, 'Log in', async () => {
+  submit(form, 'Open workspace', async () => {
     sessionStorage.setItem(TOKEN_KEY, token.value.trim());
-    try { await api('/v1/devices'); } catch (exc) { sessionStorage.removeItem(TOKEN_KEY); throw exc; }
+    try { await api('/v1/orgs/me'); } catch (exc) { sessionStorage.removeItem(TOKEN_KEY); throw exc; }
     await route();
   });
-  app.append(form);
+  const create = el('form', undefined, 'login');
+  create.append(el('h2', 'New workspace'));
+  const name = field(create, 'workspace_name', 'Company or team name', { max: 120 });
+  submit(create, 'Create workspace', async () => {
+    const response = await fetch('/v1/orgs', json('POST', { name: name.value.trim() }));
+    const data = await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.error?.message || `Could not create the workspace (${response.status}).`);
+    sessionStorage.setItem(TOKEN_KEY, data.join_code);
+    location.hash = 'devices';
+    await route();
+    message(`Workspace created. Your code is ${data.join_code}.`);
+  });
+  app.append(form, create);
+}
+
+async function showWorkspace(epoch: number) {
+  if (!workspaceBadge) return;
+  try {
+    const ws: JsonObject = await api('/v1/orgs/me');
+    if (generation !== epoch) return;
+    workspaceBadge.textContent = `${ws.name} · code ${ws.join_code}`; workspaceBadge.hidden = false;
+  } catch { workspaceBadge.hidden = true; }
+}
+
+function codeCard(ws: JsonObject) {
+  const card = el('section', undefined, 'join-code');
+  card.append(el('h2', 'Workspace code'), el('p', ws.join_code, 'code'),
+    el('p', 'On the glasses: open Specs in the Even app, go to the Lens tab, and enter this code. The glasses then answer from this workspace’s published SOPs.', 'intro'));
+  return card;
 }
 
 function upload() {
@@ -200,7 +229,11 @@ async function review(doc: string, rev: string, epoch: number) {
 }
 
 async function devices(epoch: number) {
-  heading('Devices', 'Enter the pair code shown on the lens and a name your team will recognise.');
+  heading('Devices', 'Glasses join this workspace with its code. Joined glasses appear below.');
+  const ws: JsonObject = await api('/v1/orgs/me'); if (generation !== epoch) return;
+  app.append(codeCard(ws));
+  const manual = el('details', undefined, 'pair-manual');
+  manual.append(el('summary', 'Or pair with the code shown on the lens'));
   const form = el('form', undefined, 'pair');
   field(form, 'pair_code', 'Lens pair code', { max: 4, pattern: '[A-HJ-NP-Za-hj-np-z2-9]{4}' });
   field(form, 'worker_name', 'Worker or station name', { max: 120 });
@@ -208,9 +241,9 @@ async function devices(epoch: number) {
     const data = formObject(form); data.pair_code = String(data.pair_code).trim().toUpperCase();
     await api('/v1/devices/claim', json('POST', data)); await route(); message('Device paired. You can assign a procedure.');
   });
-  app.append(form, link('Assign a procedure', '#assign'));
+  manual.append(form); app.append(manual, link('Assign a procedure', '#assign'));
   const rows: JsonObject[] = await api('/v1/devices'); if (generation !== epoch) return;
-  const table = el('table'); table.append(el('caption', 'Paired devices'));
+  const table = el('table'); table.append(el('caption', 'Joined glasses'));
   const head = el('tr'); ['Worker / station', 'Device', 'Status'].forEach(text => head.append(el('th', text))); table.append(head);
   rows.forEach(row => { const tr = el('tr'); [row.worker_name || 'Unnamed', row.device_id, row.claimed === true || row.claimed_at ? 'Paired' : 'Awaiting claim'].forEach(text => tr.append(el('td', text))); table.append(tr); });
   app.append(table);
@@ -270,7 +303,9 @@ export async function route() {
   dispose.forEach(cleanup => cleanup()); dispose = []; app.replaceChildren(); message();
   app.style.animation = 'none'; void app.offsetWidth; app.style.animation = ''; // replay the page fade-in
   const loggedIn = !!sessionStorage.getItem(TOKEN_KEY); nav.hidden = !loggedIn; logout.hidden = !loggedIn;
+  if (workspaceBadge) workspaceBadge.hidden = true;
   if (!loggedIn) { login(); return; }
+  void showWorkspace(epoch);
   nav.replaceChildren(...['Upload', 'Review', 'Devices', 'Assign', 'Board'].map(text => {
     const dest = text === 'Review' ? `review/${sessionStorage.getItem(draftKey) ?? ''}` : text.toLowerCase();
     const a = link(text, `#${dest}`); if (location.hash.slice(1).startsWith(text.toLowerCase())) a.setAttribute('aria-current', 'page'); return a;
@@ -318,5 +353,5 @@ if (themeButton) {
 
 logout.onclick = () => { sessionStorage.removeItem(TOKEN_KEY); void route(); };
 window.addEventListener('hashchange', () => { void route(); });
-window.addEventListener('portal:unauthorized', () => { void route(); message('Your token was rejected. Log in again.', true); });
+window.addEventListener('portal:unauthorized', () => { void route(); message('That workspace code was not recognised. Enter it again.', true); });
 void route();

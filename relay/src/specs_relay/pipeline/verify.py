@@ -38,13 +38,29 @@ _DIGITS = re.compile(r"\d+")
 _CODE = re.compile(r"\b[a-z]{1,4}-?\d+(?:\.\d+)?[a-z]?\b")
 # Units after a number. Deliberately omits bare "in", "a" and "x", which are
 # far more often English words than units ("4 in a star pattern").
+# Temperatures written without the degree sign. The answer prompt asks for ASCII, so a
+# model writes "160 F", "160F", "160 degrees F" or "160 Fahrenheit" for the source's
+# "160°F" (sanitized "160 degF"). They are all the same token: same number, same scale.
+_TEMP_UNIT = r"(?:degrees?|deg)?\s?(?:fahrenheit|celsius|f|c)"
 _UNIT = (
     r"n-m|n\s?m|in-lbs?|ft-lbs?|lbf|lbs?|kg|mg|g|mm|cm|um|m|ft"
-    r"|ms|min|sec|s|hrs?|h|deg\s?c|deg\s?f|deg|%|psi|bar|kpa|mpa|pa"
+    rf"|ms|min|sec|s|hrs?|h|{_TEMP_UNIT}|deg|%|psi|bar|kpa|mpa|pa"
     r"|mv|v|ma|kohm|ohm|kw|w|ml|ul|l|rpm|hz|ppm"
 )
 _NUMBER = re.compile(rf"(?<![\w.])(\d+(?:[.,]\d+)*)(?:\s*({_UNIT}))?(?![a-z0-9])")
 _UNIT_ALIASES = {"sec": "s", "hrs": "h", "hr": "h", "lbs": "lb", "inlbs": "inlb", "ftlbs": "ftlb"}
+_TEMP = re.compile(rf"^{_TEMP_UNIT}$")
+# For quote matching: the same spellings, canonical on both sides ("160 F" == "160 degf").
+_TEMP_IN_TEXT = re.compile(r"(\d)\s*(?:degrees?|deg)?\s*(fahrenheit|celsius|f|c)\b")
+
+
+def _canonical_unit(unit: str) -> str:
+    """"degrees f" / "f" / "fahrenheit" -> "degf"; "c" / "celsius" -> "degc"; else as before.
+    Only the spelling changes: a Fahrenheit value never matches a Celsius one."""
+    u = re.sub(r"[\s-]", "", unit)
+    if u and _TEMP.match(u):
+        return "degc" if u.endswith(("c", "celsius")) else "degf"
+    return _UNIT_ALIASES.get(u, u)
 
 
 def _get(obj: Any, name: str, default: Any = None) -> Any:
@@ -54,8 +70,10 @@ def _get(obj: Any, name: str, default: Any = None) -> Any:
 
 
 def normalize(text: str) -> str:
-    """Lowercase, glyphs sanitized, punctuation to spaces, whitespace collapsed."""
-    return " ".join(_NON_ALNUM.sub(" ", sanitize(text).casefold()).split())
+    """Lowercase, glyphs sanitized, temperature spellings canonical ("160 F" and "160°F"
+    both become "160 degf"), punctuation to spaces, whitespace collapsed."""
+    t = _TEMP_IN_TEXT.sub(lambda m: f"{m.group(1)} deg{m.group(2)[0]}", sanitize(text).casefold())
+    return " ".join(_NON_ALNUM.sub(" ", t).split())
 
 
 def quote_in_text(quote: str, text: str) -> bool:
@@ -100,8 +118,7 @@ def iter_number_tokens(text: str) -> Iterator[tuple[str, str]]:
     t = _CODE.sub(lambda m: " " * len(m.group(0)), t)  # keep offsets aligned
     for m in _NUMBER.finditer(t):
         num = m.group(1).replace(",", "")
-        unit = re.sub(r"[\s-]", "", m.group(2) or "")
-        yield f"{num}|{_UNIT_ALIASES.get(unit, unit)}", shown[m.start():m.end()]
+        yield f"{num}|{_canonical_unit(m.group(2) or '')}", shown[m.start():m.end()]
 
 
 def number_tokens(text: str) -> set[str]:

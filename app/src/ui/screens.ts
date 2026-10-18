@@ -86,7 +86,7 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
         switch (state.screen) {
             case 'PRIVACY': return safe(privacyScreen(o));
             case 'CALIBRATE': return safe({ header: 'CALIBRATE', main: `Nod twice (${state.calibrationDone}/${state.calibrationNeeded})`, footer: state.notice || 'press: skip' });
-            case 'PAIRING': return safe({ header: 'PAIR', main: state.pairing ? `${short(state.pairing.pair_code, 16)}\nEnter in Specs portal` : '...', footer: '' });
+            case 'PAIRING': return safe({ header: 'JOIN', main: state.pairing ? 'Enter workspace code\nin the Even app' : '...', footer: '' });
             case 'TASK_READY': return safe({ header: 'NEW TASK', main: `${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: hint('nod twice: start') });
             case 'STEP': return safe(stepScreen(state, o));
             case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: state.pages.length > 1 ? `${state.page + 1}/${state.pages.length}` : '', main: state.pages[state.page] ?? '', footer: hint('swipe: page   double: back') });

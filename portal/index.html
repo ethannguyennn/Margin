@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Specs · Employer portal</title>
+    <title>Specs · Admin portal</title>
     <script>
       // Set the theme before first paint so the page never flashes the wrong one.
       try { const t = localStorage.getItem('specs.portal.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch {}
@@ -12,8 +12,9 @@
   <body>
     <div class="demo">Demo build: upload synthetic material only.</div>
     <header>
-      <a href="#upload" class="brand">SPECS</a><span>Employer portal</span>
+      <a href="#upload" class="brand">SPECS</a><span>Admin portal</span>
       <div class="header-actions">
+        <span id="workspace" hidden></span>
         <button id="theme" type="button" aria-label="Switch theme" title="Switch theme"></button>
         <button id="logout" hidden>Log out</button>
       </div>

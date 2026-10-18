@@ -36,7 +36,7 @@ export interface AskResponse {
 }
 
 // Device + task routes
-export interface Pairing { device_id: string; device_token: string; pair_code: string; claimed: boolean; worker_name: string | null; }
+export interface Pairing { device_id: string; device_token: string; pair_code: string; claimed: boolean; worker_name: string | null; workspace?: string | null; }
 export interface Assignment { assignment_id: string; walkthrough: Walkthrough; assigned_at: string; }
 export type ProgressKind = 'task_started' | 'step_started' | 'step_completed' | 'task_paused' | 'task_completed';
 export interface ProgressEvent { assignment_id: string; step_id: string | null; kind: ProgressKind; ts: number; }

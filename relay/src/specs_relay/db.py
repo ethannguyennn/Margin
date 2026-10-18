@@ -20,6 +20,8 @@ from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 from psycopg_pool import AsyncConnectionPool
 
+from . import org
+
 if TYPE_CHECKING:
     from .schemas import Chunk, Step, MaterialText, ProcedureDraft, DraftStep, DiagramSpec, ProgressEvent
 
@@ -116,11 +118,17 @@ def _limit(k: int) -> int:
 
 
 def _revision_clause(revision: str | None) -> tuple[str, tuple]:
+    """The documents filter every SOP read shares: revision, then the current workspace."""
     if revision is None:
-        return "d.status = 'effective'", ()
-    if not revision or ":" in revision:
+        clause, params = "d.status = 'effective'", ()
+    elif not revision or ":" in revision:
         raise ValueError("revision must be a nonempty revision identifier")
-    return "d.revision = %s", (revision,)
+    else:
+        clause, params = "d.revision = %s", (revision,)
+    org_id = org.current()
+    if org_id is not None:
+        clause, params = f"{clause} AND d.org_id = %s", (*params, org_id)
+    return clause, params
 
 
 _CHUNK_COLUMNS = """c.chunk_id, c.doc_id, c.revision, c.section, d.title,
@@ -227,9 +235,10 @@ async def ingest_corpus(corpus_dir: str | Path | None = None) -> list[dict]:
 
 
 async def list_procedures() -> list[dict]:
+    clause, params = _revision_clause(None)
     return await _rows(
-        """SELECT doc_id, title, revision, status FROM documents
-        WHERE status = 'effective' ORDER BY doc_id"""
+        f"""SELECT doc_id, title, revision, status FROM documents d
+        WHERE {clause} ORDER BY doc_id""", params
     )
 
 
@@ -371,6 +380,7 @@ async def apply_migrations() -> None:
                 raise ValueError("Existing chunks vector dimension differs from EMBED_DIM; explicit migration required")
             await conn.execute(render_migration(_embed_dim), prepare=False)
             await conn.execute((ROOT / "db/migrations/002_v2.sql").read_text(encoding="utf-8"), prepare=False)
+            await conn.execute((ROOT / "db/migrations/003_orgs.sql").read_text(encoding="utf-8"), prepare=False)
 
 
 async def storage_counts() -> dict:
@@ -448,7 +458,7 @@ async def upsert_corpus(documents: list[dict], chunks: list[dict]) -> list[dict]
 # so the v1 mock relay can boot before Part 3's v2 scaffold is merged.
 MAX_FILE_BYTES = 20 * 1024 * 1024
 _MATERIAL_COLUMNS = "material_id, created_at, filename, mime, sha256, doc_id, revision, title, status, error, material_text"
-_DEVICE_COLUMNS = "device_id, pair_code, pair_expires, worker_name, claimed_at, created_at"
+_DEVICE_COLUMNS = "device_id, pair_code, pair_expires, worker_name, claimed_at, created_at, org_id"
 
 
 def _identifiers(doc_id: str, revision: str) -> None:
@@ -485,11 +495,19 @@ async def insert_material(filename: str, mime: str, data: bytes, doc_id: str,
         raise ValueError("Material must contain 1 byte to 20 MB")
     if not filename or not title.strip() or len(title) > 120:
         raise ValueError("Filename and title are required; title is limited to 120 characters")
+    org_id = org.current() or org.DEFAULT_ORG
     material_id = await _next_id("material_id_seq", "MAT")
-    await _rows(
-        """INSERT INTO materials(material_id, filename, mime, bytes, sha256, doc_id, revision, title, status)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'converting') RETURNING material_id""",
-        (material_id, filename, mime, data, hashlib.sha256(data).hexdigest(), doc_id, revision, title))
+    # Document IDs are global: one workspace's SOP-201 must not supersede another's.
+    inserted = await _rows(
+        """INSERT INTO materials(material_id, filename, mime, bytes, sha256, doc_id, revision, title, status, org_id)
+        SELECT %s, %s, %s, %s, %s, %s, %s, %s, 'converting', %s
+        WHERE NOT EXISTS (SELECT 1 FROM documents WHERE doc_id = %s AND org_id <> %s)
+        AND NOT EXISTS (SELECT 1 FROM materials WHERE doc_id = %s AND org_id <> %s)
+        RETURNING material_id""",
+        (material_id, filename, mime, data, hashlib.sha256(data).hexdigest(), doc_id, revision, title, org_id,
+         doc_id, org_id, doc_id, org_id))
+    if not inserted:
+        raise ValueError(f"{doc_id} is used by another workspace; choose a different document ID")
     return material_id
 
 
@@ -668,9 +686,47 @@ async def claim_device(pair_code: str, worker_name: str) -> dict | None:
     if not worker_name.strip() or len(worker_name) > 120:
         raise ValueError("Worker name must have 1-120 characters")
     rows = await _rows(
-        f"""UPDATE devices SET worker_name = %s, claimed_at = now()
+        f"""UPDATE devices SET worker_name = %s, claimed_at = now(), org_id = coalesce(%s, org_id)
         WHERE pair_code = %s AND claimed_at IS NULL AND pair_expires > now() RETURNING {_DEVICE_COLUMNS}""",
-        (worker_name.strip(), pair_code.strip().upper()))
+        (worker_name.strip(), org.current(), pair_code.strip().upper()))
+    return rows[0] if rows else None
+
+
+def _code(join_code: str) -> str:
+    return "".join(join_code.split()).upper()
+
+
+async def create_org(name: str, join_code: str) -> dict:
+    if not name.strip() or len(name) > 120:
+        raise ValueError("Workspace name must have 1-120 characters")
+    org_id = await _next_id("org_id_seq", "ORG")
+    rows = await _rows(
+        "INSERT INTO orgs(org_id, name, join_code) VALUES (%s, %s, %s) RETURNING org_id, name, join_code",
+        (org_id, name.strip(), _code(join_code)))
+    return rows[0]
+
+
+async def org_by_code(join_code: str) -> dict | None:
+    rows = await _rows("SELECT org_id, name, join_code FROM orgs WHERE join_code = %s", (_code(join_code),))
+    return rows[0] if rows else None
+
+
+async def org_by_id(org_id: str) -> dict | None:
+    rows = await _rows("SELECT org_id, name, join_code FROM orgs WHERE org_id = %s", (org_id,))
+    return rows[0] if rows else None
+
+
+_JOINED_COLUMNS = ", ".join("dev." + c.strip() for c in _DEVICE_COLUMNS.split(","))
+
+
+async def join_device(token_sha256: str, join_code: str, worker_name: str) -> dict | None:
+    """Link a lens to the workspace whose code the worker typed. Re-joining moves it."""
+    if not worker_name.strip() or len(worker_name) > 120:
+        raise ValueError("Worker name must have 1-120 characters")
+    rows = await _rows(
+        f"""UPDATE devices dev SET org_id = o.org_id, worker_name = %s, claimed_at = now()
+        FROM orgs o WHERE o.join_code = %s AND dev.token_sha256 = %s RETURNING {_JOINED_COLUMNS}""",
+        (worker_name.strip(), _code(join_code), token_sha256))
     return rows[0] if rows else None
 
 
@@ -680,7 +736,10 @@ async def device_by_token(token_sha256: str) -> dict | None:
 
 
 async def list_devices() -> list[dict]:
-    return await _rows(f"SELECT {_DEVICE_COLUMNS} FROM devices ORDER BY created_at, device_id")
+    org_id = org.current()
+    return await _rows(
+        f"""SELECT {_DEVICE_COLUMNS} FROM devices WHERE %s::text IS NULL OR org_id = %s
+        ORDER BY created_at, device_id""", (org_id, org_id))
 
 
 async def create_assignment(device_id: str, doc_id: str, revision: str | None = None) -> str:
@@ -790,8 +849,10 @@ async def progress_board(since=None) -> list[dict]:
             AND (v.step_id IS NULL OR v.step_id LIKE a.doc_id || ':' || a.revision || ':%')) dv ON true
         WHERE a.completed_at IS NULL
         AND (%s::timestamptz IS NULL OR greatest(a.assigned_at, p.received_at, dv.last_ts) >= %s)
+        AND (%s::text IS NULL OR d.org_id = %s)
         ORDER BY a.assigned_at DESC, a.assignment_id""",
-        (None if since is None else _timestamp(since), None if since is None else _timestamp(since)))
+        (None if since is None else _timestamp(since), None if since is None else _timestamp(since),
+         org.current(), org.current()))
 
 
 async def approved_drafts() -> list[ProcedureDraft]:
@@ -813,7 +874,8 @@ async def publish_prepared(draft: ProcedureDraft, chunks: list[dict], material: 
             if stored is None:
                 raise LookupError("Draft was not found")
             cursor = await conn.execute(
-                "SELECT material_text, status FROM materials WHERE material_id = %s FOR UPDATE", (draft.material_id,))
+                "SELECT material_text, status, org_id FROM materials WHERE material_id = %s FOR UPDATE",
+                (draft.material_id,))
             source = await cursor.fetchone()
             if source is None or source["material_text"] != material.model_dump(mode="json"):
                 raise ValueError("Source material changed during publication; verify again")
@@ -847,11 +909,11 @@ async def publish_prepared(draft: ProcedureDraft, chunks: list[dict], material: 
                 "UPDATE documents SET status = 'superseded' WHERE doc_id = %s AND status = 'effective'",
                 (draft.doc_id,))
             await conn.execute(
-                """INSERT INTO documents(doc_id, revision, title, status, effective_date)
-                VALUES (%s, %s, %s, 'effective', CURRENT_DATE)
+                """INSERT INTO documents(doc_id, revision, title, status, effective_date, org_id)
+                VALUES (%s, %s, %s, 'effective', CURRENT_DATE, %s)
                 ON CONFLICT (doc_id, revision) DO UPDATE SET title = EXCLUDED.title,
-                status = 'effective', effective_date = EXCLUDED.effective_date""",
-                (draft.doc_id, draft.revision, draft.title))
+                status = 'effective', effective_date = EXCLUDED.effective_date, org_id = EXCLUDED.org_id""",
+                (draft.doc_id, draft.revision, draft.title, source.get("org_id") or org.DEFAULT_ORG))
             await conn.execute(
                 "UPDATE chunks SET is_step = false, step_order = NULL WHERE doc_id = %s AND revision = %s",
                 (draft.doc_id, draft.revision))

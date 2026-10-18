@@ -15,7 +15,7 @@ interface Runtime {
         isCapturing(): boolean;
     };
     api: Pick<LensPorts, 'ask'> & {
-        pair(): Promise<Pairing>;
+        resumeOrPair(): Promise<Pairing>;
         pairingStatus(): Promise<Pairing>;
         nextAssignment(): Promise<Assignment | null>;
         reportProgress(ev: ProgressEvent): void;
@@ -87,7 +87,7 @@ async function boot() {
         throw new Error('Part 2 v2 motion/client modules are missing');
     const [audio, api, obs, motion] = await Promise.all(paths.map(path => loaders[path]()));
     const io = { audio, api, obs, motion } as Runtime;
-    if (typeof io.api.pair !== 'function' || typeof io.motion.startHeadGestures !== 'function')
+    if (typeof io.api.resumeOrPair !== 'function' || typeof io.motion.startHeadGestures !== 'function')
         throw new Error('Part 2 v2 interfaces are incomplete');
     mode.textContent = mock ? 'Part 2 v2 mocks: synthetic commands, assignment, calibration and PNG tiles. No microphone, relay or IMU.' : 'Live mode';
     // Mock dev panel: the utterance box is what mock STT "hears". Only an explicit ?scenario=m1 hands out no task (a packed build has no URL params).
@@ -225,7 +225,7 @@ async function boot() {
         }
     };
     try {
-        controller.dispatch({ type: 'PAIRED', pairing: await io.api.pair() });
+        controller.dispatch({ type: 'PAIRED', pairing: await io.api.resumeOrPair() });
     }
     catch (error) {
         report(error);

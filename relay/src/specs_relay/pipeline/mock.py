@@ -35,7 +35,7 @@ import zlib
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from .. import obs
+from .. import obs, org
 from ..schemas import (
     ANSWER_BODY_MAX,
     ANSWER_GLANCE_MAX,
@@ -363,8 +363,11 @@ class MockDB:
         self.devices: dict[str, dict[str, Any]] = {}
         self.assignments: dict[str, dict[str, Any]] = {}
         self.progress: dict[tuple[str, str, str, float], dict[str, Any]] = {}
+        self.orgs: dict[str, dict[str, Any]] = {
+            org.DEFAULT_ORG: {"org_id": org.DEFAULT_ORG, "name": "Demo workspace", "join_code": "DEMO"}}
+        self.doc_orgs: dict[str, str] = {}  # doc_id -> org_id; absent = the demo workspace
         self._dev_seq = itertools.count(1)
-        self._seq = {k: itertools.count(1) for k in ("MAT", "DGM", "LNS", "ASN")}
+        self._seq = {k: itertools.count(1) for k in ("MAT", "DGM", "LNS", "ASN", "ORG")}
         self._seed_demo()
 
     def _next(self, prefix: str) -> str:
@@ -401,8 +404,13 @@ class MockDB:
     async def ping(self) -> str:
         return "mock"
 
+    def _in_org(self, doc_id: str) -> bool:
+        current = org.current()
+        return current is None or self.doc_orgs.get(doc_id, org.DEFAULT_ORG) == current
+
     async def list_procedures(self) -> list[Procedure]:
-        return [Procedure(**d) for d in self.documents.values() if d["status"] == "effective"]
+        return [Procedure(**d) for d in self.documents.values()
+                if d["status"] == "effective" and self._in_org(d["doc_id"])]
 
     async def write_event(self, **fields: Any) -> None:
         self.events.append(fields)
@@ -441,7 +449,8 @@ class MockDB:
         self.materials[material_id] = {
             "material_id": material_id, "created_at": _now(), "filename": filename, "mime": mime,
             "bytes": data, "doc_id": doc_id, "revision": revision, "title": title,
-            "status": "converting", "error": None, "material_text": None}
+            "status": "converting", "error": None, "material_text": None,
+            "org_id": org.current() or org.DEFAULT_ORG}
         return material_id
 
     async def set_material_status(self, material_id: str, status: str, error: str | None = None) -> None:
@@ -579,6 +588,7 @@ class MockDB:
                 d["status"] = "superseded"
         self.documents[(doc_id, revision)] = {"doc_id": doc_id, "revision": revision,
                                               "title": draft.title, "status": "effective"}
+        self.doc_orgs[doc_id] = self.materials[draft.material_id].get("org_id", org.DEFAULT_ORG)
         self.chunks[:] = [c for c in self.chunks if (c.doc_id, c.revision) != (doc_id, revision)]
         for order, s in enumerate(draft.steps, 1):
             chunk_id = f"{doc_id}:{revision}:{s.label}"
@@ -610,7 +620,8 @@ class MockDB:
         device_id = self._next("LNS")
         self.devices[device_id] = {"device_id": device_id, "token_sha256": token_sha256,
                                    "pair_code": pair_code, "pair_expires": expires,
-                                   "worker_name": None, "claimed_at": None, "created_at": now}
+                                   "worker_name": None, "claimed_at": None, "created_at": now,
+                                   "org_id": None}
         return device_id
 
     @staticmethod
@@ -623,16 +634,48 @@ class MockDB:
         code, now = pair_code.strip().upper(), _now()
         for d in self.devices.values():
             if d["pair_code"] == code and d["claimed_at"] is None and d["pair_expires"] > now:
-                d.update(worker_name=worker_name.strip(), claimed_at=now)
+                d.update(worker_name=worker_name.strip(), claimed_at=now, org_id=org.current() or d["org_id"])
                 return self._public(d)
         return None
+
+    # --- workspaces -----------------------------------------------------------------
+
+    async def create_org(self, name: str, join_code: str) -> dict:
+        if not name.strip() or len(name) > 120:
+            raise ValueError("Workspace name must have 1-120 characters")
+        code = "".join(join_code.split()).upper()
+        if any(o["join_code"] == code for o in self.orgs.values()):
+            raise ValueError("Join code already in use")
+        org_id = self._next("ORG")
+        self.orgs[org_id] = {"org_id": org_id, "name": name.strip(), "join_code": code}
+        return dict(self.orgs[org_id])
+
+    async def org_by_code(self, join_code: str) -> dict | None:
+        code = "".join(join_code.split()).upper()
+        return next((dict(o) for o in self.orgs.values() if o["join_code"] == code), None)
+
+    async def org_by_id(self, org_id: str) -> dict | None:
+        o = self.orgs.get(org_id)
+        return dict(o) if o else None
+
+    async def join_device(self, token_sha256: str, join_code: str, worker_name: str) -> dict | None:
+        if not worker_name.strip() or len(worker_name) > 120:
+            raise ValueError("Worker name must have 1-120 characters")
+        o = await self.org_by_code(join_code)
+        d = next((d for d in self.devices.values() if d["token_sha256"] == token_sha256), None)
+        if o is None or d is None:
+            return None
+        d.update(org_id=o["org_id"], worker_name=worker_name.strip(), claimed_at=_now())
+        return self._public(d)
 
     async def device_by_token(self, token_sha256: str) -> dict | None:
         d = next((d for d in self.devices.values() if d["token_sha256"] == token_sha256), None)
         return self._public(d) if d else None
 
     async def list_devices(self) -> list[dict]:
-        return [self._public(d) for d in sorted(self.devices.values(), key=lambda d: d["created_at"])]
+        current = org.current()
+        return [self._public(d) for d in sorted(self.devices.values(), key=lambda d: d["created_at"])
+                if current is None or d["org_id"] == current]
 
     async def create_assignment(self, device_id: str, doc_id: str, revision: str | None = None) -> str:
         device = self.devices.get(device_id)

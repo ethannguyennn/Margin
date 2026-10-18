@@ -67,7 +67,7 @@ async def test_device_token_never_selected_in_list_or_claim(monkeypatch):
     assert await db.claim_device('4f7k', 'Bay 3') is None
     query, params = rows.await_args.args
     assert 'claimed_at IS NULL AND pair_expires > now()' in query
-    assert params == ('Bay 3', '4F7K')
+    assert params == ('Bay 3', None, '4F7K')  # unscoped: the org stays as it was
     assert 'token_sha256' not in query
 
 

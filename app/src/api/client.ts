@@ -6,6 +6,7 @@ import {
   mockAsk,
   mockGetDiagram,
   mockHealth,
+  mockJoin,
   mockLogDeviation,
   mockNextAssignment,
   mockPair,
@@ -291,6 +292,7 @@ function toPairing(raw: unknown, keepToken?: string): Pairing {
     pair_code: p.pair_code,
     claimed: p.claimed === true,
     worker_name: typeof p.worker_name === 'string' ? p.worker_name : null,
+    workspace: typeof p.workspace === 'string' ? p.workspace : null,
   };
 }
 
@@ -305,6 +307,27 @@ export async function pair(): Promise<Pairing> {
 export async function pairingStatus(): Promise<Pairing> {
   if (MOCK) return toPairing(await mockPairingStatus());
   return toPairing((await call('GET', '/v1/devices/me')).body, getDevice()?.device_token);
+}
+
+/** Boot: keep the stored device (and the workspace it joined) when the relay still knows it. */
+export async function resumeOrPair(): Promise<Pairing> {
+  if (!MOCK && getDevice()) {
+    try {
+      return await pairingStatus();
+    } catch (e) {
+      if (!(e instanceof RelayError && e.code === 'unauthorized')) throw e;
+    }
+  }
+  return pair();
+}
+
+/** The worker typed the admin's workspace code on the phone: the lens now answers from its SOPs.
+ *  Rejects with RelayError 'not_found' for an unknown code. */
+export async function joinWorkspace(code: string, workerName: string): Promise<Pairing> {
+  if (MOCK) return toPairing(await mockJoin(code, workerName));
+  if (!getDevice()) await pair(); // phone preview without glasses: register this browser first
+  const body = { code: code.trim(), worker_name: workerName.trim() || null };
+  return toPairing((await call('POST', '/v1/devices/join', body)).body, getDevice()?.device_token);
 }
 
 /** null on 204 (nothing assigned). Part 1 polls; this does not. */

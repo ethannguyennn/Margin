@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Depends, Request
 
+from ..auth import device_scope
 from ..main import error_response, trace_id_of
 from ..schemas import Procedure, Step
 
 router = APIRouter()
 
 
-@router.get("/v1/procedures", response_model=list[Procedure])
+@router.get("/v1/procedures", response_model=list[Procedure], dependencies=[Depends(device_scope)])
 async def list_procedures(request: Request):  # noqa: ANN201
     p = request.app.state.pipeline
     try:
@@ -19,7 +20,8 @@ async def list_procedures(request: Request):  # noqa: ANN201
     return [Procedure.model_validate(r, from_attributes=True) for r in rows]
 
 
-@router.get("/v1/procedures/{doc_id}/steps", response_model=list[Step])
+@router.get("/v1/procedures/{doc_id}/steps", response_model=list[Step],
+            dependencies=[Depends(device_scope)])
 async def procedure_steps(doc_id: str, request: Request, revision: str | None = None):  # noqa: ANN201
     p = request.app.state.pipeline
     # Real mode: Part 5's db.steps_for returns ready Step models; mock: the retriever's.

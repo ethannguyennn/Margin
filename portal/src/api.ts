@@ -23,7 +23,7 @@ export type JsonObject = Record<string, any>;
 export async function api(path: string, init: RequestInit = {}): Promise<any> {
   if (!path.startsWith('/v1/') || path.includes('://')) throw new Error('API requests must use the same origin');
   const token = sessionStorage.getItem(TOKEN_KEY);
-  if (!token) throw new ApiError(401, 'Enter your portal token to continue.');
+  if (!token) throw new ApiError(401, 'Enter your workspace code to continue.');
   const headers = new Headers(init.headers);
   headers.set('Authorization', `Bearer ${token}`);
   const response = await fetch(path, { ...init, headers, signal: init.signal ?? AbortSignal.timeout(15000) });

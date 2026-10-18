@@ -33,13 +33,16 @@ Rules:
    Copy the quote character for character; do not paraphrase inside a quote.
    For short instructions, cite the whole source instruction so all stated values remain supported.
 3. glance: <= {GLANCE_MAX} characters, ASCII only. Verb + object + value, no articles or filler.
-   Example: "Torque M5 to 4 N-m".
+   Example: "Torque M5 to 4 N-m". Count the characters, spaces included, before answering;
+   if it is over {GLANCE_MAX}, drop words, never the value or its unit.
 4. body: <= {BODY_MAX} characters, ASCII only, at most 2 short sentences, no markdown. Only what
    the glance leaves out (a warning, an order, a check). Empty when the glance is enough.
 5. Never restate the question, never address the reader ("you should"), and never name the
    document or section in glance or body: the source is shown separately.
 6. Preserve numbers, units, and warnings exactly as written. Never convert units.
-   Every number and part code in glance or body must appear in one of your quotes.
+   Every number and part code in glance or body must appear in one of your quotes, with the same
+   unit right after it: "160°F" in the quote is "160 F" in glance or body (write F or C for the
+   degree sign), "130 to 140°F" is "130 to 140 F". Never drop a unit or add one.
 7. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
 8. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
    Choose the most useful equipment view for this instruction; otherwise return null. Never invent a URL.

@@ -126,6 +126,35 @@ header span {
   margin-left: auto;
 }
 
+.header-actions #workspace {
+  padding: 0 8px 0 0;
+  border-left: 0;
+  font-size: 14px;
+  color: var(--ink-2);
+}
+
+.join-code {
+  max-width: 68ch;
+  margin: 0 0 24px;
+  padding: 20px 24px;
+  border: 1px solid var(--line-strong);
+}
+
+.join-code .code {
+  margin: 0 0 8px;
+  font-size: clamp(36px, 6vw, 56px);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.pair-manual > summary {
+  cursor: pointer;
+  margin: 0 0 12px;
+  color: var(--ink-3);
+}
+
 nav {
   display: flex;
   gap: 4px;

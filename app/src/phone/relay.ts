@@ -4,7 +4,7 @@
 // Same origin and timeout as the lens client (settings.ts), so one whitelist entry.
 import type { AskResponse, DeviationResult, Health, Procedure, Step } from './contract';
 import type { StepContext } from './session';
-import { ASK_TIMEOUT_MS, RELAY_ORIGIN } from '../settings';
+import { ASK_TIMEOUT_MS, RELAY_ORIGIN, getDevice } from '../settings';
 
 const ORIGIN = RELAY_ORIGIN;
 const TIMEOUT_MS = ASK_TIMEOUT_MS;
@@ -37,7 +37,12 @@ async function request<T>(
   try {
     res = await fetch(`${ORIGIN}${path}`, {
       method: opts.method,
-      headers: { 'content-type': 'application/json', 'x-session-id': opts.sessionId },
+      // The device token scopes procedures and asks to the workspace this lens joined.
+      headers: {
+        'content-type': 'application/json',
+        'x-session-id': opts.sessionId,
+        ...(getDevice() ? { authorization: `Bearer ${getDevice()!.device_token}` } : {}),
+      },
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });

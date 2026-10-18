@@ -25,11 +25,12 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import sentry_sdk
-from fastapi import APIRouter, BackgroundTasks, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from .. import obs
+from ..auth import device_scope
 from ..main import Pipeline, error_response, trace_id_of
 from ..pipeline import PipelineError
 from ..schemas import (
@@ -329,7 +330,7 @@ def _accepts(fn: Any, name: str) -> bool:
     return any(prm.name == name or prm.kind is inspect.Parameter.VAR_KEYWORD for prm in params)
 
 
-@router.post("/v1/ask", response_model=AskResponse)
+@router.post("/v1/ask", response_model=AskResponse, dependencies=[Depends(device_scope)])
 async def ask(req: AskRequest, request: Request, background: BackgroundTasks) -> Any:
     timer = obs.start_timer()
     p: Pipeline = request.app.state.pipeline

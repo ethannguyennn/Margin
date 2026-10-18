@@ -319,9 +319,20 @@ let pairedAt = 0;
 const CLAIM_AFTER_MS = 5000;
 const DEVICE = { device_id: 'dev-mock-1', device_token: 'mock-device-token', pair_code: '4F7K' };
 
+let joined: { worker_name: string; workspace: string } | null = null;
+
 function pairing(): Pairing {
+  if (joined) return { ...DEVICE, claimed: true, ...joined };
   const claimed = pairedAt > 0 && Date.now() - pairedAt >= CLAIM_AFTER_MS;
   return { ...DEVICE, claimed, worker_name: claimed ? 'Bay 3' : null };
+}
+
+/** Any code joins the mock "Demo workspace"; "NOPE" is the unknown-code case. */
+export async function mockJoin(code: string, worker_name: string): Promise<Pairing> {
+  await sleep(MOCK_DELAY_MS / 3);
+  if (code.trim().toUpperCase() === 'NOPE') throw new Error('unknown workspace code');
+  joined = { worker_name, workspace: 'Demo workspace' };
+  return pairing();
 }
 
 /** Code 4F7K; the "supervisor" claims it 5 s after the first pair(). */
@@ -436,6 +447,7 @@ export async function mockGetDiagram(diagram_id: string): Promise<DiagramImage |
 /** Test seam: forget pairing, progress, queued transcripts and the endpoint plan. */
 export function resetMockV2(): void {
   pairedAt = 0;
+  joined = null;
   mockProgressLog.length = 0;
   heard.length = 0;
   endpointPlan = { reason: 'speech_end', ms: 1500 };

@@ -3,6 +3,7 @@ import { SopGraphic } from '../components/SopGraphic';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ContextPicker } from '../components/ContextPicker';
+import { WorkspaceCard } from '../components/WorkspaceCard';
 import { ChevronIcon } from '../components/Icons';
 import { OutcomePill } from '../components/Pills';
 import { glassesStatus, shortId } from '../copy';
@@ -47,6 +48,8 @@ export default function LensPage() {
 
   return (
     <div className="stack">
+      <WorkspaceCard />
+
       <section className="group">
         <h2 className="group-title">Glasses</h2>
         <div className="group-body">

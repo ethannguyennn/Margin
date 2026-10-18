@@ -299,6 +299,24 @@ class Pairing(_Model):
     pair_code: str
     claimed: bool
     worker_name: str | None = None
+    workspace: str | None = None  # the joined workspace's name
+
+
+class JoinRequest(_Model):
+    """POST /v1/devices/join: the worker types the admin's workspace code in the Even app."""
+
+    code: str = Field(min_length=1, max_length=32)
+    worker_name: str | None = Field(default=None, max_length=120)
+
+
+class OrgCreate(_Model):
+    name: str = Field(min_length=1, max_length=120)
+
+
+class OrgInfo(_Model):
+    org_id: str
+    name: str
+    join_code: str
 
 
 class DeviceInfo(_Model):

@@ -34,10 +34,10 @@ def test_portal_routes_401_without_the_token(method, path, headers):
     assert b["outcome"] == "error" and b["error"]["code"] == "unauthorized" and b["trace_id"]
 
 
-def test_portal_disabled_when_token_unset():
+def test_portal_token_unset_still_opens_workspaces_by_code():
     client, _ = v2_client(portal_token=None)
-    r = client.get("/v1/devices", headers=PORTAL)
-    assert r.status_code == 401 and "PORTAL_TOKEN is not configured" in r.json()["error"]["message"]
+    assert client.get("/v1/devices", headers=PORTAL).status_code == 401
+    assert client.get("/v1/devices", headers=device("DEMO")).status_code == 200
 
 
 def test_portal_token_grants_access():
@@ -89,12 +89,12 @@ def test_claim_unknown_or_reused_code_is_404():
     assert r.status_code == 400  # ambiguous characters are not in the alphabet
 
 
-def test_expired_unclaimed_code_forces_a_repair():
+def test_expired_pair_code_cannot_be_claimed_but_the_lens_can_still_join():
     client, app = v2_client(pair_code_ttl_s=60)
     p = client.post("/v1/devices/pair", json={"session_id": sid()}).json()
     row = app.state.pipeline.db.devices[p["device_id"]]
     row["pair_expires"] = row["created_at"]  # already expired
-    assert client.get("/v1/devices/me", headers=device(p["device_token"])).status_code == 401
+    assert client.get("/v1/devices/me", headers=device(p["device_token"])).json()["claimed"] is False
     r = client.post("/v1/devices/claim", headers=PORTAL, json={"pair_code": p["pair_code"], "worker_name": "x"})
     assert r.status_code == 404
 

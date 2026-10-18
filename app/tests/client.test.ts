@@ -235,6 +235,36 @@ test('pairingStatus: bearer token, keeps the stored token when the relay omits i
   assert.equal(p.device_token, 'tok-1');
 });
 
+test('joinWorkspace: posts the code with the device token and returns the joined workspace', async () => {
+  paired();
+  const calls = stubFetch({ body: { device_id: 'd1', pair_code: '4F7K', claimed: true, worker_name: 'Maria', workspace: 'Acme' } });
+  const p = await client.joinWorkspace(' K7P2QX ', 'Maria');
+  assert.equal(calls[0].url, 'http://relay.test/v1/devices/join');
+  assert.equal(headers(calls[0]).authorization, 'Bearer tok-1');
+  assert.deepEqual(JSON.parse(calls[0].init.body as string), { code: 'K7P2QX', worker_name: 'Maria' });
+  assert.equal(p.claimed, true);
+  assert.equal(p.workspace, 'Acme');
+  assert.equal(p.device_token, 'tok-1');
+});
+
+test('joinWorkspace: an unknown code rejects not_found and keeps the device', async () => {
+  paired();
+  stubFetch({ status: 404, body: null });
+  await rejects(client.joinWorkspace('NOPE42', ''), 'not_found');
+  assert.deepEqual(settings.getDevice(), { device_id: 'd1', device_token: 'tok-1' });
+});
+
+test('resumeOrPair: keeps a known device, pairs again only when the relay forgot it', async () => {
+  paired();
+  let calls = stubFetch({ body: { device_id: 'd1', pair_code: '4F7K', claimed: true, worker_name: 'Maria' } });
+  assert.equal((await client.resumeOrPair()).claimed, true);
+  assert.deepEqual(calls.map((c) => c.url), ['http://relay.test/v1/devices/me']);
+  settings.setDevice(null);
+  calls = stubFetch({ body: { device_id: 'd9', device_token: 'tok-9', pair_code: '4F7K', claimed: false, worker_name: null } });
+  assert.equal((await client.resumeOrPair()).device_token, 'tok-9');
+  assert.deepEqual(calls.map((c) => c.url), ['http://relay.test/v1/devices/pair']);
+});
+
 test('lens routes without a token reject unauthorized without touching the network', async () => {
   settings.setDevice(null);
   const calls = stubFetch({ body: {} });

@@ -1,8 +1,11 @@
-"""Device pairing (lens) and claiming (portal). BUILD-PLAN-V2 section 5.
+"""Device pairing (lens), joining a workspace (Even app) and claiming (portal).
 
     POST /v1/devices/pair   open, rate-limited  -> Pairing (with the device_token, once)
     GET  /v1/devices/me     device token        -> Pairing (polled until claimed)
-    POST /v1/devices/claim  portal token        -> Pairing (device_token "")
+    POST /v1/devices/join   device token        -> Pairing: the worker typed the admin's
+                                                   workspace code; the lens now uses its SOPs
+    POST /v1/devices/claim  portal token        -> Pairing (device_token "") - the older
+                                                   flow, the admin types the lens's code
     GET  /v1/devices        portal token        -> DeviceInfo[] (no tokens)
 """
 
@@ -15,7 +18,6 @@ from typing import Any
 from fastapi import APIRouter, Depends, Request
 
 from ..auth import (
-    Unauthorized,
     client_key,
     device_auth,
     new_device_token,
@@ -26,7 +28,7 @@ from ..auth import (
     token_hash,
 )
 from ..pipeline import BadRequest, DbDown
-from ..schemas import ClaimRequest, DeviceInfo, Pairing, PairRequest
+from ..schemas import ClaimRequest, DeviceInfo, JoinRequest, Pairing, PairRequest
 from .common import NotFound, guarded, iso
 
 log = logging.getLogger("specs.devices")
@@ -38,6 +40,22 @@ PAIR_ATTEMPTS = 8  # a fresh code per attempt; collisions only among open codes
 def _expired(row: dict[str, Any], now: datetime) -> bool:
     expires = row.get("pair_expires")
     return expires is None or expires <= now
+
+
+async def _workspace(p: Any, row: dict[str, Any]) -> str | None:
+    if not row.get("org_id"):
+        return None
+    try:
+        found = await p.db.org_by_id(row["org_id"])
+    except Exception:  # noqa: BLE001 - the name is cosmetic
+        return None
+    return found["name"] if found else None
+
+
+async def _pairing(p: Any, row: dict[str, Any], token: str) -> Pairing:
+    return Pairing(device_id=row["device_id"], device_token=token, pair_code=row.get("pair_code") or "",
+                   claimed=row.get("claimed_at") is not None, worker_name=row.get("worker_name"),
+                   workspace=await _workspace(p, row))
 
 
 @router.post("/v1/devices/pair", response_model=Pairing)
@@ -63,14 +81,26 @@ async def pair(req: PairRequest, request: Request) -> Pairing:
 @router.get("/v1/devices/me", response_model=Pairing,
              dependencies=[Depends(device_auth)])
 async def me(request: Request) -> Pairing:
+    # No expiry here: a lens can join a workspace with its code any time after pairing.
     device, token = await require_device(request)
-    claimed = device.get("claimed_at") is not None
-    if not claimed and _expired(device, datetime.now(timezone.utc)):
-        # An unclaimed code that expired can never be claimed: make the lens pair again.
-        raise Unauthorized("The pair code expired before it was claimed. Pair the lens again.")
-    return Pairing(device_id=device["device_id"], device_token=token,
-                   pair_code=device.get("pair_code") or "", claimed=claimed,
-                   worker_name=device.get("worker_name"))
+    return await _pairing(request.app.state.pipeline, device, token)
+
+
+@router.post("/v1/devices/join", response_model=Pairing)
+async def join(req: JoinRequest, request: Request) -> Pairing:
+    # Not a route dependency: a lens that never paired (fresh browser preview) still
+    # gets a clear 401, and the client pairs first, then joins.
+    device, token = await require_device(request)
+    p = request.app.state.pipeline
+    name = (req.worker_name or "").strip() or device.get("worker_name") or "Worker"
+    try:
+        row = await guarded(p.db.join_device(token_hash(token), req.code, name), "joining")
+    except ValueError as exc:
+        raise BadRequest(str(exc)) from exc
+    if row is None:
+        raise NotFound("No workspace has that code. Check the code shown in the admin portal.")
+    log.info("lens %s joined workspace %s", row["device_id"], row.get("org_id"))
+    return await _pairing(p, row, token)
 
 
 @router.post("/v1/devices/claim", response_model=Pairing,

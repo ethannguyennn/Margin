@@ -22,6 +22,7 @@ beforeEach(async () => {
     else if (url.endsWith('/steps/1')) { Object.assign(draft.steps[0], JSON.parse(init.body as string), { verify: { ok: true } }); data = draft.steps[0]; }
     else if (url.endsWith('/approve')) { draft.status = 'approved'; data = { doc_id: 'SOP-150', revision: 'A', steps: 1 }; }
     else if (url === '/v1/drafts/SOP-150/A') data = draft;
+    else if (url === '/v1/orgs/me') data = { org_id: 'ORG-1', name: 'Fixture works', join_code: 'K7P2QX' };
     else if (url === '/v1/devices/claim') { paired = true; data = {}; }
     else if (url === '/v1/devices') data = paired ? [{ device_id: 'LNS-1', worker_name: 'Bay 3', claimed: true }] : [];
     else if (url === '/v1/procedures') data = draft.status === 'approved' ? [{ ...draft, status: 'effective' }] : [];
@@ -45,7 +46,7 @@ function click(text: string) {
 async function until(check: () => void) { await vi.waitFor(check, { timeout: 2000, interval: 5 }); }
 
 it('completes upload -> failed review -> edit -> approval -> pair -> assign -> board on fixture API', async () => {
-  input('token', 'fixture-token'); click('Log in');
+  input('token', 'K7P2QX'); click('Open workspace');
   await until(() => expect(document.querySelector('[name="file"]')).toBeTruthy());
   input('doc_id', 'SOP-150'); input('title', 'Seal swap');
   const file = document.querySelector<HTMLInputElement>('[name="file"]')!;
@@ -76,7 +77,7 @@ it('completes upload -> failed review -> edit -> approval -> pair -> assign -> b
   expect(document.body.textContent).toContain('1/6');
   progress = true;
   await vi.waitFor(() => expect(document.body.textContent).toContain('2/6'), { timeout: 4000, interval: 100 });
-  expect(sessionStorage.getItem(TOKEN_KEY)).toBe('fixture-token');
-  expect(calls.every(([, init]) => new Headers(init.headers).get('Authorization') === 'Bearer fixture-token')).toBe(true);
+  expect(sessionStorage.getItem(TOKEN_KEY)).toBe('K7P2QX');
+  expect(calls.every(([, init]) => new Headers(init.headers).get('Authorization') === 'Bearer K7P2QX')).toBe(true);
   location.hash = 'upload';
 });
