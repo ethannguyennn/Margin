@@ -7,6 +7,7 @@ Commands (BUILD-PLAN-V2 section 3) and v1 ``repeat`` must be the whole
 utterance once filler words are stripped, so "what's the next step's torque"
 and "what was that torque spec" stay questions. "repeat the warning about
 power" is a question too: retrieval answers it from the warning chunk.
+Natural phrasing of a command is the fallback (``_loose_command``).
 """
 
 from __future__ import annotations
@@ -34,7 +35,8 @@ def parse_command(transcript: str | None) -> str | None:
 
     Filler words are stripped from both ends one at a time and every
     intermediate form is tried, so "close specs" keeps its "specs" while
-    "hey specs, next please" still reads as "next".
+    "hey specs, next please" still reads as "next". Natural phrasing falls
+    through to ``_loose_command``.
     """
     words = _WORD.findall((transcript or "").lower())
     lo, hi = 0, len(words)
@@ -47,11 +49,51 @@ def parse_command(transcript: str | None) -> str | None:
         elif words[hi - 1] in _FILLER:
             hi -= 1
         else:
-            return None
-    return None
+            break
+    return _loose_command(transcript) if words else None
+
+
+# Natural phrasing: workers don't recite the phrase table. Every word must be filler or a
+# command word, all naming one command, with no question word or number, so "go to the
+# next step" and "I'm done" are commands while "back off the gland nut" stays a question.
+_COMMAND_WORDS: dict[str, str] = {
+    **dict.fromkeys(("next", "done", "finished", "finish", "complete", "completed", "forward",
+                     "onward", "skip", "move", "ahead", "got"), "next"),
+    **dict.fromkeys(("back", "previous", "backward", "backwards", "last"), "back"),
+    **dict.fromkeys(("repeat", "again"), "repeat"),
+    **dict.fromkeys(("details", "detail", "more", "explain", "expand", "info", "tell", "read"), "details"),
+    **dict.fromkeys(("diagram", "picture", "image", "drawing", "photo", "see"), "diagram"),
+    **dict.fromkeys(("pause", "stop", "hold", "wait", "break"), "pause"),
+    **dict.fromkeys(("resume", "continue", "start", "begin", "keep", "going", "carry", "ready"), "resume"),
+    **dict.fromkeys(("exit", "quit", "close"), "exit"),
+}
+_SOFT_FILLER = _FILLER | frozenset(
+    "i we let us can could would will you go to the a an this that it its one now just so then "
+    "and alright all right yeah yes yep sure thanks thank step task me with on up out show take "
+    "give say app".split()
+)
+_QUESTION_WORDS = frozenset("what how why where when which who whose is are was were does do did should".split())
+_TOKEN = re.compile(r"[a-z']+|\d")
+
+
+def _loose_command(transcript: str) -> str | None:
+    text = transcript.lower().replace("one more time", "again")
+    words = [w.split("'")[0] for w in _TOKEN.findall(text)]  # what's -> what, i'm -> i
+    if " ".join(words) in ("what next", "what is next"):
+        return "next"
+    if any(w.isdigit() or w in _QUESTION_WORDS or (w not in _SOFT_FILLER and w not in _COMMAND_WORDS)
+           for w in words):
+        return None
+    keys = [w for w in words if w in _COMMAND_WORDS]
+    if "again" in keys:  # "read it again" is a repeat, not details
+        keys = [w for w in keys if w != "read"]
+    found = {_COMMAND_WORDS[w] for w in keys}
+    return found.pop() if len(found) == 1 else None
+
 
 _WALKTHROUGH = re.compile(
-    r"\b(?:guide me|walk me through|step by step|take me through|start procedure)\b", re.I
+    r"\b(?:guide me|walk (?:me )?through|step by step|take me through|start (?:the )?procedure|"
+    r"show me how to|teach me(?: how)? to|what are the steps (?:for|to))\b", re.I
 )
 # README pattern is `report (an )?(...)`; `an?` also accepts "report a problem".
 _DEVIATION = re.compile(

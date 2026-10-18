@@ -32,7 +32,7 @@ const bar = (index: number, total: number) => {
     return `${'━'.repeat(done)}${'─'.repeat(10 - done)}`;
 };
 export function privacyScreen(o: RenderOptions = {}): ScreenText {
-    return { header: 'PRIVACY', main: 'Audio not stored.\nAsk before recording others.\nNod twice to talk.', footer: o.hints === false ? '' : 'press: ok   double: exit' };
+    return { header: 'PRIVACY', main: 'Audio not stored.\nAsk before recording others.\nNod twice or hold to talk.', footer: o.hints === false ? '' : 'press: ok   double: exit' };
 }
 export function idleScreen(o: RenderOptions = {}): ScreenText { return { header: '', main: '', footer: o.hints === false ? '' : 'nod twice: speak' }; }
 export function listeningScreen(level = 0, o: RenderOptions = {}): ScreenText {
@@ -78,7 +78,7 @@ export function stepScreen(state: LensState, o: RenderOptions = {}): ScreenText 
     const copyLength = [current.glance, current.warning, current.checkpoint].filter(Boolean).join('\n\n! > ').length;
     return { graphic_id: copyLength <= ILLUSTRATED_PAGE_CHARS ? stepGraphic(current)?.id : undefined, header: `${w.index + 1}/${w.total}  ${bar(w.index, w.total)}`,
         main: [short(current.glance, 60), current.warning ? `! ${short(current.warning, 80)}` : '', current.checkpoint ? `> ${short(current.checkpoint, 60)}` : ''].filter(Boolean).join('\n\n'),
-        footer: state.notice || join(o.hints === false ? '' : 'nod: speak', current.diagram ? '[diagram]' : '') };
+        footer: state.notice || join(o.hints === false ? '' : 'nod twice: speak', current.diagram ? '[diagram]' : '') };
 }
 export function renderScreen(state: LensState, level = 0, o: RenderOptions = {}): ScreenText {
     const hint = (text: string) => (o.hints === false ? '' : text);
@@ -89,8 +89,8 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
             case 'PAIRING': return safe({ header: 'PAIR', main: state.pairing ? `${short(state.pairing.pair_code, 16)}\nEnter in Specs portal` : '...', footer: '' });
             case 'TASK_READY': return safe({ header: 'NEW TASK', main: `${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: hint('nod twice: start') });
             case 'STEP': return safe(stepScreen(state, o));
-            case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: state.pages.length > 1 ? `${state.page + 1}/${state.pages.length}` : '', main: state.pages[state.page] ?? '', footer: hint('swipe: page   shake: back') });
-            case 'DIAGRAM': return safe({ header: '', main: '', footer: state.diagramReady ? join(short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '', 45), hint('shake: back')) : '...' });
+            case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: state.pages.length > 1 ? `${state.page + 1}/${state.pages.length}` : '', main: state.pages[state.page] ?? '', footer: hint('swipe: page   double: back') });
+            case 'DIAGRAM': return safe({ header: '', main: '', footer: state.diagramReady ? join(short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '', 45), hint('double: back')) : '...' });
             case 'TASK_DONE': return safe({ header: 'DONE', main: `${state.walkthrough?.total ?? 0}/${state.walkthrough?.total ?? 0} steps`, footer: hint('press: close') });
             case 'IDLE': return safe({ ...idleScreen(o), footer: state.notice || (state.assignment_id ? hint('nod twice: resume') : idleScreen(o).footer) });
             case 'LISTENING': return safe(listeningScreen(level, o));

@@ -6,7 +6,7 @@
 //   sysEvent.eventType === IMU_DATA_REPORT (8), sysEvent.imuData: { x?, y?, z? } (double on wire)
 // Measured: evenhub-simulator 0.9.5 does not implement imuControl at all - it throws
 // "unknown variant `imuControl`" and the promise never settles. Hence the timeout.
-import { MOCK, getImuPace } from '../settings.ts';
+import { MOCK, getImuPace, setImuPace } from '../settings.ts';
 import { getBridge } from '../audio/capture.ts';
 
 export type ImuSample = { t: number; x: number; y: number; z: number };
@@ -17,6 +17,34 @@ export type ImuFixture = { meta: Record<string, unknown>; samples: [number, numb
 const FOREGROUND_ENTER_EVENT = 4;
 const FOREGROUND_EXIT_EVENT = 5;
 const CONTROL_TIMEOUT_MS = 1500;
+// Pace codes are undocumented ("not literal Hz"). Measure what the current one delivers
+// and step through the others until one resolves a nod; the choice persists in settings.
+const PACES = [500, 1000, 100];
+const MIN_HZ = 20;
+const PROBE_MS = 1500;
+let probe: { untried: number[]; rates: Map<number, number>; t0: number; n: number; last: number } | null = null;
+
+function measure(t: number): void {
+  if (!probe) return;
+  if (t - probe.last > 1000) probe.n = 0; // the stream paused (pace switch): measure afresh
+  probe.last = t;
+  if (probe.n++ === 0) probe.t0 = t;
+  if (t - probe.t0 < PROBE_MS) return;
+  const pace = getImuPace();
+  const hz = ((probe.n - 1) * 1000) / (t - probe.t0);
+  console.info(`[motion] P${pace}: ${hz.toFixed(0)} samples/s`);
+  probe.rates.set(pace, hz);
+  const next = hz >= MIN_HZ ? undefined : probe.untried.shift();
+  if (next === undefined) {
+    const best = [...probe.rates].reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+    probe = null;
+    if (best !== pace) { setImuPace(best); void control(true, `fastest pace P${best}`); }
+    return;
+  }
+  probe.n = 0;
+  setImuPace(next);
+  void control(true, `P${pace} too slow for a nod`);
+}
 
 const now = (): number => globalThis.performance?.now() ?? Date.now();
 
@@ -62,6 +90,7 @@ async function control(isOpen: boolean, reason: string): Promise<boolean> {
 async function setOpen(want: boolean, reason: string): Promise<void> {
   if (want === open) return;
   open = want; // flip first: samples stop counting immediately on exit
+  if (want) probe = { untried: PACES.filter((p) => p !== getImuPace()), rates: new Map(), t0: 0, n: 0, last: 0 };
   const ok = await control(want, reason);
   if (want && !ok) open = false;
 }
@@ -73,7 +102,10 @@ function onEvent(e: SysEvent): void {
   else if (sys.eventType === FOREGROUND_ENTER_EVENT) void (wanted && setOpen(true, 'foreground enter'));
   else if (sys.imuData && open) {
     const s = toSample(sys.imuData, now());
-    if (s) sink?.(s);
+    if (s) {
+      measure(s.t);
+      sink?.(s);
+    }
   }
 }
 

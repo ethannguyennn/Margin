@@ -1,5 +1,5 @@
 import { TextContainerProperty, TextContainerUpgrade, CreateStartUpPageContainer, RebuildPageContainer, ImageContainerProperty, ImageRawDataUpdate, type EvenAppBridge } from '@evenrealities/even_hub_sdk';
-import { graphicPixels, GRAPHIC_WIDTH, GRAPHIC_HEIGHT } from './sop-graphics';
+import { graphicPng, GRAPHIC_WIDTH, GRAPHIC_HEIGHT } from './sop-graphics';
 import type { DiagramImage } from '../types';
 import type { ScreenText } from './screens';
 export type Layout = 'TEXT' | 'DIAGRAM' | 'REFERENCE';
@@ -27,10 +27,14 @@ export class LensDisplay {
     private layout: Layout = 'TEXT';
     private image: DiagramImage | undefined;
     private graphicId: string | undefined;
+    private failed: string | undefined; // this picture failed on the screen showing it now; retried on a later visit
     rebuildCount = 0;
-    constructor(private readonly bridge: DisplayBridge, private readonly rasterize = graphicPixels) { }
+    constructor(private readonly bridge: DisplayBridge, private readonly encode = graphicPng) { }
     async render(text: ScreenText, layout: Layout = 'TEXT', image?: DiagramImage): Promise<void> {
-        if (layout === 'TEXT' && text.graphic_id) layout = 'REFERENCE';
+        if (text.graphic_id !== this.failed) this.failed = undefined;
+        if (layout === 'TEXT' && text.graphic_id && text.graphic_id !== this.failed) layout = 'REFERENCE';
+        // A different picture gets a fresh page, so a stale one never sits beside new instructions.
+        const stale = layout === 'REFERENCE' && this.layout === 'REFERENCE' && !!this.graphicId && this.graphicId !== text.graphic_id;
         if (!this.previous) {
             const result = await this.bridge.createStartUpPageContainer(createLayout(text, layout));
             if (result !== 0)
@@ -38,7 +42,7 @@ export class LensDisplay {
             this.previous = { ...text };
             this.layout = layout;
         }
-        else if (layout !== this.layout) {
+        else if (layout !== this.layout || stale) {
             if (!this.bridge.rebuildPageContainer)
                 throw new Error('Rebuild bridge unavailable');
             const starting = layout === 'DIAGRAM' ? { ...text, footer: 'loading diagram' } : text;
@@ -50,19 +54,6 @@ export class LensDisplay {
             this.previous = { ...starting };
             this.image = undefined;
             this.graphicId = undefined;
-        }
-        if (layout === 'REFERENCE' && text.graphic_id !== this.graphicId) {
-            if (!this.bridge.updateImageRawData) throw new Error('Reference image bridge unavailable');
-            const send = async (pixels: Uint8Array) => {
-                const status = await this.bridge.updateImageRawData!(new ImageRawDataUpdate({
-                    containerID: GRAPHIC_CONTAINER.containerID, containerName: GRAPHIC_CONTAINER.containerName, imageData: pixels }));
-                if (status !== 'success') throw new Error(`Reference image update failed: ${status}`);
-            };
-            // Clear the old reference before changing the instruction, even if decoding fails.
-            if (this.graphicId) { await send(new Uint8Array(GRAPHIC_WIDTH * GRAPHIC_HEIGHT)); this.graphicId = undefined; }
-            await send(await this.rasterize(text.graphic_id!));
-            this.graphicId = text.graphic_id;
-            console.info(`[Specs] reference=${text.graphic_id} status=success`);
         }
         // Raw image sends are awaited one at a time. Callers use the shared BridgeQueue.
         if (layout === 'DIAGRAM' && image && image !== this.image) {
@@ -86,6 +77,23 @@ export class LensDisplay {
                 content: text[c.containerName] || ' ', contentOffset: 0, contentLength: 0 })))
                 throw new Error(`Text update failed: ${c.containerName}`);
             this.previous[c.containerName] = text[c.containerName];
+        }
+        // The instruction is up; the picture follows. A failed picture never blocks or outlives it.
+        if (layout === 'REFERENCE' && text.graphic_id !== this.graphicId) {
+            const id = text.graphic_id!;
+            try {
+                if (!this.bridge.updateImageRawData) throw new Error('Reference image bridge unavailable');
+                const status = await this.bridge.updateImageRawData(new ImageRawDataUpdate({
+                    containerID: GRAPHIC_CONTAINER.containerID, containerName: GRAPHIC_CONTAINER.containerName, imageData: await this.encode(id) }));
+                if (status !== 'success') throw new Error(`Reference image update failed: ${status}`);
+                this.graphicId = id;
+                console.info(`[Specs] reference=${id} status=success`);
+            }
+            catch (error) {
+                console.warn(`[Specs] reference=${id} dropped`, error instanceof Error ? error.message : error);
+                this.failed = id;
+                await this.render(text, 'TEXT', image);
+            }
         }
     }
 }

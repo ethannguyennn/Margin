@@ -255,3 +255,47 @@ test('calibrate: 3 double nods set down/up to 60 % of the median peak and persis
   assert.equal(store['specs.detector'], undefined);
   delete (globalThis as any).localStorage;
 });
+
+// --- accelerometer input (what the G2 sends) ------------------------------------
+/** The synthetic Euler fixtures re-expressed as a gravity vector in g (pitch=x, roll=z;
+ * yaw is invisible to gravity), in a lateral/forward/up frame. */
+const gravity = (samples: Sample[]): Sample[] => samples.map((s) => {
+  const p = (s.x * Math.PI) / 180, r = (s.z * Math.PI) / 180;
+  return { t: s.t, x: Math.sin(r) * Math.cos(p), y: Math.sin(p), z: Math.cos(p) * Math.cos(r) };
+});
+const frames: Record<string, (s: Sample) => Sample> = {
+  'up=z': (s) => s,
+  'up=y, forward=-x': (s) => ({ t: s.t, x: -s.y, y: s.z, z: s.x }),
+  'up=-x, m/s^2': (s) => ({ t: s.t, x: -9.81 * s.z, y: 9.81 * s.x, z: 9.81 * s.y }),
+};
+
+for (const [name, frame] of Object.entries(frames)) {
+  test(`accel (${name}): auto mode finds every double nod and no false ones, no axis knobs`, () => {
+    for (const f of files) {
+      const fx = load(f);
+      const nods = count(detect(gravity(fixtureSamples(fx)).map(frame), DEFAULT_PARAMS), 'NOD');
+      if (typeof fx.meta.expect !== 'object' || !fx.meta.expect) console.info(`[gestures] ${f} as accelerometer (${name}): NOD=${nods}`);
+      else assert.equal(nods, (fx.meta.expect as { NOD: number }).NOD, `${f} as accelerometer (${name})`);
+    }
+  });
+}
+
+test('live: a pace too slow for a nod is replaced by one that is not, and remembered', async () => {
+  const store: Record<string, string> = {};
+  (globalThis as any).localStorage = {
+    getItem: (k: string) => store[k] ?? null,
+    setItem: (k: string, v: string) => (store[k] = v),
+    removeItem: (k: string) => delete store[k],
+  };
+  const hw = imuBridge();
+  await g.startHeadGestures(() => {});
+  hw.feed(Array.from({ length: 20 }, (_, i) => ({ t: 1000 + i * 100, x: 0, y: 0, z: 1 }))); // 10 Hz
+  await settle();
+  assert.deepEqual(hw.calls.at(-1), [true, 1000], 'P500 at 10 Hz -> try P1000');
+  hw.feed(Array.from({ length: 100 }, (_, i) => ({ t: 5000 + i * 20, x: 0, y: 0, z: 1 }))); // 50 Hz
+  await settle();
+  assert.deepEqual(hw.calls.at(-1), [true, 1000], 'P1000 resolves a nod: kept, no more probing');
+  assert.equal(store['specs.imuPace'], '1000');
+  await g.stopHeadGestures();
+  delete (globalThis as any).localStorage;
+});
