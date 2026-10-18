@@ -42,7 +42,9 @@ export function privacyScreen(o: RenderOptions = {}): ScreenText {
 export function idleScreen(o: RenderOptions = {}): ScreenText { return { header: '', main: '', footer: o.hints === false ? '' : 'nod twice: speak' }; }
 export function listeningScreen(level = 0, o: RenderOptions = {}): ScreenText {
     const bars = '▁▂▃▄▅▆▇█';
-    const index = Math.round(Math.max(0, Math.min(1, Number.isFinite(level) ? level : 0)) * 7);
+    // Speech is ~0.02-0.1 RMS, so a linear scale stays flat. Map -50..-10 dBFS onto the 8 bars.
+    const db = 20 * Math.log10(Number.isFinite(level) && level > 0 ? level : 1e-6);
+    const index = Math.round(Math.max(0, Math.min(1, (db + 50) / 40)) * 7);
     return { header: 'LISTENING', main: bars[index].repeat(10), footer: o.hints === false ? '' : 'press: send   double: cancel' };
 }
 export function thinkingScreen(): ScreenText { return { header: '', main: '...', footer: '' }; }
