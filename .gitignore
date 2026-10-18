@@ -32,3 +32,10 @@ Thumbs.db
 *.pcm
 !relay/tests/fixtures/*.pcm
 .gstack/
+
+# Live diagnostic outputs (tools/diagnostic/README.md)
+tools/diagnostic/wav/
+tools/diagnostic/utterances.txt
+tools/diagnostic/*.json
+tools/diagnostic/*.log
+tools/diagnostic/__pycache__/
