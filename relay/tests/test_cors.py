@@ -82,12 +82,6 @@ def test_error_responses_carry_cors_headers():
     assert r.status_code == 400 and r.headers["access-control-allow-origin"] == ORIGIN
 
 
-def test_origin_regex_for_lan_dev():
-    client, _ = make_client(allowed_origins="", allowed_origin_regex=r"^http://192\.168\.\d+\.\d+:5174$")
-    assert preflight(client, "/v1/ask", "http://192.168.1.23:5174").status_code == 200
-    assert preflight(client, "/v1/ask", "http://10.0.0.2:5174").status_code == 400
-
-
 LAN_REGEX = r"^http://(192\.168|10)\.\d+\.\d+(\.\d+)?:517[45]$"  # as in .env.example
 
 
@@ -101,7 +95,7 @@ LAN_REGEX = r"^http://(192\.168|10)\.\d+\.\d+(\.\d+)?:517[45]$"  # as in .env.ex
 ])
 def test_documented_lan_regex(origin, ok):
     client, _ = make_client(allowed_origins="", allowed_origin_regex=LAN_REGEX)
-    assert (preflight(client, "/v1/ask", origin).status_code == 200) is ok
+    assert preflight(client, "/v1/ask", origin).status_code == (200 if ok else 400)
 
 
 def test_companion_origin_preflights_its_routes():

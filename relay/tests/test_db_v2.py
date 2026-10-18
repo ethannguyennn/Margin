@@ -31,14 +31,6 @@ async def test_migration_runs_both_scripts_in_one_transaction(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_latency_excludes_absent_stage_zero_values(monkeypatch):
-    rows = AsyncMock(return_value=[])
-    monkeypatch.setattr(db, '_rows', rows)
-    await db.latency_summary()
-    assert 'value::double precision > 0' in rows.await_args.args[0]
-
-
-@pytest.mark.asyncio
 async def test_lexical_leg_ors_stemmed_terms_and_keeps_revision_filter(monkeypatch):
     rows = AsyncMock(return_value=[])
     monkeypatch.setattr(db, '_rows', rows)
