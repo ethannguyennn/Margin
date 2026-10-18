@@ -47,21 +47,28 @@ def test_corpus_copies_match_the_supplied_originals_except_the_synthetic_flag():
 
 def test_eval_bank_answers_are_verbatim_in_the_cited_sections():
     cases = evaluation.load_cases(ROOT / "eval/qa.jsonl")
-    assert Counter(c["category"] for c in cases) == {
+    assert Counter(c["category"] for c in cases if not c["id"].startswith("v3-")) == {
         "answerable": 36, "off-domain": 4, "near-miss": 3, "ambiguous": 2}
     index = evaluation.citation_index()
-    for case in cases:
+    turns = [turn for case in cases for turn in [case, *case.get("turns", [])]]
+    for case in turns:
         if case["expect"] != "answered":
             continue
         chunk = index[f"{case['doc_id']}:{case['revision']}:{case['section']}"]
-        missing = [m for m in case["must_contain"] if not evaluation.contains(chunk["text"], m)]
+        text = chunk["text"]
+        if case.get("graphic_id"):
+            from specs_relay.illustrations import available_graphics
+            graphic = next(g for g in available_graphics([chunk]) if g["id"] == case["graphic_id"])
+            text = graphic["title"]
+        missing = [m for m in case.get("must_contain", []) if not evaluation.contains(text, m)]
         assert not missing, f"{case['id']} {case['q']!r}: {missing} not in section {case['section']}"
 
 
 def test_eval_bank_keeps_the_supplied_questions():
     supplied = [json.loads(line) for line in (ROOT / "qa.jsonl").read_text(encoding="utf-8").splitlines() if line]
     cases = evaluation.load_cases(ROOT / "eval/qa.jsonl")
-    assert [c["q"] for c in cases] == [s["q"] for s in supplied]
+    assert [c["q"] for c in cases[:len(supplied)]] == [s["q"] for s in supplied]
+    assert len([c for c in cases if c["id"].startswith("v3-")]) == 18
     for case, s in zip(cases, supplied):
         if s["expect"] == "clarify":  # the relay reports ambiguity as not_found + needs_clarification
             assert (case["expect"], case.get("needs_clarification")) == ("not_found", True)

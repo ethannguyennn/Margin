@@ -41,10 +41,11 @@ _CODE = re.compile(r"\b[a-z]{1,4}-?\d+(?:\.\d+)?[a-z]?\b")
 _UNIT = (
     r"n-m|n\s?m|in-lbs?|ft-lbs?|lbf|lbs?|kg|mg|g|mm|cm|um|m|ft"
     r"|ms|min|sec|s|hrs?|h|deg\s?c|deg\s?f|deg|%|psi|bar|kpa|mpa|pa"
-    r"|mv|v|ma|kohm|ohm|kw|w|ml|ul|l|rpm|hz|ppm"
+    r"|mv|v|ma|kohm|ohm|kw|w|ml|ul|l|rpm|hz|ppm|fl\s?oz|oz|pumps?|inches|inch"
 )
 _NUMBER = re.compile(rf"(?<![\w.])(\d+(?:[.,]\d+)*)(?:\s*({_UNIT}))?(?![a-z0-9])")
-_UNIT_ALIASES = {"sec": "s", "hrs": "h", "hr": "h", "lbs": "lb", "inlbs": "inlb", "ftlbs": "ftlb"}
+_UNIT_ALIASES = {"sec": "s", "hrs": "h", "hr": "h", "lbs": "lb", "inlbs": "inlb", "ftlbs": "ftlb",
+                 "pumps": "pump", "inches": "inch"}
 
 
 def _get(obj: Any, name: str, default: Any = None) -> Any:

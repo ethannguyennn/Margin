@@ -193,3 +193,44 @@ def test_a_value_ending_its_sentence_in_the_quote_still_supports_the_answer():
     assert evaluation.values_supported("Accept up to $50 bills", ["The largest bill we accept is $50."], ["2.2"], ["SOP-202"])
     assert not evaluation.values_supported("Add $0.85 for oat milk.", ["Oat, almond, or soy milk: add $0.75."], ["4.3"], ["SOP-201"])
     assert evaluation.fact_tokens("section 4.2.1 says 3.5.") >= {("3.5", "")}
+
+
+@pytest.mark.asyncio
+async def test_conversation_turns_share_only_their_session_and_every_ask_is_paced(monkeypatch):
+    import asyncio
+    cases = evaluation.load_cases(HX2_QA)[:2]
+    cases[0] = {**cases[0], "turns": [cases[1]]}
+    index = evaluation.citation_index(HX2_CORPUS)
+    by_query = {c["q"]: c for c in cases}
+    requests, sleeps = [], []
+    async def sleep(seconds):
+        sleeps.append(seconds)
+    monkeypatch.setattr(asyncio, "sleep", sleep)
+    def handler(request):
+        if request.url.path == "/v1/health":
+            return httpx.Response(200, json={"ok": True, "mock": True})
+        payload = json.loads(request.content)
+        requests.append(payload)
+        return httpx.Response(200, json=fixture_answer(by_query[payload["text"]], index))
+    async with httpx.AsyncClient(base_url="http://fixture.invalid", transport=httpx.MockTransport(handler)) as client:
+        results, _ = await evaluation.run_suite(client, cases, index, allow_mock=True, pace=6)
+    assert all(r.correct for r in results)
+    assert requests[0]["session_id"] == requests[1]["session_id"] != requests[2]["session_id"]
+    assert sleeps == [6, 6]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pace", [-1, float("inf"), float("nan")])
+async def test_invalid_pacing_is_rejected_before_any_request(pace):
+    async with httpx.AsyncClient(base_url="http://fixture.invalid") as client:
+        with pytest.raises(ValueError, match="pace"):
+            await evaluation.run_suite(client, [], {}, pace=pace)
+
+
+def test_gap_probe_import_is_offline_and_uses_scored_conversations(monkeypatch):
+    monkeypatch.setattr(httpx, "Client", lambda *a, **k: pytest.fail("import must not send requests"))
+    from tools.diagnostic import gap_probe
+    cases = gap_probe.cases()
+    assert len(cases) == 11
+    assert any(c["q"] == "Pull up the espresso standards." for c in cases)
+    assert any(c.get("turns") for c in cases)

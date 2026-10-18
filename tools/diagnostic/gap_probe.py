@@ -1,47 +1,54 @@
-"""Text probes for loop gaps on the merged relay: natural opens, ambiguity, chained follow-ups,
-walkthrough scope. Paced for the free-tier Gemini key."""
+"""Paced, scored v3 loop checks. Importing this module never sends requests."""
+from __future__ import annotations
+
+import argparse
+import asyncio
+from dataclasses import asdict
+from datetime import datetime, timezone
 import json
-import time
-import uuid
+from pathlib import Path
+import sys
 
 import httpx
 
-RELAY = "http://127.0.0.1:8090"
-SID = str(uuid.uuid4())  # one worker session, so "repeat"/history behave as on the lens
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from eval import run_eval
 
 
-def ask(c, text, ctx=None, rev=None, sid=SID):
-    time.sleep(7)
-    t = time.perf_counter()
-    r = c.post(f"{RELAY}/v1/ask", json={"session_id": sid, "text": text, "revision": rev, "context": ctx or {}}).json()
-    w = r.get("walkthrough") or {}
-    s = {"q": text, "intent": r.get("intent"), "outcome": r.get("outcome"), "glance": r.get("glance"),
-         "body": r.get("body"), "source": r.get("source"), "clarify": r.get("needs_clarification"),
-         "graphic": r.get("graphic_id"), "ms": round((time.perf_counter() - t) * 1000)}
-    if w:
-        st = w["steps"]
-        s.update(doc=w["doc_id"], start=st[w["index"]]["label"] + " " + st[w["index"]]["glance"],
-                 steps_left=w["total"] - w["index"], labels=[x["label"] for x in st[w["index"]:]][:12])
-    print(json.dumps(s), flush=True)
-    return r
+def cases():
+    bank = {case["id"]: case for case in run_eval.load_cases(ROOT / "eval/qa.jsonl")}
+    selected = [bank[key] for key in ("v3-w2", "v3-w3", "v3-w4", "v3-w5", "v3-c5", "v3-f1", "v3-p1")]
+    selected.extend([
+        {**bank["v3-w4"], "id": "gap-standards", "q": "Pull up the espresso standards."},
+        {**bank["v3-w2"], "id": "gap-cash-count", "q": "I need to do the cash count for closing."},
+        {**bank["v3-w3"], "id": "gap-opening", "q": "Let's start the back of house opening."},
+        {**bank["v3-w3"], "id": "gap-cleaning", "q": "Open the cleaning procedure.",
+         "section": "6.2", "scope_end": "6.5"},
+    ])
+    return selected
 
 
-with httpx.Client(timeout=90) as c:
-    # Natural ways to open a procedure (Codex's intents + the new gate).
-    for q in ["Pull up the espresso standards.", "Open the cleaning procedure.", "Bring up the closing checklist.",
-              "Let's start the back of house opening.", "I need to do the cash count for closing.",
-              "Show me how to pull a good espresso shot."]:
-        ask(c, q)
-    # Walkthrough scope: does "making a cappuccino" stop after the cappuccino?
-    cap = ask(c, "Walk me through making a cappuccino.")["walkthrough"]
-    # Ambiguity: what does the worker see?
-    ask(c, "How many pumps of syrup?")
-    ask(c, "How hot?")
-    # Chained follow-ups on the cappuccino's milk step.
-    milk = next(s for s in cap["steps"] if "milk" in s["glance"].lower() and s["label"].startswith("3."))
-    ctx = {"doc_id": cap["doc_id"], "step_id": milk["step_id"]}
-    ask(c, "How hot should the milk be?", ctx, cap["revision"])
-    ask(c, "And for a kids drink?", ctx, cap["revision"])
-    ask(c, "What about extra hot?", ctx, cap["revision"])
-    # Picture request as a question rather than the command.
-    ask(c, "What does the steam wand look like?", ctx, cap["revision"])
+async def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--relay", default="http://127.0.0.1:8090")
+    parser.add_argument("--pace", type=float, default=6)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args(argv)
+    async with httpx.AsyncClient(base_url=args.relay.rstrip("/"), timeout=90) as client:
+        results, evidence = await run_eval.run_suite(client, cases(), run_eval.citation_index(), pace=args.pace)
+        health = (await client.get("/v1/health?verbose=1")).json() if args.output else {}
+    metrics = run_eval.print_report(results, evidence)
+    if args.output:
+        args.output.write_text(json.dumps({"recorded_at": datetime.now(timezone.utc).isoformat(),
+            "relay": args.relay, "models": health.get("models"), "evidence": evidence,
+            "metrics": metrics, "results": [asdict(r) for r in results]}, indent=2) + "\n", encoding="utf-8")
+    return run_eval.exit_code(metrics)
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(asyncio.run(main()))
+    except Exception as exc:
+        print(f"Gap probe unavailable ({type(exc).__name__}); no passing live evidence.", file=sys.stderr)
+        raise SystemExit(1)

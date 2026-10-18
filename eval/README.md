@@ -53,3 +53,22 @@ through its actual mock HTTP handlers in the test suite. These results remain
 fixture evidence. The scaffold currently drops needs_clarification, so its
 ambiguous responses cannot pass that requirement until Part 3 propagates it.
 No threshold tuning or live quality metrics are claimed.
+# v3 loop evaluation
+
+The original 45 coffee questions remain first in `qa.jsonl`. Eighteen additional cases cover
+five scoped walkthroughs, five clarify/reply conversations, five contextual follow-up
+conversations and three picture questions. `turns` reuse the case's session ID; distinct cases
+use independent sessions. Each turn is scored, including clarify options, source citations,
+walkthrough section/scope and expected graphic IDs. Empty-body, verified glance-only answers
+are valid. The scorer independently checks every quote against approved corpus text.
+
+Run deliberately against a live relay, with pacing for the shared provider quota:
+
+```bash
+PYTHONPATH=relay/src python eval/run_eval.py --base-url https://getyourassto.work --pace 10 --output eval/results/YYYY-MM-DD-v3.json
+PYTHONPATH=relay/src python tools/diagnostic/gap_probe.py --relay https://getyourassto.work --pace 10
+```
+
+The gap probe is safe to import, refuses mock evidence, and exits nonzero on failed or missing
+checks. Reports include timestamps and model identifiers when verbose health provides them;
+missing model data is recorded as null. Offline tests are fixtures, never live quality evidence.
