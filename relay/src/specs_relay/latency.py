@@ -75,9 +75,11 @@ async def fetch_report() -> dict[str, list[dict]]:
 
 def main() -> int:
     # psycopg's async pool cannot run on Windows' default Proactor loop (same fix as db/seed.py).
+    # asyncio.Runner takes loop_factory on 3.11; asyncio.run() only gained it in 3.12.
     win = {"loop_factory": asyncio.SelectorEventLoop} if sys.platform == "win32" else {}
     try:
-        report = asyncio.run(fetch_report(), **win)
+        with asyncio.Runner(**win) as runner:
+            report = runner.run(fetch_report())
     except ValueError as exc:  # e.g. DATABASE_URL not set
         print(f"make latency: {exc}", file=sys.stderr)
         return 1
