@@ -40,6 +40,21 @@ def test_prompt_and_walkthrough_keep_revision_and_source_binding():
     assert graphic_for_chunk({**SOURCE, 'chunk_id':'SOP-220:X:4.4'}) is None
     assert graphic_for_chunk({**SOURCE, 'text':'Unrelated replacement content.'}) is None
 
+
+@pytest.mark.parametrize('section, expected', [
+    ('2.2', 'recipe-pumps'), ('2.3', 'espresso-shot'), ('2.4', 'milk-steaming'),
+    ('3.2', 'espresso-shot'), ('3.3', 'milk-steaming'),
+    ('4.2', 'espresso-shot'), ('4.3', 'milk-steaming'),
+    ('5.3', 'espresso-shot'), ('6.3', 'recipe-cup'), ('6.4', 'espresso-shot'),
+    ('7.2', 'recipe-pumps'), ('7.3', 'espresso-shot'), ('7.4', 'milk-steaming'),
+    ('8.2', 'recipe-cup'), ('9.2', None),
+])
+def test_recipe_steps_use_action_specific_images(section, expected):
+    chunk = next(c for c in CHUNKS if c['chunk_id'] == f'SOP-230:C:{section}')
+    assert graphic_for_chunk(chunk) == expected
+    assert step_from_chunk(chunk).graphic_id == expected
+    assert [g['id'] for g in available_graphics([chunk])] == ([expected] if expected else [])
+
 @pytest.mark.parametrize('graphic', ['https://unsafe.test/a.png','missing','allergen-binder'])
 def test_rejects_unknown_or_uncited_graphic(graphic):
     assert not verify(Draft(**{**GOOD,'graphic_id':graphic}),[CHUNK]).ok

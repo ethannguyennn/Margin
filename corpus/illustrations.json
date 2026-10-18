@@ -224,6 +224,30 @@
       {
         "chunk_id": "SOP-220:C:6.2",
         "quote": "group head"
+      },
+      {
+        "chunk_id": "SOP-230:C:2.3",
+        "quote": "Pull the shots"
+      },
+      {
+        "chunk_id": "SOP-230:C:3.2",
+        "quote": "Pull the shots"
+      },
+      {
+        "chunk_id": "SOP-230:C:4.2",
+        "quote": "Pull the shots"
+      },
+      {
+        "chunk_id": "SOP-230:C:5.3",
+        "quote": "Pull the shots"
+      },
+      {
+        "chunk_id": "SOP-230:C:6.4",
+        "quote": "Pull the shots"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.3",
+        "quote": "Pull the shots"
       }
     ]
   },
@@ -262,6 +286,22 @@
       {
         "chunk_id": "SOP-220:C:4.9",
         "quote": "pitcher"
+      },
+      {
+        "chunk_id": "SOP-230:C:2.4",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:3.3",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:4.3",
+        "quote": "Steam the milk"
+      },
+      {
+        "chunk_id": "SOP-230:C:7.4",
+        "quote": "Steam the milk"
       }
     ]
   },
@@ -292,10 +332,6 @@
       {
         "chunk_id": "SOP-230:C:2.2",
         "quote": "pump"
-      },
-      {
-        "chunk_id": "SOP-230:C:2.3",
-        "quote": "syrup"
       },
       {
         "chunk_id": "SOP-230:C:6.2",
@@ -332,34 +368,6 @@
         "quote": "ice line"
       },
       {
-        "chunk_id": "SOP-230:C:2.2",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:2.3",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:2.4",
-        "quote": "Steam the milk"
-      },
-      {
-        "chunk_id": "SOP-230:C:3.2",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:3.3",
-        "quote": "Steam the milk"
-      },
-      {
-        "chunk_id": "SOP-230:C:4.2",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:4.3",
-        "quote": "Steam the milk"
-      },
-      {
         "chunk_id": "SOP-230:C:5.2",
         "quote": "cup"
       },
@@ -372,28 +380,12 @@
         "quote": "ice line"
       },
       {
-        "chunk_id": "SOP-230:C:7.2",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:7.3",
-        "quote": "cup"
-      },
-      {
-        "chunk_id": "SOP-230:C:7.4",
-        "quote": "Steam the milk"
-      },
-      {
         "chunk_id": "SOP-230:C:8.1",
         "quote": "ice line"
       },
       {
         "chunk_id": "SOP-230:C:8.2",
         "quote": "ice line"
-      },
-      {
-        "chunk_id": "SOP-230:C:9.2",
-        "quote": "cup"
       },
       {
         "chunk_id": "SOP-230:C:9.4",
