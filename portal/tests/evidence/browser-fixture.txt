@@ -78,4 +78,3 @@
 [console] --- BEGIN UNTRUSTED EXTERNAL CONTENT (source: http://127.0.0.1:5177/portal/#board) ---
 (no console errors)
 --- END UNTRUSTED EXTERNAL CONTENT ---
-

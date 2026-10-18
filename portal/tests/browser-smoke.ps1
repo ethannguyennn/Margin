@@ -1,4 +1,4 @@
-param([string]$Browse = 'C:\Users\bryan\.agents\skills\gstack\browse\dist\browse.exe')
+param([string]$Browse = (Join-Path $env:USERPROFILE '.agents/skills/gstack/browse/dist/browse.exe'))
 # Run from the repository root with npm run dev:fixture active on :5177.
 # Every route and credential below belongs to the local test fixture.
 $steps = @'
@@ -48,4 +48,3 @@ $trace = $steps | & $Browse chain 2>&1 | Out-String
 $trace | Set-Content -LiteralPath portal/tests/evidence/browser-fixture.txt
 Write-Output $trace
 if ($LASTEXITCODE -ne 0 -or $trace -match 'ERROR:|timed out' -or $trace -notmatch 'fixtureBoardUpdateMs') { throw 'Fixture browser smoke failed; inspect browser-fixture.txt' }
-
