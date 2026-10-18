@@ -1,0 +1,12 @@
+
+> margin-portal@0.2.0 test
+> vitest run
+
+
+ RUN  v4.1.11 C:/Users/bryan/Downloads/Claude/Sessions/Margin/.part5-worktree/portal
+
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  19:13:52
+   Duration  5.65s (transform 329ms, setup 0ms, import 366ms, tests 3.33s, environment 3.68s)
