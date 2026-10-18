@@ -11,8 +11,11 @@ export type Screen = 'PRIVACY' | 'IDLE' | 'LISTENING' | 'THINKING' | 'ANSWER_GLA
 export type Gesture = 'PRESS' | 'DOUBLE_PRESS' | 'UP' | 'DOWN' | 'LONG_PRESS';
 export type Action = { type: Gesture | 'TIMEOUT' | 'DISMISS' } |
   { type: 'RESPONSE'; response: AskResponse; now: number } |
-  { type: 'FAIL' };
-export type Effect = 'START_CAPTURE' | 'STOP_AND_SEND' | 'CANCEL' | 'EXIT';
+  { type: 'FAIL' } |
+  // A question typed on the phone screen: same THINKING -> answer path as speech.
+  { type: 'TEXT_ASK' };
+export type Effect = 'START_CAPTURE' | 'STOP_AND_SEND' | 'SEND_TEXT' | 'CANCEL' | 'EXIT';
+export interface AskContext { doc_id: string | null; step_id: string | null; }
 export interface LensState {
   screen: Screen;
   session_id: string;
@@ -80,6 +83,12 @@ export function transition(state: LensState, action: Action): Transition {
   if (action.type === 'LONG_PRESS') return done();
   if (action.type === 'FAIL') return done(failed(state), ['CANCEL']);
   if (action.type === 'RESPONSE') return state.screen === 'THINKING' ? done(receive(state, action.response, action.now)) : done();
+  if (action.type === 'TEXT_ASK') {
+    // One question in flight at a time; the privacy notice must be acknowledged on the
+    // glasses first. From LISTENING the open mic is cancelled before the text is sent.
+    if (state.screen === 'THINKING' || state.screen === 'PRIVACY') return done();
+    return done({ ...idle(state), screen: 'THINKING' }, ['CANCEL', 'SEND_TEXT']);
+  }
 
   if (action.type === 'DOUBLE_PRESS') {
     if (state.screen === 'IDLE' || state.screen === 'PRIVACY') return done(state, ['EXIT']);
@@ -180,8 +189,18 @@ export class LensController {
   private disposed = false;
   private suspended = false;
   private level = 0;
+  private pendingText: { text: string; context: AskContext } | null = null;
   constructor(state: LensState, private readonly ports: LensPorts) { this.state = state; }
   async start(): Promise<void> { await this.ports.render(this.state, this.level); this.armTimer(); }
+  /** Ask a typed question (from the phone screen). False when one is already in flight
+   * or the privacy notice has not been acknowledged yet. */
+  askText(text: string, context: AskContext = { doc_id: null, step_id: null }): boolean {
+    const question = text.trim();
+    if (this.disposed || !question || this.state.screen === 'THINKING' || this.state.screen === 'PRIVACY') return false;
+    this.pendingText = { text: question, context };
+    this.dispatch({ type: 'TEXT_ASK' });
+    return true;
+  }
   dispatch(action: Action): void {
     if (this.disposed) return;
     const { state, effects } = transition(this.state, action);
@@ -223,6 +242,24 @@ export class LensController {
       }).catch(error => {
         this.ports.onError(error);
         if (epoch === this.epoch && !this.disposed) this.dispatch({ type: 'FAIL' });
+      });
+      return;
+    }
+    if (effect === 'SEND_TEXT') {
+      const pending = this.pendingText; this.pendingText = null;
+      if (!pending) return;
+      const epoch = this.epoch;
+      const request = new AbortController(); this.request = request;
+      const req: AskRequest = { session_id: this.state.session_id, text: pending.text,
+        revision: null, context: pending.context };
+      // Queued behind the cancelled capture so the mic is closed before the ask goes out.
+      this.capture = this.capture.then(() => {
+        if (epoch !== this.epoch || this.disposed) return;
+        void this.ports.ask(req, { signal: request.signal }).then(response => {
+          if (epoch === this.epoch && !this.disposed && !request.signal.aborted) this.dispatch({ type: 'RESPONSE', response, now: this.ports.now() });
+        }).catch(error => {
+          if (epoch === this.epoch && !this.disposed && !request.signal.aborted) { this.ports.onError(error); this.dispatch({ type: 'FAIL' }); }
+        });
       });
       return;
     }

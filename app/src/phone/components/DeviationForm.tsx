@@ -39,7 +39,7 @@ export function DeviationForm() {
         <div className="row wrap result">
           <Pill tone="info">{result.deviation_id}</Pill>
           <Pill tone={result.notified ? 'ok' : 'warn'}>
-            {result.notified ? 'supervisor alerted' : 'alert failed — tell your supervisor'}
+            {result.notified ? 'supervisor alert sent' : 'alert failed — tell your supervisor'}
           </Pill>
         </div>
       )}

@@ -5,7 +5,7 @@ import { useStore } from '../store';
 
 /** /v1/procedures — what the relay holds, one row per revision. */
 export function useProcedures() {
-  const { state } = useStore();
+  const { sessionId } = useStore();
   const [procedures, setProcedures] = useState<Procedure[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -13,7 +13,7 @@ export function useProcedures() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    listProcedures(state.sessionId)
+    listProcedures(sessionId)
       .then((rows) => {
         if (!alive) return;
         setProcedures(rows);
@@ -28,14 +28,14 @@ export function useProcedures() {
     return () => {
       alive = false;
     };
-  }, [state.sessionId]);
+  }, [sessionId]);
 
   return { procedures, loading, error };
 }
 
 /** /v1/procedures/{doc_id}/steps — the walkthrough the lens pages through. */
 export function useSteps(docId: string | null, revision: string | null) {
-  const { state } = useStore();
+  const { sessionId } = useStore();
   const [steps, setSteps] = useState<Step[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export function useSteps(docId: string | null, revision: string | null) {
     }
     let alive = true;
     setLoading(true);
-    listSteps(state.sessionId, docId, revision)
+    listSteps(sessionId, docId, revision)
       .then((rows) => {
         if (!alive) return;
         setSteps(rows);
@@ -64,7 +64,7 @@ export function useSteps(docId: string | null, revision: string | null) {
     return () => {
       alive = false;
     };
-  }, [docId, revision, state.sessionId]);
+  }, [docId, revision, sessionId]);
 
   return { steps, loading, error };
 }

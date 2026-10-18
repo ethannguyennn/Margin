@@ -19,7 +19,7 @@
 
 ## Part 1
 
-- `app.json` whitelist + `VITE_RELAY_ORIGIN`: `https://margin.<domain>` exactly,
+- `app.json` whitelist + `VITE_RELAY_ORIGIN`: `https://getyourassto.work` exactly,
   once the domain is live (deploy/README.md section 6).
 
 ## Part 2

@@ -8,6 +8,8 @@ import { renderScreen, type ScreenText } from './ui/screens';
 import { gestureFromEvent } from './ui/input';
 import { FIXTURE_NAMES, UI_FIXTURES } from './ui/fixtures';
 import { SessionStore } from './ui/session-store';
+import { lensLink } from './lens-link';
+import { mountPhone } from './phone/mount';
 
 type CaptureModule = Pick<LensPorts, 'startCapture' | 'stopCapture'> & { isCapturing(): boolean };
 type ClientModule = Pick<LensPorts, 'ask'>;
@@ -17,12 +19,11 @@ const modules = import.meta.glob('./{audio/capture,api/client,obs/sentry}.ts');
 const isMock = import.meta.env.VITE_MOCK === '1';
 const integrationPaths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts'];
 const useUiFixtures = isMock && integrationPaths.some(path => !modules[path]);
-const app = document.querySelector<HTMLDivElement>('#app')!;
-const title = document.createElement('h1'); title.textContent = 'Margin';
-const status = document.createElement('p'); status.textContent = 'Connecting to Even G2...';
-const mode = document.createElement('p'); mode.textContent = useUiFixtures ? 'Synthetic UI fixtures. No microphone or network.' : isMock ? 'Part 2 mock integration.' : 'Live mode: Part 2 audio and relay integration.';
-const mirror = document.createElement('pre');
-app.append(title, status, mode, mirror);
+// The phone screen (companion UI in the Even app's WebView). It renders before and
+// independently of the bridge, so it also works as a plain browser preview.
+mountPhone(document.getElementById('root'));
+console.info(`[Margin] ${useUiFixtures ? 'Synthetic UI fixtures. No microphone or network.' : isMock ? 'Part 2 mock integration.' : 'Live mode: Part 2 audio and relay integration.'}`);
+const status = { set textContent(value: string) { lensLink.update({ status: value }); } };
 
 async function boot(): Promise<void> {
   const bridge = await waitForEvenAppBridge();
@@ -39,8 +40,8 @@ async function boot(): Promise<void> {
   let rendering: Promise<void> | null = null;
   const render = (state: LensState, level: number): Promise<void> => {
     const text = renderScreen(state, level); pending = text;
-    mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
-    status.textContent = state.screen;
+    lensLink.update({ screen: state.screen, status: state.screen,
+      lensText: [text.header, text.main, text.footer].join('\n\n') });
     console.info(`[Margin] screen=${state.screen} page=${state.page} step=${state.walkthrough?.index ?? '-'} verified=${state.response?.verified ?? '-'}`);
     if (!rendering) rendering = (async () => {
       while (pending) { const next = pending; pending = null; await display.render(next); }
@@ -86,15 +87,27 @@ async function boot(): Promise<void> {
           const timer = setTimeout(resolve, 600);
           opts?.signal?.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Cancelled', 'AbortError')); }, { once: true });
         });
-        console.info(`[Margin] UI fixture=${name}`); return structuredClone(UI_FIXTURES[name]);
+        console.info(`[Margin] UI fixture=${name}`);
+        const fixture = structuredClone(UI_FIXTURES[name]);
+        lensLink.publishExchange({ response: fixture, question: request.text ?? null });
+        return fixture;
       }
       const [, client, obs] = await loadIntegrations(); const span = obs.startAsk();
-      try { const result = await client.ask(request, opts); span.end(result.outcome); return result; }
+      try {
+        const result = await client.ask(request, opts); span.end(result.outcome);
+        // The phone screen shows the full answer the glance line had to compress.
+        lensLink.publishExchange({ response: result, question: request.text ?? null });
+        return result;
+      }
       catch (error) { span.end('error'); throw error; }
     },
   };
   const controller = new LensController(state, ports);
   await controller.start(); await persist(state);
+  lensLink.attach({
+    askText: (text, context) => controller.askText(text, context),
+    togglePushToTalk: () => controller.dispatch({ type: 'PRESS' }),
+  }, controller.state.session_id);
   const suspend = async () => {
     // Start suspension synchronously so its save is queued, then flush now:
     // Android may freeze the WebView before the debounce timer can run.
@@ -123,6 +136,7 @@ async function boot(): Promise<void> {
   async function cleanup() {
     if (closing) return;
     closing = true; unsubscribe(); document.removeEventListener('visibilitychange', visibility);
+    lensLink.detach('Lens app closed. Reopen it from the Even app.');
     await controller.dispose().catch(report);
   }
   window.addEventListener('pagehide', () => { void cleanup(); }, { once: true });
