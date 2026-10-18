@@ -9,9 +9,9 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
 
 - **Tests (2026-10-18, `61b9c1e`):** relay 712 passed (12 opt-in live/PG skipped), app 558 passed
   (12 skipped) + typecheck, portal 8 passed.
-- **Live candidate:** VM relay `0.3.0+155d899` on `https://getyourassto.work`, live ask path,
+- **Live candidate:** VM relay `0.3.0+524beb4` on `https://getyourassto.work`, live ask path,
   Tiger DB `ok`, gate 0.68 / 0.04. The former production checkout stays at `61b9c1e` for rollback.
-  App pack is now `0.4.0`; full field installation/validation is pending.
+  App pack is now `0.4.1`; full field installation/validation is pending.
 - **Real glasses (`61b9c1e`):** double nods work (the G2 IMU is a gravity-normalised
   accelerometer), long press = nod, baked PNG reference images render on the lens (the host only
   renders encoded images, never raw Gray8), natural voice commands ("go to the next step").
@@ -40,7 +40,7 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
 - [x] Remote deploy reads `VM_HOST` from `.env` and guards main/clean/fast-forward state.
 - [x] **VM access/deployment:** existing SSH identity works; the earlier missing-key claim was
       incorrect. `/root/specs` stays on its original main checkout; `/root/specs-v3-candidate`
-      serves candidate `155d899`. Gate is 0.68 / 0.04; health confirms live ask and DB paths.
+      serves candidate `524beb4`. Gate is 0.68 / 0.04; health confirms live ask and DB paths.
       Backed up the VM environment before changing the two gate settings; secrets remain on VM.
 - [x] **Part 2:** scored, import-safe gap CLI with `--relay`, `--pace`, nonzero failure status.
 - [x] **Part 1:** exact safe quota copy `Busy, try again` renders on the lens ERROR screen.
@@ -50,12 +50,21 @@ The user has no new Part 4 recordings yet and will supply them later; two wearer
       it), whitelists the configured public ingest origin and filters raw audio logs. An offline
       real-SDK test creates a fresh trace per ask. Synthetic client -> VM health continued the
       same trace; Sentry ingest acknowledged HTTP 200. Glasses delivery remains a field check.
-- [ ] **M7/M9 live acceptance:** gap, full eval, voice, app loop, 18-question regression,
-      30 paced asks, latency and trace evidence. Preserve failed runs as well as passing reports.
+- [x] **M7 reviewed accuracy:** saved complete live responses at `7cdbbc6` score 35/36
+      original answerable questions, 29/29 added loop responses and zero unverified answers.
+      Approved source/wording alternatives are documented in the reviewed report; raw failures
+      remain preserved. Almond milk remains a safe refusal. This is a rescore, not a new full run.
+- [ ] **Clarification blocker:** focused live two-turn check at `524beb4` still safely refuses
+      `How many pumps of syrup?` -> `cappuccino` (1/2 passed, zero unverified answers).
+      Earlier one-off generation success did not establish route acceptance. Preserve
+      `eval/results/2026-10-18-v3-syrup-524beb4.json`; investigate before claiming M9 complete.
+- [ ] **M9 remaining acceptance:** 22-voice suite, live app loop, 18-question regression and
+      30 paced spoken asks/quota window. Broad reruns stopped at the user's request to finish
+      faster; no passing results are claimed for these. Synthetic trace evidence is recorded above.
 - [ ] **Quota entitlement:** paid/higher quota has not been confirmed. The shared key is paced
       at ten seconds; observed zero 429s alone does not establish a paid account.
 
-Integration validation: **811 relay passed / 12 skipped; 610 app passed / 12 skipped;
+Integration validation: **832 relay passed / 12 skipped; 610 app passed / 12 skipped;
 8 portal passed; app and portal typecheck/build passed**. No new hardware, paid quota or
 macOS/Linux execution result is claimed.
 
