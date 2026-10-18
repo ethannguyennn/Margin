@@ -34,8 +34,10 @@ Windows: `make` = `mingw32-make`.
       the relay; add that exact origin to `ALLOWED_ORIGINS`
 - [ ] **`make latency`** on real traffic; report `intent='command'` rows separately (target:
       command = STT + < 50 ms, answer p50 <= 3 s)
-- [ ] **Live database:** apply migrations on Tiger (`python db/seed.py --migrate-only`), then the
-      opt-in live tests (`SPECS_TEST_V2_DATABASE=1`, `DATABASE_URL`) - Part 5
+- [x] **Live database (2026-10-17):** both migrations applied on Tiger; the demo bank (SOP-201..230 rev C,
+      134 chunks) is seeded and the HX-2 rows removed (backup outside the repo:
+      `db-backups/hx2-bank-2026-10-17.json`). The live v1 relay answers from it
+- [ ] **Opt-in live tests on Tiger** (`SPECS_TEST_V2_DATABASE=1`, `DATABASE_URL`) - Part 5
 
 ## 2. Open requests between parts
 
