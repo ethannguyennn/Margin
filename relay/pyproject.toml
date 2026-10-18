@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "specs-relay"
-version = "0.1.0"
+version = "0.3.0"
 description = "Specs relay: voice question -> grounded, citation-verified SOP answer for the Even G2 lens"
 requires-python = ">=3.11"
 dependencies = [
