@@ -193,7 +193,7 @@ function receive(origin: LensState, r: AskResponse, now: number): Transition {
         return result({ ...s, screen: clarify ? 'CLARIFY' : 'NOT_FOUND', response: clarify ? { ...r, clarify } : null });
     }
     if (r.outcome === 'error' || r.verified !== true)
-        return result(failure(s));
+        return result({ ...failure(s), notice: r.outcome === 'error' && r.error?.message === 'Busy, try again' ? 'Busy, try again' : '' });
     try {
         if (r.walkthrough !== null) {
             if (!validWalkthrough(r.walkthrough))

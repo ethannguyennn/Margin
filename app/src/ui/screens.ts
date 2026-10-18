@@ -115,7 +115,7 @@ export function renderScreen(state: LensState, level = 0, o: RenderOptions = {})
             }
             case 'WALKTHROUGH': return safe(walkthroughScreen(state, o));
             case 'LOGGED': return safe(loggedScreen());
-            case 'ERROR': return safe(errorScreen(o));
+            case 'ERROR': return safe({ ...errorScreen(o), main: state.notice === 'Busy, try again' ? state.notice : 'No verified answer' });
         }
     }
     catch {
