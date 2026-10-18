@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { initialState, transition, restoreSession, serializeSession, timeoutFor, WALKTHROUGH_TTL_MS,
   type Screen, type Gesture } from '../src/state';
 import { UI_FIXTURES } from '../src/ui/fixtures';
+import { renderScreen } from '../src/ui/screens';
 
 import { stateFor } from './support';
 
@@ -45,6 +46,14 @@ describe('state/gesture matrix', () => {
 });
 
 describe('response trust routing', () => {
+  it('shows only the safe quota copy and keeps arbitrary error text off the lens', () => {
+    for (const message of ['Busy, try again', 'UNSAFE provider error text']) {
+      const response = { ...UI_FIXTURES.error, error: { code: 'llm_timeout', message } };
+      const state = transition(stateFor('THINKING'), { type: 'RESPONSE', response, now: 1000 }).state;
+      expect(state.response).toBeNull();
+      expect(renderScreen(state).main).toBe(message === 'Busy, try again' ? message : 'No verified answer');
+    }
+  });
   it.each([['answer','ANSWER_GLANCE'],['not_found','NOT_FOUND'],['error','ERROR'],['walkthrough','STEP'],['logged','LOGGED']] as const)('%s -> %s', (fixture, screen) => {
     expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response: UI_FIXTURES[fixture], now: 1000 }).state.screen).toBe(screen);
   });
@@ -178,6 +187,7 @@ const v2Map:Record<Screen,Screen[]>={
   ANSWER_GLANCE:['ANSWER_EXPANDED','IDLE','ANSWER_GLANCE','ANSWER_GLANCE','LISTENING','LISTENING','IDLE','ANSWER_GLANCE','IDLE'],
   ANSWER_EXPANDED:['ANSWER_GLANCE','ANSWER_GLANCE','ANSWER_EXPANDED','ANSWER_EXPANDED','LISTENING','LISTENING','IDLE','ANSWER_EXPANDED','IDLE'],
   NOT_FOUND:['LISTENING','IDLE','NOT_FOUND','NOT_FOUND','LISTENING','LISTENING','IDLE','NOT_FOUND','IDLE'],
+  CLARIFY:['LISTENING','IDLE','CLARIFY','CLARIFY','LISTENING','LISTENING','IDLE','CLARIFY','IDLE'],
   WALKTHROUGH:['STEP_DETAILS','IDLE','STEP','DIAGRAM','LISTENING','LISTENING','WALKTHROUGH','WALKTHROUGH','WALKTHROUGH'],
   LOGGED:['IDLE','IDLE','LOGGED','LOGGED','LISTENING','LISTENING','IDLE','LOGGED','IDLE'],
   ERROR:['LISTENING','IDLE','ERROR','ERROR','LISTENING','LISTENING','IDLE','ERROR','IDLE'],

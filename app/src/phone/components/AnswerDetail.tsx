@@ -1,4 +1,5 @@
 import { answerGraphic } from '../../ui/sop-graphics';
+import { validClarify } from '../../state';
 import { SopGraphic } from './SopGraphic';
 import type { AskResponse, Citation, Latency, Step } from '../contract';
 import { errorTitle, seconds } from '../copy';
@@ -21,21 +22,40 @@ export function AnswerDetail({
   res,
   pinnedStepId,
   onUseStep,
+  onAsk,
 }: {
   res: AskResponse;
   pinnedStepId: string | null;
   onUseStep: (step: Step) => void;
+  /** Sends a clarify option as the reply; the relay resolves it against the question. */
+  onAsk?: (text: string) => void;
 }) {
+  const clarify = validClarify(res);
   return (
     <div className="stack">
       <section className="card">
         <div className="row wrap">
-          <OutcomePill outcome={res.outcome} />
+          <OutcomePill outcome={clarify ? 'clarify' : res.outcome} />
           <Pill tone="muted">{res.intent}</Pill>
           {res.outcome === 'answered' && <VerifiedPill verified={res.verified} />}
         </div>
-        <p className="glance">{res.glance || '—'}</p>
-        {res.body && <p className="body">{res.body}</p>}
+        {clarify ? (
+          <>
+            <p className="glance">{clarify.prompt}</p>
+            <div className="row wrap" role="group" aria-label={clarify.prompt}>
+              {clarify.options.map((option) => (
+                <button key={option} className="chip" disabled={!onAsk} onClick={() => onAsk?.(option)}>
+                  {option}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="glance">{res.glance || '—'}</p>
+            {res.body && <p className="body">{res.body}</p>}
+          </>
+        )}
         <SopGraphic graphic={answerGraphic(res)} />
         {res.transcript && <p className="meta">Asked · “{res.transcript}”</p>}
         {res.source && <p className="meta">Source · {res.source}</p>}

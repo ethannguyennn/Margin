@@ -1,4 +1,4 @@
-import type { AskRequest, AskResponse, Assignment, Command, DiagramImage, Pairing, ProgressEvent, ProgressKind, Walkthrough } from './types';
+import type { AskRequest, AskResponse, Assignment, Clarify, Command, DiagramImage, Pairing, ProgressEvent, ProgressKind, Walkthrough } from './types';
 import { answerGraphic, stepGraphic, ILLUSTRATED_PAGE_CHARS } from './ui/sop-graphics';
 import { sanitizeForG2 } from './ui/glyphs';
 import { BODY_PAGE_CHARS, paginate } from './ui/paginate';
@@ -7,7 +7,7 @@ export const INACTIVITY_TIMEOUT_MS = 60000;
 export const WALKTHROUGH_TTL_MS = 30 * 60000;
 export const ASSIGNMENT_TTL_MS = 12 * 60 * 60000;
 export const STORAGE_KEY = 'specs.session.v1'; // migrate existing v1 values in place
-export const SCREENS = ['PRIVACY', 'CALIBRATE', 'PAIRING', 'IDLE', 'TASK_READY', 'STEP', 'STEP_DETAILS', 'DIAGRAM', 'TASK_DONE', 'LISTENING', 'THINKING', 'ANSWER_GLANCE', 'ANSWER_EXPANDED', 'NOT_FOUND', 'WALKTHROUGH', 'LOGGED', 'ERROR'] as const;
+export const SCREENS = ['PRIVACY', 'CALIBRATE', 'PAIRING', 'IDLE', 'TASK_READY', 'STEP', 'STEP_DETAILS', 'DIAGRAM', 'TASK_DONE', 'LISTENING', 'THINKING', 'ANSWER_GLANCE', 'ANSWER_EXPANDED', 'NOT_FOUND', 'CLARIFY', 'WALKTHROUGH', 'LOGGED', 'ERROR'] as const;
 export type Screen = typeof SCREENS[number];
 export type Gesture = 'PRESS' | 'DOUBLE_PRESS' | 'UP' | 'DOWN' | 'LONG_PRESS' | 'NOD' | 'SHAKE';
 export type Action = {
@@ -111,7 +111,32 @@ export function validWalkthrough(value: unknown): value is Walkthrough {
         Array.isArray(w.steps) && w.steps.length > 0 && w.steps.length === w.total && Number.isInteger(w.index) && w.index >= 0 && w.index < w.total &&
         w.steps.every(s => s && [s.step_id, s.label, s.glance, s.body].every(v => typeof v === 'string') && !!s.glance && !!s.body &&
             [s.warning, s.checkpoint].every(v => v == null || typeof v === 'string') &&
-            (!s.diagram || (typeof s.diagram.diagram_id === 'string' && typeof s.diagram.alt === 'string' && s.diagram.width === 576 && s.diagram.height === 144)));
+            (!s.diagram || (typeof s.diagram.diagram_id === 'string' && typeof s.diagram.alt === 'string' && s.diagram.width === 576 && s.diagram.height === 144))) &&
+        (w.scope == null || (Number.isInteger(w.scope.start) && Number.isInteger(w.scope.end) &&
+            0 <= w.scope.start && w.scope.start <= w.index && w.index < w.scope.end && w.scope.end <= w.total));
+}
+/** The steps the worker is working through: the relay's scope, else the whole procedure. */
+export function scopeOf(w: Walkthrough): { start: number; end: number } {
+    return { start: w.scope?.start ?? 0, end: w.scope?.end ?? w.total };
+}
+/** A clarify the lens can show (BUILD-PLAN-V3 §2), sanitized; null falls back to NOT_FOUND. */
+export function validClarify(r: AskResponse): Clarify | null {
+    const c = r.clarify;
+    if (r.outcome !== 'not_found' || r.needs_clarification !== true || !c || typeof c.prompt !== 'string' || !Array.isArray(c.options))
+        return null;
+    const prompt = sanitizeForG2(c.prompt).trim(), options = c.options.map(o => typeof o === 'string' ? sanitizeForG2(o).trim() : '');
+    if (!prompt || prompt.length > 40 || options.length < 2 || options.length > 3 || options.some(o => !o || o.length > 24))
+        return null;
+    return { prompt, options };
+}
+// Screens that show one exchange. An answer asked from one of them returns past it to the screen
+// the worker was working on (the STEP), not to the previous answer or the clarify prompt.
+const EXCHANGE: Screen[] = ['ANSWER_GLANCE', 'ANSWER_EXPANDED', 'NOT_FOUND', 'CLARIFY', 'ERROR', 'LOGGED'];
+function settled(s: LensState): LensState {
+    let r = s.returnState;
+    while (r && EXCHANGE.includes(r.screen) && r.returnState)
+        r = r.returnState;
+    return r === s.returnState ? s : { ...s, returnState: r, returnTo: r!.screen };
 }
 function preflight(w: Walkthrough): void { w.steps.forEach(s => paginate(sanitizeForG2(s.body), stepGraphic(s) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS)); }
 function progress(s: LensState, kind: ProgressKind, step_id: string | null): Effect[] {
@@ -141,30 +166,34 @@ function command(s: LensState, c: Command): Transition {
     if (c === 'details')
         return result({ ...step(s), screen: 'STEP_DETAILS', pages: paginate(sanitizeForG2(current.body), stepGraphic(current) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS) });
     if (c === 'diagram') {
+        // No relay diagram: the step's reference picture is shown beside its details instead.
         if (!current.diagram)
-            return result({ ...step(s), notice: 'No diagram for this step' });
+            return stepGraphic(current) ? command(s, 'details') : result({ ...step(s), notice: 'No diagram for this step' });
         return result({ ...step(s), screen: 'DIAGRAM', diagramId: current.diagram.diagram_id }, [{ type: 'SHOW_DIAGRAM', diagram_id: current.diagram.diagram_id }]);
     }
     if (c === 'back') {
-        const index = Math.max(0, w.index - 1);
+        const index = Math.max(scopeOf(w).start, w.index - 1);
         return result(step(s, index), [...(index !== w.index ? progress(s, 'step_started', w.steps[index].step_id) : []), 'PREFETCH_DIAGRAMS']);
     }
     if (c === 'next') {
         const effects = progress(s, 'step_completed', current.step_id);
-        if (w.index + 1 === w.total)
+        if (w.index + 1 >= scopeOf(w).end)
             return result({ ...step(s), screen: 'TASK_DONE' }, [...effects, ...progress(s, 'task_completed', null)]);
         return result(step(s, w.index + 1), [...effects, ...progress(s, 'step_started', w.steps[w.index + 1].step_id), 'PREFETCH_DIAGRAMS']);
     }
     return result(s);
 }
 const commands: Command[] = ['next', 'back', 'repeat', 'details', 'diagram', 'pause', 'resume', 'exit'];
-function receive(s: LensState, r: AskResponse, now: number): Transition {
+function receive(origin: LensState, r: AskResponse, now: number): Transition {
+    const s = settled(origin);
     if (r.outcome === 'command')
         return r.command && commands.includes(r.command) ? command(back(s), r.command) : result(failure(s));
-    if (r.outcome === 'not_found')
-        return result({ ...s, screen: 'NOT_FOUND', response: null });
+    if (r.outcome === 'not_found') {
+        const clarify = validClarify(r);
+        return result({ ...s, screen: clarify ? 'CLARIFY' : 'NOT_FOUND', response: clarify ? { ...r, clarify } : null });
+    }
     if (r.outcome === 'error' || r.verified !== true)
-        return result(failure(s));
+        return result({ ...failure(s), notice: r.outcome === 'error' && r.error?.message === 'Busy, try again' ? 'Busy, try again' : '' });
     try {
         if (r.walkthrough !== null) {
             if (!validWalkthrough(r.walkthrough))
@@ -297,6 +326,7 @@ export function transition(s: LensState, a: Action): Transition {
         case 'TASK_DONE': return result(idle(s), ['POLL_ASSIGNMENT']);
         case 'IDLE':
         case 'NOT_FOUND':
+        case 'CLARIFY':
         case 'ERROR': return listen(s);
         case 'LISTENING': return result({ ...s, screen: 'THINKING' }, ['STOP_AND_SEND']);
         case 'THINKING': return result(s);
@@ -340,9 +370,9 @@ export function restoreSession(raw: string, now: number, newSessionId: string): 
 export function timeoutFor(s: LensState): number | null {
     if (['PRIVACY', 'CALIBRATE', 'PAIRING', 'IDLE', 'TASK_READY', 'STEP', 'WALKTHROUGH', 'STEP_DETAILS', 'DIAGRAM'].includes(s.screen))
         return null;
-    if (['ANSWER_GLANCE', 'ANSWER_EXPANDED', 'NOT_FOUND', 'ERROR', 'LOGGED'].includes(s.screen) && isStep(s.returnTo))
+    if (['ANSWER_GLANCE', 'ANSWER_EXPANDED', 'NOT_FOUND', 'CLARIFY', 'ERROR', 'LOGGED'].includes(s.screen) && isStep(s.returnTo))
         return GLANCE_TIMEOUT_MS;
-    return s.screen === 'ANSWER_GLANCE' ? GLANCE_TIMEOUT_MS : INACTIVITY_TIMEOUT_MS;
+    return s.screen === 'ANSWER_GLANCE' || s.screen === 'CLARIFY' ? GLANCE_TIMEOUT_MS : INACTIVITY_TIMEOUT_MS;
 }
 export interface LensPorts {
     startCapture(onLevel: (level: number) => void, onEndpoint?: (reason: 'speech_end' | 'no_speech' | 'cap') => void): Promise<void>;
