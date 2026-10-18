@@ -5,7 +5,7 @@ import { useStore } from '../store';
 
 /** Everything the glance line had to leave out: full text, citations, walkthrough. */
 export default function AnswerPage() {
-  const { state, askNow, busy, error, clearError, setContext, repeatLast } = useStore();
+  const { state, sessionId, askNow, busy, error, clearError, setContext, repeatLast } = useStore();
   const res = state.lastAnswer;
 
   return (
@@ -74,7 +74,7 @@ export default function AnswerPage() {
               </li>
             ))}
           </ul>
-          <p className="meta mono">session {state.sessionId.slice(0, 8)}</p>
+          <p className="meta mono">session {sessionId.slice(0, 8)}</p>
         </section>
       )}
     </div>

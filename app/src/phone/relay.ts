@@ -1,10 +1,13 @@
-// The only place the companion talks to the relay. Same contract as the lens app:
-// every failure surfaces as a RelayError carrying the relay's own error code.
+// The phone screen's own relay calls: health, procedures, steps, deviations, and asks
+// when no glasses are connected (browser preview). With the lens connected, asks go
+// through the lens controller instead (lens-link.ts) so the glasses show them too.
+// Same origin and timeout as the lens client (settings.ts), so one whitelist entry.
 import type { AskResponse, DeviationResult, Health, Procedure, Step } from './contract';
 import type { StepContext } from './session';
+import { ASK_TIMEOUT_MS, RELAY_ORIGIN } from '../settings';
 
-const ORIGIN = (import.meta.env.VITE_RELAY_ORIGIN ?? '').replace(/\/+$/, '');
-const TIMEOUT_MS = Number(import.meta.env.VITE_ASK_TIMEOUT_MS ?? 8000);
+const ORIGIN = RELAY_ORIGIN;
+const TIMEOUT_MS = ASK_TIMEOUT_MS;
 
 export const relayOrigin = ORIGIN;
 

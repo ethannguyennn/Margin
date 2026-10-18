@@ -7,18 +7,22 @@ import { relayOrigin } from '../relay';
 import { useStore } from '../store';
 
 /**
- * The phone as the second display for the lens session: it holds the session, sets
- * the context the next question is answered against, and can ask in words.
+ * The phone side of the lens session. Inside the Even app it drives the glasses:
+ * push-to-talk, mic source, typed questions (answered on the lens too), and a live
+ * mirror of what the lens displays. In a plain browser it asks the relay directly.
  */
 export default function LensPage() {
   const {
     state,
+    lens,
+    sessionId,
     health,
     healthChecked,
     busy,
     askNow,
     repeatLast,
-    setListening,
+    canPushToTalk,
+    togglePushToTalk,
     setMicSource,
     startNewSession,
   } = useStore();
@@ -36,20 +40,26 @@ export default function LensPage() {
         <div className="row between">
           <h2 className="section-title">Session</h2>
           <button className="link" onClick={startNewSession}>
-            New session
+            {lens.connected ? 'Clear history' : 'New session'}
           </button>
         </div>
-        <p className="meta mono">session {state.sessionId}</p>
+        <p className="meta mono">session {sessionId}</p>
 
         <div className="row between mt">
-          <span className="label">Listening</span>
+          <span className="label">Glasses</span>
+          <span className="meta">{lens.connected ? `connected · ${lens.status}` : lens.status}</span>
+        </div>
+
+        <div className="row between mt">
+          <span className="label">Push to talk</span>
           <button
             type="button"
             role="switch"
             aria-checked={state.listening}
-            aria-label="Listening"
+            aria-label="Push to talk"
+            disabled={!canPushToTalk}
             className={`switch${state.listening ? ' on' : ''}`}
-            onClick={() => setListening(!state.listening)}
+            onClick={togglePushToTalk}
           >
             <span />
           </button>
@@ -79,15 +89,16 @@ export default function LensPage() {
               : 'unreachable'}
         </p>
         <p className="meta">
-          The phone asks under this session. The glasses app starts its own on launch, and nothing is
-          pushed to it yet — this panel drives the relay, it does not read the lens.
+          {lens.connected
+            ? 'Questions typed here are answered on the glasses too, under the lens session.'
+            : 'No glasses connected (browser preview): questions go straight to the relay and nothing is shown on a lens.'}
         </p>
       </section>
 
       <ContextPicker />
 
       <section className="card">
-        <h2 className="section-title">Ask for the lens</h2>
+        <h2 className="section-title">{lens.connected ? 'Ask on the lens' : 'Ask the relay'}</h2>
         <textarea
           className="input"
           rows={2}
@@ -117,10 +128,17 @@ export default function LensPage() {
         </div>
       </section>
 
+      {lens.connected && lens.lensText && (
+        <section className="card">
+          <h2 className="section-title">On the lens now</h2>
+          <pre className="glance mono">{lens.lensText}</pre>
+        </section>
+      )}
+
       {res && (
         <section className="card">
           <div className="row between">
-            <h2 className="section-title">What the lens shows</h2>
+            <h2 className="section-title">Last answer</h2>
             <Link className="link" to="/">
               Full answer
             </Link>

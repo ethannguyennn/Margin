@@ -1,5 +1,9 @@
-// The phone's half of the pair: one session, one SOP context, one in-flight action.
-// The lens app keeps its own session; this store is what the phone asks under.
+// The phone screen's state. Two modes:
+// - Linked (inside the Even app, glasses connected): the lens controller owns the
+//   session. Typed questions go through it (lens-link.ts), so the glasses show the
+//   answer too, and every answer the lens receives, spoken or typed, lands here.
+// - Standalone (plain browser preview, no Even bridge): asks go straight to the relay
+//   under a phone-only session, exactly like the old ios/ companion.
 import {
   createContext,
   useCallback,
@@ -8,10 +12,13 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import type { AskResponse, DeviationResult, Health } from './contract';
 import * as relay from './relay';
+import { lensLink, type LensExchange, type LensSnapshot } from '../lens-link';
+import { ASK_TIMEOUT_MS, setMicSource as persistMicSource } from '../settings';
 import {
   HISTORY_MAX,
   NO_CONTEXT,
@@ -34,6 +41,9 @@ export type Busy = 'ask' | 'deviation' | null;
 
 interface StoreValue {
   state: SessionState;
+  lens: LensSnapshot;
+  /** The session the relay sees: the lens's when linked, the phone's otherwise. */
+  sessionId: string;
   health: Health | null;
   healthChecked: boolean;
   busy: Busy;
@@ -41,7 +51,8 @@ interface StoreValue {
   clearError: () => void;
   setContext: (ctx: StepContext) => void;
   clearContext: () => void;
-  setListening: (listening: boolean) => void;
+  canPushToTalk: boolean;
+  togglePushToTalk: () => void;
   setMicSource: (source: MicSource) => void;
   askNow: (question: string) => Promise<AskResponse | null>;
   repeatLast: () => Promise<AskResponse | null>;
@@ -50,6 +61,9 @@ interface StoreValue {
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
+
+// The lens client times out at ASK_TIMEOUT_MS and retries once; leave room for both.
+const LINKED_ASK_WAIT_MS = ASK_TIMEOUT_MS * 2 + 4000;
 
 function exchangeOf(question: string, res: AskResponse): Exchange {
   return {
@@ -62,20 +76,54 @@ function exchangeOf(question: string, res: AskResponse): Exchange {
   };
 }
 
+function errorOf(res: AskResponse): StoreError | null {
+  return res.outcome === 'error' ? { code: res.error?.code ?? 'error', message: res.error?.message ?? 'The relay could not answer.' } : null;
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>(loadSession);
+  const lens = useSyncExternalStore(lensLink.subscribe, lensLink.getSnapshot);
   const [health, setHealth] = useState<Health | null>(null);
   const [healthChecked, setHealthChecked] = useState(false);
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<StoreError | null>(null);
 
+  const linked = lens.connected && !!lens.sessionId;
+  const sessionId = linked ? (lens.sessionId as string) : state.sessionId;
+
   // Read inside callbacks by ref: a poll or a stale closure must never ask as an old session.
-  const sessionRef = useRef(state.sessionId);
-  sessionRef.current = state.sessionId;
+  const sessionRef = useRef(sessionId);
+  sessionRef.current = sessionId;
   const contextRef = useRef(state.context);
   contextRef.current = state.context;
+  const linkedRef = useRef(linked);
+  linkedRef.current = linked;
 
   useEffect(() => saveSession(state), [state]);
+
+  // Every answer the lens receives (spoken on the glasses or typed here).
+  const pending = useRef<((res: AskResponse | null) => void) | null>(null);
+  useEffect(() => {
+    const record = ({ response, question }: LensExchange) => {
+      setState((s) => ({
+        ...s,
+        lastAnswer: response,
+        history: [exchangeOf(question ?? response.transcript ?? '', response), ...s.history].slice(0, HISTORY_MAX),
+      }));
+      setError(errorOf(response));
+      pending.current?.(response);
+    };
+    const offExchange = lensLink.onExchange(record);
+    // A typed ask that leaves THINKING without an answer was cancelled on the glasses
+    // (double press) or failed: stop waiting for it.
+    let previous = lensLink.getSnapshot().screen;
+    const offScreen = lensLink.subscribe(() => {
+      const screen = lensLink.getSnapshot().screen;
+      if (previous === 'THINKING' && screen !== 'THINKING') queueMicrotask(() => pending.current?.(null));
+      previous = screen;
+    });
+    return () => { offExchange(); offScreen(); };
+  }, []);
 
   const checkHealth = useCallback(async () => {
     try {
@@ -93,6 +141,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(timer);
   }, [checkHealth]);
 
+  const askThroughLens = useCallback((text: string): Promise<AskResponse | null> => {
+    return new Promise((resolve) => {
+      let settled = false;
+      const timer = setTimeout(() => finish(null), LINKED_ASK_WAIT_MS);
+      function finish(res: AskResponse | null) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        if (pending.current === finish) pending.current = null;
+        resolve(res);
+      }
+      pending.current = finish;
+      if (!lensLink.askText(text, contextRef.current)) {
+        const screen = lensLink.getSnapshot().screen;
+        setError(screen === 'PRIVACY'
+          ? { code: 'privacy', message: 'Press once on the glasses to acknowledge the privacy notice first.' }
+          : { code: 'busy', message: 'The lens is already answering a question.' });
+        finish(null);
+      }
+    });
+  }, []);
+
   const runAsk = useCallback(
     async (question: string): Promise<AskResponse | null> => {
       const text = question.trim();
@@ -100,6 +170,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setBusy('ask');
       setError(null);
       try {
+        if (linkedRef.current) return await askThroughLens(text);
         const res = await relay.ask(sessionRef.current, text, contextRef.current);
         setState((s) => ({
           ...s,
@@ -114,7 +185,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setBusy(null);
       }
     },
-    [],
+    [askThroughLens],
   );
 
   // The relay answers "repeat" from its own session memory, so this is the same
@@ -136,9 +207,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const canPushToTalk = linked && lensLink.canTogglePushToTalk();
+
   const value = useMemo<StoreValue>(
     () => ({
-      state,
+      state: { ...state, listening: lens.screen === 'LISTENING' },
+      lens,
+      sessionId,
       health,
       healthChecked,
       busy,
@@ -146,17 +221,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       clearError: () => setError(null),
       setContext: (ctx) => setState((s) => ({ ...s, context: ctx })),
       clearContext: () => setState((s) => ({ ...s, context: NO_CONTEXT })),
-      setListening: (listening) => setState((s) => ({ ...s, listening })),
-      setMicSource: (micSource) => setState((s) => ({ ...s, micSource })),
+      canPushToTalk,
+      togglePushToTalk: () => lensLink.togglePushToTalk(),
+      setMicSource: (micSource) => {
+        persistMicSource(micSource); // read by audio/capture.ts on the next press
+        setState((s) => ({ ...s, micSource }));
+      },
       askNow: runAsk,
       repeatLast,
       submitDeviation,
       startNewSession: () => {
         setError(null);
-        setState(newSession(uuid()));
+        // Linked: the lens owns the session, so only the phone's history is cleared.
+        setState((s) => (linkedRef.current ? { ...s, lastAnswer: null, history: [] } : newSession(uuid())));
       },
     }),
-    [state, health, healthChecked, busy, error, runAsk, repeatLast, submitDeviation],
+    [state, lens, sessionId, health, healthChecked, busy, error, canPushToTalk, runAsk, repeatLast, submitDeviation],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
