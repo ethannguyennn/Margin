@@ -1,0 +1,128 @@
+{
+  "recorded_at": "2026-10-18T13:06:44.684654+00:00",
+  "relay": "https://getyourassto.work",
+  "runtime_commit": "524beb4",
+  "evidence": "LIVE RELAY",
+  "scope": "Focused two-turn syrup clarification only; no broad rerun",
+  "health": {
+    "ok": true,
+    "mock": false,
+    "db": "ok",
+    "version": "0.3.0+524beb4",
+    "ask_mock": false,
+    "conversion_mock": false,
+    "mocked": [],
+    "git_sha": "524beb4",
+    "models": {
+      "transcribe": "gemini-3.5-flash-lite",
+      "embed": "gemini-embedding-2",
+      "generate": "gemini-3.5-flash-lite",
+      "convert": "gemini-3.8-flash"
+    },
+    "gate": {
+      "min_sim": 0.68,
+      "min_rrf": 0.04
+    },
+    "gemini_429_total": 0,
+    "gemini_429_by_stage": {}
+  },
+  "metrics": {
+    "cases": 2,
+    "answered_correct_rate": 0.0,
+    "not_found_precision": 0.5,
+    "not_found_recall": 1.0,
+    "citation_verification_pass_rate": null,
+    "median_latency_ms": 1606.7680999985896,
+    "answered": 0,
+    "unverified_answers": 0,
+    "failed_cases": 1,
+    "core_answerable": {
+      "correct": 0,
+      "total": 0,
+      "rate": null
+    },
+    "category_passes": {
+      "ambiguous": {
+        "passed": 1,
+        "total": 2
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "gap-syrup",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1509.2308999737725,
+      "reason": "",
+      "response": {
+        "trace_id": "da40f4105873464894c84e4eb5e18387",
+        "transcript": "How many pumps of syrup?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Pump sizes",
+            "Flavor syrup amounts",
+            "Latte: add syrup"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 306,
+          "retrieve": 230,
+          "generate": 955,
+          "verify": 0,
+          "total": 1493
+        }
+      }
+    },
+    {
+      "id": "gap-syrup-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "not_found",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1704.3053000234067,
+      "reason": "unexpected outcome",
+      "response": {
+        "trace_id": "6f652fb59c81403abeeed4260bf66896",
+        "transcript": "cappuccino",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 453,
+          "retrieve": 237,
+          "generate": 955,
+          "verify": 0,
+          "total": 1646
+        }
+      }
+    }
+  ]
+}
