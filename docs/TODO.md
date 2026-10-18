@@ -8,6 +8,15 @@ candidate checkout. The uploaded-source library and TODO audit are integrated in
 redeploying this combined source and completing field acceptance remain open.
 The user has no new Part 4 recordings yet and will supply them later; two wearers remain required.
 
+- **13-SOP corpus (2026-10-18, `83be85c`):** on `main` and deployed (`/root/specs`, health ok,
+  relay 913 / app 644 / portal 10 passed). **Tiger still holds the 5-SOP bank**: the reseed hit
+  the free-tier daily cap (`embed_content_free_tier_requests`, 1000/day, `gemini-embedding-2`,
+  counted per chunk). No rows were written. Backup of the current rows:
+  `db-backups/coffee-bank-5sop-2026-10-18.json` (outside the repo). After the quota resets, run in
+  order: seed (353 embeddings, batches of 8, paced), `eval/tune_gate.py` on the 139-case bank
+  (139 embeddings; update the VM's gate only if it moves), then a paced live `make eval`.
+  The embedding quota is shared with live asks: the seed alone uses about a third of a day.
+
 - **Tests (2026-10-18, `61b9c1e`):** relay 712 passed (12 opt-in live/PG skipped), app 558 passed
   (12 skipped) + typecheck, portal 8 passed.
 - **Live candidate:** VM relay `0.3.0+524beb4` on `https://getyourassto.work`, live ask path,
