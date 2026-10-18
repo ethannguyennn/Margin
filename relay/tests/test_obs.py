@@ -18,21 +18,37 @@ SENTRY_TRACE = f"{APP_TRACE}-{APP_SPAN}-1"
 BAGGAGE = f"sentry-trace_id={APP_TRACE},sentry-sample_rate=1.0,sentry-sampled=true"
 
 
-def test_stage_records_self_time_and_accumulates():
+class FakeClock:
+    """Deterministic perf_counter: real sleeps make timing asserts flaky under load."""
+
+    def __init__(self):
+        self.now = 100.0
+
+    def __call__(self):
+        return self.now
+
+    def advance(self, ms):
+        self.now += ms / 1000.0
+
+
+def test_stage_records_self_time_and_accumulates(monkeypatch):
+    clock = FakeClock()
+    monkeypatch.setattr(obs.time, "perf_counter", clock)
     timer = obs.start_timer()
     with obs.stage("retrieve"):
-        time.sleep(0.02)
+        clock.advance(20)
         with obs.stage("embed"):
-            time.sleep(0.03)
+            clock.advance(30)
     with obs.stage("generate"):
-        time.sleep(0.01)
+        clock.advance(10)
     with obs.stage("generate"):  # the retry accumulates
-        time.sleep(0.01)
+        clock.advance(10)
+    clock.advance(5)  # orchestration overhead outside any stage
     lat = timer.latency()
-    assert 25 <= lat.embed < 60
-    assert 15 <= lat.retrieve < 30  # embed is not double-counted inside retrieve
-    assert 18 <= lat.generate < 45
-    assert lat.total >= lat.embed + lat.retrieve + lat.generate
+    assert lat.embed == 30
+    assert lat.retrieve == 20  # embed is not double-counted inside retrieve
+    assert lat.generate == 20
+    assert lat.total == 75
     assert lat.stt == 0 and lat.verify == 0
 
 

@@ -1,4 +1,20 @@
-# Margin lens app
+# Margin Even Hub app
+
+One Even Hub app, two screens, one session:
+
+- **Lens** (glasses): `src/main.ts` + `src/state.ts` + `src/ui/`, drawn through the SDK
+  bridge (text containers, gestures, glasses mic).
+- **Phone** (`src/phone/`, React): the companion screen the Even app shows in its WebView,
+  formerly `ios/`. Answer (the full text the glance compresses, citations, walkthrough,
+  latency, trace id), Lens (glasses status, push-to-talk, mic source, typed questions,
+  a live mirror of the lens text) and SOPs (procedures, steps, deviation form).
+
+`src/lens-link.ts` is the only seam between them: the lens publishes its state and every
+relay answer; the phone sends typed questions (answered on the glasses too, through the
+same controller path as speech) and push-to-talk. In a plain browser there is no Even
+bridge, so the phone screen runs standalone and asks the relay directly; `npm run dev`
+and opening http://localhost:5174 is the browser preview. Routes are hash-based
+(`#/lens`, `#/sops`) and Vite uses `base: './'` so the packaged `.ehpk` resolves both.
 
 Scaffold based on the official `even-realities/evenhub-templates/asr` template
 (template commit recorded in HANDOFF.md). Its browser host, TS config and Vite

@@ -1,33 +1,32 @@
 # Margin TODO
 
 Updated 2026-10-17 from all READMEs, handoffs and a full test run of the integrated
-branch; revised after PR #1 (iPhone companion, `ios/`) merged into main.
+branch; revised after the iPhone companion (`ios/`) was merged into the Even Hub app.
 Windows: `make` = `mingw32-make`.
 
 ## 0. New since the first version
 
-- [ ] **Re-merge `part-3-relay-infra` into main.** PR #1 merged on top of the older main, so
-      main is missing the real-mode fixes (`25cd8a8`) and this file. main is already merged
-      into this branch, so a PR `part-3-relay-infra -> main` is a fast-forward - Part 3
-- [x] **CORS for the iPhone companion, local + LAN:** recommended `ALLOWED_ORIGINS` and
-      `ALLOWED_ORIGIN_REGEX` (lens 5174 + companion 5175, 192.168.x / 10.x) are in
-      `.env.example` and covered by `test_cors.py`. Copy them into your `.env` - Part 3
-- [ ] **CORS, Base44 preview origin:** open the preview against the relay, read the
-      `CORS rejected origin` log line, add that exact origin to `ALLOWED_ORIGINS` - Part 3
-- [ ] **iPhone over HTTPS needs the HTTPS relay:** a page served over https (Base44 preview,
-      home-screen shortcut) cannot call an `http://` relay (mixed content), so this depends on
-      the deploy in section 2 - Part 3
-- [x] **`ios/` in `make test`:** `make test-ios` typechecks and builds the companion; `make
-      install` also runs `npm ci` in `app/` and `ios/`; `make dev-ios` serves it on :5175 - Part 3
-- [ ] **`ios/` unit tests** (none yet; a client test like `app/tests/client.test.ts`) - ios owner
-- [ ] **Decide:** phone -> lens delivery. The relay is request/response only, so the companion
-      cannot push to the glasses or read the lens session. Needs a new relay route (e.g. a
-      session read endpoint) if we want it for the demo - Part 3 + ios owner
+- [x] **One Even Hub app.** The `ios/` companion now lives in `app/src/phone` as the phone
+      screen the Even app shows in its WebView; `main.ts` still draws the lens through the
+      SDK. Typed questions on the phone are answered on the glasses too, every lens answer
+      (spoken or typed) shows in full on the phone, push-to-talk and the mic toggle drive the
+      real lens. Verified in the official simulator (glasses + webview screenshots, 0 errors).
+      `ios/` is gone; branch `merge-phone-ui` - needs review by Parts 1 + 2 before main
+- [x] **Phone -> lens delivery** solved by the merge (same app, same session; no relay route)
+- [ ] **Check the phone screen on real hardware:** the Even app's WebView height, scrolling,
+      safe areas and dark theme, on iOS and Android - Parts 1 + 2
+- [ ] **Base44:** `ios/` came from a Base44 project (`ios-base-44`). If Base44 still syncs to
+      that folder, point it at `app/` or stop syncing, or it may recreate `ios/` - owner of PR #1
+- [ ] **Re-merge into main** once `merge-phone-ui` is approved (it already contains
+      `part-3-relay-infra`) - Part 3
+- [ ] **Mock mode:** with `VITE_MOCK=1` the lens uses Part 2's fixtures, but the phone's
+      procedures/steps/deviation calls still go to the relay, so run a `MOCK_MODE=1` relay
+      alongside - Parts 2 + 3
 
-**Where we are:** all five parts are merged and run end to end on mocks.
-`make test` is green (relay 343 passed, app 202 passed, ios typecheck + build). The app's real client passes
-its contract test against the real relay. Real mode wires every real module with zero
-mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glasses yet.**
+**Where we are:** all five parts are merged and run end to end on mocks, and the live
+relay on the VM runs real Gemini + Tiger (`mock: false`). `make test` is green (relay 343
+passed, app 237 passed + typecheck + production build). The packed `.ehpk` is 138 KB.
+**Not yet tested on the glasses.**
 
 ---
 
@@ -81,7 +80,7 @@ mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glas
 - [x] Client (timeout/abort/one retry), PCM capture, mock fixtures, contract e2e test - Part 2
 - [x] Intent, hybrid retrieval + RRF + gate, structured generation, citation verifier, transcriber - Part 4
 - [x] Synthetic corpus (6 files), migration, seed, `db.py`, walkthrough/deviation, 36-question eval - Part 5
-- [x] iPhone companion web app (`ios/`): Answer / Lens / SOPs screens on the same contract, merged as PR #1
+- [x] Phone screen (Answer / Lens / SOPs, from the `ios/` companion, PR #1) merged into the Even Hub app
 
 ## Backburner (not needed to get the app working)
 
