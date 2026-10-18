@@ -11,6 +11,13 @@ set Part 2 mocks on the app side:
   "log deviation"                 -> logged
   "boom"                          -> error, llm_timeout
 
+v3 (BUILD-PLAN-V3 section 2), the three cases Part 1 mocks, through the real orchestration:
+
+  "how many pumps of syrup"            -> not_found + needs_clarification +
+                                          clarify "Which one?" [Latte, Cappuccino, Iced latte]
+  "latte" right after it (same session) -> answered (SOP-230 1.3, the syrup pump amounts)
+  "walk me through making a cappuccino" -> walkthrough of SOP-230, scope = the 3.x steps
+
 The mocks run through the real ``/v1/ask`` orchestration, so the gate, the
 verify/retry path, sanitizing and source assembly are exercised in mock mode too.
 
@@ -66,6 +73,7 @@ from ..schemas import (
     VerifyResult,
 )
 from . import LlmTimeout
+from .clarify import names_a_subject, subject
 
 log = logging.getLogger("specs.mock")
 
@@ -85,6 +93,7 @@ def _c(doc_id: str, rev: str, section: str, heading: str, text: str, title: str,
 
 _T114 = "Mounting Bracket Assembly"
 _T120 = "Cleaning and Disinfection"
+_T230 = "Drink Recipes"
 
 # Text copied from Part 5's synthetic corpus (corpus/SOP-114-C.md, SOP-120-B.md) so
 # mock answers read like real ones. SOP-120 keeps its degree/micro glyphs on purpose.
@@ -133,11 +142,52 @@ MOCK_CHUNKS: list[Chunk] = [
        "Allow the housing to air dry for at least 5 min after the contact time. Do not use "
        "compressed air, heat, or a dry cloth to shorten drying. Leave power disconnected during "
        "drying.", _T120, 4),
+    # v3: the part of corpus/SOP-230-C.md the clarify and scope cases need, verbatim.
+    _c("SOP-230", "C", "1.3", "Flavor syrup amounts",
+       "Flavored drinks (vanilla, caramel, or hazelnut) get 2 pumps in Small, 3 pumps in Medium, "
+       "and 4 pumps in Large.", _T230),
+    _c("SOP-230", "C", "2.1", "Latte specifications",
+       "Espresso shots: Small 2, Medium 2, Large 3. Steamed milk: Small 8 oz, Medium 12 oz, Large "
+       "14 oz. Foam is about 1/4 inch of microfoam. If a flavor is ordered, add syrup using the pump "
+       "amounts in section 1.3.", _T230),
+    _c("SOP-230", "C", "2.2", "Latte: add syrup", "If flavored, pump the syrup into the empty cup.", _T230, 1),
+    _c("SOP-230", "C", "2.3", "Latte: pull espresso",
+       "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup.", _T230, 2),
+    _c("SOP-230", "C", "2.4", "Latte: steam milk",
+       "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.", _T230, 3),
+    _c("SOP-230", "C", "2.5", "Latte: pour",
+       "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the "
+       "lid and call the name.", _T230, 4),
+    _c("SOP-230", "C", "3.1", "Cappuccino specifications",
+       "Espresso shots: Small 2, Medium 2, Large 3. Steamed milk: Small 5 oz, Medium 7 oz, Large "
+       "9 oz. Foam is about 3/4 inch (2 cm).", _T230),
+    _c("SOP-230", "C", "3.2", "Cappuccino: pull espresso",
+       "Pull the shots (see SOP-220) directly into the cup.", _T230, 5),
+    _c("SOP-230", "C", "3.3", "Cappuccino: steam milk",
+       "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.",
+       _T230, 6),
+    _c("SOP-230", "C", "3.4", "Cappuccino: pour",
+       "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch "
+       "deep. Add the lid.", _T230, 7),
+    _c("SOP-230", "C", "6.2", "Iced latte: add syrup and milk",
+       "Pump syrup into the cold cup if flavored, then pour in the cold milk.", _T230, 8),
+    _c("SOP-230", "C", "6.3", "Iced latte: add ice", "Fill the cup with ice up to the ice line.", _T230, 9),
+    _c("SOP-230", "C", "6.4", "Iced latte: add espresso",
+       "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid.", _T230, 10),
 ]
 
 # keyword -> RRF-ordered hits. "walk me through"/"guide me" questions also mention the
 # bracket, so the walkthrough resolves to SOP-114 through the same table.
+_SYRUP = r"(?=.*\b(?:syrup|pumps?)\b)"
 _TOPICS: list[tuple[re.Pattern[str], list[str]]] = [
+    # v3 coffee cases first: "walk me through making a cappuccino" is not the bracket.
+    (re.compile(_SYRUP + r"(?=.*\biced\b)"), ["SOP-230:C:6.2", "SOP-230:C:1.3"]),
+    (re.compile(_SYRUP + r"(?=.*\blatte\b)"), ["SOP-230:C:1.3", "SOP-230:C:2.2"]),
+    (re.compile(_SYRUP + r"(?=.*\bcappuccino\b)"), ["SOP-230:C:1.3", "SOP-230:C:3.1"]),
+    # No drink named: the syrup step of each drink -> ambiguous -> clarify.
+    (re.compile(_SYRUP), ["SOP-230:C:2.2", "SOP-230:C:3.1", "SOP-230:C:6.2"]),
+    (re.compile(r"cappuccino"), ["SOP-230:C:3.2", "SOP-230:C:3.1", "SOP-230:C:3.3"]),
+    (re.compile(r"\blatte\b"), ["SOP-230:C:2.1", "SOP-230:C:2.2"]),
     (re.compile(r"clean|disinfect"), ["SOP-120:B:4.3", "SOP-120:B:4.4"]),
     (re.compile(r"how tight|torque|\bm5\b|bracket|mounting|guide me|walk me through|boom"),
      ["SOP-114:C:4.2", "SOP-114:C:4.1"]),
@@ -312,6 +362,13 @@ class MockGenerator:
             raise LlmTimeout("mock generator timed out (boom)")
         if not chunks:
             return Draft(answerable=False)
+        # v3: sections about different things ("Latte: ...", "Cappuccino ...") and a question
+        # naming none of them -> ambiguous, like the real model. HX-2 headings have no subject
+        # form, so the v2 fixtures never trigger this.
+        subjects = {subject(c.heading).lower() for c in chunks
+                    if c.heading and (":" in c.heading or c.heading.lower().endswith("specifications"))}
+        if len(subjects) >= 2 and not names_a_subject(query, chunks):
+            return Draft(answerable=False, needs_clarification=True)
         top = chunks[0]
         # Leading whole sentences of the top chunk within the answer limit. The citation
         # quotes the whole chunk, so every number in glance or body is covered.

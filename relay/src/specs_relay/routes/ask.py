@@ -32,6 +32,7 @@ from pydantic import ValidationError
 from .. import obs
 from ..main import Pipeline, error_response, trace_id_of
 from ..pipeline import PipelineError
+from ..pipeline import clarify as clarify_mod
 from ..schemas import (
     BODY_MAX,
     GLANCE_MAX,
@@ -44,6 +45,8 @@ from ..schemas import (
     Intent,
     Outcome,
     RetrievalResult,
+    Scope,
+    Walkthrough,
 )
 from .common import load_walkthrough
 from .deviation import log_deviation
@@ -165,15 +168,37 @@ async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
                  text="\n".join(t for t in (step.body, step.warning, step.checkpoint) if t))
 
 
+def _group(label: str) -> str:
+    return label.split(".")[0]
+
+
+def _step_hit(walk: Any, chunks: list[Chunk]) -> int | None:
+    """Index of the best-ranked retrieved chunk that is a step of ``walk``, if any."""
+    at = {s.step_id: i for i, s in enumerate(walk.steps)}
+    return next((at[c.chunk_id] for c in chunks if c.chunk_id in at), None)
+
+
 def _start_index(walk: Any, chunks: list[Chunk]) -> int:
     """Start where the worker asked ("closing out the till" -> section 7, not 2.1): the first
     step of the section group holding the best-ranked step hit. Earlier steps stay one 'back' away."""
-    at = {s.step_id: i for i, s in enumerate(walk.steps)}
-    hit = next((at[c.chunk_id] for c in chunks if c.chunk_id in at), None)
+    hit = _step_hit(walk, chunks)
     if hit is None:
         return 0
-    group = walk.steps[hit].label.split(".")[0]
-    return next(i for i, s in enumerate(walk.steps) if s.label.split(".")[0] == group)
+    group = _group(walk.steps[hit].label)
+    return next(i for i, s in enumerate(walk.steps) if _group(s.label) == group)
+
+
+def _scope(walk: Any, chunks: list[Chunk]) -> Scope | None:
+    """v3: a spoken walkthrough finishes what was asked for ("making a cappuccino" ->
+    3.2-3.4), i.e. the section group of the best step hit. No step hit (the worker asked
+    for the whole procedure), or a group that is the whole document -> no scope."""
+    hit = _step_hit(walk, chunks)
+    if hit is None:
+        return None
+    group = _group(walk.steps[hit].label)
+    inside = [i for i, s in enumerate(walk.steps) if _group(s.label) == group]
+    start, end = inside[0], inside[-1] + 1
+    return None if (start, end) == (0, walk.total) else Scope(start=start, end=end)
 
 
 def _gate_refuses(p: Pipeline, r: RetrievalResult) -> bool:
@@ -274,7 +299,15 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         return _response(trace_id, ctx, timer, glance="", body="", source="", citations=[],
                          verified=False, command=command)
 
-    classified = p.classify(ctx.transcript)
+    # v3: the reply to "which one?" ("cappuccino") is answered as the original question
+    # plus the reply. ctx.transcript stays what the worker said.
+    question = ctx.transcript
+    previous = p.sessions.get(session_id)
+    pending = getattr(previous, "clarify", None)
+    if pending is not None and clarify_mod.resolves(pending, ctx.transcript):
+        question = clarify_mod.combined_question(previous.transcript, ctx.transcript)
+
+    classified = p.classify(question)
     ctx.intent = classified.intent
     if ctx.intent == "command":
         # The classifier matched a command the fast path declined ("repeat" outside a task).
@@ -314,13 +347,13 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
                          source=source)
 
     revision = req.revision or None
-    retrieved = await _retrieve(p, ctx.transcript, revision)
+    retrieved = await _retrieve(p, question, revision)
     here = await _current_step(p, req) if ctx.intent == "question" else None
-    query = ctx.transcript
+    query = question
     if here is not None:
         others = [c for c in retrieved.chunks if c.chunk_id != here.chunk_id]
         retrieved = retrieved.model_copy(update={"chunks": [here, *others][:6]})
-        query = (f"{ctx.transcript}\n(The worker is on step {here.section} of {here.doc_id}, "
+        query = (f"{question}\n(The worker is on step {here.section} of {here.doc_id}, "
                  f"chunk_id {here.chunk_id}. \"it\", \"that\" and \"this\" mean this step.)")
     elif _gate_refuses(p, retrieved):
         ctx.outcome = "not_found"
@@ -338,7 +371,9 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         if walk is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
-        walk = walk.model_copy(update={"index": _start_index(walk, retrieved.chunks)})
+        # Re-validated (not model_copy), so the scope invariant is checked.
+        walk = Walkthrough.model_validate({**walk.model_dump(), "index": _start_index(walk, retrieved.chunks),
+                                           "scope": _scope(walk, retrieved.chunks)})
         citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
                               section=s.label, quote=s.body) for s in walk.steps]
         n = walk.total
@@ -356,7 +391,10 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
     answer = await _answer(p, settings, query, retrieved, deadline)
     if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
-        return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)
+        # v3: "which one?" with options quoted from the retrieved headings or titles; none
+        # when fewer than two are grounded (the lens then shows NOT_FOUND, as in v2).
+        options = clarify_mod.build_clarify(retrieved.chunks, p.sanitize) if answer == CLARIFY else None
+        return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY, clarify=options)
     glance, body, citations, graphic_id = answer
     ctx.outcome = "answered"
     ctx.doc_ids = sorted({c.doc_id for c in citations})
@@ -383,8 +421,12 @@ async def ask(req: AskRequest, request: Request, background: BackgroundTasks) ->
     response: AskResponse | JSONResponse
     try:
         result = await _run(req, p, settings, trace_id, ctx, timer)
-        if result.outcome == "answered" and ctx.intent != "repeat":
-            p.remember(str(req.session_id), result)
+        session_id = str(req.session_id)
+        if (result.outcome == "answered" and ctx.intent != "repeat") or result.clarify is not None:
+            # v3: a clarify is remembered too, so the next ask can resolve it.
+            p.remember(session_id, result)
+        elif getattr(p.sessions.get(session_id), "clarify", None) is not None and result.outcome != "command":
+            p.sessions.pop(session_id, None)  # the pending "which one?" was not taken up
         response = result
     except Fail as f:
         ctx.outcome = "error"

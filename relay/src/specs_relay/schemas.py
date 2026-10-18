@@ -41,6 +41,10 @@ STEP_CHECKPOINT_MAX = 40
 DIAGRAM_LABEL_MAX = 12
 DIAGRAM_ELEMENTS_MAX = 40
 TITLE_MAX = 120
+# v3 (BUILD-PLAN-V3 section 2): "which one?" when a question is ambiguous.
+CLARIFY_PROMPT_MAX = 40
+CLARIFY_OPTION_MAX = 24
+CLARIFY_OPTIONS_MIN, CLARIFY_OPTIONS_MAX = 2, 3
 
 Intent = Literal["question", "walkthrough", "deviation", "repeat", "command", "unknown"]
 Outcome = Literal["answered", "not_found", "logged", "clarify", "command", "error"]
@@ -127,6 +131,14 @@ class Step(_Model):
     graphic_id: str | None = None  # revision-pinned synthetic reference
 
 
+class Scope(_Model):
+    """v3: the part of the document a spoken walkthrough is about, as step indexes
+    [start, end). The lens counts and finishes inside it; ``steps`` stays whole."""
+
+    start: int
+    end: int
+
+
 class Walkthrough(_Model):
     doc_id: str
     revision: str
@@ -135,6 +147,14 @@ class Walkthrough(_Model):
     index: int = 0
     steps: list[Step]
     assignment_id: str | None = None  # v2: set when the walkthrough is an assigned task
+    # v3: set on spoken walkthroughs ("making a cappuccino" -> 3.2-3.4); assignments never set it.
+    scope: Scope | None = None
+
+    @model_validator(mode="after")
+    def _scope_inside(self) -> Walkthrough:
+        if self.scope is not None and not (0 <= self.scope.start <= self.index < self.scope.end <= self.total):
+            raise ValueError("scope must satisfy 0 <= start <= index < end <= total")
+        return self
 
 
 class Latency(_Model):
@@ -144,6 +164,27 @@ class Latency(_Model):
     generate: int = 0
     verify: int = 0
     total: int = 0
+
+
+ClarifyOption = Annotated[str, Field(min_length=1, max_length=CLARIFY_OPTION_MAX)]
+
+
+class Clarify(_Model):
+    """v3: sent with not_found + needs_clarification. Every option is grounded: the
+    subject of a retrieved section heading, or a retrieved document title, verbatim."""
+
+    prompt: Annotated[str, Field(min_length=1, max_length=CLARIFY_PROMPT_MAX)]
+    options: Annotated[list[ClarifyOption], Field(min_length=CLARIFY_OPTIONS_MIN,
+                                                  max_length=CLARIFY_OPTIONS_MAX)]
+
+    @model_validator(mode="after")
+    def _lens_safe(self) -> Clarify:
+        for text in (self.prompt, *self.options):
+            if not (text.isascii() and text.isprintable() and text.strip() == text):
+                raise ValueError("clarify text must be trimmed, printable ASCII")
+        if len({o.lower() for o in self.options}) != len(self.options):
+            raise ValueError("clarify options must be distinct")
+        return self
 
 
 class AskResponse(_Model):
@@ -164,6 +205,8 @@ class AskResponse(_Model):
     # v2: set iff outcome == 'command'. The lens acts on it and never renders text.
     command: Command | None = None
     graphic_id: str | None = None
+    # v3: "which one?" -- only with outcome not_found and needs_clarification.
+    clarify: Clarify | None = None
 
     @model_validator(mode="after")
     def _never_unverified_answer(self) -> AskResponse:
@@ -171,6 +214,9 @@ class AskResponse(_Model):
             raise ValueError("an `answered` response must be verified and carry citations")
         if self.graphic_id is not None and (self.outcome != "answered" or not self.verified):
             raise ValueError("a graphic requires a verified answer")
+        if self.clarify is not None and (self.outcome != "not_found" or not self.needs_clarification
+                                         or self.verified):
+            raise ValueError("clarify is sent only with not_found and needs_clarification")
         if (self.outcome == "command") != (self.command is not None):
             raise ValueError("`command` is set iff outcome == 'command'")
         if self.outcome == "command" and (self.verified or self.glance or self.body or self.citations):
