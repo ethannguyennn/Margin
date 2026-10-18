@@ -264,6 +264,45 @@ def test_number_tokens(text, expected):
     assert number_tokens(text) == expected
 
 
+@pytest.mark.parametrize("unit,alias", [("seconds", "sec"), ("minutes", "min"), ("hours", "h"),
+    ("degrees Fahrenheit", "degF"), ("Fahrenheit", "deg F"), ("degrees Celsius", "degC")])
+def test_spelled_units_match_the_same_unit_but_cannot_be_dropped_or_substituted(unit, alias):
+    source = f"Use 10 {unit}."
+    chunks = [{"chunk_id": "X:C:1", "doc_id": "X", "revision": "C", "section": "1", "text": source}]
+    d = draft(f"Use 10 {alias}", "", [("X:C:1", source)])
+    assert check_draft(d, chunks)[0] is None
+    assert check_draft({**d, "glance": "Use 10"}, chunks)[0].startswith("unsupported_number")
+    assert check_draft({**d, "glance": "Use 10 ppm"}, chunks)[0].startswith("unsupported_number")
+    assert check_draft({**d, "glance": f"Use 11 {alias}"}, chunks)[0].startswith("unsupported_number")
+
+
 def test_quote_in_text_basic():
     assert quote_in_text("Bracket Screws", C42["text"])
     assert not quote_in_text("bracket bolts", C42["text"])
+
+
+def test_html_encoded_degrees_return_a_decoded_supported_quote():
+    source = "Wash hands for 20 seconds with warm water at 100\u00b0F (38\u00b0C)."
+    chunks = [{"chunk_id": "X:C:1", "doc_id": "X", "revision": "C", "section": "1", "text": source}]
+    d = draft("Wash hands for 20 seconds", "", [("X:C:1", source.replace("\u00b0", "&deg;"))])
+    reason, citations = check_draft(d, chunks)
+    assert reason is None and citations[0]["quote"] == source
+
+
+def test_fuzzy_quote_matching_cannot_change_a_unit_in_a_long_quote():
+    source = "Before starting the shift, wash hands with soap and warm water at 100\u00b0F and dry with a single-use towel."
+    assert not quote_in_text(source.replace("\u00b0F", "\u00b0C"), source)
+
+
+def test_short_temperature_units_are_checked_instead_of_hiding_the_number():
+    source = "Set 160\u00b0F."
+    chunks = [{"chunk_id": "X:C:1", "doc_id": "X", "revision": "C", "section": "1", "text": source}]
+    d = draft("Set 160F", "", [("X:C:1", source)])
+    assert check_draft(d, chunks)[0] is None
+    for text in ("Set 999F", "Set 160C", "Set -160F"):
+        assert check_draft({**d, "glance": text}, chunks)[0].startswith("unsupported_number")
+    negative = "Before opening, set the cold chamber to -20\u00b0C and check the reading on the temperature log."
+    assert not quote_in_text(negative.replace("-20", "20"), negative)
+    chunks[0]["text"] = "Set 160F."
+    d["citations"][0]["quote"] = chunks[0]["text"]
+    assert check_draft({**d, "glance": "Set 160 degF"}, chunks)[0].startswith("unsupported_number")

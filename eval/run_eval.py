@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from collections import Counter
 from dataclasses import asdict, dataclass
 import json
+from html import unescape
 import math
 from pathlib import Path
 import re
@@ -23,10 +24,17 @@ from db.seed import load_corpus
 
 
 def normalized(text: str) -> str:
+    text = unescape(text)
     for before, after in (("°", " deg"), ("µ", "u"), ("μ", "u"), ("–", "-"), ("—", "-"),
                           ("·", "-"), ("“", '"'), ("”", '"'), ("’", "'")):
         text = text.replace(before, after)
-    return " ".join(text.casefold().split())
+    text = text.casefold()
+    for spelling, unit in ((r"deg\s*f|degrees?\s*(?:fahrenheit|f)|fahrenheit|f", "degf"),
+                           (r"deg\s*c|degrees?\s*(?:celsius|c)|celsius|c", "degc"),
+                           (r"seconds?|sec|s", "s"), (r"minutes?|min", "min"),
+                           (r"hours?|hrs?|h", "h")):
+        text = re.sub(rf"(?<=\d)\s*(?:{spelling})\b", f" {unit}", text)
+    return " ".join(text.split())
 
 
 def contains(text: str, expected: str) -> bool:
@@ -169,10 +177,13 @@ def score_case(case: dict, response: dict, index: dict, latency_ms: float) -> Re
         if not verified:
             correct, reason = False, "unverified answer"
         elif case["expect"] == "answered":
-            matching = any(all(citation.get(key) == case[key] for key in ("doc_id", "revision", "section"))
+            sections = {case["section"], *case.get("alternative_sections", [])}
+            matching = any(all(citation.get(key) == case[key] for key in ("doc_id", "revision"))
+                           and citation.get("section") in sections
                            for citation in response["citations"])
             text = str(response.get("glance", "")) + " " + str(response.get("body", ""))
-            required = all(contains(text, value) for value in case.get("must_contain", []))
+            required = any(all(contains(text, item) for item in phrases) for phrases in
+                           [case.get("must_contain", []), *case.get("alternative_content", [])])
             correct = matching and required
             if not correct:
                 reason = "wrong citation or missing expected content"

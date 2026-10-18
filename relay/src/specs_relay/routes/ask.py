@@ -224,6 +224,12 @@ def _is_follow_up(query: str) -> bool:
     return bool(re.search(r"^(?:and\b|what about\b|how about\b)|\b(?:it|that|this|those|them)\b", query, re.I))
 
 
+def _missing_subject(query: str) -> bool:
+    words = set(re.findall(r"[a-z]+", query.casefold()))
+    return bool(words) and words <= set(
+        "what how long hot temperature much many does do is are it that this last take be the a an".split())
+
+
 def _picture_answer(p: Pipeline, query: str, chunks: list[Chunk]):
     from ..illustrations import available_graphics, verify_graphic
     terms = set(re.findall(r"[a-z]+", query.casefold())) - set(
@@ -406,12 +412,18 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         query += f"\n(Previous question in this session: {previous.transcript})"
     if candidates:
         unique: dict[str, Chunk] = {}
-        for chunk in [*candidates, *retrieved.chunks]:
+        for chunk in candidates:
             unique.setdefault(chunk.chunk_id, chunk)
+        for chunk in retrieved.chunks:
+            unique[chunk.chunk_id] = chunk  # refresh partial history quotes without changing priority
         retrieved = retrieved.model_copy(update={"chunks": list(unique.values())[:6]})
     if here is not None:
         query += (f"\n(The worker is on step {here.section} of {here.doc_id}, "
                  f"chunk_id {here.chunk_id}. \"it\", \"that\" and \"this\" mean this step.)")
+    elif not candidates and ctx.intent == "question" and _missing_subject(query):
+        ctx.outcome = "not_found"
+        return _response(trace_id, ctx, timer, needs_clarification=True,
+                         clarify=_clarify(retrieved.chunks, p.sanitize))
     elif not candidates and _gate_refuses(p, retrieved):
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer)

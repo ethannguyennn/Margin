@@ -46,6 +46,11 @@ Rules:
 9. Count every character in glance, including spaces: at most {GLANCE_MAX}. Copy numbers with
    their units exactly from the quote. Preserve inner quotation marks and degree/unit glyphs
    in citations; JSON-escape quotation marks rather than rewriting or shortening the quote.
+10. Keep spelled-out counts as words ("five" stays "five", never "5"). Use compact degF/degC,
+    sec, min or hours in display text with the same source value and unit; never convert values.
+    Put a long procedure's instructions in body, with only a short action in glance.
+    If both temperature scales exceed the glance cap, put the parenthetic scale in body.
+    Never HTML-escape source quotes (copy \u00b0, not &deg;).
 Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}], graphic_id}}
 When answerable=false, return empty glance, body and citations."""
 
