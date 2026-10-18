@@ -72,7 +72,7 @@ def test_off_document_question_returns_not_found_without_llm_call():
     assert out["outcome"] == "not_found"
     assert gen.calls == 0
     assert out["verified"] is False and out["citations"] == []
-    assert out["glance"] == "Not in approved SOPs"
+    assert out["glance"] == "Not in your SOPs. Ask your manager to add it."
 
 
 def test_forced_hallucination_is_caught_and_never_displayed():

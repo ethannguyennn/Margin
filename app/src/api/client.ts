@@ -65,8 +65,8 @@ function notFound(raw: Partial<AskResponse>): AskResponse {
   return {
     ...(raw as AskResponse),
     outcome: 'not_found',
-    glance: 'Not in approved SOPs',
-    body: 'No matching procedure. Try rephrasing or ask your supervisor.',
+    glance: 'Not in your SOPs. Ask your manager to add it.',
+    body: 'No approved SOP covers this yet. Contact your manager so they can add the procedure in the Specs portal.',
     citations: [],
     verified: false,
     walkthrough: null,

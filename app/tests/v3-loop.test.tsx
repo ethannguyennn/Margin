@@ -140,7 +140,7 @@ describe('phone', () => {
     const sent: string[] = [];
     render(<AnswerDetail res={CLARIFY_PUMPS} pinnedStepId={null} onUseStep={() => {}} onAsk={(t) => sent.push(t)} />);
     expect(screen.getByText('Which size?')).toBeTruthy();
-    expect(screen.queryByText('Not in approved SOPs')).toBeNull();
+    expect(screen.queryByText('Not in your SOPs. Ask your manager to add it.')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Medium' }));
     expect(sent).toEqual(['Medium']);
   });

@@ -60,7 +60,7 @@ test('answered without verified is downgraded to not_found', async () => {
   stubFetch({ body: { ...ANSWERED, verified: false } });
   const res = await ask(REQ);
   assert.equal(res.outcome, 'not_found');
-  assert.equal(res.glance, 'Not in approved SOPs');
+  assert.equal(res.glance, 'Not in your SOPs. Ask your manager to add it.');
   assert.deepEqual(res.citations, []);
 });
 
@@ -195,7 +195,7 @@ test('mock fixtures cover the whole trigger table', () => {
   assert.equal(mockResponseFor('log deviation, screw was stripped').outcome, 'logged');
   assert.equal(mockResponseFor('boom').error?.code, 'llm_timeout');
   assert.equal(mockResponseFor('where is the good coffee').outcome, 'not_found');
-  assert.equal(fixtures.NOT_FOUND.glance, 'Not in approved SOPs');
+  assert.equal(fixtures.NOT_FOUND.glance, 'Not in your SOPs. Ask your manager to add it.');
 });
 
 test('session ids are UUIDs even without crypto.randomUUID (insecure WebView)', async () => {
