@@ -229,8 +229,10 @@ def _picture_answer(p: Pipeline, query: str, chunks: list[Chunk]):
     terms = set(re.findall(r"[a-z]+", query.casefold())) - set(
         "what does do the a an look like show me picture image of please".split())
     available = available_graphics(chunks)
-    available.sort(key=lambda g: len(terms & set(re.findall(
-        r"[a-z]+", (g["title"] + " " + " ".join(r["quote"] for r in g["references"])).casefold()))), reverse=True)
+    available.sort(key=lambda g: (
+        len(terms & set(re.findall(r"[a-z]+", g["title"].casefold()))),
+        len(terms & set(re.findall(r"[a-z]+", " ".join(r["quote"] for r in g["references"]).casefold()))),
+    ), reverse=True)
     for graphic in available:
         if not terms.intersection(re.findall(r"[a-z]+", (graphic["title"] + " " + " ".join(
                 r["quote"] for r in graphic["references"])).casefold())):
@@ -386,11 +388,18 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
     revision = req.revision or None
     previous = p.sessions.get(session_id)
     query = _clarify_query(ctx.transcript, previous) if ctx.intent == "question" else ctx.transcript
-    retrieved = await _retrieve(p, query, revision)
     here = await _current_step(p, req) if ctx.intent == "question" else None
+    follow_up = ctx.intent == "question" and _is_follow_up(ctx.transcript)
+    retrieval_query = query
+    if follow_up:
+        if here is not None:
+            retrieval_query += f"\nCurrent step: {here.heading}"
+        if previous is not None and previous.outcome == "answered":
+            retrieval_query += f"\nPrevious question: {previous.transcript}\nPrevious answer: {previous.glance}"
+    retrieved = await _retrieve(p, retrieval_query, revision)
     candidates = [here] if here is not None else []
     if (ctx.intent == "question" and previous is not None and previous.outcome == "answered"
-            and _is_follow_up(ctx.transcript)):
+            and follow_up):
         candidates.extend(Chunk(**c.model_dump(), text=c.quote) for c in previous.citations
                           if revision is None or c.revision == revision)
         query += f"\n(Previous question in this session: {previous.transcript})"
