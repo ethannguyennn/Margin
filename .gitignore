@@ -4,6 +4,7 @@
 !.env.example
 !app/.env.example
 !app/.env.mock
+!ios/.env.example
 
 # python
 .venv/
