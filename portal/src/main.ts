@@ -4,6 +4,7 @@ import './style.css';
 import { api, downloadMaterial, json, poll, TOKEN_KEY, type JsonObject } from './api';
 import { approvalReasons, element as el, highlightSource, minutesOnStep, preview } from './view';
 import { mountSimulator } from '../../app/src/simulator/simulator';
+import { mountLiveViewer } from '../../app/src/simulator/live-viewer';
 
 const app = document.querySelector<HTMLElement>('#app')!;
 const nav = document.querySelector<HTMLElement>('nav')!;
@@ -336,19 +337,32 @@ function board(epoch: number) {
 }
 
 function simulator() {
-  heading('Glasses simulator', 'Try a question or voice command with this workspace’s published SOPs. The preview uses the same screens and gestures as the glasses.');
+  heading('Glasses simulator', 'Watch a worker’s glasses in this workspace, or try the separate browser simulation.');
   const panel = el('section', undefined, 'simulator-panel');
-  app.append(panel);
+  const controls = el('div', undefined, 'lens-sim-actions');
+  let mounted: { dispose(): void } | undefined;
+  const live = button('Live glasses', () => {
+    mounted?.dispose(); panel.replaceChildren();
+    mounted = mountLiveViewer(panel, api);
+    live.setAttribute('aria-pressed', 'true'); simulate.setAttribute('aria-pressed', 'false');
+  });
+  const simulate = button('Browser simulation', () => {
+    mounted?.dispose(); panel.replaceChildren();
+    mounted = createSimulation();
+    simulate.setAttribute('aria-pressed', 'true'); live.setAttribute('aria-pressed', 'false');
+  });
+  controls.append(live, simulate); app.append(controls, panel);
   const sessionId = crypto.randomUUID();
-  const mounted = mountSimulator(panel, {
+  const createSimulation = () => mountSimulator(panel, {
     sessionId,
     ask: (request, opts) => api('/v1/simulator/ask', {
       ...json('POST', request), signal: opts?.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(50000)]) : AbortSignal.timeout(50000),
     }),
     getDiagram: id => api(`/v1/simulator/diagrams/${encodeURIComponent(id)}`),
   });
-  dispose.push(() => mounted.dispose());
-  app.append(el('p', 'Browser preview · 576 × 288 per eye. Font rendering may differ on hardware. This is a separate session from your workers’ glasses.', 'intro'));
+  mounted = mountLiveViewer(panel, api); live.setAttribute('aria-pressed', 'true');
+  dispose.push(() => mounted?.dispose());
+  app.append(el('p', '576 × 288 per eye. Live glasses requires the updated Specs app running in the foreground. Browser simulation runs independently.', 'intro'));
 }
 
 export async function route() {

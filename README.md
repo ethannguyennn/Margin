@@ -97,7 +97,11 @@ live board ◀──────────────────────
 Both web apps include a browser preview of the G2 lens (576×288). It uses the app's real lens controller, screen renderer and container positions.
 
 - **Portal → Simulator** (`/portal/#simulator`): a supervisor asks questions and runs commands against their own workspace's SOPs through `/v1/simulator/ask`, with portal auth. Diagram tiles load only from that workspace's approved, effective procedures. No fake device, assignment or progress event is created.
-- **Worker app → Lens tab** (`/app/#/lens`): the same simulator. When glasses are connected, it becomes a live mirror of the lens text, reference images and diagrams.
+- **Live glasses** in either web app: select a glasses device in the same workspace to follow its acknowledged text, reference images and two diagram tiles. Install/open Specs 0.4.4 on the G2 and keep it in the foreground. The viewer marks paused or disconnected sources offline after 12 seconds. **Browser simulation** remains a separate mode; its controls do not drive the physical glasses.
+- **Worker app → Lens tab** (`/app/#/lens`): the live viewer by default, with browser simulation available beside it. Inside the connected Even app, the Lens tab mirrors the local display directly.
+
+Setup, packaging commands, authentication boundaries and hardware-test limitations:
+[`docs/handoffs/LIVE-DISPLAY-SYNC.md`](docs/handoffs/LIVE-DISPLAY-SYNC.md).
 
 Screenshots, reproduction commands, and which results are mock versus hardware evidence: [`app/tests/evidence/browser-simulator/README.md`](app/tests/evidence/browser-simulator/README.md).
 

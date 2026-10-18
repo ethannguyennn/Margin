@@ -9,6 +9,8 @@ import { SessionStore } from './ui/session-store';
 import { lensLink } from './lens-link';
 import { noteGesture, showHints } from './settings';
 import { mountPhone } from './phone/mount';
+import { DisplayPublisher } from './simulator/live-feed';
+import { deviceFeedRequest } from './simulator/device-feed';
 type HeadGesture = 'NOD' | 'SHAKE';
 interface Runtime {
     audio: Pick<LensPorts, 'startCapture' | 'stopCapture'> & {
@@ -108,6 +110,7 @@ async function boot() {
         state.screen = 'CALIBRATE';
     const store = new SessionStore(value => queue.run(() => bridge.setLocalStorage(STORAGE_KEY, value)), raw);
     let foreground = true, closing = false, motionOn = false;
+    const publisher = mock ? undefined : new DisplayPublisher(deviceFeedRequest);
     let motionWork = Promise.resolve();
     const syncMotion = (value: LensState) => {
         const wanted = foreground && value.privacySeen && value.calibrated;
@@ -130,8 +133,7 @@ async function boot() {
         status.textContent = value.screen;
         app.dataset.screen = value.screen;
         mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
-        lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent,
-            graphic_id: text.graphic_id, frame: text, diagram: value.screen === 'DIAGRAM' ? diagram : undefined });
+        lensLink.update({ status: value.screen });
         console.info(`[Specs] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
         syncMotion(value);
         if (!rendering)
@@ -141,8 +143,16 @@ async function boot() {
                     pending = null;
                     try {
                         await display.render(next.text, next.layout, next.diagram);
+                        const frame = display.acknowledgedFrame;
+                        if (frame && foreground && !closing) {
+                            publisher?.setActive(true);
+                            publisher?.acknowledged({ screen: next.screen, frame, diagram: display.acknowledgedDiagram });
+                            lensLink.update({ screen: next.screen, frame, lensText: [frame.header, frame.main, frame.footer].join('\n\n'),
+                                graphic_id: frame.graphic_id, diagram: display.acknowledgedDiagram });
+                        }
                     }
                     catch (error) {
+                        publisher?.setActive(false);
                         if (error instanceof DiagramRenderError && controller.state.diagramId) {
                             controller.dispatch({ type: 'DIAGRAM_FAILED', id: controller.state.diagramId });
                             continue;
@@ -234,7 +244,7 @@ async function boot() {
     }
     let pairTimer: ReturnType<typeof setInterval> | undefined, assignmentTimer: ReturnType<typeof setInterval> | undefined;
     const startPolling = () => { clearInterval(pairTimer); clearInterval(assignmentTimer); pairTimer = setInterval(() => { void checkPairing(); }, 1000); assignmentTimer = setInterval(() => { void poll(); }, 10000); void poll(); };
-    const suspend = async () => { foreground = false; clearInterval(pairTimer); clearInterval(assignmentTimer); syncMotion(controller.state); const saved = controller.suspend(); await store.flush(); await saved; await motionWork; };
+    const suspend = async () => { foreground = false; publisher?.setActive(false); clearInterval(pairTimer); clearInterval(assignmentTimer); syncMotion(controller.state); const saved = controller.suspend(); await store.flush(); await saved; await motionWork; };
     const resume = async () => { foreground = true; await controller.resume(); syncMotion(controller.state); startPolling(); };
     const unsubscribe = bridge.onEvenHubEvent(event => {
         const type = event.sysEvent?.eventType;
@@ -259,7 +269,7 @@ async function boot() {
     const visibility = () => { void (document.hidden ? suspend() : resume()).catch(report); };
     document.addEventListener('visibilitychange', visibility);
     async function cleanup() { if (closing)
-        return; closing = true; foreground = false; lensLink.detach('Lens app closed. Reopen it from the Even app.'); clearInterval(pairTimer); clearInterval(assignmentTimer); unsubscribe(); document.removeEventListener('visibilitychange', visibility); syncMotion(controller.state); await controller.dispose().catch(report); await store.flush().catch(report); await motionWork; }
+        return; closing = true; foreground = false; publisher?.dispose(); lensLink.detach('Lens app closed. Reopen it from the Even app.'); clearInterval(pairTimer); clearInterval(assignmentTimer); unsubscribe(); document.removeEventListener('visibilitychange', visibility); syncMotion(controller.state); await controller.dispose().catch(report); await store.flush().catch(report); await motionWork; }
     window.addEventListener('pagehide', () => { void cleanup(); }, { once: true });
     if (import.meta.hot)
         import.meta.hot.dispose(() => { void cleanup(); });

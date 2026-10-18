@@ -17,7 +17,8 @@ beforeEach(async () => {
   paired = assigned = progress = false; calls = [];
   vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit = {}) => {
     calls.push([url, init]); let data: any = {};
-    if (url === '/v1/simulator/ask') data = JSON.parse(init.body as string).text === 'next'
+    if (url === '/v1/lens/displays') data = [];
+    else if (url === '/v1/simulator/ask') data = JSON.parse(init.body as string).text === 'next'
       ? { ...UI_FIXTURES.answer, outcome: 'command', verified: false, command: 'next' }
       : structuredClone(UI_FIXTURES.walkthrough);
     else if (url.startsWith('/v1/materials?')) {
@@ -116,6 +117,7 @@ it('opens the glasses simulator and drives a real lens walkthrough with authenti
   await until(() => expect(document.querySelector('[name="file"]')).toBeTruthy());
   location.hash = 'simulator';
   await until(() => expect(document.querySelector('h1')?.textContent).toBe('Glasses simulator'));
+  click('Browser simulation');
   expect(document.querySelector('nav')?.textContent).toContain('Simulator');
   const question = document.querySelector<HTMLInputElement>('.lens-sim-form input')!;
   question.value = 'Walk me through the bracket'; question.dispatchEvent(new Event('input'));
