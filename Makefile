@@ -4,8 +4,9 @@
 #   make install     # one-time: venv deps for the relay (+ dev/test tools)
 #   make dev-relay   # uvicorn, reload, MOCK_MODE from .env, bound to 0.0.0.0 for LAN sideload
 #   make dev-app     # cd app && npm run dev
+#   make dev-ios     # iPhone companion web app on :5175
 #   make sim         # even simulator against the dev app
-#   make test        # pytest relay/tests + npm test in app (must stay green)
+#   make test        # pytest relay/tests + npm test in app + ios build (must stay green)
 #   make seed        # python db/seed.py            (Part 5)
 #   make eval        # python eval/run_eval.py      (Part 5)
 #   make latency     # p50/p95 per stage from the events hypertable
@@ -26,17 +27,23 @@ PY ?= $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(SYS_PY))
 
 COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
-.PHONY: help venv install dev-relay dev-app sim test test-relay test-app seed eval latency \
-        deploy deploy-remote logs health
+.PHONY: help venv install dev-relay dev-app dev-ios sim test test-relay test-app test-ios \
+        seed eval latency deploy deploy-remote logs health sync-branches
 
 help:
-	@echo targets: install dev-relay dev-app sim test seed eval latency deploy deploy-remote logs health
+	@echo targets: install dev-relay dev-app dev-ios sim test seed eval latency deploy deploy-remote logs health
 
 venv:
 	$(SYS_PY) -m venv .venv
 
 install:
 	$(PY) -m pip install -e "relay[dev]"
+ifneq ($(wildcard app/package.json),)
+	cd app && npm ci
+endif
+ifneq ($(wildcard ios/package.json),)
+	cd ios && npm ci
+endif
 
 dev-relay:
 	$(PY) -m uvicorn margin_relay.main:create_app --factory --reload --reload-dir relay/src --host 0.0.0.0 --port $(PORT)
@@ -44,10 +51,14 @@ dev-relay:
 dev-app:
 	cd app && npm run dev
 
+# iPhone companion on :5175 (needs VITE_RELAY_ORIGIN, see ios/.env.example)
+dev-ios:
+	cd ios && npm run dev
+
 sim:
 	cd app && npx evenhub-simulator $(SIM_URL)
 
-test: test-relay test-app
+test: test-relay test-app test-ios
 
 test-relay:
 	$(PY) -m pytest relay/tests -q
@@ -59,11 +70,21 @@ else
 	@echo app/ not merged on this branch - skipping app tests
 endif
 
+# The iPhone companion has no unit tests yet: typecheck + production build.
+test-ios:
+ifneq ($(wildcard ios/package.json),)
+	cd ios && npm run build
+else
+	@echo ios/ not merged on this branch - skipping companion checks
+endif
+
 seed:
 	$(PY) db/seed.py $(ARGS)
 
+# Against the running relay; add ARGS=--allow-mock for a MOCK_MODE=1 relay.
+EVAL_URL ?= http://127.0.0.1:$(PORT)
 eval:
-	$(PY) eval/run_eval.py $(ARGS)
+	$(PY) eval/run_eval.py --base-url $(EVAL_URL) $(ARGS)
 
 latency:
 	$(PY) -m margin_relay.latency $(ARGS)

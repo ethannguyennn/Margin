@@ -102,7 +102,9 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
         return m
 
     intent = mod("pipeline.intent",
-                 classify_intent=lambda t: "deviation" if "log deviation" in t else "question",
+                 classify_intent=lambda t: ("deviation" if "log deviation" in t else
+                                            "walkthrough" if "walk me through" in t else
+                                            "question"),
                  deviation_text=lambda t: t.replace("log deviation", "").strip())
     mod("pipeline.sanitize", sanitize=lambda s: s.replace("·", "-"))
     mod("pipeline.verify", verify=lambda d, c: VerifyResult(ok=True, citations=[
@@ -158,7 +160,8 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
 
     class GeminiTranscriber:
         @classmethod
-        def from_settings(cls, settings):
+        def from_settings(cls, settings, client=None):
+            seen["transcriber_client"] = client
             return cls()
 
         async def transcribe(self, pcm, sample_rate):
@@ -166,18 +169,19 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
 
     mod("pipeline.transcribe", GeminiTranscriber=GeminiTranscriber)
 
-    pool = object()
     events: list = []
     devs: list = []
 
+    class RetrievalStore:  # Part 5: Part 4's raw-row Store over db.py's own pool
+        def __init__(self):
+            seen["pool_stores"].append(self)
+
+        async def vector_top(self, q, k, rev):
+            seen["vector_top"] = (q, k, rev)
+            return []
+
     async def write_event(**kw):
         events.append(kw)
-
-    async def next_deviation_id():
-        return "DEV-0042"
-
-    async def insert_deviation(**kw):
-        devs.append(kw)
 
     async def ok():
         return "ok"
@@ -185,18 +189,28 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
     async def noop():
         return None
 
-    mod("db", get_pool=lambda: pool, write_event=write_event, ping=ok, init_pool=noop,
-        close_pool=noop, next_deviation_id=next_deviation_id, insert_deviation=insert_deviation,
-        list_procedures=lambda: [])
+    mod("db", RetrievalStore=RetrievalStore, write_event=write_event, ping=ok,
+        init_pool=noop, close_pool=noop, list_procedures=lambda: [])
 
     class ConsoleNotifier:
         async def notify(self, deviation_id, text):
             return True
 
-    notify_pkg = mod("notify")
+    notify_pkg = mod("notify", get_notifier=lambda settings=None: ConsoleNotifier())
     notify_pkg.__path__ = []
-    mod("notify.console", ConsoleNotifier=ConsoleNotifier)
-    seen.update(pool=pool, events=events, devs=devs, intent=intent)
+
+    async def build_walkthrough(doc_id, revision=None):
+        return {"doc_id": doc_id, "revision": "C", "title": "Mounting Bracket Assembly",
+                "total": 1, "index": 0,
+                "steps": [{"step_id": "SOP-114:C:4.1", "label": "4.1",
+                           "glance": "Prepare and seat the bracket", "body": "Disconnect power."}]}
+
+    async def log_deviation(session_id, text, doc_id=None, step_id=None, *, notifier=None):
+        devs.append({"text": text, "doc_id": doc_id, "step_id": step_id})
+        return {"deviation_id": "DEV-0042", "notified": await notifier.notify("DEV-0042", text)}
+
+    mod("walkthrough", build_walkthrough=build_walkthrough, log_deviation=log_deviation)
+    seen.update(events=events, devs=devs, intent=intent)
     return seen
 
 
@@ -209,6 +223,7 @@ def test_real_mode_wires_part4_and_part5(monkeypatch):
     assert p.mocked == [] and p.real_db
     assert seen["embedder"] == (seen["client"], "embed-from-env", 768)
     assert seen["generator_client"] is seen["client"]  # one shared Gemini client
+    assert seen["transcriber_client"] is seen["client"]
     assert (p.min_sim, p.min_rrf) == (0.5, 0.02)
     assert p.classify("log deviation gap too wide") == IntentResult(intent="deviation",
                                                                    text="gap too wide")
@@ -220,10 +235,54 @@ def test_real_mode_wires_part4_and_part5(monkeypatch):
         b = ask(client, "how tight is the m5").json()
         assert b["outcome"] == "answered" and b["glance"] == "Torque M5 to 4 N-m"
         assert seen["embedded"] == "how tight is the m5" and seen["q_embedding"] == [0.1]
-        assert seen["pool_stores"] == [seen["pool"]]  # Part 4's SQL on Part 5's pool
+        assert len(seen["pool_stores"]) == 1  # db.RetrievalStore(), never Part 4's PgStore
+        assert seen["vector_top"] == ([0.1], 20, None)
         assert seen["events"][-1]["outcome"] == "answered"
         d = ask(client, "log deviation gap too wide").json()
-        assert d["outcome"] == "logged" and seen["devs"][-1]["text"] == "gap too wide"
+        assert d["outcome"] == "logged" and d["glance"] == "Deviation DEV-0042 logged"
+        assert seen["devs"][-1]["text"] == "gap too wide"  # via walkthrough.log_deviation
+        r = client.post("/v1/deviation", json={"session_id": "6f1c2f1e-8a0b-4c1e-9a55-0b9b0e8f2a11",
+                                               "text": "gap", "context": {"doc_id": "SOP-114"}})
+        assert r.json() == {"deviation_id": "DEV-0042", "notified": True}
+        assert p.walkthrough is sys.modules["margin_relay.walkthrough"]
+
+
+def test_real_mode_walkthrough_uses_part5_builder(monkeypatch):
+    _fake_part4_and_part5(monkeypatch)
+    p = main.build_pipeline(make_settings(mock_mode=False, gemini_model_generate="g",
+                                          gemini_model_embed="e"))
+    client, _ = make_client(pipeline=p, mock_mode=False)
+    b = ask(client, "walk me through the bracket").json()
+    assert b["outcome"] == "answered" and b["verified"] is True
+    assert b["walkthrough"]["title"] == "Mounting Bracket Assembly"
+    assert b["walkthrough"]["steps"][0]["step_id"] == "SOP-114:C:4.1"
+
+    async def missing(doc_id, revision=None):
+        raise LookupError(doc_id)
+
+    async def too_long(doc_id, revision=None):
+        raise ValueError("Step body must have 1..449 characters")
+
+    sys.modules["margin_relay.walkthrough"].build_walkthrough = missing
+    assert ask(client, "walk me through the bracket").json()["outcome"] == "not_found"
+    sys.modules["margin_relay.walkthrough"].build_walkthrough = too_long
+    r = ask(client, "walk me through the bracket")
+    assert r.status_code == 500 and r.json()["error"]["code"] == "internal"
+
+
+def test_real_mode_deviation_value_error_is_bad_request(monkeypatch):
+    _fake_part4_and_part5(monkeypatch)
+
+    async def invalid(session_id, text, doc_id=None, step_id=None, *, notifier=None):
+        raise ValueError("step_id must belong to doc_id")
+
+    sys.modules["margin_relay.walkthrough"].log_deviation = invalid
+    client, _ = make_client(pipeline=main.build_pipeline(make_settings(mock_mode=False)),
+                            mock_mode=False)
+    r = client.post("/v1/deviation", json={"session_id": "6f1c2f1e-8a0b-4c1e-9a55-0b9b0e8f2a11",
+                                           "text": "gap", "doc_id": "SOP-114",
+                                           "step_id": "SOP-120:B:4.1"})
+    assert r.status_code == 400 and "belong" in r.json()["error"]["message"]
 
 
 def test_real_mode_missing_key_falls_back_loudly(monkeypatch, caplog):

@@ -145,9 +145,13 @@ def _is_timeout(exc: BaseException) -> bool:
     return isinstance(exc, (asyncio.TimeoutError, TimeoutError)) or "Timeout" in type(exc).__name__
 
 
+CLARIFY = "clarify"  # _answer's marker: the model found the question ambiguous
+
+
 async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
-                  ) -> tuple[str, str, list[Citation]] | None:
-    """generate -> verify, retried once with the failure reason. None means not_found."""
+                  ) -> tuple[str, str, list[Citation]] | str | None:
+    """generate -> verify, retried once with the failure reason. None means not_found,
+    CLARIFY means not_found with needs_clarification."""
     feedback: str | None = None
     last_exc: BaseException | None = None
     for _attempt in range(2):
@@ -163,7 +167,9 @@ async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
             feedback = f"malformed_output: {type(exc).__name__}. Return JSON matching the schema."
             continue
         last_exc = None
-        if not draft.answerable or draft.needs_clarification:
+        if draft.needs_clarification:
+            return CLARIFY
+        if not draft.answerable:
             return None  # the model refusing is a success state, not something to retry
         with obs.stage("verify"):
             result = p.verify(draft, r.chunks)
@@ -222,11 +228,11 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         ctx.doc_ids = [doc_id] if doc_id else []
         source = _source_from_step_id(step_id, doc_id)
         against = f" against {source}" if source else ""
-        tail = ("and sent to your supervisor." if dev.notified
+        # "Alert sent" only: a console notifier is delivery, not a human acknowledging it.
+        tail = ("Supervisor alert sent." if dev.notified
                 else "Supervisor alert failed; tell your supervisor directly.")
-        sep = " " if dev.notified else ". "
         return _response(trace_id, ctx, timer, glance=f"Deviation {dev.deviation_id} logged",
-                         body=f"Deviation {dev.deviation_id} recorded{against}{sep}{tail}",
+                         body=f"Deviation {dev.deviation_id} recorded{against}. {tail}",
                          source=source)
 
     revision = req.revision or None
@@ -237,18 +243,15 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
 
     if ctx.intent == "walkthrough":
         top = retrieved.chunks[0]
-        try:
-            steps = await p.retriever.steps_for(top.doc_id, revision)
-        except Exception as exc:
-            raise _fail_from(exc, "db_down", "loading steps") from exc
-        if not steps:
+        loaded = await _walkthrough_steps(p, top, revision)
+        if loaded is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
+        rev, title, raw_steps = loaded
         # Re-validated (not model_copy): sanitizing can lengthen text, and the caps must bite.
         steps = [Step(step_id=s.step_id, label=s.label, glance=p.sanitize(s.glance).strip(),
-                      body=p.sanitize(s.body).strip()) for s in steps]
-        rev = top.revision
-        title = p.sanitize(top.title or await _doc_title(p, top.doc_id, rev) or top.doc_id).strip()
+                      body=p.sanitize(s.body).strip()) for s in raw_steps]
+        title = p.sanitize(title).strip()
         citations = [Citation(chunk_id=s.step_id, doc_id=top.doc_id, revision=rev,
                               section=s.label, quote=s.body) for s in steps]
         n = len(steps)
@@ -265,14 +268,41 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
 
     # question
     answer = await _answer(p, settings, ctx.transcript, retrieved)
-    if answer is None:
+    if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
-        return _response(trace_id, ctx, timer)
+        return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)
     glance, body, citations = answer
     ctx.outcome = "answered"
     ctx.doc_ids = sorted({c.doc_id for c in citations})
     return _response(trace_id, ctx, timer, glance=glance, body=body,
                      source=_source(citations[0]), citations=citations, verified=True)
+
+
+async def _walkthrough_steps(p: Pipeline, top: Any, revision: str | None
+                             ) -> tuple[str, str, list[Step]] | None:
+    """(revision, title, steps) for the top chunk's document, or None for not_found.
+
+    Real mode uses Part 5's walkthrough.build_walkthrough (revision pinned, every step);
+    otherwise the retriever's steps_for."""
+    if p.walkthrough is not None:
+        try:
+            built = await p.walkthrough.build_walkthrough(top.doc_id, revision)
+        except LookupError:
+            return None
+        except ValueError as exc:  # an over-cap step body: corpus problem, never truncate
+            raise Fail("internal", f"walkthrough {top.doc_id} violates the step caps") from exc
+        except Exception as exc:
+            raise _fail_from(exc, "db_down", "loading the walkthrough") from exc
+        steps = [Step.model_validate(s) for s in built["steps"]]
+        return (built["revision"], built["title"], steps) if steps else None
+    try:
+        steps = await p.retriever.steps_for(top.doc_id, revision)
+    except Exception as exc:
+        raise _fail_from(exc, "db_down", "loading steps") from exc
+    if not steps:
+        return None
+    title = top.title or await _doc_title(p, top.doc_id, top.revision) or top.doc_id
+    return top.revision, title, list(steps)
 
 
 async def _doc_title(p: Pipeline, doc_id: str, revision: str) -> str | None:

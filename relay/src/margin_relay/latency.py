@@ -1,103 +1,78 @@
 """`make latency`: p50/p95 per stage from the Timescale `events` hypertable.
 
-    python -m margin_relay.latency [--hours 24] [--outcome answered] [--all-outcomes]
+    python -m margin_relay.latency
 
-Reads DATABASE_URL from config. Relay-side only: the pitch number (end-of-speech
-to glance on the lens) adds the app's upload and render spans, which live in Sentry.
+Reads through Part 5's ``db.latency_summary()`` (db.py is the only module that
+opens connections), using DATABASE_URL from config. Relay-side only: the pitch
+number (end-of-speech to glance on the lens) adds the app's upload and render.
 """
 
 from __future__ import annotations
 
-import argparse
-import json
+import asyncio
 import math
 import sys
 from collections.abc import Iterable, Mapping
 from typing import Any
 
-from .config import get_settings
 from .obs import STAGES
 
-COLUMNS = (*STAGES, "total")
-# A text request never runs STT and a gated not_found never runs generate/verify:
-# zeros there are "stage skipped", not "stage was instant", so they are excluded.
-SKIPPABLE = {"stt", "embed", "retrieve", "generate", "verify"}
-
-QUERY = """
-SELECT latency_ms FROM events
-WHERE ts > now() - %(hours)s::float8 * interval '1 hour'
-  AND (%(outcome)s::text IS NULL OR outcome = %(outcome)s::text)
-ORDER BY ts DESC
-LIMIT 100000
-"""
+ORDER = (*STAGES, "total")
+BUDGET_MS = 3000
 
 
-def percentile(values: list[float], q: float) -> float:
-    """Linear interpolation between closest ranks (same as Postgres percentile_cont)."""
-    if not values:
-        return math.nan
-    data = sorted(values)
-    pos = (len(data) - 1) * q
-    lo, hi = math.floor(pos), math.ceil(pos)
-    return data[lo] + (data[hi] - data[lo]) * (pos - lo)
+def _ms(value: Any) -> str:
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return "-"
+    return f"{float(value):.0f}"
 
 
-def summarize(rows: Iterable[Mapping[str, Any]]) -> dict[str, dict[str, float]]:
-    """{stage: {n, p50, p95}} from latency_ms dicts."""
-    samples: dict[str, list[float]] = {c: [] for c in COLUMNS}
-    for row in rows:
-        if isinstance(row, str):
-            row = json.loads(row)
-        for col in COLUMNS:
-            value = row.get(col)
-            if value is None:
-                continue
-            value = float(value)
-            if col in SKIPPABLE and value <= 0:
-                continue
-            samples[col].append(value)
-    return {c: {"n": len(v), "p50": percentile(v, 0.50), "p95": percentile(v, 0.95)}
-            for c, v in samples.items()}
-
-
-def render(summary: dict[str, dict[str, float]]) -> str:
-    def ms(x: float) -> str:
-        return "-" if math.isnan(x) else f"{x:.0f}"
-
+def render(rows: Iterable[Mapping[str, Any]]) -> str:
+    """Table from latency_summary rows: {stage, samples, p50_ms, p95_ms}."""
+    by_stage = {r["stage"]: r for r in rows}
+    stages = [s for s in ORDER if s in by_stage] + sorted(set(by_stage) - set(ORDER))
     lines = [f"{'stage':<10}{'n':>7}{'p50 ms':>9}{'p95 ms':>9}", "-" * 35]
-    for col in COLUMNS:
-        s = summary[col]
-        lines.append(f"{col:<10}{s['n']:>7}{ms(s['p50']):>9}{ms(s['p95']):>9}")
+    for stage in stages:
+        r = by_stage[stage]
+        lines.append(f"{stage:<10}{r['samples']:>7}{_ms(r['p50_ms']):>9}{_ms(r['p95_ms']):>9}")
+    if not stages:
+        lines.append("(no events yet)")
     return "\n".join(lines)
 
 
-def fetch(hours: float, outcome: str | None) -> list[Any]:
-    import psycopg
+def verdict(rows: Iterable[Mapping[str, Any]]) -> str | None:
+    total = next((r for r in rows if r["stage"] == "total"), None)
+    if total is None or total["p50_ms"] is None:
+        return None
+    p50 = float(total["p50_ms"])
+    word = "within" if p50 <= BUDGET_MS else "OVER"
+    return (f"relay p50 total {p50:.0f} ms ({word} the {BUDGET_MS // 1000} s "
+            "end-of-speech-to-glance budget; add app upload + render for the full number)")
 
-    settings = get_settings()
-    if settings.database_url is None:
-        raise SystemExit("DATABASE_URL is not set (make latency reads the events hypertable)")
-    with psycopg.connect(settings.database_url.get_secret_value(), connect_timeout=10) as conn:
-        rows = conn.execute(QUERY, {"hours": hours, "outcome": outcome}).fetchall()
-    return [r[0] for r in rows]
+
+async def fetch() -> list[dict]:
+    try:
+        from . import db
+    except ImportError as exc:
+        raise SystemExit(f"margin_relay.db is not available: {exc}") from exc
+    await db.init_pool()
+    try:
+        return [dict(r) for r in await db.latency_summary()]
+    finally:
+        await db.close_pool()
 
 
-def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--hours", type=float, default=24.0)
-    ap.add_argument("--outcome", default="answered")
-    ap.add_argument("--all-outcomes", action="store_true")
-    args = ap.parse_args(argv)
-    outcome = None if args.all_outcomes else args.outcome
-    rows = fetch(args.hours, outcome)
-    print(f"events, last {args.hours:g} h, outcome={outcome or 'any'}: {len(rows)} rows")
-    summary = summarize(rows)
-    print(render(summary))
-    p50 = summary["total"]["p50"]
-    if not math.isnan(p50):
-        verdict = "within" if p50 <= 3000 else "OVER"
-        print(f"relay p50 total {p50:.0f} ms ({verdict} the 3 s end-of-speech-to-glance budget; "
-              "add app upload + render from Sentry for the full number)")
+def main() -> int:
+    try:
+        rows = asyncio.run(fetch())
+    except ValueError as exc:  # e.g. DATABASE_URL not set
+        print(f"make latency: {exc}", file=sys.stderr)
+        return 1
+    print("events (all requests; a stage that did not run records 0 ms)")
+    print(render(rows))
+    line = verdict(rows)
+    if line:
+        print(line)
     return 0
 
 

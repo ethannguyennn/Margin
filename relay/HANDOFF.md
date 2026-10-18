@@ -10,8 +10,10 @@
   every response also carries an `x-trace-id` header (exposed to CORS).
 - A walkthrough comes back as `outcome: "answered"`, `verified: true`, one citation
   per step, `walkthrough` filled, `source` from the first step.
-- An ambiguous question (`needs_clarification`) returns `not_found`, not `clarify`:
-  Part 1 has no CLARIFY screen and Part 5's eval expects `not_found`.
+- An ambiguous question returns `outcome: "not_found"` (Part 1 has no CLARIFY
+  screen) **plus `needs_clarification: true`**. That field is additive (default
+  false) and present on every AskResponse; clients that ignore it still render
+  NOT FOUND. Parts 1/2: add `needs_clarification?: boolean` to `types.ts` if useful.
 - `/v1/deviation` accepts the ids top-level (contract) **or** nested as
   `context: {doc_id, step_id}` (what Part 2's client sends).
 
@@ -45,11 +47,21 @@ the one retry with the verifier's reason as `feedback=`, and the `embed` / `retr
 `generate` / `verify` spans; `answer_question()` is not called. Exceptions with a
 `.code` attribute keep that code.
 
-## Part 5 (what the factory expects from `db.py`)
+## Part 5 (what the factory uses, as integrated on main)
 
-`init_pool`, `close_pool` (optional), `ping`, `get_pool()` (the psycopg pool, which
-Part 4's `PgStore` queries), `list_procedures`, `write_event(**kw)`,
-`next_deviation_id`, `insert_deviation(deviation_id=, session_id=, doc_id=, step_id=,
-text=, notified=)`, and optionally `ingest_corpus(corpus_dir)` for `POST /v1/ingest`.
-Notifiers: `notify/console.py: ConsoleNotifier()`, `notify/photon.py:
-PhotonNotifier.from_settings(settings)` (or `PhotonNotifier(settings)`).
+- Retrieval: `Retriever(db.RetrievalStore(), embedder)`; all SQL stays in db.py
+  (Part 4's `PgStore` is not used).
+- Walkthrough branch of `/v1/ask`: `walkthrough.build_walkthrough(doc_id, revision)`;
+  `LookupError` -> not_found, `ValueError` (over-cap step) -> 500 internal.
+- `/v1/deviation` and the deviation branch: `walkthrough.log_deviation(session_id,
+  text, doc_id, step_id, notifier=)` -- row committed before notifying;
+  `ValueError` -> 400 bad_request. Lens copy says "Supervisor alert sent", never
+  that a human received it.
+- `GET /v1/procedures/{doc_id}/steps`: `db.steps_for`. Lifespan: `db.init_pool()` /
+  `db.close_pool()`. Health: `db.ping()`. Events: `db.write_event(...)`.
+- Notifier: `notify.get_notifier(settings)` (console only until Photon is verified).
+- `make latency` -> `db.latency_summary()`; `make eval` passes `--base-url` (8080).
+- PyYAML is a runtime dependency; the image is an editable install at /srv/margin so
+  `db.ingest_corpus()` finds `db/seed.py` and `corpus/`.
+- Open: `latency_summary()` includes 0 ms rows for stages that did not run (stt on
+  text asks, generate on gated not_found), which pulls those p50s down.

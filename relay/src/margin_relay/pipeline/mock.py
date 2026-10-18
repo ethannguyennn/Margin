@@ -285,3 +285,10 @@ class MockDB:
 
     async def insert_deviation(self, **fields: Any) -> None:
         self.deviations.append(fields)
+
+    async def set_deviation_notified(self, deviation_id: str, notified: bool) -> None:
+        for row in self.deviations:
+            if row["deviation_id"] == deviation_id:
+                row["notified"] = notified
+                return
+        raise LookupError(deviation_id)

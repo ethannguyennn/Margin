@@ -22,8 +22,12 @@ async def list_procedures(request: Request):  # noqa: ANN201
 @router.get("/v1/procedures/{doc_id}/steps", response_model=list[Step])
 async def procedure_steps(doc_id: str, request: Request, revision: str | None = None):  # noqa: ANN201
     p = request.app.state.pipeline
+    # Real mode: Part 5's db.steps_for returns ready Step models; mock: the retriever's.
+    steps_for = p.db.steps_for if p.real_db else p.retriever.steps_for
     try:
-        steps = await p.retriever.steps_for(doc_id, revision or None)
+        steps = await steps_for(doc_id, revision or None)
+    except ValueError as exc:
+        return error_response(trace_id_of(request), "bad_request", str(exc)[:200])
     except Exception as exc:  # noqa: BLE001
         return error_response(trace_id_of(request), "db_down",
                               f"could not load steps: {type(exc).__name__}")
