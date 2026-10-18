@@ -431,6 +431,11 @@ class MockDB:
 
     # --- v2 materials + drafts ----------------------------------------------------
 
+    async def walkthrough_citations(self, doc_id: str, revision: str) -> list[Citation]:
+        return [Citation(chunk_id=c.chunk_id, doc_id=c.doc_id, revision=c.revision,
+                         section=c.section, quote=c.text) for c in self.chunks
+                if c.doc_id == doc_id and c.revision == revision and c.is_step]
+
     async def insert_material(self, filename: str, mime: str, data: bytes, doc_id: str,
                               revision: str, title: str) -> str:
         if not re.fullmatch(r"[A-Z]{2,5}-\d{3}", doc_id) or not re.fullmatch(r"[A-Z0-9]{1,3}", revision):

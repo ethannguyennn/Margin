@@ -4,7 +4,8 @@
 // Same origin and timeout as the lens client (settings.ts), so one whitelist entry.
 import type { AskResponse, DeviationResult, Health, Procedure, Step } from './contract';
 import type { StepContext } from './session';
-import { ASK_TIMEOUT_MS, RELAY_ORIGIN } from '../settings';
+import { ASK_TIMEOUT_MS, MOCK, RELAY_ORIGIN } from '../settings';
+import { mockAsk, mockHealth, mockListProcedures, mockListSteps, mockLogDeviation } from '../mock';
 
 const ORIGIN = RELAY_ORIGIN;
 const TIMEOUT_MS = ASK_TIMEOUT_MS;
@@ -60,20 +61,24 @@ async function request<T>(
 }
 
 export function health(sessionId: string): Promise<Health> {
+  if (MOCK) return mockHealth();
   return request<Health>('/v1/health', { method: 'GET', sessionId });
 }
 
 export function listProcedures(sessionId: string): Promise<Procedure[]> {
+  if (MOCK) return mockListProcedures();
   return request<Procedure[]>('/v1/procedures', { method: 'GET', sessionId });
 }
 
 export function listSteps(sessionId: string, docId: string, revision: string | null): Promise<Step[]> {
+  if (MOCK) return mockListSteps(docId, revision);
   const q = revision ? `?revision=${encodeURIComponent(revision)}` : '';
   return request<Step[]>(`/v1/procedures/${encodeURIComponent(docId)}/steps${q}`, { method: 'GET', sessionId });
 }
 
 /** Exactly the AskRequest shape: extra keys are rejected (schemas.py forbids them). */
 export function ask(sessionId: string, text: string, context: StepContext): Promise<AskResponse> {
+  if (MOCK) return mockAsk({ session_id: sessionId, text, context });
   return request<AskResponse>('/v1/ask', {
     method: 'POST',
     sessionId,
@@ -86,6 +91,7 @@ export function logDeviation(
   text: string,
   context: StepContext,
 ): Promise<DeviationResult> {
+  if (MOCK) return mockLogDeviation();
   return request<DeviationResult>('/v1/deviation', {
     method: 'POST',
     sessionId,

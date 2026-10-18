@@ -1,5 +1,5 @@
 // Sentry in the WebView: one `ask` transaction with capture / upload / render spans.
-// Verified against @sentry/browser 11.4.0 (logs are on by default in 11.x; no flag).
+// Bundled and API-checked against @sentry/browser 11.8.0 (logs on by default in 11.x).
 import { RELAY_ORIGIN, SENTRY_DSN, SESSION_ID, env } from '../settings.ts';
 
 type Span = { end: () => void; setAttribute: (k: string, v: string) => void };
@@ -19,12 +19,6 @@ type SentryApi = {
   logger: { info: (m: string, a?: Record<string, unknown>) => void; error: (m: string, a?: Record<string, unknown>) => void };
 };
 
-// ponytail: @sentry/browser is not in app/package.json yet (Part 1 owns it), so the
-// specifier is a variable and Vite does not try to bundle it - build stays green and
-// Sentry stays off. Once the dep lands, replace SENTRY_PKG with the literal
-// '@sentry/browser' (verified working that way in the simulator).
-const SENTRY_PKG = '@sentry/browser';
-
 let sentry: SentryApi | null = null;
 /** The ask opened by startAsk(), so upload spans and trace headers attach to it. */
 let openAsk: Span | null = null;
@@ -34,7 +28,7 @@ export async function initObs(): Promise<boolean> {
   if (sentry) return true;
   if (!SENTRY_DSN) return false;
   try {
-    const mod = (await import(/* @vite-ignore */ SENTRY_PKG)) as SentryApi;
+    const mod = (await import('@sentry/browser')) as unknown as SentryApi;
     mod.init({
       dsn: SENTRY_DSN,
       // No pageload/navigation spans: in a glasses WebView they are noise, and an ask

@@ -44,7 +44,7 @@ from ..schemas import (
     Outcome,
     RetrievalResult,
 )
-from .common import load_walkthrough
+from .common import load_walkthrough, walkthrough_citations
 from .deviation import log_deviation
 
 log = logging.getLogger("specs.ask")
@@ -296,8 +296,10 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         if walk is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
-        citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
-                              section=s.label, quote=s.body) for s in walk.steps]
+        try:
+            citations = await walkthrough_citations(p, walk)
+        except PipelineError as exc:
+            raise Fail(exc.code, exc.message) from exc
         n = walk.total
         glance = f"{walk.title}, {n} steps"
         if len(glance) > GLANCE_MAX:

@@ -196,6 +196,14 @@ async def steps_for(doc_id: str, revision: str | None = None) -> list[Step]:
     return [step_from_chunk(row) for row in await _step_rows(doc_id, revision)]
 
 
+async def walkthrough_citations(doc_id: str, revision: str) -> list:
+    """Verbatim published support, separate from the frozen lens Step shape."""
+    from .schemas import Citation
+    return [Citation(chunk_id=row["chunk_id"], doc_id=row["doc_id"], revision=row["revision"],
+                     section=row["section"], quote=row["text"])
+            for row in await _step_rows(doc_id, revision)]
+
+
 class RetrievalStore:
     """Part 4's raw-row Store protocol, using only this module's pool/SQL.
 

@@ -397,10 +397,11 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
         materials,
         procedures,
         progress,
+        sentry_tunnel,
     )
 
     for module in (health, ask, deviation, procedures, ingest,  # v1
-                   devices, assignments, progress, diagrams, materials, drafts):  # v2
+                   devices, assignments, progress, diagrams, materials, drafts, sentry_tunnel):  # v2
         app.include_router(module.router)
 
     # Added innermost first: CORS is outermost, so even error responses carry CORS headers.

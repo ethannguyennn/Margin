@@ -174,3 +174,30 @@ PY
 
 This command reads existing data only. For the separately opt-in database
 restart/reconnection test and cleanup behavior, see `portal/README.md`.
+
+## TODO audit configuration (2026-10-18)
+
+`codex/todo-audit-completion` includes the SOP library and current `main`, plus
+source-based walkthrough citations, offline phone mocks and the Sentry tunnel.
+The public relay answers version 0.3.0 and root-domain CORS now passes, but this
+machine cannot authenticate over SSH to confirm/deploy its exact revision.
+
+Deploy that branch with the same fetch/switch/`make deploy` workflow above.
+Keep the existing VM `.env` private. Confirm `PUBLIC_ORIGIN` is the root HTTPS
+origin; keep the already working root-domain CORS entry and add the actual lens
+origin only after observing it from a device. The local audited app pack uses
+`VITE_RELAY_ORIGIN=https://getyourassto.work`, `VITE_MOCK=0`.
+
+For the coffee bank, `eval/results/2026-10-18-gate-calibration.json` records the
+candidate thresholds (`0.7389722026007067`, `0.031754032258064516`), already
+applied to the local private env. They protect all answerable and clarification
+questions in the development bank. Recalibrate for a new bank/model rather than
+treating those as universal defaults. Provider quota still blocks sustained
+live QA on `gemini-3.5-flash-lite`; no billing/account settings were changed.
+
+For the telemetry tunnel, configure server `SENTRY_DSN_APP` to **exactly** the
+app build's public `VITE_SENTRY_DSN`, then opt in with `VITE_SENTRY_TUNNEL=1`.
+The tunnel defaults off when the app DSN is absent. It accepts only that DSN,
+caps streamed envelopes at 256 KB, rate limits each client to 60/min and never
+follows upstream redirects. Its tests mock the upstream: physical trace
+collection and confirmation in Sentry remain open hardware/integration checks.

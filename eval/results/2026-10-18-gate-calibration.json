@@ -1,0 +1,407 @@
+{
+  "evidence": "LIVE EMBEDDINGS + CLOUD POSTGRES; no generation",
+  "scope": "development QA bank, not independent validation",
+  "embedding_model": "gemini-embedding-2",
+  "embed_dim": 768,
+  "documents": [
+    {
+      "doc_id": "SOP-201",
+      "title": "Cashier - Station Setup and Order Taking",
+      "revision": "C",
+      "status": "effective"
+    },
+    {
+      "doc_id": "SOP-202",
+      "title": "Cashier - Payments, Refunds, Voids, and Closing the Till",
+      "revision": "C",
+      "status": "effective"
+    },
+    {
+      "doc_id": "SOP-210",
+      "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+      "revision": "C",
+      "status": "effective"
+    },
+    {
+      "doc_id": "SOP-220",
+      "title": "Espresso Bar - Shot and Milk Standards",
+      "revision": "C",
+      "status": "effective"
+    },
+    {
+      "doc_id": "SOP-230",
+      "title": "Drink Recipes",
+      "revision": "C",
+      "status": "effective"
+    }
+  ],
+  "thresholds": {
+    "NOT_FOUND_MIN_SIM": 0.7389722026007067,
+    "NOT_FOUND_MIN_RRF": 0.031754032258064516,
+    "protected_false_refusals": 0,
+    "cheap_refusals": 5,
+    "refusal_candidates": 7
+  },
+  "samples": [
+    {
+      "id": "a01",
+      "question": "How much money is in the opening float?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.807875728372466,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a02",
+      "question": "How fast do I have to greet a guest?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7885985626460835,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a03",
+      "question": "How much extra is oat milk?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7850278849908082,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a04",
+      "question": "How much is a medium cappuccino?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.788479255943254,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a05",
+      "question": "Can I sell a large flat white?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8120636697988641,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a06",
+      "question": "What do I do when a guest mentions an allergy?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.76455710039863,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a07",
+      "question": "What is the biggest bill we accept?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8278379645540815,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a08",
+      "question": "What does a black mark from the pen mean on a fifty?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7865930326823698,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a09",
+      "question": "When do I need to do a cash drop?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8007034778175679,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a10",
+      "question": "Who has to approve a fifteen dollar refund?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8300820094298134,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a11",
+      "question": "How long after purchase can I give a refund?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7468133497107097,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a12",
+      "question": "How long can I void an order after payment?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7644655704498291,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a13",
+      "question": "What is the maximum gift card load?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7871513366699219,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a14",
+      "question": "When does a till variance need a manager signature?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.822577714920044,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a15",
+      "question": "How much do I leave in the drawer when closing?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8113676084718238,
+      "best_rrf": 0.032266458495966696
+    },
+    {
+      "id": "a16",
+      "question": "How cold does the milk fridge need to be?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7731981738327859,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a17",
+      "question": "How long do I wash my hands?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.741091079213418,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a18",
+      "question": "What strength should the sanitizer bucket be?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7997767209873643,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a19",
+      "question": "How long does opened oat milk last?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7617225646972711,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a20",
+      "question": "When do I throw out drip coffee?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8098559266242952,
+      "best_rrf": 0.032266458495966696
+    },
+    {
+      "id": "a21",
+      "question": "How do I backflush the group heads?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8175184726715088,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a22",
+      "question": "How long do I soak the portafilters?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8344165284137155,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a23",
+      "question": "What temperature is the wash sink water?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7761708862730765,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a24",
+      "question": "Where is the first aid kit?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7695297324096892,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a25",
+      "question": "How long should an espresso shot take?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7835207218981007,
+      "best_rrf": 0.032266458495966696
+    },
+    {
+      "id": "a26",
+      "question": "What is the espresso dose?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7869889374670157,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a27",
+      "question": "My shot ran twenty seconds, what do I do?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7454299845442183,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a28",
+      "question": "What temperature do I steam almond milk to?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8069998025894165,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a29",
+      "question": "How hot is extra hot?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7803599834442194,
+      "best_rrf": 0.032266458495966696
+    },
+    {
+      "id": "a30",
+      "question": "How much foam goes on a cappuccino?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8296405673027039,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a31",
+      "question": "What should the steam boiler pressure read?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8036361815712575,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a32",
+      "question": "How much steamed milk goes in a medium latte?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.847446577022664,
+      "best_rrf": 0.032266458495966696
+    },
+    {
+      "id": "a33",
+      "question": "How many grams of matcha for a large?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8115374333582793,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a34",
+      "question": "How much concentrate goes in a medium cold brew?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8456556108984731,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "a35",
+      "question": "How long do I steep cold brew?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.7619330145080708,
+      "best_rrf": 0.03252247488101534
+    },
+    {
+      "id": "a36",
+      "question": "How many pumps of mocha sauce in a large?",
+      "category": "answerable",
+      "protected": true,
+      "best_sim": 0.8052474740295111,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "o01",
+      "question": "How do I make a croissant?",
+      "category": "off-domain",
+      "protected": false,
+      "best_sim": 0.6446783158374939,
+      "best_rrf": 0.01639344262295082
+    },
+    {
+      "id": "o02",
+      "question": "What is the wifi password?",
+      "category": "off-domain",
+      "protected": false,
+      "best_sim": 0.6341273406668113,
+      "best_rrf": 0.01639344262295082
+    },
+    {
+      "id": "o03",
+      "question": "How much do baristas get paid?",
+      "category": "off-domain",
+      "protected": false,
+      "best_sim": 0.6907850915661509,
+      "best_rrf": 0.02976190476190476
+    },
+    {
+      "id": "n01",
+      "question": "How do I make a pumpkin spice latte?",
+      "category": "near-miss",
+      "protected": false,
+      "best_sim": 0.7322531938552856,
+      "best_rrf": 0.030158730158730156
+    },
+    {
+      "id": "n02",
+      "question": "How do I clean the ice machine?",
+      "category": "near-miss",
+      "protected": false,
+      "best_sim": 0.721882722433887,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "o04",
+      "question": "How do I request time off?",
+      "category": "off-domain",
+      "protected": false,
+      "best_sim": 0.6208401918411255,
+      "best_rrf": 0.01639344262295082
+    },
+    {
+      "id": "n03",
+      "question": "What concentration of bleach should I use to sanitize?",
+      "category": "near-miss",
+      "protected": false,
+      "best_sim": 0.7265228792117323,
+      "best_rrf": 0.03278688524590164
+    },
+    {
+      "id": "c01",
+      "question": "How long does it last?",
+      "category": "ambiguous",
+      "protected": true,
+      "best_sim": 0.6722554970168321,
+      "best_rrf": 0.031754032258064516
+    },
+    {
+      "id": "c02",
+      "question": "What temperature?",
+      "category": "ambiguous",
+      "protected": true,
+      "best_sim": 0.7389722026007067,
+      "best_rrf": 0.03252247488101534
+    }
+  ]
+}

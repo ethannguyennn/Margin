@@ -123,7 +123,9 @@ def citations_verified(response: dict, index: dict, forced_revision: str | None 
         sections.append(chunk["section"])
         doc_ids.append(chunk["doc_id"])
     glance, body = response.get("glance"), response.get("body")
-    if not isinstance(glance, str) or not isinstance(body, str) or not body.strip():
+    # The v2 generator intentionally omits body when the glance contains the answer.
+    # Keep requiring a visible glance and independently audit every value/citation.
+    if not isinstance(glance, str) or not glance.strip() or not isinstance(body, str):
         return False
     if len(glance) > 60 or len(body) > 450:
         return False

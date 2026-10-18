@@ -13,7 +13,7 @@ from datetime import datetime
 from typing import Any, TypeVar
 
 from ..pipeline import DbDown, PipelineError
-from ..schemas import Step, Walkthrough
+from ..schemas import Citation, Step, Walkthrough
 
 
 T = TypeVar("T")
@@ -115,3 +115,18 @@ async def load_walkthrough(p: Any, doc_id: str, revision: str | None, *,
     steps = [sanitized_step(p, s) for s in steps]
     return Walkthrough(doc_id=doc_id, revision=rev, title=p.sanitize(title).strip() or doc_id,
                        total=len(steps), index=0, steps=steps)
+
+
+async def walkthrough_citations(p: Any, walk: Walkthrough) -> list[Citation]:
+    """An answer needs source support for every step; display copy is not a quote."""
+    citations = await guarded(p.db.walkthrough_citations(walk.doc_id, walk.revision),
+                              "loading procedure source quotes")
+    by_id = {c.chunk_id: c for c in citations}
+    ordered = []
+    for step in walk.steps:
+        citation = by_id.get(step.step_id)
+        if (citation is None or not citation.quote.strip() or citation.doc_id != walk.doc_id
+                or citation.revision != walk.revision):
+            raise Internal("The procedure is missing published source support; review it in the portal.")
+        ordered.append(citation)
+    return ordered

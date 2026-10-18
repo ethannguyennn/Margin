@@ -197,8 +197,14 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
     async def noop():
         return None
 
+    async def walkthrough_citations(doc_id, revision):
+        from specs_relay.schemas import Citation
+        return [Citation(chunk_id=f"{doc_id}:{revision}:4.1", doc_id=doc_id, revision=revision,
+                         section="4.1", quote="Disconnect power.")]
+
     mod("db", RetrievalStore=RetrievalStore, write_event=write_event, ping=ok,
-        init_pool=noop, close_pool=noop, list_procedures=lambda: [])
+        init_pool=noop, close_pool=noop, list_procedures=lambda: [],
+        walkthrough_citations=walkthrough_citations)
 
     class ConsoleNotifier:
         async def notify(self, deviation_id, text):

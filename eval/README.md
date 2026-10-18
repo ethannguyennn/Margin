@@ -35,6 +35,28 @@ optional request_revision field is the only way to force a revision.
 - Median latency: observed HTTP round-trip milliseconds, including failed
   requests. This is not hardware end-of-speech-to-lens latency.
 
+A verified answer may put the whole answer in `glance` and leave `body` empty,
+as the v2 generator prompt specifies. The evaluator requires a visible glance
+and still audits every number and source citation independently. The 2026-10-18
+pre-alignment live report is retained as historical failure evidence; the six
+flagged questions were rechecked with saved responses after this correction.
+
+## Retrieval gate calibration
+
+```powershell
+$env:PYTHONPATH = 'relay/src'
+.venv/Scripts/python.exe eval/tune_gate.py --output eval/results/gate-calibration.json
+```
+
+This uses the normalized `eval/qa.jsonl`, live query embeddings and read-only
+cloud retrieval. It performs no generation and changes no environment setting.
+The candidate gate preserves every answerable and clarification case; among
+those candidates it maximizes cheap refusals. The report records the model,
+dimension, bank and per-case scores. It is development-bank calibration, not
+independent evaluation; rerun when the bank or embedding model changes.
+
+## Interpreting reports
+
 Undefined denominators print N/A. All-refusal behavior cannot claim perfect
 citation coverage. HTTP/transport failures count as failed cases. Every
 response must carry a trace_id. A non-2xx answered body is still inspected for
@@ -45,11 +67,12 @@ usable relay; 2 = at least one unverified answer. Fixture/mock results require
 --allow-mock and are always labeled MOCK/FIXTURE ONLY, never live evidence.
 The health endpoint must explicitly identify mock mode.
 
-The independent tests use answer-key fixtures to test the harness. Their
-percentages are not retrieval/generation quality numbers. As of 2026-10-17,
-no live eval was possible because cloud credentials and a real-mode service
-were unavailable. After scaffold-relay was published, the harness also ran
-through its actual mock HTTP handlers in the test suite. These results remain
-fixture evidence. The scaffold currently drops needs_clarification, so its
-ambiguous responses cannot pass that requirement until Part 3 propagates it.
-No threshold tuning or live quality metrics are claimed.
+Independent harness tests use answer-key fixtures; their percentages are not
+retrieval/generation quality numbers. Actual live evidence is explicitly labeled
+in the saved JSON. On 2026-10-18, the 45-case run was incomplete as a quality
+gate: generation hit HTTP 429 starting at case 18, and the pre-alignment evaluator
+also rejected glance-only answers. Keep that report as failure evidence.
+The six flagged questions were rerun using `gemini-3.8-flash` after alignment:
+6/6 passed with 0 unverified answers; 3 had empty bodies. The responses are saved
+in `results/2026-10-18-glance-only-recheck.json`. This subset does not establish
+full-bank quality or sustained quota, and its 7148 ms median is not a latency pass.
