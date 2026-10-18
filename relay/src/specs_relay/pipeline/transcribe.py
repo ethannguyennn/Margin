@@ -20,7 +20,11 @@ TRANSCRIBE_PROMPT = (
     "Transcribe the speech in this audio verbatim. Output only the words spoken, "
     "exactly as heard: no punctuation cleanup, no corrections, no summary, no "
     "interpretation. Keep part codes and numbers as spoken (for example 'M5', "
-    "'four newton meters'). If there is no speech, output nothing."
+    "'four newton meters'). Vocabulary may include espresso, cappuccino, latte, "
+    "flat white, americano, mocha, syrup, pumps, oz, fl oz, ppm, and degrees "
+    "Fahrenheit (\u00b0F). Use vocabulary only to resolve sounds present in the audio; "
+    "never add unheard words or convert numbers or units. "
+    "If there is no speech, output nothing."
 )
 
 

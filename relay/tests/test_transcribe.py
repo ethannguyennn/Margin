@@ -87,6 +87,18 @@ def test_timeout_raises_stt_failed():
     assert len(cl.aio.models.requests) <= 1
 
 
+def test_coffee_vocabulary_is_sent_without_rewriting_spoken_units():
+    cl = client(text="two pumps for the cappuccino at one hundred fifty degrees Fahrenheit")
+    text = asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000))
+    assert text == cl.aio.models.text
+    prompt = cl.aio.models.requests[0].contents[0]
+    for word in ("espresso", "cappuccino", "latte", "flat white", "americano", "mocha",
+                 "pumps", "oz", "ppm", "Fahrenheit"):
+        assert word in prompt
+    assert "never add unheard words or convert numbers or units" in prompt
+    assert "If there is no speech, output nothing" in prompt
+
+
 def api_error(code):
     return APIError(code, {"error": {"message": "api"}})
 
