@@ -119,3 +119,48 @@ def test_say_that_again_inside_a_task_is_the_repeat_command():
     with client_for(ScriptedGenerator(GOOD)) as c:
         out = ask(c, "say that again", context={"doc_id": "SOP-114", "step_id": "SOP-114:C:4.2"})
     assert (out["intent"], out["outcome"], out["command"]) == ("command", "command", "repeat")
+
+
+# --- a follow-up question knows the step the worker is on ---------------------------
+RINSE = "Rinse the wetted path with purified water at 60°C for 5 min."
+
+
+class StepRetriever(FakeRetriever):
+    async def steps_for(self, doc_id, revision):
+        from specs_relay.schemas import Step
+        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE)] if doc_id == "SOP-120" else []
+
+
+class RecordingGenerator(ScriptedGenerator):
+    async def generate(self, query, chunks, feedback=None):
+        self.query, self.chunks = query, chunks
+        return await super().generate(query, chunks, feedback)
+
+
+def step_client(gen):
+    c = client_for(gen)
+    c.app.state.pipeline.retriever = StepRetriever()
+    return c
+
+
+HERE = {"doc_id": "SOP-120", "step_id": "SOP-120:B:3.1"}
+FIVE_MIN = {"answerable": True, "needs_clarification": False, "glance": "Rinse for 5 min", "body": "",
+            "citations": [{"chunk_id": "SOP-120:B:3.1", "quote": RINSE}], "graphic_id": None}
+
+
+def test_follow_up_resolves_against_the_current_step():
+    gen = RecordingGenerator(FIVE_MIN)
+    with step_client(gen) as c:
+        # Retrieval alone is below both gates ("that" names nothing); the step context answers it.
+        out = ask(c, "how long do I do that for", context=HERE)
+    assert out["outcome"] == "answered" and out["verified"] is True, out
+    assert out["source"] == "SOP-120 Sec 3.1 rev B"
+    assert gen.chunks[0].chunk_id == "SOP-120:B:3.1" and len(gen.chunks) <= 6
+    assert "SOP-120:B:3.1" in gen.query and gen.query.startswith("how long do I do that for")
+
+
+def test_unknown_step_context_falls_back_to_plain_retrieval():
+    gen = RecordingGenerator(FIVE_MIN)
+    with step_client(gen) as c:
+        out = ask(c, "how long do I do that for", context={"doc_id": "SOP-120", "step_id": "SOP-120:B:9.9"})
+    assert out["outcome"] == "not_found" and gen.calls == 0

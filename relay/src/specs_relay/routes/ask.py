@@ -39,6 +39,7 @@ from ..schemas import (
     NOT_FOUND_GLANCE,
     AskRequest,
     AskResponse,
+    Chunk,
     Citation,
     Intent,
     Outcome,
@@ -143,6 +144,25 @@ async def _retrieve(p: Pipeline, query: str, revision: str | None) -> RetrievalR
             return await p.retriever.retrieve(query, revision)
     except Exception as exc:
         raise _fail_from(exc, "db_down", "retrieval") from exc
+
+
+async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
+    """The step the worker is on, as a citable chunk, so "how long do I do that for?"
+    resolves against it. Same text the lens shows; None when it can't be loaded."""
+    doc_id, step_id = req.context.doc_id, req.context.step_id
+    if not doc_id or not step_id:
+        return None
+    try:
+        walk = await load_walkthrough(p, doc_id, req.revision or None)
+    except Exception as exc:  # noqa: BLE001 -- a follow-up still works on plain retrieval
+        log.info("step context unavailable: %s", type(exc).__name__)
+        return None
+    step = next((s for s in walk.steps if s.step_id == step_id), None) if walk else None
+    if step is None:
+        return None
+    return Chunk(chunk_id=step.step_id, doc_id=walk.doc_id, revision=walk.revision, section=step.label,
+                 heading=step.glance, is_step=True,
+                 text="\n".join(t for t in (step.body, step.warning, step.checkpoint) if t))
 
 
 def _gate_refuses(p: Pipeline, r: RetrievalResult) -> bool:
@@ -280,7 +300,14 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
 
     revision = req.revision or None
     retrieved = await _retrieve(p, ctx.transcript, revision)
-    if _gate_refuses(p, retrieved):
+    here = await _current_step(p, req) if ctx.intent == "question" else None
+    query = ctx.transcript
+    if here is not None:
+        others = [c for c in retrieved.chunks if c.chunk_id != here.chunk_id]
+        retrieved = retrieved.model_copy(update={"chunks": [here, *others][:6]})
+        query = (f"{ctx.transcript}\n(The worker is on step {here.section} of {here.doc_id}, "
+                 f"chunk_id {here.chunk_id}. \"it\", \"that\" and \"this\" mean this step.)")
+    elif _gate_refuses(p, retrieved):
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer)
 
@@ -310,7 +337,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
                          walkthrough=walk)
 
     # question
-    answer = await _answer(p, settings, ctx.transcript, retrieved, deadline)
+    answer = await _answer(p, settings, query, retrieved, deadline)
     if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)
