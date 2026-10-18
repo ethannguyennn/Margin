@@ -61,6 +61,10 @@ describe('response trust routing', () => {
     expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response, now: 1000 }).state.screen).toBe('ERROR');
     expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response: { ...UI_FIXTURES.answer, body: 'a'.repeat(451) }, now: 1000 }).state.screen).toBe('ERROR');
   });
+  it('shows a verified glance-only answer (empty body) instead of an error', () => {
+    const state = transition(stateFor('THINKING'), { type: 'RESPONSE', response: { ...UI_FIXTURES.answer, body: '' }, now: 1000 }).state;
+    expect(state.screen).toBe('ANSWER_GLANCE'); expect(state.pages).toEqual([UI_FIXTURES.answer.glance]);
+  });
   it('prioritizes not_found and error over a supplied walkthrough', () => {
     for (const [outcome, expected] of [['not_found','NOT_FOUND'],['error','ERROR']] as const) {
       expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response: { ...UI_FIXTURES.walkthrough, outcome }, now: 1 }).state.screen).toBe(expected);
