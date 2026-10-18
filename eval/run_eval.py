@@ -41,7 +41,7 @@ _PART = re.compile(r"\b[a-z]{1,5}-?\d+(?:\.\d+)?\b")
 _VALUE = re.compile(
     r"(?<![\w.])(-?\d+(?:\.\d+)*)(?:\s*"
     r"(n-m|in-lb|ft-lb|mm|cm|um|kg|mg|ml|ul|ms|min|deg\s*c|deg\s*f|%|psi|rpm|hz|s|m|g|l))?"
-    r"(?![a-z0-9.])"
+    r"(?![a-z0-9]|\.\d)"  # a sentence-ending period still ends the value ("add $0.75.")
 )
 
 

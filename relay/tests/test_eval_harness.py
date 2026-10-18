@@ -185,3 +185,11 @@ async def test_transport_failure_counts_as_a_failed_case():
         results, _ = await evaluation.run_suite(client, [case], evaluation.citation_index(HX2_CORPUS))
     assert results[0].outcome == "error"
     assert evaluation.exit_code(evaluation.summarize(results)) == 1
+
+
+def test_a_value_ending_its_sentence_in_the_quote_still_supports_the_answer():
+    # Seen in the live demo-bank run: "add $0.75." ends the SOP sentence, the answer says it mid-sentence.
+    assert evaluation.values_supported("Add $0.75 for oat milk.", ["Oat, almond, or soy milk: add $0.75."], ["4.3"], ["SOP-201"])
+    assert evaluation.values_supported("Accept up to $50 bills", ["The largest bill we accept is $50."], ["2.2"], ["SOP-202"])
+    assert not evaluation.values_supported("Add $0.85 for oat milk.", ["Oat, almond, or soy milk: add $0.75."], ["4.3"], ["SOP-201"])
+    assert evaluation.fact_tokens("section 4.2.1 says 3.5.") >= {("3.5", "")}
