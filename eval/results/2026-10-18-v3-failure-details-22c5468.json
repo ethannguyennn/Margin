@@ -1,0 +1,843 @@
+{
+  "evidence": "LIVE RELAY",
+  "deployed_commit": "22c5468",
+  "results": [
+    {
+      "id": "v3-w2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 594.7551000281237,
+      "reason": "wrong walkthrough document, start or scope",
+      "response": {
+        "trace_id": "c9be0e3e62d64a79b5d6aaed06687101",
+        "transcript": "Bring up the closing checklist",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 13,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 13,
+            "end": 17
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-f1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 3023.563400027342,
+      "reason": "",
+      "response": {
+        "trace_id": "c9abdec4fbbe496ea1670793d1f7088c",
+        "transcript": "How hot should the milk be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Target milk temperature 140 to 155F",
+        "body": "Never exceed 160 deg F.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Whole and 2 percent | 150 to 155\u00b0F (65 to 68\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Soy | 140 to 150\u00b0F (60 to 65\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Oat | 140 to 150\u00b0F (60 to 65\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Never exceed 160\u00b0F (71\u00b0C)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-f1-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "not_found",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1568.2928999885917,
+      "reason": "unexpected outcome",
+      "response": {
+        "trace_id": "b1345b2367b842b8a33f4d9261139d65",
+        "transcript": "And for a kids drink?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-f1-turn-2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1562.4706999515183,
+      "reason": "",
+      "response": {
+        "trace_id": "fc7789d5c5a0462e8e211b3e9d0d701b",
+        "transcript": "What about extra hot?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "\"Extra hot\" is 160 degF (71 degC)",
+        "body": "Extra hot is free.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum."
+          },
+          {
+            "chunk_id": "SOP-201:C:4.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Whipped cream, decaf, and extra hot are free."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-p1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 388.2356000249274,
+      "reason": "missing expected graphic",
+      "response": {
+        "trace_id": "a7cfe6197e914dab93f01e483c4f11bd",
+        "transcript": "What does the steam wand look like?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Espresso cleaning parts",
+        "body": "",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "steam wand"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "espresso-cleaning"
+      }
+    },
+    {
+      "id": "gap-cleaning",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 636.7367000202648,
+      "reason": "wrong walkthrough document, start or scope",
+      "response": {
+        "trace_id": "84e012fa3a5443c197930047576843bd",
+        "transcript": "Open the cleaning procedure.",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 9,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 9,
+            "end": 13
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    }
+  ]
+}
