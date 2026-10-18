@@ -91,6 +91,153 @@ def test_mock_mode_never_imports_real_modules(monkeypatch):
     assert p.mocked == ["all"] and not p.real_db
 
 
+@pytest.mark.parametrize("mocked,ask_mock,conversion_mock", [
+    (["convert"], False, True), (["render", "notify"], False, True),
+    (["transcribe"], True, False), (["retrieve"], True, False),
+    (["generate"], True, False), (["all"], True, True), ([], False, False),
+])
+def test_health_separates_ask_and_conversion(monkeypatch, mocked, ask_mock, conversion_mock):
+    _fake_part4_and_part5(monkeypatch)
+    p = main.build_pipeline(make_settings(mock_mode=False))
+    p.mocked = mocked
+    client, _ = make_client(pipeline=p, mock_mode=False, git_sha="test-sha")
+    normal = client.get("/v1/health").json()
+    assert normal["mock"] is ask_mock
+    assert set(normal) == {"ok", "mock", "db", "version"}
+    verbose = client.get("/v1/health?verbose=1").json()
+    assert verbose["ask_mock"] is ask_mock
+    assert verbose["conversion_mock"] is conversion_mock
+    assert verbose["mocked"] == mocked
+    assert verbose["git_sha"] == "test-sha"
+    assert isinstance(verbose["gemini_429_total"], int)
+    assert isinstance(verbose["gemini_429_by_stage"], dict)
+
+
+def test_health_database_failure_is_unhealthy(monkeypatch):
+    _fake_part4_and_part5(monkeypatch)
+    p = main.build_pipeline(make_settings(mock_mode=False))
+
+    async def down():
+        raise ConnectionError("unavailable")
+
+    monkeypatch.setattr(p.db, "ping", down)
+    client, _ = make_client(pipeline=p, mock_mode=False)
+    assert client.get("/v1/health").json()["ok"] is False
+    assert client.get("/v1/health?verbose=1").json()["db"] == "down"
+
+
+@pytest.mark.parametrize("body,healthy", [(' {"ok":true}', True), ('{"ok":false}', False),
+                                        ('{"ok":"true"}', False), ('{}', False)])
+def test_container_probe_requires_true_ok(monkeypatch, body, healthy):
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("healthcheck", Path(__file__).resolve().parents[2] / "deploy/healthcheck.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    class Response:
+        status = 200
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def read(self): return body.encode()
+
+    monkeypatch.setattr(module.urllib.request, "urlopen", lambda *a, **kw: Response())
+    assert module.probe("http://relay.test/v1/health", tries=1) is healthy
+
+
+@pytest.fixture
+def diagnostic_tool():
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("diagnostic", Path(__file__).resolve().parents[2] / "deploy/diagnostic.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize("rows", [{}, {"a": {"pass": False}},
+                                  {"a": {"pass": True}, "extra": {"pass": True}}])
+def test_voice_diagnostic_rejects_missing_failed_or_stale_results(diagnostic_tool, tmp_path, rows):
+    path = tmp_path / "results.json"
+    path.write_text(json.dumps(rows))
+    with pytest.raises(RuntimeError, match="failed or returned incomplete"):
+        diagnostic_tool.assert_voice_results(path, {"a"})
+    path.write_text(json.dumps({"a": {"pass": True}}))
+    diagnostic_tool.assert_voice_results(path, {"a"})
+
+
+def test_loop_diagnostic_cleans_copy_after_failure(diagnostic_tool, tmp_path, monkeypatch):
+    tool = diagnostic_tool
+    (tmp_path / "app/tests").mkdir(parents=True)
+    (tmp_path / "loop.test.ts").write_text("// synthetic diagnostic")
+    monkeypatch.setattr(tool, "ROOT", tmp_path)
+    monkeypatch.setattr(tool, "DIAG", tmp_path)
+    monkeypatch.setattr(tool, "voice_module", lambda: None)
+    monkeypatch.setattr(tool, "prepare_voice", lambda module: None)
+
+    def fail(command, **kwargs):
+        assert kwargs["env"]["SPECS_DIAG_RELAY"] == "https://relay.example"
+        assert kwargs["env"]["SPECS_DIAG_PACE_MS"] == "10000"
+        assert (tmp_path / "app/tests/zz-diagnostic-loop.test.ts").is_file()
+        raise subprocess.CalledProcessError(1, command)
+
+    monkeypatch.setattr(tool.subprocess, "run", fail)
+    with pytest.raises(subprocess.CalledProcessError):
+        tool.run_loop("https://relay.example", 10)
+    assert not (tmp_path / "app/tests/zz-diagnostic-loop.test.ts").exists()
+
+
+def test_gap_diagnostic_targets_the_selected_relay_and_propagates_failure(diagnostic_tool, monkeypatch, capsys):
+    calls = []
+    monkeypatch.setattr(diagnostic_tool, "check_live", lambda relay: calls.append(relay))
+    def fail(relay, seconds):
+        calls.append((relay, seconds))
+        raise RuntimeError("gap assertions failed")
+    monkeypatch.setattr(diagnostic_tool, "run_gap", fail)
+    assert diagnostic_tool.main(["gap", "--relay", "https://relay.example", "--pace", "10"]) == 1
+    assert calls == ["https://relay.example", ("https://relay.example", 10)]
+    assert "gap assertions failed" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("seconds", ["-1", "nan", "inf"])
+def test_diagnostic_rejects_invalid_pacing(diagnostic_tool, seconds):
+    import argparse
+    with pytest.raises(argparse.ArgumentTypeError):
+        diagnostic_tool.pace(seconds)
+
+
+@pytest.mark.parametrize("url", ["https://secret@relay.example", "https://relay.example/path", "file:///tmp/relay"])
+def test_diagnostic_rejects_credentials_or_non_origin(diagnostic_tool, url):
+    import argparse
+    with pytest.raises(argparse.ArgumentTypeError):
+        diagnostic_tool.origin(url)
+
+
+def test_remote_deploy_reads_dotenv_and_guards_main(monkeypatch, tmp_path):
+    import importlib.util
+    from pathlib import Path
+    spec = importlib.util.spec_from_file_location("remote_deploy", Path(__file__).resolve().parents[2] / "deploy/remote.py")
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+    monkeypatch.setattr(tool, "ROOT", tmp_path)
+    monkeypatch.delenv("VM_HOST", raising=False)
+    monkeypatch.setattr(tool, "dotenv_values", lambda path: {"VM_HOST": "root@vm.example"})
+    monkeypatch.setattr(sys, "argv", ["remote.py"])
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        return types.SimpleNamespace(returncode=7)
+
+    monkeypatch.setattr(tool.subprocess, "run", run)
+    assert tool.main() == 7  # SSH's failure cannot be mistaken for a successful deploy.
+    assert calls[0][-2] == "root@vm.example"
+    assert 'git branch --show-current' in calls[0][-1]
+    assert "git pull --ff-only origin main" in calls[0][-1]
+    with pytest.raises(ValueError):
+        tool.destination("-oProxyCommand=anything")
+
+
 # --- MOCK_MODE=0 wiring against Part 4's module surface -------------------------------
 
 

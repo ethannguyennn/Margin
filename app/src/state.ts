@@ -176,9 +176,11 @@ function receive(s: LensState, r: AskResponse, now: number): Transition {
         }
         if (r.outcome === 'logged')
             return result({ ...s, screen: 'LOGGED', response: null });
-        if (r.outcome !== 'answered' || !r.glance?.trim() || !r.body?.trim())
+        if (r.outcome !== 'answered' || !r.glance?.trim())
             return result(failure(s));
-        return result({ ...s, screen: 'ANSWER_GLANCE', response: r, pages: paginate(sanitizeForG2(r.body), answerGraphic(r) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS), page: 0 });
+        // The relay leaves body empty when the glance says it all; details then repeat the glance.
+        const detail = r.body?.trim() ? r.body : r.glance;
+        return result({ ...s, screen: 'ANSWER_GLANCE', response: r, pages: paginate(sanitizeForG2(detail), answerGraphic(r) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS), page: 0 });
     }
     catch {
         return result(failure(s));

@@ -58,6 +58,58 @@ def test_stage_without_timer_is_harmless():
         pass
 
 
+def test_provider_429_counted_once_through_nested_spans(monkeypatch, caplog):
+    from collections import Counter
+    monkeypatch.setattr(obs, '_quota_counts', Counter())
+    class ProviderLimit(Exception):
+        code = 429
+    error = ProviderLimit('private provider body must not appear in quota logs')
+    with pytest.raises(ProviderLimit):
+        with obs.stage('retrieve'):
+            with obs.stage('embed'):
+                raise error
+    assert obs.quota_snapshot() == {'gemini_429_total': 1, 'gemini_429_by_stage': {'embed': 1}}
+    assert 'private provider body' not in caplog.text
+
+
+def test_wrapped_quota_and_non_quota_errors_are_distinct(monkeypatch):
+    from collections import Counter
+    monkeypatch.setattr(obs, '_quota_counts', Counter())
+    try:
+        try:
+            raise RuntimeError('generation unavailable: HTTP 429')
+        except RuntimeError as cause:
+            raise ValueError('outer safe failure') from cause
+    except ValueError as error:
+        assert obs.record_quota_error(error, 'generate')
+        assert not obs.record_quota_error(error, 'generate')
+    assert not obs.record_quota_error(RuntimeError('HTTP 500'), 'generate')
+    assert obs.quota_snapshot()['gemini_429_total'] == 1
+
+
+def test_real_ask_quota_response_is_safe_and_context_does_not_leak(monkeypatch):
+    from collections import Counter
+    monkeypatch.setattr(obs, "_quota_counts", Counter())
+    client, app = make_client()
+
+    class ProviderLimit(Exception):
+        code = 429
+
+    class LimitedGenerator:
+        async def generate(self, *args, **kwargs):
+            raise ProviderLimit("private provider body")
+
+    app.state.pipeline.generator = LimitedGenerator()
+    response = client.post("/v1/ask", json={"session_id": sid(), "text": "how tight is the m5"})
+    assert response.json()["error"] == {"code": "llm_timeout", "message": "Busy, try again"}
+    assert "private provider body" not in response.text
+    # The relay makes two provider attempts; each actual 429 counts once.
+    assert client.get("/v1/health?verbose=1").json()["gemini_429_total"] == 2
+    unrelated = client.post("/v1/ask", json={"session_id": "invalid"})
+    assert unrelated.json()["error"]["code"] == "bad_request"
+    assert unrelated.json()["error"]["message"] != "Busy, try again"
+
+
 def test_resolve_trace_id_prefers_incoming_header():
     assert obs.resolve_trace_id({"sentry-trace": SENTRY_TRACE}) == APP_TRACE
     assert obs.resolve_trace_id({"sentry-trace": APP_TRACE}) == APP_TRACE

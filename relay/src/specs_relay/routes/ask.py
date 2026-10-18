@@ -39,6 +39,7 @@ from ..schemas import (
     NOT_FOUND_GLANCE,
     AskRequest,
     AskResponse,
+    Chunk,
     Citation,
     Intent,
     Outcome,
@@ -145,6 +146,36 @@ async def _retrieve(p: Pipeline, query: str, revision: str | None) -> RetrievalR
         raise _fail_from(exc, "db_down", "retrieval") from exc
 
 
+async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
+    """The step the worker is on, as a citable chunk, so "how long do I do that for?"
+    resolves against it. Same text the lens shows; None when it can't be loaded."""
+    doc_id, step_id = req.context.doc_id, req.context.step_id
+    if not doc_id or not step_id:
+        return None
+    try:
+        walk = await load_walkthrough(p, doc_id, req.revision or None)
+    except Exception as exc:  # noqa: BLE001 -- a follow-up still works on plain retrieval
+        log.info("step context unavailable: %s", type(exc).__name__)
+        return None
+    step = next((s for s in walk.steps if s.step_id == step_id), None) if walk else None
+    if step is None:
+        return None
+    return Chunk(chunk_id=step.step_id, doc_id=walk.doc_id, revision=walk.revision, section=step.label,
+                 heading=step.glance, is_step=True,
+                 text="\n".join(t for t in (step.body, step.warning, step.checkpoint) if t))
+
+
+def _start_index(walk: Any, chunks: list[Chunk]) -> int:
+    """Start where the worker asked ("closing out the till" -> section 7, not 2.1): the first
+    step of the section group holding the best-ranked step hit. Earlier steps stay one 'back' away."""
+    at = {s.step_id: i for i, s in enumerate(walk.steps)}
+    hit = next((at[c.chunk_id] for c in chunks if c.chunk_id in at), None)
+    if hit is None:
+        return 0
+    group = walk.steps[hit].label.split(".")[0]
+    return next(i for i, s in enumerate(walk.steps) if s.label.split(".")[0] == group)
+
+
 def _gate_refuses(p: Pipeline, r: RetrievalResult) -> bool:
     """not_found without calling the LLM: nothing retrieved, or both signals weak."""
     return not r.chunks or (r.best_sim < p.min_sim and r.best_rrf < p.min_rrf)
@@ -199,6 +230,10 @@ async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult,
             return None  # the model refusing is a success state, not something to retry
         with obs.stage("verify"):
             result = p.verify(draft, r.chunks)
+            if not result.ok and (result.reason or "").startswith("unsupported_graphic"):
+                # A wrong picture never sinks a verified answer: drop it, check the text alone.
+                draft = draft.model_copy(update={"graphic_id": None})
+                result = p.verify(draft, r.chunks)
         if result.ok and result.citations:
             glance = p.sanitize(draft.glance).strip()
             body = p.sanitize(draft.body).strip()
@@ -280,7 +315,14 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
 
     revision = req.revision or None
     retrieved = await _retrieve(p, ctx.transcript, revision)
-    if _gate_refuses(p, retrieved):
+    here = await _current_step(p, req) if ctx.intent == "question" else None
+    query = ctx.transcript
+    if here is not None:
+        others = [c for c in retrieved.chunks if c.chunk_id != here.chunk_id]
+        retrieved = retrieved.model_copy(update={"chunks": [here, *others][:6]})
+        query = (f"{ctx.transcript}\n(The worker is on step {here.section} of {here.doc_id}, "
+                 f"chunk_id {here.chunk_id}. \"it\", \"that\" and \"this\" mean this step.)")
+    elif _gate_refuses(p, retrieved):
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer)
 
@@ -296,6 +338,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         if walk is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
+        walk = walk.model_copy(update={"index": _start_index(walk, retrieved.chunks)})
         citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
                               section=s.label, quote=s.body) for s in walk.steps]
         n = walk.total
@@ -306,11 +349,11 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         ctx.doc_ids = [walk.doc_id]
         return _response(trace_id, ctx, timer, glance=glance,
                          body=f"{walk.title}, {n} steps. Swipe to advance."[:BODY_MAX],
-                         source=_source(citations[0]), citations=citations, verified=True,
+                         source=_source(citations[walk.index]), citations=citations, verified=True,
                          walkthrough=walk)
 
     # question
-    answer = await _answer(p, settings, ctx.transcript, retrieved, deadline)
+    answer = await _answer(p, settings, query, retrieved, deadline)
     if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)

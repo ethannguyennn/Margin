@@ -222,7 +222,46 @@ const COFFEE: AskResponse = base({
   citations: [{ chunk_id: 'SOP-220:C:4.4', doc_id: 'SOP-220', revision: 'C', section: '4.4',
     quote: 'Purge the steam wand for 2 seconds before and after every use.' }],
 });
+// v3 (BUILD-PLAN-V3 §2): an ambiguous question with its clarify, the answer to each reply, and a
+// scoped walkthrough. Text quoted from corpus/SOP-230-C.md, so the reference pictures resolve.
+const PUMP_RULE = 'Flavored drinks (vanilla, caramel, or hazelnut) get 2 pumps in Small, 3 pumps in Medium, and 4 pumps in Large.';
+const PUMPS: Record<string, number> = { small: 2, medium: 3, large: 4 };
+const CLARIFY_PUMPS: AskResponse = base({
+  transcript: 'how many pumps of syrup', outcome: 'not_found', needs_clarification: true,
+  glance: 'Not in approved SOPs', body: 'No matching procedure. Try rephrasing or ask your supervisor.',
+  clarify: { prompt: 'Which size?', options: ['Small', 'Medium', 'Large'] },
+});
+function pumpsFor(size: string): AskResponse {
+  const name = size[0].toUpperCase() + size.slice(1);
+  return base({
+    transcript: size, verified: true, glance: `${PUMPS[size]} pumps in ${name}`, body: '',
+    source: 'SOP-230 Sec 1.3 rev C', graphic_id: 'recipe-pumps',
+    citations: [{ chunk_id: 'SOP-230:C:1.3', doc_id: 'SOP-230', revision: 'C', section: '1.3', quote: PUMP_RULE }],
+  });
+}
+const recipe = (label: string, glance: string, body: string): Step => ({ step_id: `SOP-230:C:${label}`, label, glance, body });
+const RECIPE_STEPS: Step[] = [
+  recipe('2.2', 'Latte: add syrup', 'If flavored, pump the syrup into the empty cup.'),
+  recipe('2.3', 'Latte: pull espresso', 'Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup.'),
+  recipe('2.4', 'Latte: steam milk', 'Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.'),
+  recipe('2.5', 'Latte: pour', 'Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name.'),
+  recipe('3.2', 'Cappuccino: pull espresso', 'Pull the shots (see SOP-220) directly into the cup.'),
+  recipe('3.3', 'Cappuccino: steam milk', 'Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.'),
+  recipe('3.4', 'Cappuccino: pour', 'Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid.'),
+  recipe('4.2', 'Flat white: pull espresso', 'Pull the shots (see SOP-220) directly into the cup.'),
+  recipe('4.3', 'Flat white: steam milk', 'Steam the milk to its target temperature, stretching for only 1 to 2 seconds.'),
+  recipe('4.4', 'Flat white: pour', 'Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid.'),
+];
+const CAPPUCCINO: AskResponse = base({
+  transcript: 'walk me through making a cappuccino', intent: 'walkthrough', verified: true,
+  glance: 'Drink Recipes, 10 steps', body: 'Drink Recipes, 10 steps. Swipe to advance.', source: 'SOP-230 Sec 3.2 rev C',
+  citations: RECIPE_STEPS.map((s) => ({ chunk_id: s.step_id, doc_id: 'SOP-230', revision: 'C', section: s.label, quote: s.body })),
+  walkthrough: { doc_id: 'SOP-230', revision: 'C', title: 'Drink Recipes', total: 10, index: 4, scope: { start: 4, end: 7 }, steps: RECIPE_STEPS },
+});
+
 const TRIGGERS: Array<[string[], AskResponse]> = [
+  [['how many pumps', 'pumps of syrup'], CLARIFY_PUMPS],
+  [['making a cappuccino'], CAPPUCCINO],
   [['steam wand', 'coffee reference'], COFFEE],
   [['log deviation', 'deviation'], LOGGED],
   [['boom'], ERROR],
@@ -248,10 +287,14 @@ export function clearMockTranscripts(): void {
   heard.length = 0;
 }
 
+/** Like the relay's session (BUILD-PLAN-V3 §2): a reply naming an option resolves the last clarify. */
+let clarifying = false;
 export async function mockAsk(req: AskRequest): Promise<AskResponse> {
   // Audio requests have no client-side transcript: use the queued one, else the torque question.
   const said = req.text ?? heard.shift();
-  const res = said ? mockResponseFor(said) : TORQUE;
+  const size = clarifying && said ? Object.keys(PUMPS).find((k) => said.toLowerCase().includes(k)) : undefined;
+  const res = size ? pumpsFor(size) : said ? mockResponseFor(said) : TORQUE;
+  clarifying = !!res.clarify;
   // Commands take the relay's fast path (no retrieval, no LLM), so they come back quicker.
   await sleep(res.outcome === 'command' ? MOCK_DELAY_MS / 3 : MOCK_DELAY_MS);
   return res;
@@ -440,6 +483,7 @@ export function resetMockV2(): void {
   heard.length = 0;
   endpointPlan = { reason: 'speech_end', ms: 1500 };
   assignmentEnabled = true;
+  clarifying = false;
 }
 
-export const fixtures = { TORQUE, WALKTHROUGH, CLEAN, NOT_FOUND, LOGGED, ERROR, ASSIGNMENT };
+export const fixtures = { TORQUE, WALKTHROUGH, CLEAN, NOT_FOUND, LOGGED, ERROR, ASSIGNMENT, CLARIFY_PUMPS, CAPPUCCINO, pumpsFor };

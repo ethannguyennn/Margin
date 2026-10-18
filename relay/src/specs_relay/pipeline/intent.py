@@ -93,7 +93,9 @@ def _loose_command(transcript: str) -> str | None:
 
 _WALKTHROUGH = re.compile(
     r"\b(?:guide me|walk (?:me )?through|step by step|take me through|start (?:the )?procedure|"
-    r"show me how to|teach me(?: how)? to|what are the steps (?:for|to))\b", re.I
+    r"show me how to|teach me(?: how)? to|what are the steps (?:for|to))\b|"
+    r"^(?:open|pull up|bring up|load|start|begin|let['\u2019]s (?:do|start|begin))\b"
+    r"[^.!?]*\b(?:procedure|checklist|sop|steps|standards|routine|process|opening|closing)\b", re.I
 )
 # README pattern is `report (an )?(...)`; `an?` also accepts "report a problem".
 _DEVIATION = re.compile(
