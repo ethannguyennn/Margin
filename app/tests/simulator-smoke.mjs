@@ -20,7 +20,7 @@ if(process.argv.includes('--launch')){launch('m1');}else{
   async function lastScreen(){return(await entries()).filter(e=>e.message.includes('[Margin] rendered screen=')).at(-1)?.message;}
   async function screen(name,step,timeout){await until(async()=>{const line=await lastScreen();return line?.includes('screen='+name+' ') && (step===undefined || line.includes('step='+step+' '));},name+' '+step,timeout);checks.push({screen:name,...(step===undefined?{}:{step})});console.log('PASS',name,step??'');}
   async function touch(action){await fetch(`${base}/api/input`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action})});await wait(150);}
-  async function capture(name){for(const kind of ['glasses','webview']){const r=await fetch(`${base}/api/screenshot/${kind}`,{signal:AbortSignal.timeout(10000)});assert.ok(r.ok);await writeFile(new URL(`${name}-${kind}.png`,output),Buffer.from(await r.arrayBuffer()));}}
+  async function capture(name){await wait(160);for(const kind of ['glasses','webview']){const r=await fetch(`${base}/api/screenshot/${kind}`,{signal:AbortSignal.timeout(10000)});assert.ok(r.ok);await writeFile(new URL(`${name}-${kind}.png`,output),Buffer.from(await r.arrayBuffer()));}}
   async function connect(){
     const target=await until(async()=>{const targets=await(await fetch(cdp+'/json/list')).json();return targets.find(t=>t.url.startsWith(url));},'CDP app target');
     const ws=new WebSocket(target.webSocketDebuggerUrl),pending=new Map();let id=0;
