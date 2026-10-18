@@ -165,6 +165,17 @@ async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
                  text="\n".join(t for t in (step.body, step.warning, step.checkpoint) if t))
 
 
+def _start_index(walk: Any, chunks: list[Chunk]) -> int:
+    """Start where the worker asked ("closing out the till" -> section 7, not 2.1): the first
+    step of the section group holding the best-ranked step hit. Earlier steps stay one 'back' away."""
+    at = {s.step_id: i for i, s in enumerate(walk.steps)}
+    hit = next((at[c.chunk_id] for c in chunks if c.chunk_id in at), None)
+    if hit is None:
+        return 0
+    group = walk.steps[hit].label.split(".")[0]
+    return next(i for i, s in enumerate(walk.steps) if s.label.split(".")[0] == group)
+
+
 def _gate_refuses(p: Pipeline, r: RetrievalResult) -> bool:
     """not_found without calling the LLM: nothing retrieved, or both signals weak."""
     return not r.chunks or (r.best_sim < p.min_sim and r.best_rrf < p.min_rrf)
@@ -323,6 +334,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         if walk is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
+        walk = walk.model_copy(update={"index": _start_index(walk, retrieved.chunks)})
         citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
                               section=s.label, quote=s.body) for s in walk.steps]
         n = walk.total
@@ -333,7 +345,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         ctx.doc_ids = [walk.doc_id]
         return _response(trace_id, ctx, timer, glance=glance,
                          body=f"{walk.title}, {n} steps. Swipe to advance."[:BODY_MAX],
-                         source=_source(citations[0]), citations=citations, verified=True,
+                         source=_source(citations[walk.index]), citations=citations, verified=True,
                          walkthrough=walk)
 
     # question

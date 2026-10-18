@@ -164,3 +164,27 @@ def test_unknown_step_context_falls_back_to_plain_retrieval():
     with step_client(gen) as c:
         out = ask(c, "how long do I do that for", context={"doc_id": "SOP-120", "step_id": "SOP-120:B:9.9"})
     assert out["outcome"] == "not_found" and gen.calls == 0
+
+
+# --- a walkthrough starts at the section the worker asked for -----------------------
+class TillRetriever:
+    async def retrieve(self, query, revision):
+        from specs_relay.schemas import Chunk
+        hits = [Chunk(chunk_id=f"SOP-202:C:{s}", doc_id="SOP-202", revision="C", section=s, text="t", is_step=True)
+                for s in ("7.2", "2.3", "7.1")]
+        return RetrievalResult(chunks=hits, best_sim=0.79, best_rrf=0.032)
+
+    async def steps_for(self, doc_id, revision):
+        from specs_relay.schemas import Step
+        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.")
+                for s in ("2.3", "5.1", "7.1", "7.2", "7.3")]
+
+
+def test_walkthrough_starts_at_the_first_step_of_the_asked_section():
+    c = client_for(ScriptedGenerator(GOOD))
+    c.app.state.pipeline.retriever = TillRetriever()
+    with c:
+        out = ask(c, "take me through closing out the till")
+    w = out["walkthrough"]
+    assert out["intent"] == "walkthrough" and (w["total"], w["index"]) == (5, 2), out
+    assert w["steps"][w["index"]]["label"] == "7.1" and out["source"] == "SOP-202 Sec 7.1 rev C"

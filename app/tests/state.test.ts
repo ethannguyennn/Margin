@@ -65,6 +65,13 @@ describe('response trust routing', () => {
     const state = transition(stateFor('THINKING'), { type: 'RESPONSE', response: { ...UI_FIXTURES.answer, body: '' }, now: 1000 }).state;
     expect(state.screen).toBe('ANSWER_GLANCE'); expect(state.pages).toEqual([UI_FIXTURES.answer.glance]);
   });
+  it('a walkthrough opens at the relay\'s start step, and back still reaches step 1', () => {
+    const response = structuredClone(UI_FIXTURES.walkthrough); response.walkthrough!.index = 2;
+    let state = transition(stateFor('THINKING'), { type: 'RESPONSE', response, now: 1000 }).state;
+    expect(state.screen).toBe('STEP'); expect(state.walkthrough!.index).toBe(2);
+    state = transition(transition(state, { type: 'UP' }).state, { type: 'UP' }).state;
+    expect(state.walkthrough!.index).toBe(0);
+  });
   it('prioritizes not_found and error over a supplied walkthrough', () => {
     for (const [outcome, expected] of [['not_found','NOT_FOUND'],['error','ERROR']] as const) {
       expect(transition(stateFor('THINKING'), { type: 'RESPONSE', response: { ...UI_FIXTURES.walkthrough, outcome }, now: 1 }).state.screen).toBe(expected);
