@@ -1,3 +1,5 @@
+> **v2:** the current Part 3 handoff is [docs/handoffs/PART-3.md](../docs/handoffs/PART-3.md). This file is the v1 handoff.
+
 # Part 3 handoff
 
 `scaffold-relay` is tagged. Merge it: `git fetch --tags && git merge scaffold-relay`.

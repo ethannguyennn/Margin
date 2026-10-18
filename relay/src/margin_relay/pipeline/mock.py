@@ -18,7 +18,7 @@ v2 (BUILD-PLAN-V2): ``parse_command``, an in-memory ``MockDB`` with every Part 5
 v2 query (materials, drafts, diagrams, devices, assignments, progress, publish),
 ``MockConverter`` + ``verify_step`` (text uploads are converted for real;
 binary uploads get a clearly labelled synthetic stand-in), and ``MockRenderer``
-(stdlib PNG, no Pillow). SOP-114 rev C step 4.2 ships with an approved demo
+(stdlib 8-bit grey PNG tiles, the proven lens format; no Pillow). SOP-114 rev C step 4.2 ships with an approved demo
 schematic (DGM-0001, the star torque order) so "show diagram" works on the mock
 relay for milestone M2.
 """
@@ -887,9 +887,10 @@ class _Canvas:
 
 
 class MockRenderer:
-    """Stand-in for Part 4's DiagramRenderer. Tiles are 288x144 RGBA PNGs, opaque
-    black with white strokes: the format Part 1 proved through ImageRawDataUpdate
-    in simulator 0.9.5. Part 2 owns the final format (BUILD-PLAN-V2 section 4)."""
+    """Stand-in for Part 4's DiagramRenderer. Tiles are 288x144 8-bit greyscale PNGs
+    with every pixel at a lens level (level * 17; strokes at level 15): the format
+    Part 2 proved through ImageRawDataUpdate in simulator 0.9.5 and Part 4 renders
+    (``render.TILE_FORMAT = "png"``, BUILD-PLAN-V2 section 4)."""
 
     def render(self, spec: DiagramSpec, page_image: bytes | None) -> list[bytes]:
         c = _Canvas()
@@ -918,20 +919,17 @@ class MockRenderer:
                 c.digits(e.x, e.y, e.label)
         tiles = []
         for slot in range(2):
-            rows = []
-            for y in range(CANVAS_H):
-                row = c.px[y * CANVAS_W + slot * TILE_W: y * CANVAS_W + (slot + 1) * TILE_W]
-                rows.append(bytes(b for v in row for b in (v, v, v, 255)))
-            tiles.append(png_bytes(TILE_W, CANVAS_H, rows, 6))
+            rows = [bytes(c.px[y * CANVAS_W + slot * TILE_W: y * CANVAS_W + (slot + 1) * TILE_W])
+                    for y in range(CANVAS_H)]
+            tiles.append(png_bytes(TILE_W, CANVAS_H, rows, 0))
         return tiles
 
     def preview_png(self, tiles: list[bytes]) -> bytes:
         """576x144 RGB PNG coloured like the lens. Re-renders from the tile PNGs' pixels."""
         canvas = bytearray(CANVAS_W * CANVAS_H)
         for slot, data in enumerate(tiles[:2]):
-            for y, row in enumerate(_decode_rgba_rows(data)):
-                for x in range(TILE_W):
-                    canvas[y * CANVAS_W + slot * TILE_W + x] = row[x * 4]
+            for y, row in enumerate(_decode_grey_rows(data)):
+                canvas[y * CANVAS_W + slot * TILE_W: y * CANVAS_W + (slot + 1) * TILE_W] = row[:TILE_W]
         rows = [bytes(round(v * ch / 255) for v in canvas[y * CANVAS_W:(y + 1) * CANVAS_W] for ch in _LENS_GREEN)
                 for y in range(CANVAS_H)]
         return png_bytes(CANVAS_W, CANVAS_H, rows, 2)
@@ -940,8 +938,8 @@ class MockRenderer:
         return png_bytes(1, 1, [b"\x00"], 0)  # mock: crops only need *a* page image
 
 
-def _decode_rgba_rows(data: bytes) -> list[bytes]:
-    """Inverse of png_bytes for its own RGBA output (filter 0 only)."""
+def _decode_grey_rows(data: bytes) -> list[bytes]:
+    """Inverse of png_bytes for its own 8-bit grey output (filter 0 only)."""
     size = png_size(data)
     if size is None:
         raise ValueError("not a PNG tile")
@@ -954,5 +952,5 @@ def _decode_rgba_rows(data: bytes) -> list[bytes]:
             idat += data[pos + 8:pos + 8 + length]
         pos += 12 + length
     raw = zlib.decompress(idat)
-    stride = width * 4 + 1
+    stride = width + 1
     return [raw[y * stride + 1:(y + 1) * stride] for y in range(height)]
