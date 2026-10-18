@@ -118,6 +118,15 @@ def test_transient_error_twice_raises_stt_failed():
     assert len(cl.aio.models.requests) == 2
 
 
+def test_recovered_quota_error_reaches_observability(monkeypatch):
+    from specs_relay import obs
+    recorded = []
+    monkeypatch.setattr(obs, "record_quota_error", lambda error, stage: recorded.append((error.code, stage)), raising=False)
+    cl = client(text="next", exc=[api_error(429), None])
+    assert asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000)) == "next"
+    assert recorded == [(429, "stt")]
+
+
 def test_bad_request_does_not_retry():
     cl = client(exc=[api_error(400), None])
     with pytest.raises(TranscriptionError):

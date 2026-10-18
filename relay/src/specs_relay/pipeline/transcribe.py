@@ -11,6 +11,7 @@ import io
 import wave
 from typing import Any
 
+from .. import obs
 from . import SttFailed
 
 TRANSCRIBE_TIMEOUT_S = 4.0
@@ -81,6 +82,9 @@ class GeminiTranscriber:
                 except asyncio.TimeoutError:
                     raise
                 except Exception as e:
+                    record_quota = getattr(obs, "record_quota_error", None)
+                    if record_quota is not None:
+                        record_quota(e, "stt")
                     if (attempt or getattr(e, "code", None) not in TRANSIENT_CODES
                             or deadline - loop.time() <= 0.4):
                         raise
