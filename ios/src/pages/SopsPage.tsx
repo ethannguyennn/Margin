@@ -87,7 +87,7 @@ function StepList({
             <p className="step-label">{s.label}</p>
             <p className="glance sm">{s.glance}</p>
             <p className="body">{s.body}</p>
-            <button className="ghost" onClick={() => onUse(s)}>
+            <button className="btn" onClick={() => onUse(s)}>
               {pinnedStepId === s.step_id ? 'Pinned as lens context ✓' : 'Pin as lens context'}
             </button>
           </li>

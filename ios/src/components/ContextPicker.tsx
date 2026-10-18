@@ -15,7 +15,7 @@ export function ContextPicker() {
       <div className="row between">
         <h2 className="section-title">Context</h2>
         {docId && (
-          <button className="link" onClick={clearContext}>
+          <button className="btn" onClick={clearContext}>
             Clear
           </button>
         )}

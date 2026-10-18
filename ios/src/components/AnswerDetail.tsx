@@ -1,27 +1,10 @@
-import type { AskResponse, Citation, Latency, Step } from '../contract';
-import { OutcomePill, Pill, VerifiedPill } from './Pills';
-import { Walkthrough } from './Walkthrough';
+import type { AskResponse, Citation } from '../contract';
 
-const STAGES: Array<keyof Latency> = ['stt', 'embed', 'retrieve', 'generate', 'verify', 'total'];
-
-/** The phone's reading surface: everything the glance line had to leave out. */
-export function AnswerDetail({
-  res,
-  pinnedStepId,
-  onUseStep,
-}: {
-  res: AskResponse;
-  pinnedStepId: string | null;
-  onUseStep: (step: Step) => void;
-}) {
+/** The phone's reading surface: the answer block, then the evidence behind it. */
+export function AnswerDetail({ res }: { res: AskResponse }) {
   return (
-    <div className="stack">
+    <>
       <section className="card">
-        <div className="row wrap">
-          <OutcomePill outcome={res.outcome} />
-          <Pill tone="muted">{res.intent}</Pill>
-          {res.outcome === 'answered' && <VerifiedPill verified={res.verified} />}
-        </div>
         <p className="glance">{res.glance || '—'}</p>
         {res.body && <p className="body">{res.body}</p>}
         {res.transcript && <p className="meta">Asked · “{res.transcript}”</p>}
@@ -46,35 +29,14 @@ export function AnswerDetail({
           </ul>
         </section>
       )}
-
-      {res.walkthrough && res.walkthrough.steps.length > 0 && (
-        <Walkthrough
-          key={`${res.walkthrough.doc_id}-${res.trace_id}`}
-          wt={res.walkthrough}
-          pinnedStepId={pinnedStepId}
-          onUse={onUseStep}
-        />
-      )}
-
-      <section className="card">
-        <h2 className="section-title">Latency</h2>
-        <div className="row wrap">
-          {STAGES.map((stage) => (
-            <span key={stage} className={`chip static${stage === 'total' ? ' strong' : ''}`}>
-              {stage} {res.latency_ms[stage]} ms
-            </span>
-          ))}
-        </div>
-        {res.trace_id && <p className="meta mono">trace {res.trace_id}</p>}
-      </section>
-    </div>
+    </>
   );
 }
 
 function CitationItem({ citation }: { citation: Citation }) {
   return (
     <li>
-      <p className="meta">
+      <p className="lbl">
         {citation.doc_id} rev {citation.revision} · section {citation.section}
       </p>
       <p className="quote">{citation.quote}</p>

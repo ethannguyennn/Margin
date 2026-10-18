@@ -31,14 +31,14 @@ export function DeviationForm() {
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-      <button className="primary" disabled={busy === 'deviation' || !text.trim()} onClick={() => void submit()}>
+      <button className="btn pri" disabled={busy === 'deviation' || !text.trim()} onClick={() => void submit()}>
         {busy === 'deviation' ? 'Logging…' : 'Log deviation'}
       </button>
 
       {result && (
-        <div className="row wrap result">
-          <Pill tone="info">{result.deviation_id}</Pill>
-          <Pill tone={result.notified ? 'ok' : 'warn'}>
+        <div className="row wrap">
+          <Pill tone="dim">{result.deviation_id}</Pill>
+          <Pill tone={result.notified ? 'plain' : 'solid'}>
             {result.notified ? 'supervisor alerted' : 'alert failed — tell your supervisor'}
           </Pill>
         </div>

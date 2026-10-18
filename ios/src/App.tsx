@@ -1,6 +1,9 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { HeaderSummary } from './components/HeaderSummary';
 import { RelayStatus } from './components/RelayStatus';
 import { TabBar } from './components/TabBar';
+import { ThemeToggle } from './components/ThemeToggle';
+import { useTheme } from './hooks/useTheme';
 import AnswerPage from './pages/AnswerPage';
 import LensPage from './pages/LensPage';
 import SopsPage from './pages/SopsPage';
@@ -14,17 +17,24 @@ const HEADS: Record<string, { title: string; subtitle: string }> = {
 export default function App() {
   const { pathname } = useLocation();
   const head = HEADS[pathname] ?? { title: 'Margin', subtitle: 'iPhone display' };
+  const { theme, toggle } = useTheme();
 
   return (
     <div className="shell">
       <div className="app">
         <header className="app-header">
-          <div className="head-text">
-            <p className="eyebrow">Margin · iPhone display</p>
-            <h1>{head.title}</h1>
-            <p className="subtitle">{head.subtitle}</p>
+          <div className="top">
+            <div className="head-text">
+              <p className="eyebrow">Margin · iPhone display</p>
+              <h1>{head.title}</h1>
+              <p className="subtitle">{head.subtitle}</p>
+            </div>
+            <div className="row">
+              <RelayStatus />
+              <ThemeToggle theme={theme} onToggle={toggle} />
+            </div>
           </div>
-          <RelayStatus />
+          <HeaderSummary />
         </header>
 
         <main className="app-main">

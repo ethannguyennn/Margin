@@ -24,17 +24,26 @@ export function Walkthrough({
           {wt.doc_id} rev {wt.revision}
         </span>
       </div>
-      <p className="wt-title">{wt.title}</p>
+      <p className="lbl">{wt.title}</p>
 
-      <div className="row wrap steps">
+      <ol className="steps">
+        {wt.steps.map((s, i) => (
+          <li key={s.step_id}>
+            <span className="n">{i + 1}</span>
+            <span>{s.glance}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="row wrap">
         {wt.steps.map((s, i) => (
           <button
             key={s.step_id}
-            className={`chip${i === index ? ' on' : ''}`}
+            className={`btn${i === index ? ' on' : ''}`}
             onClick={() => setIndex(i)}
             aria-current={i === index}
           >
-            {s.label}
+            {i + 1}
           </button>
         ))}
       </div>
@@ -43,18 +52,18 @@ export function Walkthrough({
       <p className="body">{step.body}</p>
 
       <div className="row between">
-        <button className="ghost" onClick={() => setIndex(Math.max(0, index - 1))} disabled={index === 0}>
+        <button className="btn" onClick={() => setIndex(Math.max(0, index - 1))} disabled={index === 0}>
           Previous
         </button>
         <span className="meta">
           {index + 1} / {wt.steps.length}
         </span>
-        <button className="ghost" onClick={() => setIndex(Math.min(last, index + 1))} disabled={index === last}>
+        <button className="btn" onClick={() => setIndex(Math.min(last, index + 1))} disabled={index === last}>
           Next
         </button>
       </div>
 
-      <button className="primary wide" onClick={() => onUse(step)}>
+      <button className="btn pri" onClick={() => onUse(step)}>
         {pinnedStepId === step.step_id ? 'Pinned as lens context ✓' : 'Pin as lens context'}
       </button>
     </section>

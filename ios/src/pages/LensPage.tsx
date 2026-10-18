@@ -35,7 +35,7 @@ export default function LensPage() {
       <section className="card">
         <div className="row between">
           <h2 className="section-title">Session</h2>
-          <button className="link" onClick={startNewSession}>
+          <button className="btn" onClick={startNewSession}>
             New session
           </button>
         </div>
@@ -96,10 +96,10 @@ export default function LensPage() {
           onChange={(e) => setQuestion(e.target.value)}
         />
         <div className="row wrap">
-          <button className="primary" disabled={busy === 'ask' || !question.trim()} onClick={() => void submit()}>
+          <button className="btn pri" disabled={busy === 'ask' || !question.trim()} onClick={() => void submit()}>
             {busy === 'ask' ? 'Asking…' : 'Ask'}
           </button>
-          <button className="ghost" disabled={busy === 'ask'} onClick={() => void repeatLast()}>
+          <button className="btn" disabled={busy === 'ask'} onClick={() => void repeatLast()}>
             Repeat last
           </button>
         </div>
@@ -121,7 +121,7 @@ export default function LensPage() {
         <section className="card">
           <div className="row between">
             <h2 className="section-title">What the lens shows</h2>
-            <Link className="link" to="/">
+            <Link className="btn" to="/">
               Full answer
             </Link>
           </div>
