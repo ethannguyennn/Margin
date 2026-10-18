@@ -35,7 +35,7 @@ from ..schemas import (
 )
 from .common import NotFound, PayloadTooLarge, UnsupportedMedia, guarded
 
-log = logging.getLogger("margin.materials")
+log = logging.getLogger("specs.materials")
 router = APIRouter()
 
 PDF = "application/pdf"

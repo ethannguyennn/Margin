@@ -141,9 +141,9 @@ test('sensitivity and nod mode come from settings', () => {
     setItem: (k: string, v: string) => (store[k] = v),
     removeItem: (k: string) => delete store[k],
   };
-  store['margin.sensitivity'] = '2';
-  store['margin.nodMode'] = '"single"';
-  store['margin.detector'] = JSON.stringify({ down: 70, gate: 'junk' });
+  store['specs.sensitivity'] = '2';
+  store['specs.nodMode'] = '"single"';
+  store['specs.detector'] = JSON.stringify({ down: 70, gate: 'junk' });
   const p = currentParams();
   assert.equal(p.down, 35, 'override 70 / sensitivity 2');
   assert.equal(p.up, DEFAULT_PARAMS.up / 2);
@@ -242,16 +242,16 @@ test('calibrate: 3 double nods set down/up to 60 % of the median peak and persis
   assert.deepEqual(await p, { ok: true });
   assert.deepEqual(progress, [0, 1, 2, 3]);
   assert.equal(g.isCalibrated(), true);
-  const saved = JSON.parse(store['margin.detector']);
+  const saved = JSON.parse(store['specs.detector']);
   assert.ok(saved.down > DEFAULT_PARAMS.down && saved.down < 100, `down=${saved.down}`);
   assert.deepEqual(hw.calls.at(-1), [false, undefined], 'calibration started the IMU, so it stops it');
 
   // Weak nods: detected by the relaxed pass, but below the floor -> defaults kept, ok: false.
-  delete store['margin.detector'];
+  delete store['specs.detector'];
   const weak = g.calibrate(() => {}, { timeoutMs: 3000 });
   await settle();
   hw.feed(shifted(nodSession(7), 90000));
   assert.deepEqual(await weak, { ok: false });
-  assert.equal(store['margin.detector'], undefined);
+  assert.equal(store['specs.detector'], undefined);
   delete (globalThis as any).localStorage;
 });

@@ -3,11 +3,11 @@ import os
 
 import pytest
 
-from margin_relay import db
+from specs_relay import db
 
 
 @pytest.mark.asyncio
-@pytest.mark.skipif(os.environ.get('MARGIN_TEST_V2_DATABASE') != '1', reason='Tiger validation deferred until team merge; set MARGIN_TEST_V2_DATABASE=1 to opt in')
+@pytest.mark.skipif(os.environ.get('SPECS_TEST_V2_DATABASE') != '1', reason='Tiger validation deferred until team merge; set SPECS_TEST_V2_DATABASE=1 to opt in')
 async def test_migration_twice_preserves_v1_and_deduplicates_null_and_step_progress():
     try:
         await db.init_pool()

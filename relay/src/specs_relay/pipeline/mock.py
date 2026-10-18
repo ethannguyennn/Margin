@@ -65,7 +65,7 @@ from ..schemas import (
 )
 from . import LlmTimeout
 
-log = logging.getLogger("margin.mock")
+log = logging.getLogger("specs.mock")
 
 # Thresholds the gate uses in mock mode when NOT_FOUND_MIN_* are unset.
 MOCK_MIN_SIM = 0.5
@@ -159,10 +159,10 @@ COMMAND_PHRASES: dict[str, tuple[str, ...]] = {
     "diagram": ("diagram", "show diagram", "picture", "show me"),
     "pause": ("pause", "stop task"),
     "resume": ("resume", "continue"),
-    "exit": ("exit", "close margin"),
+    "exit": ("exit", "close specs"),
 }
 _PHRASE_TO_COMMAND = {p: c for c, ps in COMMAND_PHRASES.items() for p in ps}
-_FILLER = frozenset({"ok", "okay", "um", "uh", "please", "margin", "hey"})
+_FILLER = frozenset({"ok", "okay", "um", "uh", "please", "specs", "hey"})
 
 
 def parse_command(transcript: str | None) -> str | None:

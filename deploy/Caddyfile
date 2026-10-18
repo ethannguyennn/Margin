@@ -1,12 +1,12 @@
 # TLS termination for the public relay origin. Caddy obtains and renews the
 # certificate automatically once the DNS A record points at this VM.
-# MARGIN_DOMAIN may list several hosts, e.g. "getyourassto.work, 45-32-88-132.sslip.io".
+# SPECS_DOMAIN may list several hosts, e.g. "getyourassto.work, 45-32-88-132.sslip.io".
 # CORS is the relay's job; Caddy passes OPTIONS and every header through untouched.
 {
 	email {$ACME_EMAIL}
 }
 
-{$MARGIN_DOMAIN} {
+{$SPECS_DOMAIN} {
 	encode zstd gzip
 
 	# Upload limit at the edge too: MAX_UPLOAD_MB (20) plus multipart overhead.

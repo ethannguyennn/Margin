@@ -22,10 +22,10 @@ COMMAND_PHRASES: dict[str, tuple[str, ...]] = {
     "diagram": ("diagram", "show diagram", "picture", "show me"),
     "pause": ("pause", "stop task"),
     "resume": ("resume", "continue"),
-    "exit": ("exit", "close margin"),
+    "exit": ("exit", "close specs"),
 }
 _PHRASE_TO_COMMAND = {p: c for c, ps in COMMAND_PHRASES.items() for p in ps}
-_FILLER = frozenset({"ok", "okay", "um", "uh", "please", "margin", "hey"})
+_FILLER = frozenset({"ok", "okay", "um", "uh", "please", "specs", "hey"})
 _WORD = re.compile(r"[a-z]+")
 
 
@@ -33,8 +33,8 @@ def parse_command(transcript: str | None) -> str | None:
     """The ``Command`` if the whole utterance is one, else None.
 
     Filler words are stripped from both ends one at a time and every
-    intermediate form is tried, so "close margin" keeps its "margin" while
-    "hey margin, next please" still reads as "next".
+    intermediate form is tried, so "close specs" keeps its "specs" while
+    "hey specs, next please" still reads as "next".
     """
     words = _WORD.findall((transcript or "").lower())
     lo, hi = 0, len(words)

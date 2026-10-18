@@ -255,7 +255,7 @@ def print_report(results: list[Result], evidence: str) -> dict:
     for result in results:
         if not result.correct:
             print(f"  FAIL {result.id}: {result.reason}")
-    print(f"Margin [{evidence}]: {metrics['cases']} questions; "
+    print(f"Specs [{evidence}]: {metrics['cases']} questions; "
           f"answered-correct {percent(metrics['answered_correct_rate'])}; "
           f"not_found P/R {percent(metrics['not_found_precision'])}/{percent(metrics['not_found_recall'])}; "
           f"citation pass {percent(metrics['citation_verification_pass_rate'])}; "

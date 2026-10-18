@@ -27,7 +27,7 @@ import logging
 import re
 from typing import Any
 
-log = logging.getLogger("margin.convert")
+log = logging.getLogger("specs.convert")
 
 EXTRACT_TIMEOUT_S = 90.0  # gemini-3.7-flash took > 60 s on a figure page; conversion is a background job
 RENDER_DPI = 150

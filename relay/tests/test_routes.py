@@ -9,9 +9,9 @@ import pytest
 from pydantic import ValidationError
 
 from _relay_helpers import ask, make_client, sid
-from margin_relay.pipeline import DbDown, SttFailed
-from margin_relay.pipeline.mock import MockGenerator
-from margin_relay.schemas import (
+from specs_relay.pipeline import DbDown, SttFailed
+from specs_relay.pipeline.mock import MockGenerator
+from specs_relay.schemas import (
     NOT_FOUND_BODY,
     NOT_FOUND_GLANCE,
     AskResponse,
@@ -229,7 +229,7 @@ def test_repeat_resends_last_answer_without_pipeline(client_app):
 def test_unknown_intent_is_not_found(client_app):
     client, app = client_app
     app.state.pipeline.classify = lambda t: __import__(
-        "margin_relay.schemas", fromlist=["IntentResult"]).IntentResult(intent="unknown", text="")
+        "specs_relay.schemas", fromlist=["IntentResult"]).IntentResult(intent="unknown", text="")
     assert ask(client, "uh").json()["outcome"] == "not_found"
     assert app.state.pipeline.retriever.calls == 0
 
@@ -398,7 +398,7 @@ def test_gate_needs_both_signals_weak(client_app):
         calls = 0
 
         async def retrieve(self, query, revision):
-            from margin_relay.pipeline.mock import MOCK_CHUNKS
+            from specs_relay.pipeline.mock import MOCK_CHUNKS
             return RetrievalResult(chunks=[MOCK_CHUNKS[1]], best_sim=0.1, best_rrf=0.9)
 
         async def steps_for(self, doc_id, revision):

@@ -14,14 +14,14 @@ const HEADS: Record<string, { title: string; subtitle: string }> = {
 
 export default function App() {
   const { pathname } = useLocation();
-  const head = HEADS[pathname] ?? { title: 'Margin', subtitle: 'Phone display' };
+  const head = HEADS[pathname] ?? { title: 'Specs', subtitle: 'Phone display' };
 
   return (
     <div className="shell">
       <div className="app">
         <header className="app-header">
           <div className="head-text">
-            <p className="eyebrow">Margin</p>
+            <p className="eyebrow">Specs</p>
             <h1>{head.title}</h1>
             <p className="subtitle">{head.subtitle}</p>
           </div>

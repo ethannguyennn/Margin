@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark';
 
-const KEY = 'margin.phone.theme';
+const KEY = 'specs.phone.theme';
 const query = () => window.matchMedia?.('(prefers-color-scheme: dark)');
 
 function stored(): Theme | null {

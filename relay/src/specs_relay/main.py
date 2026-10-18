@@ -1,6 +1,6 @@
 """App factory: Sentry init, CORS, trace ids, error shape, router mount, pipeline factory.
 
-Run:  uvicorn margin_relay.main:create_app --factory --host 0.0.0.0 --port 8080
+Run:  uvicorn specs_relay.main:create_app --factory --host 0.0.0.0 --port 8080
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ from .jobs import JobRunner
 from .pipeline import PipelineError, mock
 from .schemas import ErrorBody, ErrorResponse, IntentResult
 
-log = logging.getLogger("margin.relay")
+log = logging.getLogger("specs.relay")
 
 ALLOWED_HEADERS = ["content-type", "sentry-trace", "baggage", "x-session-id", "authorization"]
 ERROR_STATUS = {"bad_request": 400, "stt_failed": 502, "db_down": 503, "llm_timeout": 504,
@@ -73,7 +73,7 @@ class Pipeline:
 def _import(name: str) -> ModuleType | None:
     """Lazy import of a real module. Missing (Part 4/5 not merged yet) -> None."""
     try:
-        return importlib.import_module(f"margin_relay.{name}")
+        return importlib.import_module(f"specs_relay.{name}")
     except ImportError as exc:
         log.warning("real %s unavailable (%s); using mock", name, exc)
         return None
@@ -358,7 +358,7 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
             except Exception:  # noqa: BLE001
                 log.warning("db close_pool failed")
 
-    app = FastAPI(title="Margin relay", version=obs.version(settings), lifespan=lifespan,
+    app = FastAPI(title="Specs relay", version=obs.version(settings), lifespan=lifespan,
                   docs_url="/v1/docs", openapi_url="/v1/openapi.json", redoc_url=None)
     app.state.settings = settings
     app.state.pipeline = pipe
@@ -414,6 +414,6 @@ def create_app(settings: Settings | None = None, pipeline: Pipeline | None = Non
                        allow_methods=["GET", "POST", "PUT", "OPTIONS"], allow_headers=ALLOWED_HEADERS,
                        expose_headers=["x-trace-id"], allow_credentials=False, max_age=600)
 
-    log.info("Margin relay %s up: mock_mode=%s mocked=%s origins=%s", obs.version(settings),
+    log.info("Specs relay %s up: mock_mode=%s mocked=%s origins=%s", obs.version(settings),
              settings.mock_mode, pipe.mocked or "none", origins or "-")
     return app

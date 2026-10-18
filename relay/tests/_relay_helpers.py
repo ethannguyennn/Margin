@@ -8,8 +8,8 @@ from typing import Any
 
 from fastapi.testclient import TestClient
 
-from margin_relay.config import Settings
-from margin_relay.main import Pipeline, build_pipeline, create_app
+from specs_relay.config import Settings
+from specs_relay.main import Pipeline, build_pipeline, create_app
 
 ORIGIN = "http://localhost:5174"
 DEVICE_ORIGIN = "https://evenhub.device.example"  # stand-in until the real one is read off a device

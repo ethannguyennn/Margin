@@ -1,6 +1,6 @@
 """`make latency`: p50/p95 per stage from the Timescale `events` hypertable.
 
-    python -m margin_relay.latency
+    python -m specs_relay.latency
 
 Reads through Part 5's ``db.latency_summary()`` (db.py is the only module that
 opens connections), using DATABASE_URL from config. Relay-side only: the pitch
@@ -54,7 +54,7 @@ async def fetch() -> list[dict]:
     try:
         from . import db
     except ImportError as exc:
-        raise SystemExit(f"margin_relay.db is not available: {exc}") from exc
+        raise SystemExit(f"specs_relay.db is not available: {exc}") from exc
     await db.init_pool()
     try:
         return [dict(r) for r in await db.latency_summary()]

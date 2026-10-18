@@ -1,4 +1,4 @@
-export const TOKEN_KEY = 'margin.portal.token';
+export const TOKEN_KEY = 'specs.portal.token';
 
 export class ApiError extends Error {
   constructor(public status: number, message: string) { super(message); }

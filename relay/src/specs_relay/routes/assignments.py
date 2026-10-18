@@ -20,7 +20,7 @@ from ..auth import device_auth, portal_auth, require_device, require_portal
 from ..schemas import AssignRequest, Assignment
 from .common import Internal, NotFound, guarded, iso, load_walkthrough
 
-log = logging.getLogger("margin.assignments")
+log = logging.getLogger("specs.assignments")
 router = APIRouter()
 
 

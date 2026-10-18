@@ -16,16 +16,16 @@ bring-up (real Gemini, Tiger, domain, device CORS).
 
 ```
 Makefile, .env.example, relay/pyproject.toml
-relay/src/margin_relay/main.py          # factory, CORS, routers, Sentry, pipeline + converter resolution
-relay/src/margin_relay/config.py        # + PORTAL_TOKEN, DEVICE_TOKEN_SECRET, MAX_UPLOAD_MB, CONVERT_TIMEOUT_S, GEMINI_MODEL_CONVERT
-relay/src/margin_relay/schemas.py       # contract v2 (BUILD-PLAN-V2 §5), SHARED
-relay/src/margin_relay/auth.py          # portal bearer + device tokens (new)
-relay/src/margin_relay/jobs.py          # conversion job runner (new)
-relay/src/margin_relay/obs.py
-relay/src/margin_relay/routes/          # ask.py (+command), devices.py, assignments.py, progress.py,
+relay/src/specs_relay/main.py          # factory, CORS, routers, Sentry, pipeline + converter resolution
+relay/src/specs_relay/config.py        # + PORTAL_TOKEN, DEVICE_TOKEN_SECRET, MAX_UPLOAD_MB, CONVERT_TIMEOUT_S, GEMINI_MODEL_CONVERT
+relay/src/specs_relay/schemas.py       # contract v2 (BUILD-PLAN-V2 §5), SHARED
+relay/src/specs_relay/auth.py          # portal bearer + device tokens (new)
+relay/src/specs_relay/jobs.py          # conversion job runner (new)
+relay/src/specs_relay/obs.py
+relay/src/specs_relay/routes/          # ask.py (+command), devices.py, assignments.py, progress.py,
                                         # materials.py, drafts.py, diagrams.py (new); v1 routes kept
-relay/src/margin_relay/pipeline/__init__.py   # + Converter, verify_step, DiagramRenderer, parse_command Protocols
-relay/src/margin_relay/pipeline/mock.py       # + MockConverter, MockRenderer
+relay/src/specs_relay/pipeline/__init__.py   # + Converter, verify_step, DiagramRenderer, parse_command Protocols
+relay/src/specs_relay/pipeline/mock.py       # + MockConverter, MockRenderer
 relay/tests/test_routes*.py, test_auth.py, test_jobs.py, test_cors.py, test_boot.py
 deploy/                                 # compose, Caddyfile (+ /portal static), healthcheck
 TODO.md                                 # keep it current
@@ -34,7 +34,7 @@ TODO.md                                 # keep it current
 ## 2. Files you must NOT touch
 
 `pipeline/{transcribe,intent,retrieve,generate,verify,sanitize}.py`,
-`relay/src/margin_relay/convert/`, `relay/src/margin_relay/diagrams/`,
+`relay/src/specs_relay/convert/`, `relay/src/specs_relay/diagrams/`,
 `eval/conversion/` (Part 4); `db.py`, `db/`, `notify/`, `walkthrough.py`,
 `corpus/`, `eval/qa.jsonl`, `portal/` (Part 5); all of `app/`, `ios/`; and **`main`**.
 

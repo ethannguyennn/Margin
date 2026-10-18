@@ -10,7 +10,7 @@ from ..main import error_response, trace_id_of
 from ..pipeline import BadRequest, DbDown
 from ..schemas import DeviationRequest, DeviationResponse
 
-log = logging.getLogger("margin.deviation")
+log = logging.getLogger("specs.deviation")
 router = APIRouter()
 
 NOTIFY_TIMEOUT_S = 2.0

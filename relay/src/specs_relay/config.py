@@ -18,7 +18,7 @@ from pathlib import Path
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# relay/src/margin_relay/config.py -> repo root is three levels above the package dir.
+# relay/src/specs_relay/config.py -> repo root is three levels above the package dir.
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 

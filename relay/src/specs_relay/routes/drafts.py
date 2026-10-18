@@ -25,7 +25,7 @@ from ..auth import portal_auth, require_portal
 from ..schemas import ApproveResult, DraftStep, DraftStepEdit, OkResponse, ProcedureDraft
 from .common import Conflict, Internal, NotFound, guarded, load_walkthrough
 
-log = logging.getLogger("margin.drafts")
+log = logging.getLogger("specs.drafts")
 router = APIRouter()
 
 _REASON_LINE = re.compile(r"^Step (\S+?): (.+)$")

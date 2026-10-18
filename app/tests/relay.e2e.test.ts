@@ -1,11 +1,11 @@
 // Contract check against a REAL relay (Part 3), not a stub. Skipped unless pointed at one:
-//   MARGIN_E2E_RELAY=http://127.0.0.1:8080 npx vitest run tests/relay.e2e.test.ts
+//   SPECS_E2E_RELAY=http://127.0.0.1:8080 npx vitest run tests/relay.e2e.test.ts
 // Start Part 3's relay first: MOCK_MODE=1 ALLOWED_ORIGINS=http://localhost:5174 \
-//   uvicorn margin_relay.main:create_app --factory --port 8080
+//   uvicorn specs_relay.main:create_app --factory --port 8080
 import { describe, test } from 'vitest';
 import assert from 'node:assert/strict';
 
-const RELAY = process.env.MARGIN_E2E_RELAY;
+const RELAY = process.env.SPECS_E2E_RELAY;
 process.env.VITE_RELAY_ORIGIN = RELAY ?? 'http://unused.invalid';
 process.env.VITE_MOCK = '0';
 

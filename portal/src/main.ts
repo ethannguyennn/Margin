@@ -6,7 +6,7 @@ const app = document.querySelector<HTMLElement>('#app')!;
 const nav = document.querySelector<HTMLElement>('nav')!;
 const logout = document.querySelector<HTMLButtonElement>('#logout')!;
 const notice = document.querySelector<HTMLElement>('#notice')!;
-const draftKey = 'margin.portal.draft';
+const draftKey = 'specs.portal.draft';
 let dispose: (() => void)[] = [];
 let generation = 0;
 

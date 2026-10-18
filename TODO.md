@@ -1,4 +1,4 @@
-# Margin TODO
+# Specs TODO
 
 Updated 2026-10-17 for v2 (BUILD-PLAN-V2), after Part 3's v2 relay landed on
 `part-3-relay-platform` and a trial merge of Parts 1, 4 and 5 on top of it.
@@ -18,7 +18,7 @@ walkthrough). Nothing v2 is deployed yet; nothing has run on glasses.
 - [ ] **Deploy v2 to the VM** (`make deploy`): relay + Caddy image with the portal at
       `/portal/`. Add `PORTAL_TOKEN` (and `GEMINI_MODEL_CONVERT`) to the VM's `.env` first
       ([[deploy/README]]). The live relay today is the v1 build on `45-32-88-132.sslip.io`
-- [ ] **Domain switch:** `MARGIN_DOMAIN=getyourassto.work, 45-32-88-132.sslip.io` on the VM so
+- [ ] **Domain switch:** `SPECS_DOMAIN=getyourassto.work, 45-32-88-132.sslip.io` on the VM so
       Caddy gets a certificate for the root domain (DNS is already correct: A -> 45.32.88.132);
       ~5 s Caddy restart. Then give Part 1 `https://getyourassto.work` for `app.json`
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`

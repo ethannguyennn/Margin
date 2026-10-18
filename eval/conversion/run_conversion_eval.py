@@ -33,9 +33,9 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "relay" / "src"))
 
-from margin_relay.convert.structure import GeminiConverter  # noqa: E402
-from margin_relay.diagrams import render as R  # noqa: E402
-from margin_relay.pipeline.verify import iter_number_tokens, normalize  # noqa: E402
+from specs_relay.convert.structure import GeminiConverter  # noqa: E402
+from specs_relay.diagrams import render as R  # noqa: E402
+from specs_relay.pipeline.verify import iter_number_tokens, normalize  # noqa: E402
 
 CONVERTED_UNITS = ("in-lb", "ft-lb", "degf", "deg f", "psi", "inch", "kgf", "lbf")
 
@@ -122,7 +122,7 @@ def load_saved(exp: dict, saved: Path) -> tuple[dict, dict]:
 
 def score(exp: dict, text: dict, draft: dict, out_dir: Path, seconds: float | None, calls: dict | None) -> dict:
     """No API calls: re-verify every step, render every diagram, compute the metrics."""
-    from margin_relay.convert.verify_step import step_failures
+    from specs_relay.convert.verify_step import step_failures
 
     data = (ROOT / exp["material"]).read_bytes()
     for s in draft["steps"]:  # always re-verify with the current verifier
@@ -234,8 +234,8 @@ async def main(argv: list[str] | None = None) -> int:
     if args.from_saved:
         model = args.model_label or "saved outputs (model not recorded)"
     else:
-        from margin_relay.config import get_settings
-        from margin_relay.pipeline.generate import gemini_client
+        from specs_relay.config import get_settings
+        from specs_relay.pipeline.generate import gemini_client
 
         settings = get_settings()
         model = args.model or getattr(settings, "gemini_model_convert", "")

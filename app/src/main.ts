@@ -51,7 +51,7 @@ app.id = 'app';
 if (dev)
     document.body.append(app);
 const heading = document.createElement('h1');
-heading.textContent = 'Margin';
+heading.textContent = 'Specs';
 const status = document.createElement('p');
 status.textContent = 'Connecting...';
 const mode = document.createElement('p');
@@ -80,8 +80,8 @@ async function boot() {
         textContainerUpgrade: p => queue.run(() => bridge.textContainerUpgrade(p)),
         updateImageRawData: p => queue.run(() => bridge.updateImageRawData(p)),
     });
-    await display.render({ header: 'MARGIN', main: '', footer: 'starting...' });
-    const report = (error: unknown) => { console.warn('[Margin] integration failure', error instanceof Error ? error.message : 'unknown'); };
+    await display.render({ header: 'SPECS', main: '', footer: 'starting...' });
+    const report = (error: unknown) => { console.warn('[Specs] integration failure', error instanceof Error ? error.message : 'unknown'); };
     const paths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts', './motion/gestures.ts'];
     let io: Runtime;
     const hasV2 = paths.every(path => !!loaders[path]);
@@ -129,7 +129,7 @@ async function boot() {
         app.dataset.screen = value.screen;
         mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
         lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent });
-        console.info(`[Margin] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
+        console.info(`[Specs] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
         syncMotion(value);
         if (!rendering)
             rendering = (async () => {
@@ -147,7 +147,7 @@ async function boot() {
                         else
                             throw error;
                     }
-                    console.info(`[Margin] rendered screen=${next.screen} page=${next.page} step=${next.step} rebuilds=${display.rebuildCount}`);
+                    console.info(`[Specs] rendered screen=${next.screen} page=${next.page} step=${next.step} rebuilds=${display.rebuildCount}`);
                 }
             })().finally(() => { rendering = null; });
         return rendering;
@@ -171,8 +171,8 @@ async function boot() {
     };
     const ports: LensPorts = {
         now: Date.now, onError: report, render, persist: value => store.save(serializeSession(value)),
-        exit: async () => { await store.flush(); console.info('[Margin] native exit confirmation requested'); if (!await queue.run(() => bridge.shutDownPageContainer(1)))
-            throw new Error('Native exit failed'); console.info('[Margin] native exit accepted'); },
+        exit: async () => { await store.flush(); console.info('[Specs] native exit confirmation requested'); if (!await queue.run(() => bridge.shutDownPageContainer(1)))
+            throw new Error('Native exit failed'); console.info('[Specs] native exit accepted'); },
         startCapture: (onLevel, onEndpoint) => queue.run(() => io.audio.startCapture(onLevel, onEndpoint)),
         stopCapture: () => queue.run(() => io.audio.stopCapture()),
         ask: async (req: AskRequest, opts): Promise<AskResponse> => { const span = io.obs.startAsk(); try {
@@ -252,4 +252,4 @@ async function boot() {
         import.meta.hot.dispose(() => { void cleanup(); });
     startPolling();
 }
-void boot().catch(error => { console.error('[Margin] boot failed', error); status.textContent = 'Unable to start. ' + String(error); lensLink.update({ status: status.textContent }); });
+void boot().catch(error => { console.error('[Specs] boot failed', error); status.textContent = 'Unable to start. ' + String(error); lensLink.update({ status: status.textContent }); });

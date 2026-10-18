@@ -59,7 +59,7 @@ Part 3 owns relay/pyproject.toml.
 ## Part 3 wiring
 
 No production environment variables were added. Settings are read exclusively
-from margin_relay.config.get_settings(); lower-case setting attributes and their
+from specs_relay.config.get_settings(); lower-case setting attributes and their
 upper-case environment-style equivalents are accepted:
 
 - DATABASE_URL, EMBED_DIM
@@ -119,8 +119,8 @@ scaffold files arrived only through the authorized tag merge.
 The published Retriever at 5425a67 accepts a Store. Use:
 
 ```python
-from margin_relay import db
-from margin_relay.pipeline.retrieve import Retriever
+from specs_relay import db
+from specs_relay.pipeline.retrieve import Retriever
 
 retriever = Retriever(db.RetrievalStore(), embedder)
 ```

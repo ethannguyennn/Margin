@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from part5_support import Cursor, RecordingConnection, RecordingPool
-from margin_relay import db, walkthrough
+from specs_relay import db, walkthrough
 
 
 def fixture_model(**values):
@@ -219,11 +219,11 @@ async def test_published_quote_chunks_feed_actual_v1_ask_with_verbatim_citations
     """Actual HTTP handler and verifier; publication/provider/database are fixtures."""
     import httpx
     from uuid import uuid4
-    from margin_relay.config import Settings
-    from margin_relay.main import build_pipeline, create_app
-    from margin_relay.pipeline.sanitize import sanitize
-    from margin_relay.pipeline.verify import verify
-    from margin_relay.schemas import Chunk, Draft, DraftCitation, RetrievalResult
+    from specs_relay.config import Settings
+    from specs_relay.main import build_pipeline, create_app
+    from specs_relay.pipeline.sanitize import sanitize
+    from specs_relay.pipeline.verify import verify
+    from specs_relay.schemas import Chunk, Draft, DraftCitation, RetrievalResult
 
     captured = []
     async def commit(draft, chunks, material):
@@ -250,7 +250,7 @@ async def test_published_quote_chunks_feed_actual_v1_ask_with_verbatim_citations
 
 @pytest.mark.asyncio
 async def test_published_walkthrough_preserves_v2_extras_when_shared_contract_is_merged(monkeypatch):
-    from margin_relay.schemas import Step
+    from specs_relay.schemas import Step
     if 'warning' not in Step.model_fields:
         pytest.skip('V2 Step schema is deferred until the Part 3 merge')
     row = {'chunk_id': 'SOP-150:A:1', 'doc_id': 'SOP-150', 'revision': 'A', 'section': '1',

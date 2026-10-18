@@ -1,4 +1,4 @@
--- Run through margin_relay.db.apply_migrations: EMBED_DIM is validated and rendered.
+-- Run through specs_relay.db.apply_migrations: EMBED_DIM is validated and rendered.
 -- Deliberately no dimension default here: config is the single source of truth.
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS timescaledb;

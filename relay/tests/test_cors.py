@@ -47,7 +47,7 @@ def test_bare_options_2xx_on_every_route(client, method, path):
 
 
 def test_rejected_origin_is_logged_at_warn(client, caplog):
-    caplog.set_level(logging.WARNING, logger="margin.relay")
+    caplog.set_level(logging.WARNING, logger="specs.relay")
     r = preflight(client, "/v1/ask", "https://evil.example")
     assert r.status_code == 400
     assert "access-control-allow-origin" not in r.headers
@@ -55,7 +55,7 @@ def test_rejected_origin_is_logged_at_warn(client, caplog):
 
 
 def test_simple_request_from_wrong_origin_gets_no_acao(client, caplog):
-    caplog.set_level(logging.WARNING, logger="margin.relay")
+    caplog.set_level(logging.WARNING, logger="specs.relay")
     r = client.get("/v1/health", headers={"Origin": "http://localhost:9999"})
     assert "access-control-allow-origin" not in r.headers
     assert any("localhost:9999" in m for m in caplog.messages)

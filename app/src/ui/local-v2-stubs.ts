@@ -9,7 +9,7 @@ export function createLocalV2FixturePorts(readUtterance: () => string, scenario 
     let timer: ReturnType<typeof setTimeout> | undefined, utterance = '', assigned = false;
     const born = Date.now();
     const pairing: Pairing = { device_id: 'fixture-device', device_token: 'fixture-only-not-a-credential', pair_code: '4F7K', claimed: false, worker_name: null };
-    const mapped: Record<string, Command> = { next: 'next', done: 'next', 'next step': 'next', finished: 'next', complete: 'next', back: 'back', previous: 'back', 'go back': 'back', repeat: 'repeat', 'say that again': 'repeat', details: 'details', more: 'details', 'read it': 'details', diagram: 'diagram', 'show diagram': 'diagram', picture: 'diagram', 'show me': 'diagram', pause: 'pause', 'stop task': 'pause', resume: 'resume', continue: 'resume', exit: 'exit', 'close margin': 'exit' };
+    const mapped: Record<string, Command> = { next: 'next', done: 'next', 'next step': 'next', finished: 'next', complete: 'next', back: 'back', previous: 'back', 'go back': 'back', repeat: 'repeat', 'say that again': 'repeat', details: 'details', more: 'details', 'read it': 'details', diagram: 'diagram', 'show diagram': 'diagram', picture: 'diagram', 'show me': 'diagram', pause: 'pause', 'stop task': 'pause', resume: 'resume', continue: 'resume', exit: 'exit', 'close specs': 'exit' };
     return {
         audio: {
             async startCapture(onLevel: (v: number) => void, onEndpoint?: (reason: 'speech_end' | 'no_speech' | 'cap') => void) { capturing = true; utterance = readUtterance().trim().toLowerCase(); onLevel(0.5); clearTimeout(timer); timer = setTimeout(() => onEndpoint?.(utterance === 'silence' ? 'no_speech' : 'speech_end'), 1500); },
@@ -20,11 +20,11 @@ export function createLocalV2FixturePorts(readUtterance: () => string, scenario 
             async pair() { return { ...pairing }; }, async pairingStatus() { return { ...pairing, claimed: Date.now() - born >= 5000, worker_name: 'Synthetic worker' }; },
             async nextAssignment() { if (scenario !== 'm2' || assigned)
                 return null; assigned = true; return taskFixture(); },
-            reportProgress(ev: ProgressEvent) { console.info('[Margin] progress=' + JSON.stringify(ev)); },
+            reportProgress(ev: ProgressEvent) { console.info('[Specs] progress=' + JSON.stringify(ev)); },
             async getDiagram(id: string): Promise<DiagramImage> { return { diagram_id: id, tiles: structuredClone(fixtureTiles) }; },
             async ask(): Promise<AskResponse> {
                 await new Promise(resolve => setTimeout(resolve, 250));
-                console.info('[Margin] stub-ask=' + utterance);
+                console.info('[Specs] stub-ask=' + utterance);
                 if (mapped[utterance])
                     return { ...structuredClone(UI_FIXTURES.answer), intent: 'command', outcome: 'command', command: mapped[utterance], verified: false, glance: '', body: '', citations: [], walkthrough: null };
                 return structuredClone(UI_FIXTURES[utterance === 'not found' ? 'not_found' : utterance === 'error' ? 'error' : utterance === 'walkthrough' ? 'walkthrough' : utterance === 'logged' ? 'logged' : 'answer']);

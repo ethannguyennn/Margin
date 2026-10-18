@@ -17,11 +17,11 @@ sys.path.insert(0, str(ROOT / "relay/src"))
 def schema_dependencies(monkeypatch):
     """Use actual shared modules when present; otherwise isolate explicit fixtures."""
     try:
-        importlib.import_module("margin_relay.schemas")
+        importlib.import_module("specs_relay.schemas")
     except ModuleNotFoundError as exc:
-        if exc.name != "margin_relay.schemas":
+        if exc.name != "specs_relay.schemas":
             raise
-        module = ModuleType("margin_relay.schemas")
+        module = ModuleType("specs_relay.schemas")
 
         class FixtureChunk(BaseModel):
             chunk_id: str
@@ -44,15 +44,15 @@ def schema_dependencies(monkeypatch):
         module.Chunk, module.Step = FixtureChunk, FixtureStep
         monkeypatch.setitem(sys.modules, module.__name__, module)
     try:
-        importlib.import_module("margin_relay.pipeline.sanitize")
+        importlib.import_module("specs_relay.pipeline.sanitize")
     except ModuleNotFoundError as exc:
-        if exc.name not in {"margin_relay.pipeline", "margin_relay.pipeline.sanitize"}:
+        if exc.name not in {"specs_relay.pipeline", "specs_relay.pipeline.sanitize"}:
             raise
-        if "margin_relay.pipeline" not in sys.modules:
-            package = ModuleType("margin_relay.pipeline")
+        if "specs_relay.pipeline" not in sys.modules:
+            package = ModuleType("specs_relay.pipeline")
             package.__path__ = []
             monkeypatch.setitem(sys.modules, package.__name__, package)
-        module = ModuleType("margin_relay.pipeline.sanitize")
+        module = ModuleType("specs_relay.pipeline.sanitize")
 
         def fixture_sanitize(text):
             # Deliberately scoped to glyphs in our synthetic corpus; does not

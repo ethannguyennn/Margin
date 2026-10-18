@@ -23,7 +23,7 @@ from ..pipeline.verify import _get, quote_in_text
 from .extract import box_from_2d
 from .verify_step import step_failures
 
-log = logging.getLogger("margin.convert")
+log = logging.getLogger("specs.convert")
 
 STRUCTURE_TIMEOUT_S = 120.0
 CHUNK_CHARS = 30_000

@@ -5,9 +5,9 @@ from __future__ import annotations
 import asyncio
 
 from _relay_helpers import PORTAL, v2_client, wait_material
-from margin_relay.jobs import JobRunner, readable
-from margin_relay.main import build_pipeline
-from margin_relay.pipeline import ConversionError, mock
+from specs_relay.jobs import JobRunner, readable
+from specs_relay.main import build_pipeline
+from specs_relay.pipeline import ConversionError, mock
 from _relay_helpers import make_settings
 
 SOP_153 = b"""# SOP-153 Quick start

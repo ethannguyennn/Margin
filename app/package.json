@@ -1,5 +1,5 @@
 {
-  "name": "margin-lens",
+  "name": "specs-lens",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,7 +9,7 @@
     "dev:mock:v2": "vite --host 0.0.0.0 --port 5176 --strictPort --mode mock",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "pack": "npm run build && evenhub pack app.json dist -o margin.ehpk --sdk-ver 0.0.16",
+    "pack": "npm run build && evenhub pack app.json dist -o specs.ehpk --sdk-ver 0.0.16",
     "simulate": "evenhub-simulator http://localhost:5174 --automation-port 9898",
     "simulate:v2": "node tests/simulator-smoke.mjs --launch",
     "test": "vitest run",

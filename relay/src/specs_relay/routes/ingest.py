@@ -11,7 +11,7 @@ from fastapi import APIRouter, Request
 from ..config import REPO_ROOT
 from ..main import error_response, trace_id_of
 
-log = logging.getLogger("margin.ingest")
+log = logging.getLogger("specs.ingest")
 router = APIRouter()
 
 

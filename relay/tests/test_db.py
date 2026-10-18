@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from part5_support import RecordingConnection, RecordingPool, schema_dependencies
-from margin_relay import db
+from specs_relay import db
 from db.seed import load_corpus
 
 

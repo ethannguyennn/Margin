@@ -26,7 +26,7 @@ from fastapi import Request
 from .pipeline import PipelineError
 from .schemas import PAIR_CODE_ALPHABET
 
-log = logging.getLogger("margin.auth")
+log = logging.getLogger("specs.auth")
 
 
 class Unauthorized(PipelineError):

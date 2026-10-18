@@ -1,4 +1,4 @@
-# Margin employer portal
+# Specs employer portal
 
 Vite and vanilla TypeScript. Production output is `portal/dist`, with a
 `/portal/` base. API calls always use the same origin at `/v1/`. Enter the shared

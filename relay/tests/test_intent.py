@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from margin_relay.pipeline.intent import COMMAND_PHRASES, classify_intent, deviation_text, parse_command
+from specs_relay.pipeline.intent import COMMAND_PHRASES, classify_intent, deviation_text, parse_command
 
 # BUILD-PLAN-V2 section 3, verbatim.
 COMMANDS = {
@@ -13,7 +13,7 @@ COMMANDS = {
     "diagram": ["diagram", "show diagram", "picture", "show me"],
     "pause": ["pause", "stop task"],
     "resume": ["resume", "continue"],
-    "exit": ["exit", "close margin"],
+    "exit": ["exit", "close specs"],
 }
 # README-PART-4 section 3, plus near-misses of every command.
 MUST_NOT_MATCH = [
@@ -84,11 +84,11 @@ def test_every_build_plan_phrase_parses(command, phrase):
     ("okay, next step please", "next"),
     ("um, go back", "back"),
     ("uh back", "back"),
-    ("hey margin, show diagram", "diagram"),
-    ("margin next", "next"),
+    ("hey specs, show diagram", "diagram"),
+    ("specs next", "next"),
     ("show me please", "diagram"),
-    ("Close Margin.", "exit"),
-    ("hey margin close margin", "exit"),
+    ("Close Specs.", "exit"),
+    ("hey specs close specs", "exit"),
     ("  done  ", "next"),
 ])
 def test_filler_case_and_punctuation(phrase, command):
@@ -101,7 +101,7 @@ def test_must_not_match_is_not_a_command(t):
     assert classify_intent(t) == "question"
 
 
-@pytest.mark.parametrize("t", ["", "  ", "...", None, "please", "um uh ok", "margin"])
+@pytest.mark.parametrize("t", ["", "  ", "...", None, "please", "um uh ok", "specs"])
 def test_filler_only_is_not_a_command(t):
     assert parse_command(t) is None
 

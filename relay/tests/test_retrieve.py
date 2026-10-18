@@ -3,7 +3,7 @@ import math
 
 import pytest
 
-from margin_relay.pipeline.retrieve import (
+from specs_relay.pipeline.retrieve import (
     GeminiEmbedder,
     Retriever,
     fuse,
@@ -78,7 +78,7 @@ def test_fuse_best_sim_comes_from_vector_leg_only():
 
 def test_fuse_reads_sim_from_schema_chunks():
     # Part 5's db.vector_top/fts_top return schemas.Chunk with `sim` set on the vector leg.
-    from margin_relay.schemas import Chunk
+    from specs_relay.schemas import Chunk
 
     vec = [Chunk(chunk_id="A:C:1", doc_id="A", revision="C", section="1", text="t", sim=0.83)]
     lex = [Chunk(chunk_id="A:C:2", doc_id="A", revision="C", section="2", text="u")]
@@ -160,7 +160,7 @@ class FakeEmbedder:
 
 
 def test_retriever_runs_both_legs_and_fuses():
-    schemas = pytest.importorskip("margin_relay.schemas")
+    schemas = pytest.importorskip("specs_relay.schemas")
     store = FakeStore([row(f"A:C:{i}", 0.9 - i / 100) for i in range(20)],
                       [row(f"B:C:{i}", 5.0 - i) for i in range(20)])
     emb = FakeEmbedder()
@@ -175,7 +175,7 @@ def test_retriever_runs_both_legs_and_fuses():
 
 
 def test_retriever_passes_forced_revision_and_reuses_embedding():
-    pytest.importorskip("margin_relay.schemas")
+    pytest.importorskip("specs_relay.schemas")
     store = FakeStore([row("A:D:1", 0.8)], [])
     emb = FakeEmbedder()
     asyncio.run(Retriever(store, emb).retrieve("q", "D", q_embedding=[0.1] * 768))
@@ -184,7 +184,7 @@ def test_retriever_passes_forced_revision_and_reuses_embedding():
 
 
 def test_steps_for_maps_rows_in_order():
-    pytest.importorskip("margin_relay.schemas")
+    pytest.importorskip("specs_relay.schemas")
     rows = [
         {"chunk_id": "SOP-114:C:4.1", "section": "4.1", "heading": "Preparation",
          "text": "Seat bracket on dowel pins.", "step_order": 1},
@@ -259,7 +259,7 @@ def test_embedder_v2_uses_prefix_not_task_type():
 
 
 def test_embedder_rejects_wrong_dimension():
-    from margin_relay.pipeline.retrieve import EmbeddingError
+    from specs_relay.pipeline.retrieve import EmbeddingError
 
     client = FakeClient([[1.0] * 3072])
     with pytest.raises(EmbeddingError):

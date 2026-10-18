@@ -1,9 +1,9 @@
 
-> margin-portal@0.2.0 test
+> specs-portal@0.2.0 test
 > vitest run
 
 
- RUN  v4.1.11 C:/Users/bryan/Downloads/Claude/Sessions/Margin/.part5-worktree/portal
+ RUN  v4.1.11 C:/Users/bryan/Downloads/Claude/Sessions/Specs/.part5-worktree/portal
 
 
  Test Files  2 passed (2)

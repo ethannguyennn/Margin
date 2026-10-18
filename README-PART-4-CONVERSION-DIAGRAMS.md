@@ -16,13 +16,13 @@ best guess.
 ## 1. Files you own
 
 ```
-relay/src/margin_relay/convert/__init__.py
-relay/src/margin_relay/convert/extract.py     # bytes -> MaterialText (pages verbatim + figures with bboxes)
-relay/src/margin_relay/convert/structure.py   # MaterialText -> ProcedureDraft (Gemini, structured output)
-relay/src/margin_relay/convert/verify_step.py # deterministic draft verifier, reuses pipeline/verify.py
-relay/src/margin_relay/diagrams/render.py     # DiagramSpec -> lens tiles + preview PNG (Pillow)
-relay/src/margin_relay/pipeline/intent.py     # + 'command', parse_command()
-relay/src/margin_relay/pipeline/{transcribe,retrieve,generate,verify,sanitize}.py   # v1, maintenance only
+relay/src/specs_relay/convert/__init__.py
+relay/src/specs_relay/convert/extract.py     # bytes -> MaterialText (pages verbatim + figures with bboxes)
+relay/src/specs_relay/convert/structure.py   # MaterialText -> ProcedureDraft (Gemini, structured output)
+relay/src/specs_relay/convert/verify_step.py # deterministic draft verifier, reuses pipeline/verify.py
+relay/src/specs_relay/diagrams/render.py     # DiagramSpec -> lens tiles + preview PNG (Pillow)
+relay/src/specs_relay/pipeline/intent.py     # + 'command', parse_command()
+relay/src/specs_relay/pipeline/{transcribe,retrieve,generate,verify,sanitize}.py   # v1, maintenance only
 corpus/materials/                              # synthetic demo inputs (see §7)
 eval/conversion/                               # expected outputs + run_conversion_eval.py
 relay/tests/test_extract.py, test_structure.py, test_verify_step.py, test_render.py, test_intent.py
@@ -47,7 +47,7 @@ Depend on `v2-scaffold-relay` (`git fetch --tags && git merge v2-scaffold-relay`
 ## 3. Command intents (`intent.py`) — do first, it is an hour
 
 `parse_command(transcript) -> Command | None` per BUILD-PLAN-V2 §3: the
-**whole utterance** (after stripping filler: ok, okay, um, uh, please, margin,
+**whole utterance** (after stripping filler: ok, okay, um, uh, please, specs,
 hey) must be the command. `classify_intent` returns `'command'` when
 `parse_command` matches, before every other rule.
 

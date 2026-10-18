@@ -50,7 +50,7 @@ WebView2 profiles must be isolated, and another running simulator can claim
 the app-view profile before the test's debug port is set. The normal
 `simulate` and v1 port commands remain available.
 
-The production pack is `app/margin.ehpk` (ignored), SDK 0.0.16, minimum Even
+The production pack is `app/specs.ehpk` (ignored), SDK 0.0.16, minimum Even
 App 2.2.10. Dev controls require a development build and `VITE_MOCK=1` or
 `?dev=1`; they are not available in the packaged production app.
 
@@ -58,7 +58,7 @@ Repository milestone check, exactly as run from the v2 checkout root:
 
 ```powershell
 $env:PYTHONPATH = Join-Path (Get-Location) 'relay/src'
-mingw32-make test 'PY=C:/Users/miles/OneDrive/Desktop/LAHacks/Margin/.venv/Scripts/python.exe'
+mingw32-make test 'PY=C:/Users/miles/OneDrive/Desktop/LAHacks/Specs/.venv/Scripts/python.exe'
 ```
 
 This interpreter already has `relay[dev]` installed. For a fresh clone, use
