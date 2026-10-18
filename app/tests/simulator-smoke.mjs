@@ -77,8 +77,23 @@ if(process.argv.includes('--launch')){launch('m1');}else{
     await capture('cold-start-step-3');checks.push({screen:'STEP',step:2,coldStart:true});
     log=await entries();const errors=log.filter(e=>e.level==='error' || /\[uncaught\]|\[unhandledrejection\]/.test(e.message));assert.deepEqual(errors,[]);
     await writeFile(new URL('m2-console.json',output),JSON.stringify(log,null,2));
+    session.close();await stop(child);
+    // M8 (BUILD-PLAN-V3): spoken scoped walkthrough -> clarify -> answer back on the step -> picture -> scoped done.
+    child=launch('m1');session=await setup();await screen('IDLE');
+    await say(session,'walk me through making a cappuccino');await screen('STEP',4);await capture('m8-step-1-of-3');
+    await say(session,'next');await screen('STEP',5);
+    await say(session,'how many pumps of syrup');await screen('CLARIFY',5);await capture('m8-clarify');
+    await say(session,'medium');await screen('ANSWER_GLANCE',5);await capture('m8-answer');
+    await dev(session,'dev-shake');await screen('STEP',5);
+    await say(session,'picture');await screen('STEP_DETAILS',5);
+    await until(async()=> (await entries()).some(e=>e.message.includes('reference=recipe-cup status=success')),'step reference image');
+    await capture('m8-picture');await dev(session,'dev-shake');await screen('STEP',5);
+    await say(session,'next');await screen('STEP',6);await say(session,'next');await screen('TASK_DONE',6);await capture('m8-done');
+    log=await entries();const m8errors=log.filter(e=>e.level==='error' || /\[uncaught\]|\[unhandledrejection\]/.test(e.message));assert.deepEqual(m8errors,[]);
+    runs.push({flow:'M8',input:'dev Nod/Shake + mock utterances, no tap',scope:'3.2-3.4',clarify:'Which size?',picture:'recipe-cup'});
+    await writeFile(new URL('m8-console.json',output),JSON.stringify(log,null,2));
     await writeFile(new URL('results.json',output),JSON.stringify({checks,runs,rootExit:true,coldStartStep:3,hardware:'not yet tested on hardware',integration:'Part 2 mocks (VITE_MOCK=1); not IMU replay or live relay',errors},null,2));
-    console.log('PASS M1, M2, returnTo, native exit, cold start; '+checks.length+' screen assertions.');
+    console.log('PASS M1, M2, M8, returnTo, native exit, cold start; '+checks.length+' screen assertions.');
   }catch(error){await writeFile(new URL('failure-console.json',output),JSON.stringify(await entries().catch(()=>[]),null,2));throw error;}
   finally{session?.close();if(child)await stop(child);}
 }

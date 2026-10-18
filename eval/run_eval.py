@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+from datetime import datetime, timezone
 from collections import Counter
 from dataclasses import asdict, dataclass
 import json
+from html import unescape
+import math
 from pathlib import Path
 import re
 import statistics
@@ -21,10 +24,17 @@ from db.seed import load_corpus
 
 
 def normalized(text: str) -> str:
+    text = unescape(text)
     for before, after in (("°", " deg"), ("µ", "u"), ("μ", "u"), ("–", "-"), ("—", "-"),
                           ("·", "-"), ("“", '"'), ("”", '"'), ("’", "'")):
         text = text.replace(before, after)
-    return " ".join(text.casefold().split())
+    text = re.sub(r"\s*\|\s*", " ", text.casefold())  # Markdown cell separators are not source facts
+    for spelling, unit in ((r"deg\s*f|degrees?\s*(?:fahrenheit|f)|fahrenheit|f", "degf"),
+                           (r"deg\s*c|degrees?\s*(?:celsius|c)|celsius|c", "degc"),
+                           (r"seconds?|sec|s", "s"), (r"minutes?|min", "min"),
+                           (r"hours?|hrs?|h", "h")):
+        text = re.sub(rf"(?<=\d)\s*(?:{spelling})\b", f" {unit}", text)
+    return " ".join(text.split())
 
 
 def contains(text: str, expected: str) -> bool:
@@ -81,8 +91,15 @@ def load_cases(path: Path) -> list[dict]:
             raise ValueError(f"QA line {line_number}: invalid expected outcome")
         if case.get("category") not in {"answerable", "near-miss", "ambiguous", "off-domain"}:
             raise ValueError(f"QA line {line_number}: invalid category")
-        if case["expect"] == "answered" and any(not case.get(k) for k in ("doc_id", "revision", "section", "must_contain")):
+        if case["expect"] == "answered" and any(not case.get(k) for k in ("doc_id", "revision", "section")):
             raise ValueError(f"QA line {line_number}: answered case needs citation and content expectations")
+        if case["expect"] == "answered" and not case.get("must_contain") and case.get("kind") != "walkthrough":
+            raise ValueError(f"QA line {line_number}: answered case needs content expectations")
+        for turn in case.get("turns", []):
+            if not isinstance(turn, dict) or not turn.get("q") or turn.get("expect") not in {"answered", "not_found"}:
+                raise ValueError(f"QA line {line_number}: invalid conversation turn")
+            if turn["expect"] == "answered" and any(not turn.get(k) for k in ("doc_id", "revision", "section", "must_contain")):
+                raise ValueError(f"QA line {line_number}: answered turn needs citation and content expectations")
         case.setdefault("id", f"line-{line_number}")
         cases.append(case)
     if not cases or len({case["id"] for case in cases}) != len(cases):
@@ -92,8 +109,9 @@ def load_cases(path: Path) -> list[dict]:
 
 def citation_index(corpus_dir: Path = ROOT / "corpus") -> dict[str, dict]:
     documents, chunks = load_corpus(corpus_dir)
-    statuses = {(d["doc_id"], d["revision"]): d["status"] for d in documents}
-    return {c["chunk_id"]: {**c, "status": statuses[c["doc_id"], c["revision"]]} for c in chunks}
+    docs = {(d["doc_id"], d["revision"]): d for d in documents}
+    return {c["chunk_id"]: {**c, "status": docs[c["doc_id"], c["revision"]]["status"],
+                            "title": docs[c["doc_id"], c["revision"]]["title"]} for c in chunks}
 
 
 def citations_verified(response: dict, index: dict, forced_revision: str | None = None) -> bool:
@@ -123,10 +141,17 @@ def citations_verified(response: dict, index: dict, forced_revision: str | None 
         sections.append(chunk["section"])
         doc_ids.append(chunk["doc_id"])
     glance, body = response.get("glance"), response.get("body")
-    if not isinstance(glance, str) or not isinstance(body, str) or not body.strip():
+    if not isinstance(glance, str) or not glance.strip() or not isinstance(body, str):
         return False
     if len(glance) > 60 or len(body) > 450:
         return False
+    walk = response.get("walkthrough")
+    if walk is not None:
+        if (not isinstance(walk, dict) or not isinstance(walk.get("steps"), list)
+                or not isinstance(walk.get("index"), int) or not isinstance(walk.get("total"), int)
+                or not 0 <= walk["index"] < walk["total"] == len(walk["steps"])):
+            return False
+        quotes.append(str(walk["total"]))  # count is independently checked against the step list
     return values_supported(glance + " " + body, quotes, sections, doc_ids)
 
 
@@ -140,6 +165,7 @@ class Result:
     citation_verified: bool
     latency_ms: float
     reason: str = ""
+    response: dict | None = None
 
 
 def score_case(case: dict, response: dict, index: dict, latency_ms: float) -> Result:
@@ -151,15 +177,40 @@ def score_case(case: dict, response: dict, index: dict, latency_ms: float) -> Re
         if not verified:
             correct, reason = False, "unverified answer"
         elif case["expect"] == "answered":
-            matching = any(all(citation.get(key) == case[key] for key in ("doc_id", "revision", "section"))
+            sections = {case["section"], *case.get("alternative_sections", [])}
+            matching = any(all(citation.get(key) == case[key] for key in ("doc_id", "revision"))
+                           and citation.get("section") in sections
                            for citation in response["citations"])
             text = str(response.get("glance", "")) + " " + str(response.get("body", ""))
-            required = all(contains(text, value) for value in case["must_contain"])
+            required = any(all(contains(text, item) for item in phrases) for phrases in
+                           [case.get("must_contain", []), *case.get("alternative_content", [])])
             correct = matching and required
             if not correct:
                 reason = "wrong citation or missing expected content"
     if case.get("needs_clarification") is True and response.get("needs_clarification") is not True:
         correct, reason = False, "missing needs_clarification"
+    if case.get("clarify_options") is not None:
+        clarify = response.get("clarify") or {}
+        options = clarify.get("options", [])
+        grounded = {normalized(c.get(key) or "") for c in index.values()
+                    if c.get("status") == "effective" for key in ("heading", "title")}
+        if (not isinstance(clarify.get("prompt"), str) or not 0 < len(clarify["prompt"]) <= 40
+                or not 2 <= len(options) <= 3 or any(not isinstance(o, str) or not 0 < len(o) <= 24
+                    or normalized(o) not in grounded for o in options)
+                or not set(map(normalized, case["clarify_options"])).issubset(set(map(normalized, options)))):
+            correct, reason = False, "missing or ungrounded clarify options"
+    if case.get("kind") == "walkthrough":
+        walk = response.get("walkthrough") or {}
+        scope = walk.get("scope") or {}
+        steps = walk.get("steps", [])
+        start, end, at = scope.get("start"), scope.get("end"), walk.get("index")
+        if (walk.get("doc_id") != case["doc_id"] or not all(type(x) is int for x in (start, at, end))
+                or not 0 <= start <= at < end <= len(steps)
+                or steps[start].get("label") != case["section"]
+                or steps[end - 1].get("label") != case["scope_end"]):
+            correct, reason = False, "wrong walkthrough document, start or scope"
+    if case.get("graphic_id") and response.get("graphic_id") != case["graphic_id"]:
+        correct, reason = False, "missing expected graphic"
     if outcome == "not_found" and (response.get("citations") != [] or response.get("verified") is not False):
         correct, reason = False, "not_found violates citation/verification contract"
     return Result(case["id"], case["category"], case["expect"], outcome, correct, bool(verified),
@@ -167,7 +218,9 @@ def score_case(case: dict, response: dict, index: dict, latency_ms: float) -> Re
 
 
 async def run_suite(client: httpx.AsyncClient, cases: list[dict], index: dict, *,
-                    allow_mock: bool = False) -> tuple[list[Result], str]:
+                    allow_mock: bool = False, pace: float = 0) -> tuple[list[Result], str]:
+    if not math.isfinite(pace) or pace < 0:
+        raise ValueError("pace must be finite and nonnegative")
     health_response = await client.get("/v1/health")
     health_response.raise_for_status()
     health = health_response.json()
@@ -177,13 +230,21 @@ async def run_suite(client: httpx.AsyncClient, cases: list[dict], index: dict, *
         raise ValueError("Mock relay cannot produce live quality evidence; use --allow-mock for fixtures")
     evidence = "MOCK/FIXTURE ONLY" if health["mock"] else "LIVE RELAY"
     results = []
+    turns = []
     for case in cases:
+        session = str(uuid4())
+        turns.append((case, session))
+        for i, turn in enumerate(case.get("turns", []), 1):
+            turns.append(({"category": case["category"], **turn, "id": f"{case['id']}-turn-{i}"}, session))
+    for case, session in turns:
+        if results and pace:
+            await asyncio.sleep(pace)
         started = time.perf_counter()
         try:
             response = await client.post("/v1/ask", json={
-                "session_id": str(uuid4()), "text": case["q"], "audio": None,
+                "session_id": session, "text": case["q"], "audio": None,
                 "revision": case.get("request_revision"),
-                "context": {"doc_id": None, "step_id": None},
+                "context": case.get("context", {"doc_id": None, "step_id": None}),
             })
             # Inspect bodies even on non-2xx: an unverified answered payload
             # must not escape the safety gate behind an HTTP error.
@@ -191,6 +252,9 @@ async def run_suite(client: httpx.AsyncClient, cases: list[dict], index: dict, *
             if not isinstance(payload, dict):
                 raise ValueError("Expected an object response")
             result = score_case(case, payload, index, (time.perf_counter() - started) * 1000)
+            result.response = {key: payload[key] for key in ("trace_id", "transcript", "intent", "outcome",
+                "glance", "body", "source", "verified", "citations", "walkthrough", "clarify",
+                "needs_clarification", "graphic_id", "command", "latency_ms", "error") if key in payload}
             if not response.is_success:
                 result.correct = False
                 result.reason = f"HTTP {response.status_code}; {result.reason}".rstrip("; ")
@@ -214,6 +278,7 @@ def summarize(results: list[Result]) -> dict:
     predicted_nf = [r for r in results if r.outcome == "not_found"]
     expected_nf = [r for r in results if r.expected == "not_found"]
     true_nf = sum(r.expected == "not_found" for r in predicted_nf)
+    core = [r for r in results if r.category == "answerable" and not r.id.startswith(("v3-", "gap-"))]
     return {
         "cases": len(results),
         "answered_correct_rate": ratio(sum(r.correct for r in answerable), len(answerable)),
@@ -224,6 +289,8 @@ def summarize(results: list[Result]) -> dict:
         "answered": len(answers),
         "unverified_answers": sum(not r.citation_verified for r in answers),
         "failed_cases": sum(not r.correct for r in results),
+        "core_answerable": {"correct": sum(r.correct for r in core), "total": len(core),
+                            "rate": ratio(sum(r.correct for r in core), len(core))},
         "category_passes": {name: {"passed": sum(r.correct for r in results if r.category == name), "total": count}
                             for name, count in sorted(Counter(r.category for r in results).items())},
     }
@@ -269,16 +336,20 @@ async def main(argv=None) -> int:
     parser.add_argument("--qa", type=Path, default=ROOT / "eval/qa.jsonl")
     parser.add_argument("--allow-mock", action="store_true", help="Label all results as fixture-only evidence")
     parser.add_argument("--output", type=Path, help="Write metrics and per-case outcomes as JSON")
+    parser.add_argument("--pace", type=float, default=0, help="Seconds between asks (shared free tier: 6 or more)")
     args = parser.parse_args(argv)
     cases = load_cases(args.qa)
     async with httpx.AsyncClient(base_url=args.base_url.rstrip("/"), timeout=30) as client:
-        results, evidence = await run_suite(client, cases, citation_index(), allow_mock=args.allow_mock)
+        results, evidence = await run_suite(client, cases, citation_index(), allow_mock=args.allow_mock, pace=args.pace)
+        health = (await client.get("/v1/health?verbose=1")).json() if args.output else {}
     # An explicit fixture flag may never accidentally produce a LIVE label.
     if args.allow_mock:
         evidence = "MOCK/FIXTURE ONLY"
     metrics = print_report(results, evidence)
     if args.output:
         args.output.write_text(json.dumps({"evidence": evidence, "metrics": metrics,
+                                          "recorded_at": datetime.now(timezone.utc).isoformat(),
+                                          "relay": args.base_url, "models": health.get("models"),
                                           "results": [asdict(r) for r in results]}, indent=2) + "\n",
                                encoding="utf-8")
     return exit_code(metrics)

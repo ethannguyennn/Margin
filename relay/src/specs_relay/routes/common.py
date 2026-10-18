@@ -68,7 +68,7 @@ def sanitized_step(p: Any, s: Step) -> Step:
 
     return Step(step_id=s.step_id, label=s.label, glance=clean(s.glance) or "",
                 body=clean(s.body) or "", warning=clean(s.warning), checkpoint=clean(s.checkpoint),
-                diagram=s.diagram, graphic_id=s.graphic_id)
+                diagram=s.diagram, graphic_id=s.graphic_id, source_text=s.source_text)
 
 
 async def doc_title(p: Any, doc_id: str, revision: str | None) -> str | None:

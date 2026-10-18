@@ -14,6 +14,15 @@ export interface Step {
 export interface Walkthrough {
   doc_id: string; revision: string; title: string; total: number; index: number; steps: Step[];
   assignment_id?: string | null;
+  // v3: the steps the worker asked for ("making a cappuccino"); 0 <= start <= index < end <= total.
+  // Assignments never set it. steps stays the whole document.
+  scope?: { start: number; end: number } | null;
+}
+// v3: "which one did you mean?" Only with outcome not_found + needs_clarification; options are
+// headings the relay retrieved, never generated text.
+export interface Clarify {
+  prompt: string;      // <= 40 chars
+  options: string[];   // 2-3 items, each <= 24 chars
 }
 export interface Latency { stt: number; embed: number; retrieve: number; generate: number; verify: number; total: number; }
 
@@ -32,6 +41,7 @@ export interface AskResponse {
   graphic_id?: string | null;
   command?: Command | null;           // set iff outcome === 'command'
   needs_clarification?: boolean;      // the relay already sends it (TODO.md §4)
+  clarify?: Clarify | null;           // v3 (BUILD-PLAN-V3 §2)
   error?: { code: string; message: string };
 }
 

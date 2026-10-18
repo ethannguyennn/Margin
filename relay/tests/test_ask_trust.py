@@ -119,3 +119,80 @@ def test_say_that_again_inside_a_task_is_the_repeat_command():
     with client_for(ScriptedGenerator(GOOD)) as c:
         out = ask(c, "say that again", context={"doc_id": "SOP-114", "step_id": "SOP-114:C:4.2"})
     assert (out["intent"], out["outcome"], out["command"]) == ("command", "command", "repeat")
+
+
+# --- a follow-up question knows the step the worker is on ---------------------------
+RINSE = "Rinse the wetted path with purified water at 60°C for 5 min."
+
+
+class StepRetriever(FakeRetriever):
+    async def steps_for(self, doc_id, revision):
+        from specs_relay.schemas import Step
+        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE, source_text=RINSE)] if doc_id == "SOP-120" else []
+
+
+class RecordingGenerator(ScriptedGenerator):
+    async def generate(self, query, chunks, feedback=None):
+        self.query, self.chunks = query, chunks
+        return await super().generate(query, chunks, feedback)
+
+
+def step_client(gen):
+    c = client_for(gen)
+    c.app.state.pipeline.retriever = StepRetriever()
+    return c
+
+
+HERE = {"doc_id": "SOP-120", "step_id": "SOP-120:B:3.1"}
+FIVE_MIN = {"answerable": True, "needs_clarification": False, "glance": "Rinse for 5 min", "body": "",
+            "citations": [{"chunk_id": "SOP-120:B:3.1", "quote": RINSE}], "graphic_id": None}
+
+
+def test_follow_up_resolves_against_the_current_step():
+    gen = RecordingGenerator(FIVE_MIN)
+    with step_client(gen) as c:
+        # Retrieval alone is below both gates ("that" names nothing); the step context answers it.
+        out = ask(c, "how long do I do that for", context=HERE)
+    assert out["outcome"] == "answered" and out["verified"] is True, out
+    assert out["source"] == "SOP-120 Sec 3.1 rev B"
+    assert gen.chunks[0].chunk_id == "SOP-120:B:3.1" and len(gen.chunks) <= 6
+    assert "SOP-120:B:3.1" in gen.query and gen.query.startswith("how long do I do that for")
+
+
+def test_unknown_step_context_falls_back_to_plain_retrieval():
+    gen = RecordingGenerator(FIVE_MIN)
+    with step_client(gen) as c:
+        out = ask(c, "how long do I do that for", context={"doc_id": "SOP-120", "step_id": "SOP-120:B:9.9"})
+    assert out["outcome"] == "not_found" and gen.calls == 0
+
+
+# --- a walkthrough starts at the section the worker asked for -----------------------
+class TillRetriever:
+    async def retrieve(self, query, revision):
+        from specs_relay.schemas import Chunk
+        hits = [Chunk(chunk_id=f"SOP-202:C:{s}", doc_id="SOP-202", revision="C", section=s, text="t", is_step=True)
+                for s in ("7.2", "2.3", "7.1")]
+        return RetrievalResult(chunks=hits, best_sim=0.79, best_rrf=0.032)
+
+    async def steps_for(self, doc_id, revision):
+        from specs_relay.schemas import Step
+        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.", source_text=f"Do {s}.")
+                for s in ("2.3", "5.1", "7.1", "7.2", "7.3")]
+
+
+def test_walkthrough_starts_at_the_first_step_of_the_asked_section():
+    c = client_for(ScriptedGenerator(GOOD))
+    c.app.state.pipeline.retriever = TillRetriever()
+    with c:
+        out = ask(c, "take me through closing out the till")
+    w = out["walkthrough"]
+    assert out["intent"] == "walkthrough" and (w["total"], w["index"]) == (5, 2), out
+    assert w["steps"][w["index"]]["label"] == "7.1" and out["source"] == "SOP-202 Sec 7.1 rev C"
+
+
+def test_uncited_graphic_is_dropped_not_the_answer():
+    gen = ScriptedGenerator({**GOOD, "graphic_id": "allergen-binder"})
+    with client_for(gen) as c:
+        out = ask(c, M5)
+    assert out["outcome"] == "answered" and out["verified"] is True, out
+    assert out["graphic_id"] is None and gen.calls == 1

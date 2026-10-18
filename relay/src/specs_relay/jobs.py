@@ -21,6 +21,7 @@ from typing import Any
 import sentry_sdk
 
 from .pipeline import PipelineError
+from . import obs
 from .schemas import DraftStep, MaterialText, VerifyResult
 
 log = logging.getLogger("specs.jobs")
@@ -73,6 +74,7 @@ class JobRunner:
             await self._fail(material_id, "Conversion was interrupted because the relay shut down. Upload again.")
             raise
         except Exception as exc:  # noqa: BLE001 - every failure must end in `failed`, never stuck
+            obs.record_quota_error(exc, "convert")
             log.warning("conversion %s failed: %s", material_id, type(exc).__name__)
             sentry_sdk.capture_exception(exc)
             await self._fail(material_id, readable(exc))

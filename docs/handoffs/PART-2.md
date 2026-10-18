@@ -325,3 +325,23 @@ on a bad token.
   LISTENING anyway (Part 1).
 - Not started, per scope: single-nod mode tuning, speakerRole filtering, battery tuning beyond pace
   choice.
+
+## 9. v3 field preparation (2026-10-18; no new hardware measurements)
+
+The historical tables above describe the v2 session. Current detector defaults use `signal: 'auto'`
+and already accept gravity-vector input; actual wearer rates and axis/unit measurements remain
+unmeasured. Do not tune defaults from the synthetic fixtures or infer M10 acceptance from them.
+
+- The dev recorder now allows 1800 s for the required continuous bench-work trial. Summaries
+  handle long recordings without spreading all samples into a function argument list.
+- Recording and live gestures share IMU samples; stopping the recorder leaves gestures active.
+  A recording holds the chosen pace (including on foreground resume), so P100/P500/P1000 rates
+  are measured separately. Normal pace probing resumes when no fixed-pace consumer remains.
+- Exports include the chosen pace and effective detector parameters. Mock/replay input and an
+  empty stream cannot be exported as a real `g2` fixture. Controls prevent overlapping UI runs
+  and show errors without losing the ability to retry. No audio capture/storage was added.
+- Save genuine recordings as `<activity>.<A-or-B>.P<pace>.g2.json`, with `meta.source: "g2"`
+  and measured `meta.expect` counts. `gestures.test.ts` replays them; the synthetic gravity
+  conversion tests apply only to `*.synthetic.json`, never to real sensor axes.
+- Field acquisition, the 40-line speech bank, scoring, on-device checks and an unfilled run
+  template are in `docs/field/`. No `*.g2.json` fixtures or field results have been fabricated.

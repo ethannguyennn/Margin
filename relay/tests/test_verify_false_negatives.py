@@ -9,7 +9,7 @@ import pytest
 from specs_relay.pipeline.verify import check_draft
 
 FIXTURES = [json.loads(line) for line in
-            (Path(__file__).parent / "fixtures" / "verify-false-negatives.jsonl").read_text("utf-8").splitlines()
+            (Path(__file__).parent / "fixtures" / "verify-false-negatives-diagnostic.jsonl").read_text("utf-8").splitlines()
             if line.strip()]
 
 

@@ -46,6 +46,21 @@ Rules:
 7. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
 8. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
    Choose the most useful equipment view for this instruction; otherwise return null. Never invent a URL.
+9. Count every character in glance, including spaces: at most {GLANCE_MAX}. Copy numbers with
+   their units exactly from the quote. Preserve inner quotation marks and degree/unit glyphs
+   in citations; JSON-escape quotation marks rather than rewriting or shortening the quote.
+10. Keep spelled-out counts as words ("five" stays "five", never "5"). Use compact degF/degC,
+    sec, min or hours in display text with the same source value and unit; never convert values.
+    Put a long procedure's instructions in body, with only a short action in glance.
+    If both temperature scales exceed the glance cap, put the parenthetic scale in body.
+    Never HTML-escape source quotes (copy \u00b0, not &deg;).
+11. If QUESTION labels ORIGINAL QUESTION and CLARIFICATION REPLY, use the reply to identify
+    the retrieved procedure and answer the original question. General rules may be conditional:
+    state their conditions explicitly. If only a size or variant remains unspecified and the
+    approved rule lists alternatives, return the labeled alternatives rather than guessing one.
+    For alternatives, use a short number-free source heading in glance and copy the applicable
+    source sentences into body, preserving conditions and the unit after every value.
+    This applies only after clarification; initially ambiguous questions still need clarification.
 Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}], graphic_id}}
 When answerable=false, return empty glance, body and citations."""
 

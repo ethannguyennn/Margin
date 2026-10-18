@@ -25,7 +25,7 @@ const PROBE_MS = 1500;
 let probe: { untried: number[]; rates: Map<number, number>; t0: number; n: number; last: number } | null = null;
 
 function measure(t: number): void {
-  if (!probe) return;
+  if (!probe || [...sinks.values()].some(Boolean)) return;
   if (t - probe.last > 1000) probe.n = 0; // the stream paused (pace switch): measure afresh
   probe.last = t;
   if (probe.n++ === 0) probe.t0 = t;
@@ -62,7 +62,7 @@ export function fixtureSamples(f: ImuFixture): ImuSample[] {
 
 type SysEvent = { sysEvent?: { eventType?: number; imuData?: { x?: number; y?: number; z?: number } } };
 
-let sink: ((s: ImuSample) => void) | null = null;
+const sinks = new Map<(s: ImuSample) => void, boolean>(); // true holds the selected pace for a recording
 let wanted = false;
 let open = false;
 let unsubscribe: (() => void) | null = null;
@@ -104,7 +104,7 @@ function onEvent(e: SysEvent): void {
     const s = toSample(sys.imuData, now());
     if (s) {
       measure(s.t);
-      sink?.(s);
+      for (const sink of sinks.keys()) sink(s);
     }
   }
 }
@@ -155,7 +155,10 @@ async function startReplay(name: string, onSample: (s: ImuSample) => void): Prom
 }
 
 /** Start streaming samples. Returns the stop function. Idempotent per caller. */
-export async function startImu(onSample: (s: ImuSample) => void): Promise<() => Promise<void>> {
+export async function startImu(
+  onSample: (s: ImuSample) => void,
+  options: { fixedPace?: boolean } = {},
+): Promise<() => Promise<void>> {
   const replay = replayName();
   if (replay) return startReplay(replay, onSample);
   if (MOCK) {
@@ -163,14 +166,28 @@ export async function startImu(onSample: (s: ImuSample) => void): Promise<() => 
     console.info('[motion] mock mode: no IMU. Use ?imu=<fixture> or simulateGesture().');
     return async () => {};
   }
-  sink = onSample;
+  sinks.set(onSample, options.fixedPace === true);
   wanted = true;
-  if (!unsubscribe) unsubscribe = (await getBridge()).onEvenHubEvent(onEvent as (e: unknown) => void);
-  const hidden = typeof document !== 'undefined' && (document as { visibilityState?: string }).visibilityState === 'hidden';
-  if (!hidden) await setOpen(true, 'start');
+  try {
+    if (!unsubscribe) {
+      const b = await getBridge();
+      if (!unsubscribe) unsubscribe = b.onEvenHubEvent(onEvent as (e: unknown) => void);
+    }
+    const hidden = typeof document !== 'undefined' && (document as { visibilityState?: string }).visibilityState === 'hidden';
+    if (!hidden) {
+      if (open && options.fixedPace) await control(true, 'fixed recording pace');
+      else await setOpen(true, 'start');
+    }
+  } catch (e) {
+    sinks.delete(onSample);
+    wanted = sinks.size > 0;
+    throw e;
+  }
   return async () => {
-    wanted = false;
-    sink = null;
+    if (!sinks.delete(onSample)) return;
+    wanted = sinks.size > 0;
+    if (wanted) return;
+    probe = null;
     unsubscribe?.();
     unsubscribe = null;
     await setOpen(false, 'stop');
