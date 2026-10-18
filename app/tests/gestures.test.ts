@@ -90,9 +90,9 @@ const bump = (t: number, t0: number, amp: number, dur = 0.5) =>
 const double = (t0: number) => (t: number) => bump(t, t0, 15) + bump(t, t0 + 0.65, 15);
 
 test('cooldown: a double nod 1 s after a double nod is ignored, 2.5 s after is not', () => {
-  const close = trace(5, (t) => double(0.5)(t) + double(1.9)(t));
+  const close = trace(5, (t) => double(1.0)(t) + double(2.4)(t));
   assert.equal(count(detect(close, DEFAULT_PARAMS), 'NOD'), 1);
-  const far = trace(6, (t) => double(0.5)(t) + double(3.2)(t));
+  const far = trace(6, (t) => double(1.0)(t) + double(3.7)(t));
   assert.equal(count(detect(far, DEFAULT_PARAMS), 'NOD'), 2);
 });
 
@@ -390,4 +390,24 @@ test('live: a pace too slow for a nod is replaced by one that is not, and rememb
   assert.equal(store['specs.imuPace'], '1000');
   await g.stopHeadGestures();
   delete (globalThis as any).localStorage;
+});
+
+test('accel: a double nod that overshoots rest, with a radio stall between the nods, is one NOD', () => {
+  // Pitch: two 8 deg nods, each swinging 4 deg back past rest; 25 Hz in bursts of 3.
+  const swing = (t: number, at: number) => {
+    const u = t - at;
+    if (u < 0 || u > 0.7) return 0;
+    if (u < 0.2) return -8 * (1 - Math.cos((Math.PI * u) / 0.2)) / 2;
+    if (u < 0.35) return -8 + 12 * (1 - Math.cos((Math.PI * (u - 0.2)) / 0.15)) / 2;
+    return u < 0.55 ? 4 * (1 + Math.cos((Math.PI * (u - 0.35)) / 0.2)) / 2 : 0;
+  };
+  const s = gravity(Array.from({ length: 125 }, (_, i) => {
+    const t = i / 25;
+    return { t: i * 40, x: -10 + swing(t, 2) + swing(t, 2.75), y: 0, z: 0 };
+  }));
+  const overshoot = s.map((x, i) => ({ ...x, t: s[Math.min(s.length - 1, i - (i % 3) + 2)].t }));
+  assert.equal(count(detect(overshoot, DEFAULT_PARAMS), 'NOD'), 1, 'overshoot past rest is not a third nod');
+  // Same stream, but the burst after the first nod arrives 350 ms late with its backlog.
+  const stalled = overshoot.map((x) => ({ ...x, t: x.t >= 2560 ? x.t + 350 : x.t }));
+  assert.equal(count(detect(stalled, DEFAULT_PARAMS), 'NOD'), 1, 'a stall does not reset or squash the double');
 });

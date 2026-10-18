@@ -69,7 +69,7 @@ export const DEFAULT_PARAMS: DetectorParams = {
   restMs: 3000,
   lpMs: 40,
   hpMs: 0,
-  maxGapMs: 300,
+  maxGapMs: 600,
   lobeEnd: 0.3,
   // As low as the motion gate and the walking-train check allow: a double nod is never
   // accidental, so sensitivity wins. 22/18 caught 5-9 deg nods at 25 Hz in BLE bursts with
@@ -95,7 +95,13 @@ type Filtered = { t: number; p: number; y: number; r: number };
 export type NodInfo = { t: number; down: number; up: number };
 
 const HISTORY_MS = 3000;
+// 'accel': a movement away from rest starts once the tilt passes EXCURSION_DEG and ends after
+// EXCURSION_END_MS back within it. Its direction signs the tilt, so swinging back past rest
+// reads as the same movement continuing, not a new one.
+const EXCURSION_DEG = 1.5;
+const EXCURSION_END_MS = 150;
 type Vec = { x: number; y: number; z: number };
+const dot = (a: Vec, b: Vec): number => a.x * b.x + a.y * b.y + a.z * b.z;
 /** 1 g, in g or in m/s^2. Euler angles or gyro rates of a still head are near 0 instead. */
 const gravityLike = (s: Vec): boolean => {
   const m = Math.hypot(s.x, s.y, s.z);
@@ -109,8 +115,10 @@ const unit = (v: Vec): Vec => {
 
 export class Detector {
   private prev: { t: number; p: number; y: number; r: number } | null = null;
+  private arrival = 0; // last arrival time, for gap detection
   private t0 = 0; // first arrival since the stream (re)started
   private n = 0; // samples since then
+  private ts = 0; // even sample clock (see push)
   private lp = { p: 0, y: 0, r: 0 };
   private bias = { p: 0, y: 0, r: 0 };
   private hist: Filtered[] = [];
@@ -124,6 +132,8 @@ export class Detector {
   private mode: Exclude<DetectorParams['signal'], 'auto'> | null = null;
   private rest: Vec | null = null;
   private grav: Vec | null = null;
+  private dir: Vec | null = null; // direction of the current excursion from rest
+  private nearMs = 0;
 
   /** onNod reports every single nod's peak rates once its return lobe ends (calibration). */
   constructor(
@@ -141,12 +151,15 @@ export class Detector {
     this.pitch = this.yawCur = this.lastNod = null;
     this.lobeStarts = [];
     this.yawLobes = [];
-    this.rest = this.grav = null;
+    this.rest = this.grav = this.dir = null;
+    this.nearMs = 0;
   }
 
   /** Degrees between gravity now and the slow rest direction, negated so a nod reads as a
-   * down lobe then its return. No axis or sign mapping; yaw is invisible to gravity, so an
-   * accelerometer gives no SHAKE (double press covers "back"). */
+   * down lobe then its return, and signed by the excursion's direction: a nod that swings back
+   * past rest keeps rising instead of reading as a fresh down lobe (an extra "nod" that broke
+   * the double). No axis or sign mapping; yaw is invisible to gravity, so an accelerometer
+   * gives no SHAKE (double press covers "back"). */
   private tilt(s: ImuSample, dt: number): number {
     const m = Math.hypot(s.x, s.y, s.z) || 1;
     // Low-pass the gravity direction before taking the angle: the angle is unsigned, so
@@ -159,7 +172,12 @@ export class Detector {
     // Rest holds during a pitch lobe: drifting toward the first nod of a double put the head
     // "above" rest for the second, which then started with a reversal.
     this.rest = this.pitch?.open ? rest : unit(lerp(rest, u, Math.min(1, dt / this.params.restMs)));
-    return -deg;
+    const off = { x: u.x - rest.x, y: u.y - rest.y, z: u.z - rest.z };
+    if (deg > EXCURSION_DEG) {
+      this.dir ??= unit(off);
+      this.nearMs = 0;
+    } else if (this.dir && (this.nearMs += dt) > EXCURSION_END_MS) this.dir = null;
+    return this.dir && dot(off, this.dir) < 0 ? deg : -deg;
   }
 
   push(s: ImuSample): HeadGesture | null {
@@ -169,10 +187,11 @@ export class Detector {
       console.info(`[motion] IMU signal: ${this.mode}`);
     }
     const prev = this.prev;
-    const gap = !prev || s.t - prev.t > P.maxGapMs || s.t < prev.t;
+    const gap = !prev || s.t - this.arrival > P.maxGapMs || s.t < this.arrival;
+    this.arrival = s.t;
     if (gap) {
       this.reset();
-      this.t0 = s.t;
+      this.t0 = this.ts = s.t;
       this.n = 0;
     } else this.n++;
     // BLE delivers in bursts: several samples share one arrival time and the next burst
@@ -180,8 +199,12 @@ export class Detector {
     // since the stream (re)started, not the gap to the previous arrival (which read a nod
     // in bursts of 3 at a third of its speed).
     const dt = this.n ? (s.t - this.t0) / this.n : 0;
-    const raw = this.mode === 'accel' ? { t: s.t, p: this.tilt(s, dt), y: 0, r: 0 } : {
-      t: s.t,
+    // Timing (lobe onsets, nod spacing) runs on an even clock for the same reason: a radio
+    // stall that delivers its backlog in one burst would squash a nod into one instant. The
+    // clock never runs ahead of arrival and never trails it by more than maxGapMs.
+    if (!gap) this.ts = Math.min(s.t, Math.max(s.t - P.maxGapMs, this.ts + dt));
+    const raw = this.mode === 'accel' ? { t: this.ts, p: this.tilt(s, dt), y: 0, r: 0 } : {
+      t: this.ts,
       p: s[P.pitchAxis] * P.scale * P.pitchSign,
       y: s[P.yawAxis] * P.scale * P.yawSign,
       r: s[this.roll] * P.scale,
@@ -196,14 +219,14 @@ export class Detector {
     };
     const a = this.mode === 'accel' ? 1 : dt / (P.lpMs + dt); // accel: tilt() already low-passed
     const b = P.hpMs > 0 ? dt / (P.hpMs + dt) : 0;
-    const f: Filtered = { t: s.t, p: 0, y: 0, r: 0 };
+    const f: Filtered = { t: this.ts, p: 0, y: 0, r: 0 };
     for (const k of ['p', 'y', 'r'] as const) {
       this.lp[k] += a * (rate(k) - this.lp[k]);
       this.bias[k] += b * (this.lp[k] - this.bias[k]);
       f[k] = this.lp[k] - this.bias[k];
     }
     this.hist.push(f);
-    while (this.hist[0].t < s.t - HISTORY_MS) this.hist.shift();
+    while (this.hist[0].t < this.ts - HISTORY_MS) this.hist.shift();
 
     return this.pitchStep(f) ?? this.yawStep(f);
   }
@@ -246,8 +269,9 @@ export class Detector {
     lobe.nod = { down: cur.peak };
     // Walking bobs the head in a steady train of nod-like lobes; a deliberate nod starts from
     // a still head. Any lobe in the gate window before the down lobe = part of a train.
+    // Right after the stream (re)starts there is no window to look at: not proven still.
     const from = cur.t0 - P.gateLeadMs - P.gateMs;
-    const busy = this.lobeStarts.some((t) => t >= from && t < cur.t0 - P.gateLeadMs);
+    const busy = from < this.t0 || this.lobeStarts.some((t) => t >= from && t < cur.t0 - P.gateLeadMs);
     const nod = { start: cur.t0, t: f.t, busy };
     if (P.single) return busy ? null : this.emit('NOD', nod.start, f.t);
     const first = this.lastNod;
