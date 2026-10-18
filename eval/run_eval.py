@@ -266,7 +266,7 @@ def summarize(results: list[Result]) -> dict:
     predicted_nf = [r for r in results if r.outcome == "not_found"]
     expected_nf = [r for r in results if r.expected == "not_found"]
     true_nf = sum(r.expected == "not_found" for r in predicted_nf)
-    core = [r for r in results if r.category == "answerable" and not r.id.startswith("v3-")]
+    core = [r for r in results if r.category == "answerable" and not r.id.startswith(("v3-", "gap-"))]
     return {
         "cases": len(results),
         "answered_correct_rate": ratio(sum(r.correct for r in answerable), len(answerable)),

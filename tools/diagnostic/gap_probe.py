@@ -24,7 +24,7 @@ def cases():
         {**bank["v3-w2"], "id": "gap-cash-count", "q": "I need to do the cash count for closing."},
         {**bank["v3-w3"], "id": "gap-opening", "q": "Let's start the back of house opening."},
         {**bank["v3-w3"], "id": "gap-cleaning", "q": "Open the cleaning procedure.",
-         "section": "6.2", "scope_end": "6.5"},
+         "section": "5.1", "scope_end": "5.4"},
     ])
     return selected
 

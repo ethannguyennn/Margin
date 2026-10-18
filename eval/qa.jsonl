@@ -44,7 +44,7 @@
 {"id":"c01","category":"ambiguous","q":"How long does it last?","expect":"not_found","needs_clarification":true}
 {"id":"c02","category":"ambiguous","q":"What temperature?","expect":"not_found","needs_clarification":true}
 {"id":"v3-w1","category":"answerable","kind":"walkthrough","q":"Walk me through getting the register ready before my shift","expect":"answered","doc_id":"SOP-201","revision":"C","section":"2.1","scope_end":"2.5"}
-{"id":"v3-w2","category":"answerable","kind":"walkthrough","q":"Bring up the closing checklist","expect":"answered","doc_id":"SOP-202","revision":"C","section":"7.1","scope_end":"7.5"}
+{"id":"v3-w2","category":"answerable","kind":"walkthrough","q":"Take me through closing out the till","expect":"answered","doc_id":"SOP-202","revision":"C","section":"7.1","scope_end":"7.5"}
 {"id":"v3-w3","category":"answerable","kind":"walkthrough","q":"Guide me through kitchen opening","expect":"answered","doc_id":"SOP-210","revision":"C","section":"3.1","scope_end":"3.8"}
 {"id":"v3-w4","category":"answerable","kind":"walkthrough","q":"Show me how to pull a good espresso shot","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.1","scope_end":"3.7"}
 {"id":"v3-w5","category":"answerable","kind":"walkthrough","q":"Walk me through making a cappuccino","expect":"answered","doc_id":"SOP-230","revision":"C","section":"3.2","scope_end":"3.4"}

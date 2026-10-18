@@ -146,6 +146,23 @@ def test_follow_up_keeps_current_source_first_then_previous_citations():
     assert chunks[0].chunk_id == "SOP-230:C:3.3"
     assert chunks[1].chunk_id == prior.chunk_id and chunks[1].text == prior.text
     assert len(chunks) <= 6 and "Previous question" in query
+    assert "How hot should the milk be?" in ret.queries[-1]
+    assert "Current step:" in ret.queries[-1]
+    assert "Extra hot: 160 degF" in ret.queries[-1]
+
+
+def test_a_new_topic_retrieves_without_the_previous_answer():
+    prior = chunk("SOP-220", "4.2")
+    draft = Draft(answerable=True, glance="Extra hot: 160 degF", citations=[
+        {"chunk_id": prior.chunk_id, "quote": prior.text}])
+    ret, gen = Retriever([prior]), Generator(draft, Draft(answerable=False))
+    sid = uuid4()
+    with client(pipeline(ret, gen)) as c:
+        ask(c, "How hot should the milk be?", sid)
+        ret.chunks = [chunk("SOP-230", "1.3")]
+        ask(c, "How many pumps in a mocha?", sid)
+    assert ret.queries[-1] == "How many pumps in a mocha?"
+    assert [c.chunk_id for c in gen.requests[-1][1]] == ["SOP-230:C:1.3"]
 
 
 @pytest.mark.parametrize("query,doc,section", [
@@ -184,7 +201,7 @@ def test_authored_paraphrase_is_never_used_as_a_source_quote():
 
 
 def test_picture_question_returns_a_cited_reference_without_generation():
-    ret, gen = Retriever([chunk("SOP-220", "4.4")]), Generator()
+    ret, gen = Retriever([chunk("SOP-210", "5.3"), chunk("SOP-220", "4.4")]), Generator()
     with client(pipeline(ret, gen)) as c:
         out = ask(c, "What does the steam wand look like?")
         command = ask(c, "show me the picture")
