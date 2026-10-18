@@ -124,6 +124,21 @@ def test_long_document_titles_use_untruncated_grounded_headings_instead():
     assert all(option in {c.heading for c in chunks} for option in result.options)
 
 
+def test_subjectless_question_clarifies_even_below_the_answer_gate():
+    class Weak(Retriever):
+        async def retrieve(self, query, revision):
+            return RetrievalResult(chunks=self.chunks, best_sim=0.1, best_rrf=0.001)
+    gen = Generator()
+    p = pipeline(Weak([chunk("SOP-220", "4.1"), chunk("SOP-210", "3.6")]), gen)
+    p.min_sim, p.min_rrf = 0.68, 0.04
+    with client(p) as c:
+        out = ask(c, "How long does it last?")
+        unrelated = ask(c, "How long does a tire last?")
+    assert out["needs_clarification"] and len(out["clarify"]["options"]) >= 2
+    assert not unrelated["needs_clarification"] and unrelated["outcome"] == "not_found"
+    assert gen.requests == []
+
+
 def test_a_reference_only_recipe_hit_starts_the_matching_procedural_group():
     with client(pipeline(Retriever([chunk("SOP-230", "3.1")]), Generator())) as c:
         walk = ask(c, "walk me through making a cappuccino")["walkthrough"]
@@ -161,6 +176,20 @@ def test_a_new_topic_retrieves_without_the_previous_answer():
         ask(c, "How many pumps in a mocha?", sid)
     assert ret.queries[-1] == "How many pumps in a mocha?"
     assert [c.chunk_id for c in gen.requests[-1][1]] == ["SOP-230:C:1.3"]
+
+
+def test_fresh_source_is_not_shadowed_by_a_previous_partial_quote():
+    source = chunk("SOP-220", "4.2")
+    kid = '"Kid\'s temp" is 130\u00b0F (54\u00b0C).'
+    extra = '"Extra hot" is 160\u00b0F (71\u00b0C), which is the maximum.'
+    gen = Generator(
+        Draft(answerable=True, glance="Kids: 130 degF", citations=[{"chunk_id": source.chunk_id, "quote": kid}]),
+        Draft(answerable=True, glance="Extra hot: 160 degF", citations=[{"chunk_id": source.chunk_id, "quote": extra}]))
+    sid = uuid4()
+    with client(pipeline(Retriever([source]), gen)) as c:
+        assert ask(c, "How hot for a kids drink?", sid)["outcome"] == "answered"
+        assert ask(c, "What about extra hot?", sid)["outcome"] == "answered"
+    assert gen.requests[-1][1][0].text == source.text
 
 
 @pytest.mark.parametrize("query,doc,section", [

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import re
 from difflib import SequenceMatcher
+from html import unescape
 from typing import Any, Iterator
 
 from ..schemas import ANSWER_BODY_MAX, ANSWER_GLANCE_MAX
@@ -32,7 +33,7 @@ BODY_MAX = ANSWER_BODY_MAX
 FUZZY_MIN_RATIO = 0.95
 FUZZY_MIN_LEN = 12  # shorter quotes must match exactly
 
-_NON_ALNUM = re.compile(r"[^0-9a-z]+")
+_NON_ALNUM = re.compile(r"[^0-9a-z-]+")  # preserve signs; -20 is not 20
 _DIGITS = re.compile(r"\d+")
 # Part codes: M5, HX-2, SOP-131, M5x0.8 is out of scope.
 _CODE = re.compile(r"\b[a-z]{1,4}-?\d+(?:\.\d+)?[a-z]?\b")
@@ -40,11 +41,16 @@ _CODE = re.compile(r"\b[a-z]{1,4}-?\d+(?:\.\d+)?[a-z]?\b")
 # far more often English words than units ("4 in a star pattern").
 _UNIT = (
     r"n-m|n\s?m|in-lbs?|ft-lbs?|lbf|lbs?|kg|mg|g|mm|cm|um|m|ft"
-    r"|ms|min|sec|s|hrs?|h|deg\s?c|deg\s?f|deg|%|psi|bar|kpa|mpa|pa"
+    r"|ms|minutes?|min|seconds?|sec|s|hours?|hrs?|h"
+    r"|degrees?\s*(?:fahrenheit|celsius|[cf])|fahrenheit|celsius|deg\s?c|deg\s?f|deg|[cf]|%|psi|bar|kpa|mpa|pa"
     r"|mv|v|ma|kohm|ohm|kw|w|ml|ul|l|rpm|hz|ppm|fl\s?oz|oz|pumps?|inches|inch"
 )
-_NUMBER = re.compile(rf"(?<![\w.])(\d+(?:[.,]\d+)*)(?:\s*({_UNIT}))?(?![a-z0-9])")
+_NUMBER = re.compile(rf"(?<![\w.])(-?\d+(?:[.,]\d+)*)(?:\s*({_UNIT}))?(?![a-z0-9])")
 _UNIT_ALIASES = {"sec": "s", "hrs": "h", "hr": "h", "lbs": "lb", "inlbs": "inlb", "ftlbs": "ftlb",
+                 "second": "s", "seconds": "s", "minute": "min", "minutes": "min", "hour": "h", "hours": "h",
+                 "fahrenheit": "degf", "degreefahrenheit": "degf", "degreesfahrenheit": "degf",
+                 "celsius": "degc", "degreecelsius": "degc", "degreescelsius": "degc",
+                 "degreef": "degf", "degreesf": "degf", "degreec": "degc", "degreesc": "degc",
                  "pumps": "pump", "inches": "inch"}
 
 
@@ -56,7 +62,7 @@ def _get(obj: Any, name: str, default: Any = None) -> Any:
 
 def normalize(text: str) -> str:
     """Lowercase, glyphs sanitized, punctuation to spaces, whitespace collapsed."""
-    return " ".join(_NON_ALNUM.sub(" ", sanitize(text).casefold()).split())
+    return " ".join(_NON_ALNUM.sub(" ", sanitize(unescape(text)).casefold()).split())
 
 
 def quote_in_text(quote: str, text: str) -> bool:
@@ -68,6 +74,7 @@ def quote_in_text(quote: str, text: str) -> bool:
     if len(nq) < FUZZY_MIN_LEN:
         return False
     digits = _DIGITS.findall(nq)
+    values = tuple(tok for tok, _ in iter_number_tokens(nq))
     slack = max(2, int(len(nq) * (1 - FUZZY_MIN_RATIO)) + 1)
     sm = SequenceMatcher(autojunk=False)
     sm.set_seq2(nq)
@@ -83,6 +90,7 @@ def quote_in_text(quote: str, text: str) -> bool:
                 and sm.quick_ratio() >= FUZZY_MIN_RATIO
                 and sm.ratio() >= FUZZY_MIN_RATIO
                 and _DIGITS.findall(window) == digits
+                and tuple(tok for tok, _ in iter_number_tokens(window)) == values
             ):
                 return True
     return False
@@ -121,6 +129,8 @@ def _unsupported(answer: str, quotes: list[str], sections: list[str]) -> str | N
         # its unit. Bare section labels ("Step 4.2") are allowed.
         if tok in quoted or tok in labels:
             continue
+        if tok.endswith(("|f", "|c")) and tok[:-1] + "deg" + tok[-1] in quoted:
+            continue  # a source with explicit degrees grounds the compact F/C spelling
         return tok.replace("|", " ").strip()
     return None
 
@@ -150,7 +160,7 @@ def check_draft(draft: Any, chunks: list[Any]) -> tuple[str | None, list[dict]]:
     by_id = {_get(c, "chunk_id"): c for c in chunks}
     out: list[dict] = []
     for cite in cites:
-        cid, quote = _get(cite, "chunk_id"), (_get(cite, "quote") or "").strip()
+        cid, quote = _get(cite, "chunk_id"), unescape(_get(cite, "quote") or "").strip()
         chunk = by_id.get(cid)
         if chunk is None:
             return f"chunk_not_retrieved: {cid} is not one of the provided chunks", []
