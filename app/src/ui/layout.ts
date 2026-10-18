@@ -1,15 +1,10 @@
 import { TextContainerProperty, TextContainerUpgrade, CreateStartUpPageContainer, RebuildPageContainer, ImageContainerProperty, ImageRawDataUpdate, type EvenAppBridge } from '@evenrealities/even_hub_sdk';
-import { graphicPng, GRAPHIC_WIDTH, GRAPHIC_HEIGHT } from './sop-graphics';
+import { graphicPng } from './sop-graphics';
+import { CONTAINERS, TILES, GRAPHIC_CONTAINER } from './geometry';
+export { CONTAINERS, TILES, GRAPHIC_CONTAINER } from './geometry';
 import type { DiagramImage } from '../types';
 import type { ScreenText } from './screens';
 export type Layout = 'TEXT' | 'DIAGRAM' | 'REFERENCE';
-export const CONTAINERS = [
-    { containerID: 1, containerName: 'header', yPosition: 0, height: 40, textColor: 2, isEventCapture: 0, paddingLength: 4 },
-    { containerID: 2, containerName: 'main', yPosition: 48, height: 184, textColor: 4, isEventCapture: 1, paddingLength: 8 },
-    { containerID: 3, containerName: 'footer', yPosition: 240, height: 48, textColor: 2, isEventCapture: 0, paddingLength: 4 },
-] as const;
-export const TILES = [{ containerID: 4, containerName: 'tile-0', xPosition: 0 }, { containerID: 5, containerName: 'tile-1', xPosition: 288 }] as const;
-export const GRAPHIC_CONTAINER = { containerID: 6, containerName: "reference", xPosition: 288, yPosition: 68, width: GRAPHIC_WIDTH, height: GRAPHIC_HEIGHT };
 export function createLayout(text: ScreenText, layout: Layout = 'TEXT'): CreateStartUpPageContainer {
     const texts = CONTAINERS.filter(c => layout !== 'DIAGRAM' || c.containerName !== 'main');
     return new CreateStartUpPageContainer({ containerTotalNum: layout === 'TEXT' ? 3 : 4,

@@ -1,5 +1,11 @@
 # Deploy: relay + Caddy on Vultr, behind `getyourassto.work`
 
+The Caddy image serves both web apps: admin simulator at `/portal/#simulator`,
+worker Lens tab at `/app/#/lens`. The worker production build targets
+`https://getyourassto.work`, uses live APIs and a 50-second ask timeout. Only
+public frontend configuration is passed at build time; relay keys stay in the VM
+environment. To change the worker API origin, build with `APP_RELAY_ORIGIN`.
+
 ## v3 deployment checkpoint
 
 `make deploy-remote` reads `VM_HOST` from a make argument, the process environment, then the

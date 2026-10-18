@@ -3,6 +3,7 @@ import '@fontsource/carlito/latin-700.css';
 import './style.css';
 import { api, downloadMaterial, json, poll, TOKEN_KEY, type JsonObject } from './api';
 import { approvalReasons, element as el, highlightSource, minutesOnStep, preview } from './view';
+import { mountSimulator } from '../../app/src/simulator/simulator';
 
 const app = document.querySelector<HTMLElement>('#app')!;
 const nav = document.querySelector<HTMLElement>('nav')!;
@@ -334,6 +335,22 @@ function board(epoch: number) {
   dispose.push(stop);
 }
 
+function simulator() {
+  heading('Glasses simulator', 'Try a question or voice command with this workspace’s published SOPs. The preview uses the same screens and gestures as the glasses.');
+  const panel = el('section', undefined, 'simulator-panel');
+  app.append(panel);
+  const sessionId = crypto.randomUUID();
+  const mounted = mountSimulator(panel, {
+    sessionId,
+    ask: (request, opts) => api('/v1/simulator/ask', {
+      ...json('POST', request), signal: opts?.signal ? AbortSignal.any([opts.signal, AbortSignal.timeout(50000)]) : AbortSignal.timeout(50000),
+    }),
+    getDiagram: id => api(`/v1/simulator/diagrams/${encodeURIComponent(id)}`),
+  });
+  dispose.push(() => mounted.dispose());
+  app.append(el('p', 'Browser preview · 576 × 288 per eye. Font rendering may differ on hardware. This is a separate session from your workers’ glasses.', 'intro'));
+}
+
 export async function route() {
   const epoch = ++generation;
   dispose.forEach(cleanup => cleanup()); dispose = []; app.replaceChildren(); message();
@@ -342,7 +359,7 @@ export async function route() {
   if (workspaceBadge) workspaceBadge.hidden = true;
   if (!loggedIn) { login(); return; }
   void showWorkspace(epoch);
-  nav.replaceChildren(...['Upload', 'Library', 'Review', 'Devices', 'Assign', 'Board'].map(text => {
+  nav.replaceChildren(...['Upload', 'Library', 'Review', 'Devices', 'Assign', 'Board', 'Simulator'].map(text => {
     const dest = text === 'Review' ? `review/${sessionStorage.getItem(draftKey) ?? ''}` : text.toLowerCase();
     const a = link(text, `#${dest}`); if (location.hash.slice(1).startsWith(text.toLowerCase())) a.setAttribute('aria-current', 'page'); return a;
   }));
@@ -356,6 +373,7 @@ export async function route() {
     else if (page === 'devices') await devices(epoch);
     else if (page === 'assign') await assign(epoch);
     else if (page === 'board') board(epoch);
+    else if (page === 'simulator') simulator();
     else { heading('Open a draft', 'Upload a material or open a draft by its document ID and revision.'); app.append(link('Upload or open a draft', '#upload')); }
   } catch (exc) { if (generation === epoch) { error(exc); app.append(button('Retry', route)); } }
 }

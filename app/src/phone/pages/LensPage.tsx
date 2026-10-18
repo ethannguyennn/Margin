@@ -1,5 +1,4 @@
-import { getGraphic } from '../../ui/sop-graphics';
-import { SopGraphic } from '../components/SopGraphic';
+import { GlassesSimulator } from '../components/GlassesSimulator';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ContextPicker } from '../components/ContextPicker';
@@ -50,6 +49,8 @@ export default function LensPage() {
     <div className="stack">
       <WorkspaceCard />
 
+      <GlassesSimulator />
+
       <section className="group">
         <h2 className="group-title">Glasses</h2>
         <div className="group-body">
@@ -91,7 +92,7 @@ export default function LensPage() {
         {glasses.hint && <p className="group-note">{glasses.hint}</p>}
       </section>
 
-      <section className="card">
+      {lens.connected && <section className="card">
         <h2 className="section-title">Ask a question</h2>
         <textarea
           className="input"
@@ -118,15 +119,7 @@ export default function LensPage() {
             ? 'Answers also appear on your glasses.'
             : 'Glasses not connected: answers appear here only.'}
         </p>
-      </section>
-
-      {lens.connected && lens.lensText && (
-        <section className="card">
-          <h2 className="section-title">On the lens now</h2>
-          <pre className="glance mono">{lens.lensText}</pre>
-          <SopGraphic graphic={getGraphic(lens.graphic_id)} />
-        </section>
-      )}
+      </section>}
 
       {res && (
         <section className="card">

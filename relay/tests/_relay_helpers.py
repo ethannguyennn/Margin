@@ -17,7 +17,7 @@ DEVICE_ORIGIN = "https://evenhub.device.example"  # stand-in until the real one 
 
 def make_settings(**overrides: Any) -> Settings:
     values: dict[str, Any] = dict(mock_mode=True, allowed_origins=f"{ORIGIN},{DEVICE_ORIGIN}",
-                                  sentry_dsn_relay="", admin_token=None)
+                                  sentry_dsn_relay="", admin_token=None, git_sha="")
     values.update(overrides)
     return Settings(_env_file=None, **values)
 

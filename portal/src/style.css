@@ -67,6 +67,9 @@
   box-sizing: border-box;
 }
 
+.simulator-panel { max-width: 880px; padding: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+@media (max-width: 600px) { .simulator-panel { padding: 16px; } }
+
 body {
   margin: 0;
   font-family: var(--font);
@@ -287,7 +290,7 @@ small {
 
 /* --- forms ---------------------------------------------------------------- */
 
-form:not(.review-columns form) {
+form:not(.review-columns form):not(.lens-sim-form) {
   max-width: 560px;
   margin: 0 0 24px;
   padding: 24px;

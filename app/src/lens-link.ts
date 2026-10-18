@@ -5,6 +5,8 @@
 // runs standalone against the relay.
 import type { AskResponse } from './types';
 import type { AskContext } from './state';
+import type { ScreenText } from './ui/screens';
+import type { DiagramImage } from './types';
 
 export interface LensSnapshot {
   /** The Even app bridge is up and the lens controller is running. */
@@ -18,6 +20,8 @@ export interface LensSnapshot {
   /** Exactly what the glasses display right now (header, main, footer). */
   lensText: string;
   graphic_id?: string;
+  frame?: ScreenText;
+  diagram?: DiagramImage;
 }
 
 export interface LensCommands {
@@ -65,7 +69,7 @@ export class LensLink {
 
   detach(status: string): void {
     this.commands = null;
-    this.update({ connected: false, screen: null, status, lensText: '', graphic_id: undefined });
+    this.update({ connected: false, screen: null, status, lensText: '', graphic_id: undefined, frame: undefined, diagram: undefined });
   }
 
   /** False when the lens is not connected, busy, or still on the privacy notice. */
