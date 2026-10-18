@@ -33,9 +33,10 @@ mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glas
 
 ## 1. Accounts and secrets (blocking, needs you)
 
-- [ ] **Domain:** pick the GoDaddy domain; the relay lives at `https://margin.<domain>`
-- [ ] **Vultr VM:** Ubuntu 24.04, ports 22/80/443 open, Docker + make + git ([[deploy/README]])
-- [ ] **DNS:** A record `margin` -> VM IPv4
+- [x] **Domain:** `getyourassto.work` (Porkbun); the relay lives at `https://getyourassto.work`
+- [x] **Vultr VM:** `45.32.88.132` (`ssh margin-vm` once this laptop's key is authorized)
+- [ ] **Authorize this laptop's key** (`margin-deploy@enguy-laptop`) in `/root/.ssh/authorized_keys` on the VM
+- [ ] **DNS (Porkbun):** delete the `pixie.porkbun.com` ALIAS + `*` CNAME, add A (blank host) -> `45.32.88.132` ([[deploy/README]])
 - [ ] **Gemini API key** -> `.env`: `GEMINI_API_KEY`, `GEMINI_MODEL_GENERATE=gemini-3.5-flash-lite`,
       `GEMINI_MODEL_TRANSCRIBE=gemini-3.5-flash-lite`, `GEMINI_MODEL_EMBED=gemini-embedding-2`, `EMBED_DIM=768`
 - [ ] **Tiger Cloud service** -> `DATABASE_URL`
@@ -48,7 +49,7 @@ mocks, but **nothing has run against Gemini, Tiger Cloud, the domain or the glas
 - [ ] **Relay in real mode:** `MOCK_MODE=0 make dev-relay`; `make health` shows `"mock": false, "db": "ok"`
 - [ ] **Eval:** `make eval`; record the four metrics; **0 unverified answers** - Parts 4 + 5
 - [ ] **Tune the gate:** `NOT_FOUND_MIN_SIM` / `NOT_FOUND_MIN_RRF` with `retrieve.tune_gate` on the 10 near-misses, put them in `.env`, re-run `make eval` - Parts 4 + 5
-- [ ] **Deploy:** `make deploy` on the VM; `https://margin.<domain>/v1/health` answers **from a phone on cellular** - Part 3
+- [ ] **Deploy:** `make deploy` on the VM; `https://getyourassto.work/v1/health` answers **from a phone on cellular** - Part 3
 - [ ] **Whitelist:** replace `https://margin.example.com` in `app/app.json` and set `VITE_RELAY_ORIGIN` to the exact origin, then `npm run pack` - Part 1
 - [ ] **Device origin:** sideload, press once, read the `CORS rejected origin` line in `make logs`, add it to `ALLOWED_ORIGINS`, redeploy; the preflight must be 2xx - Part 3
 - [ ] **Latency:** `make latency`; relay p50 total well under 3 s - Part 3
