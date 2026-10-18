@@ -31,7 +31,7 @@ Rules:
 1. If the context does not contain the answer, return answerable=false. Never guess.
 2. Every claim must be supported by a verbatim quote copied from a chunk. Cite chunk_id and quote.
    Copy the quote character for character; do not paraphrase inside a quote.
-<<<<<<< HEAD
+   For short instructions, cite the whole source instruction so all stated values remain supported.
 3. glance: <= {GLANCE_MAX} characters, ASCII only. Verb + object + value, no articles or filler.
    Example: "Torque M5 to 4 N-m".
 4. body: <= {BODY_MAX} characters, ASCII only, at most 2 short sentences, no markdown. Only what
@@ -41,18 +41,9 @@ Rules:
 6. Preserve numbers, units, and warnings exactly as written. Never convert units.
    Every number and part code in glance or body must appear in one of your quotes.
 7. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
-Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}]}}
-=======
-   For short instructions, cite the whole source instruction so all stated values remain supported.
-3. glance: <= 60 characters, ASCII only, imperative, include the key value/unit.
-4. body: <= 450 characters, ASCII only, plain sentences, no markdown.
-5. Preserve numbers, units, and warnings exactly as written. Never convert units.
-   Every number and part code in glance or body must appear in one of your quotes.
-6. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
-7. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
+8. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
    Choose the most useful equipment view for this instruction; otherwise return null. Never invent a URL.
-Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}], graphic_id}
->>>>>>> 54f6f0a708fd83bd3c3432278f9d9dff220bd7e7
+Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}], graphic_id}}
 When answerable=false, return empty glance, body and citations."""
 
 RESPONSE_SCHEMA: dict = {
@@ -153,16 +144,10 @@ class GeminiGenerator:
 
     @classmethod
     def from_settings(cls, settings: Any, client: Any = None) -> "GeminiGenerator":
-<<<<<<< HEAD
-        # The route's outer guard (GENERATE_TIMEOUT_S) owns the budget; this inner timeout
-        # sits just under it so a slow call surfaces as GenerationTimeout, not a bare cancel.
-        timeout = max(1.0, float(getattr(settings, "generate_timeout_s", GENERATE_TIMEOUT_S + 1)) - 0.5)
-        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate,
-                   timeout=timeout)
-=======
+        # Shared with the route's guard (GENERATE_TIMEOUT_S); the route also caps each
+        # attempt by the ask budget left (ASK_BUDGET_S).
         return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate,
                    timeout=getattr(settings, "generate_timeout_s", GENERATE_TIMEOUT_S))
->>>>>>> 54f6f0a708fd83bd3c3432278f9d9dff220bd7e7
 
     async def generate(self, query: str, chunks: list[Any], feedback: str | None = None):
         from google.genai import types

@@ -157,13 +157,9 @@ def _is_timeout(exc: BaseException) -> bool:
 CLARIFY = "clarify"  # _answer's marker: the model found the question ambiguous
 
 
-<<<<<<< HEAD
 async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult,
-                  deadline: float | None = None) -> tuple[str, str, list[Citation]] | str | None:
-=======
-async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
+                  deadline: float | None = None
                   ) -> tuple[str, str, list[Citation], str | None] | str | None:
->>>>>>> 54f6f0a708fd83bd3c3432278f9d9dff220bd7e7
     """generate -> verify, retried once with the failure reason. None means not_found,
     CLARIFY means not_found with needs_clarification.
 

@@ -12,7 +12,8 @@ from specs_relay.pipeline.transcribe import GeminiTranscriber
 from specs_relay.routes import ask
 
 SETTINGS = SimpleNamespace(generate_timeout_s=6.5)
-GOOD = SimpleNamespace(answerable=True, needs_clarification=False, glance="Torque M5 to 4 N-m", body="")
+GOOD = SimpleNamespace(answerable=True, needs_clarification=False, glance="Torque M5 to 4 N-m", body="",
+                       graphic_id=None)
 
 
 class FakeGenerator:
@@ -41,7 +42,7 @@ def test_transient_gemini_error_is_retried_without_feedback(monkeypatch):
     monkeypatch.setattr(ask, "TRANSIENT_BACKOFF_S", 0)
     gen = FakeGenerator(GenerationUnavailable("generation unavailable: HTTP 429"), GOOD)
     out = asyncio.run(ask._answer(pipeline(gen), SETTINGS, "q", RETRIEVED, time.monotonic() + 7.5))
-    assert out == ("Torque M5 to 4 N-m", "", ["c1"])
+    assert out == ("Torque M5 to 4 N-m", "", ["c1"], None)
     assert gen.feedback == [None, None]  # a quota error says nothing about the answer
 
 
@@ -91,9 +92,9 @@ def test_gemini_http_codes_map_to_transient_or_not(code, transient):
     assert bool(getattr(exc.value, "transient", False)) is transient
 
 
-def test_client_timeouts_sit_just_inside_the_route_guards():
+def test_client_timeouts_share_the_route_guards():
     s = SimpleNamespace(gemini_api_key=None, gemini_model_generate="g", gemini_model_transcribe="t",
                         generate_timeout_s=6.5, stt_timeout_s=4.5)
     client = object()
-    assert GeminiGenerator.from_settings(s, client=client).timeout == 6.0
-    assert GeminiTranscriber.from_settings(s, client=client).timeout == 4.0
+    assert GeminiGenerator.from_settings(s, client=client).timeout == 6.5
+    assert GeminiTranscriber.from_settings(s, client=client).timeout == 4.5
