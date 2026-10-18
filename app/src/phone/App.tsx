@@ -1,14 +1,16 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { OfflineBanner } from './components/OfflineBanner';
 import { RelayStatus } from './components/RelayStatus';
 import { TabBar } from './components/TabBar';
 import { ThemeToggle } from './components/ThemeToggle';
+import { Toaster } from './toast';
 import AnswerPage from './pages/AnswerPage';
 import LensPage from './pages/LensPage';
 import SopsPage from './pages/SopsPage';
 
 const HEADS: Record<string, { title: string; subtitle: string }> = {
   '/': { title: 'Answer', subtitle: 'Full text, citations and walkthrough' },
-  '/lens': { title: 'Lens', subtitle: 'Session and input for the glasses' },
+  '/lens': { title: 'Lens', subtitle: 'Glasses, connection and questions' },
   '/sops': { title: 'SOPs', subtitle: 'Procedures and deviations' },
 };
 
@@ -21,7 +23,7 @@ export default function App() {
       <div className="app">
         <header className="app-header">
           <div className="head-text">
-            <p className="eyebrow">Specs</p>
+            <p className="wordmark">SPECS</p>
             <h1>{head.title}</h1>
             <p className="subtitle">{head.subtitle}</p>
           </div>
@@ -30,6 +32,7 @@ export default function App() {
             <ThemeToggle />
           </div>
         </header>
+        <OfflineBanner />
 
         <main className="app-main">
           <Routes>
@@ -48,6 +51,7 @@ export default function App() {
           </Routes>
         </main>
 
+        <Toaster />
         <TabBar />
       </div>
     </div>

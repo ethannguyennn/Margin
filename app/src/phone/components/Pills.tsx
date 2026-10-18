@@ -29,8 +29,8 @@ export function outcomeTone(outcome: string): Tone {
   return OUTCOME_TONE[outcome as Outcome] ?? 'muted';
 }
 
-export function OutcomePill({ outcome }: { outcome: Outcome }) {
-  return <span className={`pill pill-${outcomeTone(outcome)} dot-before`}>{OUTCOME_LABEL[outcome] ?? outcome}</span>;
+export function OutcomePill({ outcome }: { outcome: Outcome | string }) {
+  return <span className={`pill pill-${outcomeTone(outcome)} dot-before`}>{OUTCOME_LABEL[outcome as Outcome] ?? outcome}</span>;
 }
 
 /** The relay never answers unverified; this is what the phone shows when it does. */

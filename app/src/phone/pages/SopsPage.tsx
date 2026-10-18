@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import type { Step } from '../contract';
 import { DeviationForm } from '../components/DeviationForm';
+import { ChevronIcon } from '../components/Icons';
+import { LoadError } from '../components/OfflineBanner';
+import { PinButton } from '../components/PinButton';
+import { loadError } from '../copy';
 import { useProcedures, useSteps } from '../hooks/useSops';
 import { useStore } from '../store';
 
 /** Procedures as the relay holds them, and the deviation log the phone can write to. */
 export default function SopsPage() {
   const { state, setContext } = useStore();
-  const { procedures, loading, error } = useProcedures();
+  const { procedures, loading, error, retry } = useProcedures();
   const [openDoc, setOpenDoc] = useState<string | null>(null);
   const open = procedures.find((p) => p.doc_id === openDoc) ?? null;
 
@@ -16,12 +20,12 @@ export default function SopsPage() {
       <section className="card">
         <div className="row between">
           <h2 className="section-title">Procedures</h2>
-          <span className="meta">{procedures.length} loaded</span>
+          {!loading && <span className="meta num">{procedures.length}</span>}
         </div>
-        {loading && <p className="meta">Loading…</p>}
-        {error && <p className="error-line">{error}</p>}
+        {loading && <SkeletonRows count={3} />}
+        {error && <LoadError message={loadError(error)} detail={error} onRetry={retry} />}
         {!loading && !error && procedures.length === 0 && (
-          <p className="body">The relay listed no procedures. Is the database reachable?</p>
+          <p className="body">No procedures have been published yet.</p>
         )}
         <ul className="list">
           {procedures.map((p) => (
@@ -35,10 +39,10 @@ export default function SopsPage() {
                     {p.doc_id} · {p.title}
                   </span>
                   <span className="meta">
-                    rev {p.revision} · {p.status}
+                    Revision {p.revision} · {p.status}
                   </span>
                 </span>
-                <span className="chev">{openDoc === p.doc_id ? '−' : '+'}</span>
+                <ChevronIcon className={`chev${openDoc === p.doc_id ? ' open' : ''}`} />
               </button>
             </li>
           ))}
@@ -71,28 +75,36 @@ function StepList({
   pinnedStepId: string | null;
   onUse: (step: Step) => void;
 }) {
-  const { steps, loading, error } = useSteps(docId, revision);
+  const { steps, loading, error, retry } = useSteps(docId, revision);
 
   return (
     <section className="card">
       <div className="row between">
         <h2 className="section-title">{docId} steps</h2>
-        <span className="meta">rev {revision}</span>
+        <span className="meta">Revision {revision}</span>
       </div>
-      {loading && <p className="meta">Loading…</p>}
-      {error && <p className="error-line">{error}</p>}
+      {loading && <SkeletonRows count={2} tall />}
+      {error && <LoadError message={loadError(error)} detail={error} onRetry={retry} />}
       <ul className="list steps-list">
         {steps.map((s) => (
           <li key={s.step_id}>
             <p className="step-label">{s.label}</p>
             <p className="glance sm">{s.glance}</p>
             <p className="body">{s.body}</p>
-            <button className="ghost" onClick={() => onUse(s)}>
-              {pinnedStepId === s.step_id ? 'Pinned as lens context ✓' : 'Pin as lens context'}
-            </button>
+            <PinButton pinned={pinnedStepId === s.step_id} onPin={() => onUse(s)} />
           </li>
         ))}
       </ul>
     </section>
+  );
+}
+
+function SkeletonRows({ count, tall = false }: { count: number; tall?: boolean }) {
+  return (
+    <div className="list" aria-busy="true" aria-label="Loading">
+      {Array.from({ length: count }, (_, i) => (
+        <span key={i} className={`skeleton ${tall ? 'sk-block' : 'sk-row'}`} />
+      ))}
+    </div>
   );
 }

@@ -15,6 +15,11 @@
 		max_size 22MB
 	}
 
+	# The bare domain opens the employer portal. Exact "/" only, so every /v1/...
+	# route still reaches the relay. 302, not 308: browsers do not cache it, so the
+	# root can become a landing page later without stale redirects.
+	redir / /portal/ 302
+
 	# Employer portal (static, same origin as /v1, so no CORS): /portal/ -> portal/dist
 	redir /portal /portal/ 308
 	handle_path /portal/* {

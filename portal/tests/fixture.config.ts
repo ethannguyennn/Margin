@@ -12,7 +12,7 @@ export default defineConfig({
   base: '/portal/', server: { host: '127.0.0.1', port: 5177, strictPort: true, fs: { allow: ['..'] } },
   plugins: [{
     name: 'explicit-test-fixture',
-    transformIndexHtml(html) { return html.replace('<body>', '<body><p style="background:#fff0b8;padding:12px;margin:0">FIXTURE API · Local UI checks only. Not the Part 3 relay.</p>'); },
+    transformIndexHtml(html) { return html.replace('<body>', '<body><p style="background:#fff0b8;color:#302504;padding:12px;margin:0">FIXTURE API · Local UI checks only. Not the Part 3 relay.</p>'); },
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         const path = req.url?.split('?')[0] || '';
