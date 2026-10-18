@@ -195,7 +195,9 @@ async def main(argv=None) -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(asyncio.run(main()))
+        # psycopg async cannot run on Windows' default ProactorEventLoop.
+        win = {"loop_factory": asyncio.SelectorEventLoop} if sys.platform == "win32" else {}
+        raise SystemExit(asyncio.run(main(), **win))
     except Exception as exc:
         # Provider/connection errors may contain credentials. Do not print them.
         print(f"Seed failed ({type(exc).__name__}); check Part 3 config, credentials, and service access.",

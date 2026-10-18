@@ -8,7 +8,7 @@
   "entrypoint": "index.html",
   "permissions": [
     { "name": "g2-microphone", "desc": "Process a question on demand; audio is not stored." },
-    { "name": "network", "desc": "Ask the approved Margin relay for verified procedures.", "whitelist": ["https://margin.example.com"] }
+    { "name": "network", "desc": "Ask the approved Margin relay for verified procedures.", "whitelist": ["https://margin.getyourassto.work"] }
   ],
   "supported_languages": ["en"]
 }

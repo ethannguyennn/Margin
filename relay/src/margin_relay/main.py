@@ -103,8 +103,8 @@ class _PoolStore:
         self._retrieve, self._db = retrieve_mod, db
 
     def _store(self) -> Any:
-        get_pool = getattr(self._db, "get_pool", None)
-        pool = get_pool() if callable(get_pool) else getattr(self._db, "pool", None)
+        pool = getattr(self._db, "get_pool", None) or getattr(self._db, "pool", None)
+        pool = pool() if callable(pool) else pool  # Part 5's db.pool is a function
         return self._retrieve.PgStore(pool) if pool is not None else self._db
 
     async def vector_top(self, q_embedding: list[float], k: int, revision: str | None) -> list[Any]:
