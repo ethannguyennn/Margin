@@ -860,7 +860,7 @@ async def progress_board(since=None) -> list[dict]:
         LEFT JOIN LATERAL (SELECT jsonb_agg(jsonb_build_object(
             'deviation_id', v.deviation_id, 'text', v.text, 'ts', v.ts) ORDER BY v.ts) AS items, max(v.ts) AS last_ts
             FROM deviations v WHERE v.doc_id = a.doc_id AND v.ts >= a.assigned_at
-            AND (v.step_id IS NULL OR v.step_id LIKE a.doc_id || ':' || a.revision || ':%')) dv ON true
+            AND (v.step_id IS NULL OR v.step_id LIKE a.doc_id || ':' || a.revision || ':%%')) dv ON true
         WHERE a.completed_at IS NULL
         AND (%s::timestamptz IS NULL OR greatest(a.assigned_at, p.received_at, dv.last_ts) >= %s)
         AND (%s::text IS NULL OR d.org_id = %s)
