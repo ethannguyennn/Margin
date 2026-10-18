@@ -2,8 +2,8 @@
 
 Run python eval/run_eval.py against a running relay. The default origin is
 http://127.0.0.1:8000; use --base-url for another origin and --output for a JSON
-report. qa.jsonl is the demo bank's 45 questions (the team's list, kept verbatim at the
-repo root as qa.jsonl; the Ember & Oak SOPs it asks about are in corpus/):
+report. qa.jsonl is the demo bank's 45 questions (the Ember & Oak SOPs it asks about
+are in corpus/):
 
 - 36 answerable lookups spanning SOP-201, 202, 210, 220 and 230 (all revision C).
 - 3 near-misses whose topic is nearby but whose answer is absent (pumpkin spice latte,
