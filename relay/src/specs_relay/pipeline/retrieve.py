@@ -17,6 +17,7 @@ import math
 import re
 from typing import Any, Protocol, Sequence
 
+from .. import obs
 from . import DbDown, LlmTimeout
 from .sanitize import sanitize
 
@@ -214,6 +215,9 @@ class GeminiEmbedder:
                 except asyncio.TimeoutError:
                     raise
                 except Exception as e:
+                    record_quota = getattr(obs, "record_quota_error", None)
+                    if record_quota is not None:
+                        record_quota(e, "embed")
                     if (attempt or getattr(e, "code", None) not in TRANSIENT_CODES
                             or deadline - loop.time() <= 0.4):
                         raise

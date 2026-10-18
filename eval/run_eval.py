@@ -263,6 +263,7 @@ def summarize(results: list[Result]) -> dict:
     predicted_nf = [r for r in results if r.outcome == "not_found"]
     expected_nf = [r for r in results if r.expected == "not_found"]
     true_nf = sum(r.expected == "not_found" for r in predicted_nf)
+    core = [r for r in results if r.category == "answerable" and not r.id.startswith("v3-")]
     return {
         "cases": len(results),
         "answered_correct_rate": ratio(sum(r.correct for r in answerable), len(answerable)),
@@ -273,6 +274,8 @@ def summarize(results: list[Result]) -> dict:
         "answered": len(answers),
         "unverified_answers": sum(not r.citation_verified for r in answers),
         "failed_cases": sum(not r.correct for r in results),
+        "core_answerable": {"correct": sum(r.correct for r in core), "total": len(core),
+                            "rate": ratio(sum(r.correct for r in core), len(core))},
         "category_passes": {name: {"passed": sum(r.correct for r in results if r.category == name), "total": count}
                             for name, count in sorted(Counter(r.category for r in results).items())},
     }

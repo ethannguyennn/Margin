@@ -189,7 +189,10 @@ def test_picture_without_a_matching_retrieved_reference_refuses():
 @pytest.mark.parametrize("codes,timeout,calls,success", [([429, None], 1, 2, True),
     ([503, None], 1, 2, True), ([429, 429], 1, 2, False), ([400, None], 1, 1, False),
     ([429, None], 0.1, 1, False)])
-def test_embedding_retry_is_bounded(codes, timeout, calls, success):
+def test_embedding_retry_is_bounded(codes, timeout, calls, success, monkeypatch):
+    from specs_relay import obs
+    quota, original = [], list(codes)
+    monkeypatch.setattr(obs, "record_quota_error", lambda error, stage: quota.append(stage) if error.code == 429 else None, raising=False)
     requests = []
     async def embed_content(**kwargs):
         requests.append(kwargs)
@@ -204,6 +207,7 @@ def test_embedding_retry_is_bounded(codes, timeout, calls, success):
         with pytest.raises(EmbeddingError):
             asyncio.run(embedder.embed_query("q"))
     assert len(requests) == calls
+    assert quota == ["embed" for code in original[:calls] if code == 429]
 
 
 @pytest.mark.parametrize("case", [json.loads(line) for line in (

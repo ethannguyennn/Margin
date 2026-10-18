@@ -72,4 +72,3 @@ PYTHONPATH=relay/src python tools/diagnostic/gap_probe.py --relay https://getyou
 The gap probe is safe to import, refuses mock evidence, and exits nonzero on failed or missing
 checks. Reports include timestamps and model identifiers when verbose health provides them;
 missing model data is recorded as null. Offline tests are fixtures, never live quality evidence.
-
