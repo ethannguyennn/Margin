@@ -215,6 +215,7 @@ async def test_conversation_turns_share_only_their_session_and_every_ask_is_pace
     async with httpx.AsyncClient(base_url="http://fixture.invalid", transport=httpx.MockTransport(handler)) as client:
         results, _ = await evaluation.run_suite(client, cases, index, allow_mock=True, pace=6)
     assert all(r.correct for r in results)
+    assert all(r.response["verified"] is True for r in results)
     assert requests[0]["session_id"] == requests[1]["session_id"] != requests[2]["session_id"]
     assert sleeps == [6, 6]
 
