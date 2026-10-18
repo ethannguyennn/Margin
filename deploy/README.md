@@ -168,3 +168,56 @@ The prior SSH blocker is resolved. The existing identity deployed the integratio
 from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
 rollback. Verbose health identifies the actual serving commit. Promotion to main waits for
 the acceptance results in `TODO.md`, including the pending two-wearer field recordings.
+
+## SOP upload library deployment and verification
+
+The upload-library change is on `codex/sop-cloud-persistence`. On the VM, after
+checking that the checkout has no uncommitted work:
+
+```bash
+cd /root/specs
+git status --short
+git fetch origin codex/sop-cloud-persistence
+git switch codex/sop-cloud-persistence
+make deploy
+```
+
+Use `MOCK_MODE=0`, a working `DATABASE_URL`, `PORTAL_TOKEN`, and
+`GEMINI_MODEL_CONVERT` in the VM's existing `.env`. Do not copy database or
+provider credentials into the portal. The current database schema already
+stores uploads; this change adds no migration or storage service.
+
+Open `/portal/`, log in, upload a synthetic SOP, and choose **Library**. Its
+source file is saved before the upload receives 202. Search by ID/title/file,
+download the original, and confirm it remains listed after a reload or a new
+login. Conversion failure does not delete the original. Review and approval
+are still required to publish the procedure for workers and Q&A.
+
+Read-only HTTPS verification from the VM, using the container's token without
+printing it (requires at least one upload; verifies the newest file):
+
+```bash
+docker compose -f deploy/docker-compose.yml --env-file .env exec -T relay python - <<'PY'
+import hashlib
+import httpx
+from specs_relay.config import Settings
+s = Settings()
+assert s.portal_token, 'PORTAL_TOKEN must be configured'
+headers = {'Authorization': 'Bearer ' + s.portal_token.get_secret_value()}
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    health = client.get('/v1/health'); health.raise_for_status()
+    assert health.json()['db'] == 'ok' and not health.json()['mock']
+    library = client.get('/v1/materials?limit=1'); library.raise_for_status()
+    assert library.json()['items'], 'Upload a synthetic SOP first'
+    item = library.json()['items'][0]
+with httpx.Client(base_url=s.public_origin, headers=headers, timeout=30) as client:
+    original = client.get('/v1/materials/' + item['material_id'] + '/file')
+    original.raise_for_status()
+    assert len(original.content) == item['size_bytes']
+    assert hashlib.sha256(original.content).hexdigest() == item['sha256']
+print('PASS: original SOP is listed and byte-exact over HTTPS in a fresh session')
+PY
+```
+
+This command reads existing data only. For the separately opt-in database
+restart/reconnection test and cleanup behavior, see `portal/README.md`.
