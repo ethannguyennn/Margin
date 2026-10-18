@@ -166,19 +166,20 @@ unsupported relay tunnel off. Keep the source commit and SHA-256 with the `.ehpk
 and offline tests do not establish deployment, quota capacity, latency or field acceptance.
 The prior SSH blocker is resolved. The existing identity deployed the integration candidate
 from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
-rollback. Verbose health identifies the actual serving commit. Promotion to main waits for
-the acceptance results in `TODO.md`, including the pending two-wearer field recordings.
+rollback. Verbose health identifies the actual serving commit. The source is merged into main;
+field acceptance in `TODO.md`, including two-wearer recordings, remains pending.
 
 ## SOP upload library deployment and verification
 
-The upload-library change is on `codex/sop-cloud-persistence`. On the VM, after
+The upload-library and audit changes are merged into `main`. On the VM, after
 checking that the checkout has no uncommitted work:
 
 ```bash
 cd /root/specs
 git status --short
-git fetch origin codex/sop-cloud-persistence
-git switch codex/sop-cloud-persistence
+git fetch origin main
+git switch main
+git merge --ff-only origin/main
 make deploy
 ```
 
@@ -221,3 +222,23 @@ PY
 
 This command reads existing data only. For the separately opt-in database
 restart/reconnection test and cleanup behavior, see `portal/README.md`.
+
+## TODO audit configuration (2026-10-18)
+
+The audit is merged into `main`, including offline phone mocks, SDK 11.8.0,
+the SOP library and Sentry tunnel. Main retains its existing source-text citations,
+scoped walkthroughs and deployed v3 gate defaults. Deploy main using the workflow
+above; keep the VM `.env` private. The earlier audit's SSH-authentication blocker
+was superseded by the v3 deployment checkpoint; see that section for VM context.
+
+`eval/results/2026-10-18-gate-calibration.json` preserves historical v2 development-bank
+thresholds (`0.7389722026007067`, `0.031754032258064516`). Do not replace the v3
+defaults from that report: recalibrate against the current bank/model, including
+scoped walkthroughs. This merge changes no private env or provider billing setting.
+
+For the telemetry tunnel, configure server `SENTRY_DSN_APP` to **exactly** the
+app build's public `VITE_SENTRY_DSN`, then opt in with `VITE_SENTRY_TUNNEL=1`.
+The tunnel defaults off when the app DSN is absent. It accepts only that DSN,
+caps streamed envelopes at 256 KB, rate limits each client to 60/min and never
+follows upstream redirects. Its tests mock the upstream: physical trace
+collection and confirmation in Sentry remain open hardware/integration checks.

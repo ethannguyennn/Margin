@@ -1,0 +1,310 @@
+{
+  "evidence": "LOCAL RELAY CODE + LIVE GEMINI + CLOUD POSTGRES; text asks, not hardware or deployed HTTPS",
+  "gate": {
+    "min_sim": 0.7389722026007067,
+    "min_rrf": 0.031754032258064516
+  },
+  "models": {
+    "generate": "gemini-3.8-flash",
+    "embed": "gemini-embedding-2"
+  },
+  "responses": [
+    {
+      "question": "How much money is in the opening float?",
+      "response": {
+        "trace_id": "7235bf55770248ba9b66abcb6878d00f",
+        "transcript": "How much money is in the opening float?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Count opening float $150.00",
+        "body": "Two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each).",
+        "source": "SOP-201 Sec 2.2 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:2.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "Count the cash drawer. The opening float is $150.00: two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each)."
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 305,
+          "retrieve": 212,
+          "generate": 8982,
+          "verify": 1,
+          "total": 9501
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    },
+    {
+      "question": "How much extra is oat milk?",
+      "response": {
+        "trace_id": "2e41efe5c8bc4f12bd53d2f1ea4505f4",
+        "transcript": "How much extra is oat milk?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Add $0.75 for oat milk",
+        "body": "",
+        "source": "SOP-201 Sec 4.3 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Oat, almond, or soy milk: add $0.75."
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 299,
+          "retrieve": 96,
+          "generate": 4308,
+          "verify": 0,
+          "total": 4705
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    },
+    {
+      "question": "How much is a medium cappuccino?",
+      "response": {
+        "trace_id": "effd36d47a8145af8978ffad37fa0bb3",
+        "transcript": "How much is a medium cappuccino?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Charge $5.50 for Medium Cappuccino",
+        "body": "",
+        "source": "SOP-201 Sec 4.2 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "| Drink | Small (12 oz) | Medium (16 oz) | Large (20 oz) |"
+          },
+          {
+            "chunk_id": "SOP-201:C:4.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "| Cappuccino | $4.75 | $5.50 | $6.25 |"
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 321,
+          "retrieve": 91,
+          "generate": 7590,
+          "verify": 1,
+          "total": 8004
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    },
+    {
+      "question": "Can I sell a large flat white?",
+      "response": {
+        "trace_id": "3f598945f101441892ebad3be9de7458",
+        "transcript": "Can I sell a large flat white?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Do not sell large Flat White",
+        "body": "Flat White is sold in Small and Medium only.",
+        "source": "SOP-201 Sec 4.1 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.1",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Flat White is sold in Small and Medium only."
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 207,
+          "retrieve": 89,
+          "generate": 5464,
+          "verify": 0,
+          "total": 5762
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    },
+    {
+      "question": "Who has to approve a fifteen dollar refund?",
+      "response": {
+        "trace_id": "02343e13946e4a75a57805a1f0d27927",
+        "transcript": "Who has to approve a fifteen dollar refund?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Obtain Shift lead (PIN) approval",
+        "body": "Shift lead approves $10.01 to $25.00. After 24 hours, only a manager may approve a refund.",
+        "source": "SOP-202 Sec 5.2 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:5.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "| $10.01 to $25.00 | Shift lead (PIN) |"
+          },
+          {
+            "chunk_id": "SOP-202:C:5.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After 24 hours, only a manager may approve a refund."
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 199,
+          "retrieve": 89,
+          "generate": 11116,
+          "verify": 0,
+          "total": 11405
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    },
+    {
+      "question": "What is the maximum gift card load?",
+      "response": {
+        "trace_id": "e5cf6859c7bb4b758277ee21448ddc60",
+        "transcript": "What is the maximum gift card load?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Load gift card up to $200.00",
+        "body": "",
+        "source": "SOP-202 Sec 6.1 rev C",
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:6.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "The minimum load is $10.00 and the maximum is $200.00."
+          }
+        ],
+        "verified": true,
+        "walkthrough": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 220,
+          "retrieve": 117,
+          "generate": 5750,
+          "verify": 1,
+          "total": 6090
+        },
+        "needs_clarification": false,
+        "command": null,
+        "graphic_id": null
+      }
+    }
+  ],
+  "metrics": {
+    "cases": 6,
+    "answered_correct_rate": 1.0,
+    "not_found_precision": null,
+    "not_found_recall": null,
+    "citation_verification_pass_rate": 1.0,
+    "median_latency_ms": 7147.906699989107,
+    "answered": 6,
+    "unverified_answers": 0,
+    "failed_cases": 0,
+    "category_passes": {
+      "answerable": {
+        "passed": 6,
+        "total": 6
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "a01",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 9596.687700017355,
+      "reason": ""
+    },
+    {
+      "id": "a03",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 4792.392899980769,
+      "reason": ""
+    },
+    {
+      "id": "a04",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 8089.049899979727,
+      "reason": ""
+    },
+    {
+      "id": "a05",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 5856.849899981171,
+      "reason": ""
+    },
+    {
+      "id": "a10",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 11495.523100020364,
+      "reason": ""
+    },
+    {
+      "id": "a13",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 6206.7634999984875,
+      "reason": ""
+    }
+  ]
+}

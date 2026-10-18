@@ -309,6 +309,18 @@ export async function mockLogDeviation() {
   return { deviation_id: 'dev-mock-1', notified: true };
 }
 
+/** Same catalog on the phone and lens; fresh copies keep UI edits out of fixtures. */
+export async function mockListProcedures() {
+  const walk = ASSIGNMENT.walkthrough;
+  return [{ doc_id: walk.doc_id, revision: walk.revision, title: walk.title, status: 'effective' as const }];
+}
+
+export async function mockListSteps(docId: string, revision: string | null): Promise<Step[]> {
+  const walk = ASSIGNMENT.walkthrough;
+  return docId === walk.doc_id && (!revision || revision === walk.revision)
+    ? structuredClone(walk.steps) : [];
+}
+
 // --- fake mic -------------------------------------------------------------
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 let capturing = false;

@@ -1,0 +1,190 @@
+{
+  "doc_id": "SOP-153",
+  "revision": "A",
+  "title": "Cover Plate Quick Start",
+  "material_id": "SOP-153",
+  "status": "ready",
+  "steps": [
+    {
+      "label": "1",
+      "glance": "Place cover plate on housing",
+      "body": "Point arrow to outlet.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Place the cover plate on the housing with the arrow pointing to the outlet."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "2",
+      "glance": "Start six M5 cover screws by hand",
+      "body": "",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Start all six M5 cover screws by hand."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3",
+      "glance": "Torque six M5 screws to 3 N-m",
+      "body": "Follow star pattern: top (1), bottom (2), upper right (3), lower left (4), lower right (5), upper left (6).",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Tighten the six M5 cover screws to 3 N-m in a star pattern: top (1), bottom (2), upper right (3), lower left (4), lower right (5), upper left (6)."
+      ],
+      "diagram": {
+        "kind": "schematic",
+        "figure_id": null,
+        "bbox": null,
+        "elements": [
+          {
+            "type": "callout",
+            "x": 288,
+            "y": 25,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "1"
+          },
+          {
+            "type": "callout",
+            "x": 288,
+            "y": 119,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "2"
+          },
+          {
+            "type": "callout",
+            "x": 335,
+            "y": 48,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "3"
+          },
+          {
+            "type": "callout",
+            "x": 241,
+            "y": 96,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "4"
+          },
+          {
+            "type": "callout",
+            "x": 335,
+            "y": 96,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "5"
+          },
+          {
+            "type": "callout",
+            "x": 241,
+            "y": 48,
+            "x2": null,
+            "y2": null,
+            "r": null,
+            "label": "6"
+          },
+          {
+            "type": "arrow",
+            "x": 288,
+            "y": 40,
+            "x2": 288,
+            "y2": 104,
+            "r": null,
+            "label": null
+          },
+          {
+            "type": "arrow",
+            "x": 298,
+            "y": 108,
+            "x2": 325,
+            "y2": 59,
+            "r": null,
+            "label": null
+          },
+          {
+            "type": "arrow",
+            "x": 320,
+            "y": 54,
+            "x2": 256,
+            "y2": 90,
+            "r": null,
+            "label": null
+          },
+          {
+            "type": "arrow",
+            "x": 256,
+            "y": 96,
+            "x2": 320,
+            "y2": 96,
+            "r": null,
+            "label": null
+          },
+          {
+            "type": "arrow",
+            "x": 325,
+            "y": 90,
+            "x2": 256,
+            "y2": 54,
+            "r": null,
+            "label": null
+          }
+        ],
+        "alt": "Star pattern tightening order for the six cover screws"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "4",
+      "glance": "Check gap with 0.10 mm feeler gauge",
+      "body": "Gauge must not enter under cover plate edge.",
+      "warning": null,
+      "checkpoint": "The gauge must not enter.",
+      "quotes": [
+        "Check the gap under the cover plate edge with a 0.10 mm feeler gauge. The gauge must not enter."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    }
+  ],
+  "warnings": [
+    "Do not overtighten the cover screws; the plastic cover cracks."
+  ]
+}
