@@ -10,7 +10,7 @@ import pytest
 from pydantic import ValidationError
 
 from _relay_helpers import PORTAL, ask, device, pair_and_claim, sid, v2_client, wait_material
-from margin_relay.schemas import (
+from specs_relay.schemas import (
     ApproveResult,
     Assignment,
     AskResponse,
@@ -112,7 +112,7 @@ def test_m3_upload_review_approve_pair_assign_step_through_and_board():
 
 @pytest.mark.parametrize("phrase,command", [("next", "next"), ("okay done", "next"), ("go back", "back"),
                                             ("show diagram", "diagram"), ("pause", "pause"),
-                                            ("close margin", "exit")])
+                                            ("close specs", "exit")])
 def test_command_never_touches_retrieval_or_the_llm(phrase, command):
     client, app = v2_client()
     p = app.state.pipeline

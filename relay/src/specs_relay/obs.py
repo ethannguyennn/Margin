@@ -24,7 +24,7 @@ from . import __version__
 from .config import Settings
 from .schemas import Latency
 
-log = logging.getLogger("margin.obs")
+log = logging.getLogger("specs.obs")
 
 STAGES = ("stt", "embed", "retrieve", "generate", "verify")
 _SENTRY_TRACE_RE = re.compile(r"^\s*([0-9a-f]{32})(?:-[0-9a-f]{16})?(?:-[01])?\s*$")
@@ -46,7 +46,7 @@ def init_sentry(settings: Settings) -> bool:
     sentry_sdk.init(
         dsn=settings.sentry_dsn_relay,
         environment=settings.sentry_environment,
-        release=f"margin-relay@{version(settings)}",
+        release=f"specs-relay@{version(settings)}",
         traces_sample_rate=settings.sentry_traces_sample_rate,
         enable_logs=True,
         send_default_pii=False,  # no IPs, no cookies, no request bodies with transcripts
@@ -108,7 +108,7 @@ class StageTimer:
         )
 
 
-_timer: ContextVar[StageTimer | None] = ContextVar("margin_stage_timer", default=None)
+_timer: ContextVar[StageTimer | None] = ContextVar("specs_stage_timer", default=None)
 
 
 def start_timer() -> StageTimer:

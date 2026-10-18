@@ -326,7 +326,7 @@ export async function nextAssignment(): Promise<Assignment | null> {
 // Progress: fire-and-forget for Part 1, durable here. Text only, capped, mirrored to
 // localStorage so a reload or an airplane-mode stretch loses nothing. The relay is
 // idempotent on (assignment_id, step_id, kind, ts), so resending a batch is safe.
-const QUEUE_KEY = 'margin.progressQueue';
+const QUEUE_KEY = 'specs.progressQueue';
 const QUEUE_CAP = 200;
 const FLUSH_EVERY = 10;
 const FLUSH_MS = 5000;

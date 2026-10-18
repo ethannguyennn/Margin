@@ -13,16 +13,16 @@ import types
 import pytest
 
 from _relay_helpers import ask, make_client, make_settings
-from margin_relay import main
-from margin_relay.schemas import Chunk, Draft, DraftCitation, IntentResult, VerifyResult
+from specs_relay import main
+from specs_relay.schemas import Chunk, Draft, DraftCitation, IntentResult, VerifyResult
 
 BLOCKED = [
-    "margin_relay.db", "margin_relay.notify", "margin_relay.walkthrough",
-    *[f"margin_relay.pipeline.{m}" for m in
+    "specs_relay.db", "specs_relay.notify", "specs_relay.walkthrough",
+    *[f"specs_relay.pipeline.{m}" for m in
       ("transcribe", "intent", "retrieve", "generate", "verify", "sanitize")],
     "google.genai", "psycopg", "psycopg_pool", "pgvector",
     # v2: Part 4's conversion + diagrams and their libraries are not needed on mocks.
-    "margin_relay.convert", "margin_relay.diagrams", "PIL", "pypdf", "pypdfium2", "docx",
+    "specs_relay.convert", "specs_relay.diagrams", "PIL", "pypdf", "pypdfium2", "docx",
 ]
 
 BOOT_SCRIPT = textwrap.dedent("""
@@ -37,8 +37,8 @@ BOOT_SCRIPT = textwrap.dedent("""
 
     sys.meta_path.insert(0, Block())
     from fastapi.testclient import TestClient
-    from margin_relay.config import Settings
-    from margin_relay.main import create_app
+    from specs_relay.config import Settings
+    from specs_relay.main import create_app
 
     app = create_app(Settings(_env_file=None))   # MOCK_MODE comes from the environment
     c = TestClient(app)
@@ -103,9 +103,9 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
                   text="Torque all four M5 bracket screws to 4 N-m in a star pattern.")
 
     def mod(name: str, **attrs):
-        m = types.ModuleType(f"margin_relay.{name}")
+        m = types.ModuleType(f"specs_relay.{name}")
         m.__dict__.update(attrs)
-        monkeypatch.setitem(sys.modules, f"margin_relay.{name}", m)
+        monkeypatch.setitem(sys.modules, f"specs_relay.{name}", m)
         return m
 
     intent = mod("pipeline.intent",
@@ -116,7 +116,7 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
                  parse_command=lambda t: "next" if t.strip().lower() == "next" else None)
     mod("pipeline.sanitize", sanitize=lambda s: s.replace("·", "-"))
     mod("pipeline.verify", verify=lambda d, c: VerifyResult(ok=True, citations=[
-        __import__("margin_relay.schemas", fromlist=["Citation"]).Citation(
+        __import__("specs_relay.schemas", fromlist=["Citation"]).Citation(
             chunk_id=chunk.chunk_id, doc_id="SOP-114", revision="C", section="4.2",
             quote=d.citations[0].quote)]))
 
@@ -156,7 +156,7 @@ def _fake_part4_and_part5(monkeypatch) -> dict:
             return [0.1]
 
         async def retrieve(self, query, revision, q_embedding=None):
-            from margin_relay.schemas import RetrievalResult
+            from specs_relay.schemas import RetrievalResult
             seen["q_embedding"] = q_embedding
             await self.store.vector_top(q_embedding, 20, revision)
             return RetrievalResult(chunks=[chunk], best_sim=0.9, best_rrf=0.03)
@@ -289,7 +289,7 @@ def test_real_mode_wires_part4_and_part5(monkeypatch):
         r = client.post("/v1/deviation", json={"session_id": "6f1c2f1e-8a0b-4c1e-9a55-0b9b0e8f2a11",
                                                "text": "gap", "context": {"doc_id": "SOP-114"}})
         assert r.json() == {"deviation_id": "DEV-0042", "notified": True}
-        assert p.walkthrough is sys.modules["margin_relay.walkthrough"]
+        assert p.walkthrough is sys.modules["specs_relay.walkthrough"]
 
 
 def test_real_mode_walkthrough_uses_part5_builder(monkeypatch):
@@ -308,9 +308,9 @@ def test_real_mode_walkthrough_uses_part5_builder(monkeypatch):
     async def too_long(doc_id, revision=None):
         raise ValueError("Step body must have 1..449 characters")
 
-    sys.modules["margin_relay.walkthrough"].build_walkthrough = missing
+    sys.modules["specs_relay.walkthrough"].build_walkthrough = missing
     assert ask(client, "walk me through the bracket").json()["outcome"] == "not_found"
-    sys.modules["margin_relay.walkthrough"].build_walkthrough = too_long
+    sys.modules["specs_relay.walkthrough"].build_walkthrough = too_long
     r = ask(client, "walk me through the bracket")
     assert r.status_code == 500 and r.json()["error"]["code"] == "internal"
 
@@ -321,7 +321,7 @@ def test_real_mode_deviation_value_error_is_bad_request(monkeypatch):
     async def invalid(session_id, text, doc_id=None, step_id=None, *, notifier=None):
         raise ValueError("step_id must belong to doc_id")
 
-    sys.modules["margin_relay.walkthrough"].log_deviation = invalid
+    sys.modules["specs_relay.walkthrough"].log_deviation = invalid
     client, _ = make_client(pipeline=main.build_pipeline(make_settings(mock_mode=False)),
                             mock_mode=False)
     r = client.post("/v1/deviation", json={"session_id": "6f1c2f1e-8a0b-4c1e-9a55-0b9b0e8f2a11",
@@ -336,7 +336,7 @@ def test_real_mode_missing_key_falls_back_loudly(monkeypatch, caplog):
     def no_key(_):
         raise ValueError("GEMINI_API_KEY is not set")
 
-    sys.modules["margin_relay.pipeline.generate"].gemini_client = no_key
+    sys.modules["specs_relay.pipeline.generate"].gemini_client = no_key
     p = main.build_pipeline(make_settings(mock_mode=False))
     assert {"generate", "retrieve"} <= set(p.mocked)
     assert "intent" not in p.mocked and p.real_db

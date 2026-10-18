@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from margin_relay.pipeline.sanitize import G2_ALLOWED_NON_ASCII, REPLACEMENTS, sanitize
+from specs_relay.pipeline.sanitize import G2_ALLOWED_NON_ASCII, REPLACEMENTS, sanitize
 
 CASES = json.loads((Path(__file__).parent / "fixtures" / "glyph_cases.json").read_text("utf-8"))
 

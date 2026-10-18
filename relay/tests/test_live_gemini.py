@@ -1,7 +1,7 @@
 """Live Gemini checks. Skipped unless Part 3's config provides GEMINI_API_KEY
 and the three model IDs; keys are read only through that config.
 
-Run: MARGIN_LIVE_GEMINI=1 pytest relay/tests/test_live_gemini.py -v
+Run: SPECS_LIVE_GEMINI=1 pytest relay/tests/test_live_gemini.py -v
 """
 
 import asyncio
@@ -10,8 +10,8 @@ from pathlib import Path
 
 import pytest
 
-config = pytest.importorskip("margin_relay.config")
-schemas = pytest.importorskip("margin_relay.schemas")
+config = pytest.importorskip("specs_relay.config")
+schemas = pytest.importorskip("specs_relay.schemas")
 
 
 def _settings():
@@ -27,13 +27,13 @@ _key = getattr(S, "gemini_api_key", None)
 _key = _key.get_secret_value() if hasattr(_key, "get_secret_value") else _key
 # Opt-in: a key in .env must not make `make test` spend quota or flake on 429s
 # (the free tier allows 15 requests/min and 20/day on some models).
-pytestmark = [pytest.mark.skipif(os.environ.get("MARGIN_LIVE_GEMINI") != "1",
-                                 reason="live Gemini tests are opt-in: MARGIN_LIVE_GEMINI=1"),
+pytestmark = [pytest.mark.skipif(os.environ.get("SPECS_LIVE_GEMINI") != "1",
+                                 reason="live Gemini tests are opt-in: SPECS_LIVE_GEMINI=1"),
               pytest.mark.skipif(not _key, reason="GEMINI_API_KEY not configured")]
 
 
 def test_live_transcribe_fixture():
-    from margin_relay.pipeline.transcribe import GeminiTranscriber
+    from specs_relay.pipeline.transcribe import GeminiTranscriber
 
     pcm = (Path(__file__).parent / "fixtures" / "m5_question.pcm").read_bytes()
     text = asyncio.run(GeminiTranscriber.from_settings(S).transcribe(pcm, 16000)).lower()
@@ -42,8 +42,8 @@ def test_live_transcribe_fixture():
 
 
 def test_live_embedding_dimension_matches_config():
-    from margin_relay.pipeline.generate import gemini_client
-    from margin_relay.pipeline.retrieve import GeminiEmbedder
+    from specs_relay.pipeline.generate import gemini_client
+    from specs_relay.pipeline.retrieve import GeminiEmbedder
 
     emb = GeminiEmbedder(gemini_client(S.gemini_api_key), S.gemini_model_embed, S.embed_dim)
 
@@ -63,7 +63,7 @@ def test_live_embedding_dimension_matches_config():
 
 
 def test_live_generate_answers_and_refuses():
-    from margin_relay.pipeline.generate import GeminiGenerator, answer_question
+    from specs_relay.pipeline.generate import GeminiGenerator, answer_question
     from test_generate import CHUNKS, FakeRetriever, retrieval
 
     gen = GeminiGenerator.from_settings(S)

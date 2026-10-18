@@ -30,7 +30,7 @@ export interface SessionState {
   history: Exchange[];
 }
 
-const KEY = 'margin.companion.session';
+const KEY = 'specs.companion.session';
 export const HISTORY_MAX = 20;
 
 export const NO_CONTEXT: StepContext = { doc_id: null, step_id: null };

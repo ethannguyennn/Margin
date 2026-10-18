@@ -28,7 +28,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 HERE = Path(__file__).resolve().parent
-FONT = HERE.parents[1] / "relay" / "src" / "margin_relay" / "diagrams" / "fonts" / "AtkinsonHyperlegible-Bold.ttf"
+FONT = HERE.parents[1] / "relay" / "src" / "specs_relay" / "diagrams" / "fonts" / "AtkinsonHyperlegible-Bold.ttf"
 FIG = HERE / "figures"
 
 
@@ -228,7 +228,7 @@ def build_sop151(path: Path) -> None:
     from docx.shared import Inches
 
     doc = Document()
-    doc.core_properties.author = "Margin synthetic materials"
+    doc.core_properties.author = "Specs synthetic materials"
     doc.add_heading("SOP-151 Filter Element Change", level=1)
     doc.add_paragraph("Halcyon HX-2 portable fluid pump. Revision B. SYNTHETIC TRAINING DOCUMENT: all "
                       "names, parts, limits and records are fictional demo data.")

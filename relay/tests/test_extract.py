@@ -11,7 +11,7 @@ from types import SimpleNamespace as NS
 import pytest
 from PIL import Image
 
-from margin_relay.convert import extract as X
+from specs_relay.convert import extract as X
 
 MAT = Path(__file__).resolve().parents[2] / "corpus" / "materials"
 PDF = (MAT / "SOP-150-pump-seal-swap.pdf").read_bytes()

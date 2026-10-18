@@ -67,7 +67,7 @@ Keep it a pure transition table with effects, as in v1. New screens:
 | Screen | Shows | Entered from |
 |---|---|---|
 | `CALIBRATE` | "Nod twice now (2/3)" | first run after PRIVACY, or voice "calibrate" later (stretch) |
-| `PAIRING` | "Pair code 4F7K / enter it in the Margin portal" | boot when the device is unclaimed |
+| `PAIRING` | "Pair code 4F7K / enter it in the Specs portal" | boot when the device is unclaimed |
 | `TASK_READY` | "Task ready: Pump seal swap / 6 steps / nod twice to start" | `nextAssignment()` returned a task while IDLE |
 | `STEP` | progress bar, step glance, warning line, checkpoint, `[diagram]` hint | task start, `next`/`back`/`resume`, back from DETAILS/DIAGRAM/answers |
 | `STEP_DETAILS` | paginated step body (v1 ANSWER_EXPANDED for a step) | `details` command or tap on STEP |

@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from part5_support import RecordingConnection, RecordingPool, Cursor
-from margin_relay import db
+from specs_relay import db
 
 
 @pytest.mark.asyncio
@@ -164,7 +164,7 @@ async def test_edit_rejects_published_revision_before_mutating(monkeypatch):
 
 
 def test_shared_v2_contract_available_after_scaffold_merge():
-    from margin_relay import schemas
+    from specs_relay import schemas
     if not hasattr(schemas, 'ProcedureDraft'):
         pytest.skip('Part 3 v2-scaffold-relay is pending the team merge')
     for name in ('ProcedureDraft', 'DraftStep', 'MaterialText', 'DiagramSpec', 'ProgressEvent'):
@@ -174,7 +174,7 @@ def test_shared_v2_contract_available_after_scaffold_merge():
 @pytest.mark.asyncio
 async def test_seed_from_drafts_republishes_only_approved_snapshots(monkeypatch, capsys):
     from db import seed
-    from margin_relay import walkthrough
+    from specs_relay import walkthrough
     approved = SimpleNamespace(doc_id='SOP-150', revision='A')
     monkeypatch.setattr(db, 'get_settings', lambda: SimpleNamespace())
     monkeypatch.setattr(db, 'init_pool', AsyncMock())

@@ -9,7 +9,7 @@ RUN if [ -f portal/package.json ]; then \
       cd portal && npm ci --no-audit --no-fund && npm run build; \
     else \
       mkdir -p portal/dist && \
-      printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Margin portal</title>' \
+      printf '%s\n' '<!doctype html><meta charset="utf-8"><title>Specs portal</title>' \
         '<p>The portal is not on this branch yet (Part 5 builds portal/).</p>' > portal/dist/index.html; \
     fi
 

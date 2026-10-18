@@ -46,7 +46,7 @@ from ..schemas import (
 from .common import load_walkthrough
 from .deviation import log_deviation
 
-log = logging.getLogger("margin.ask")
+log = logging.getLogger("specs.ask")
 router = APIRouter()
 
 CODES = {"stt_failed", "db_down", "llm_timeout", "bad_request", "internal"}

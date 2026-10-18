@@ -30,8 +30,8 @@ cd relay
 pytest tests/test_intent.py tests/test_verify_step.py tests/test_render.py \
        tests/test_extract.py tests/test_structure.py tests/test_sanitize.py tests/test_verify.py
 pytest                                          # whole relay suite
-MARGIN_LIVE_GEMINI=1 pytest tests/test_live_gemini.py   # live v1 Gemini checks, opt-in
-MARGIN_UPDATE_GOLDEN=1 pytest tests/test_render.py      # regenerate goldens, deliberately
+SPECS_LIVE_GEMINI=1 pytest tests/test_live_gemini.py   # live v1 Gemini checks, opt-in
+SPECS_UPDATE_GOLDEN=1 pytest tests/test_render.py      # regenerate goldens, deliberately
 ```
 
 Conversion eval (keys from `.env` via Part 3's config; the model is never defaulted):
@@ -60,7 +60,7 @@ exits 2 when steps, values or expected diagrams are missing. Rebuild the materia
 | test_verify (v1) | 40 passed |
 | Whole relay suite | 489 passed, 8 skipped, 1 xfailed |
 
-Skips: 3 live Gemini tests (opt-in), 5 Postgres tests (need `MARGIN_TEST_PG_DSN`). The xfail is
+Skips: 3 live Gemini tests (opt-in), 5 Postgres tests (need `SPECS_TEST_PG_DSN`). The xfail is
 `test_ask_trust` "say that again", which becomes `intent: command` and needs the v2 `Intent`
 literal from `v2-scaffold-relay`; it is strict, so it flips red when the scaffold lands and
 must then be un-marked. Live Gemini tests, run once opted in: 3 passed (transcribe the PCM
@@ -164,7 +164,7 @@ one-line switch. Canvas 576 x 144 -> always two 288 x 144 tiles (slot 0 left, sl
 - Crops from the materials keep the figure's own small labels (about 9 px on the lens for
   SOP-150). Legibility on real glasses is unverified (no hardware).
 - Not run: `v2-scaffold-relay` integration, the M3 portal flow, Postgres integration tests
-  against Tiger (they need `MARGIN_TEST_PG_DSN`), BLE tile timing, the photo crop on a real lens.
+  against Tiger (they need `SPECS_TEST_PG_DSN`), BLE tile timing, the photo crop on a real lens.
 
 ## Open requests
 

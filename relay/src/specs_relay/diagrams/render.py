@@ -29,7 +29,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont, ImageOps
 
-log = logging.getLogger("margin.diagrams")
+log = logging.getLogger("specs.diagrams")
 
 CANVAS_W, CANVAS_H = 576, 144
 TILE_W, TILE_H = 288, 144

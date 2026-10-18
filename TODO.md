@@ -1,4 +1,4 @@
-# Margin TODO
+# Specs TODO
 
 Updated 2026-10-17 after **all five v2 parts were merged into `main`** (order 1, 3, 2, 4, 5, on
 top of the phone-UI merge from PR #3) and the cross-part follow-ups were closed.
@@ -35,7 +35,7 @@ Windows: `make` = `mingw32-make`.
 - [ ] **`make latency`** on real traffic; report `intent='command'` rows separately (target:
       command = STT + < 50 ms, answer p50 <= 3 s)
 - [ ] **Live database:** apply migrations on Tiger (`python db/seed.py --migrate-only`), then the
-      opt-in live tests (`MARGIN_TEST_V2_DATABASE=1`, `DATABASE_URL`) - Part 5
+      opt-in live tests (`SPECS_TEST_V2_DATABASE=1`, `DATABASE_URL`) - Part 5
 
 ## 2. Open requests between parts
 

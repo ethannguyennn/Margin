@@ -1,7 +1,7 @@
 """Diagram renderer: golden images (exact pixel match), tile format, levels, budget.
 
 Regenerate the goldens deliberately, after looking at them:
-    MARGIN_UPDATE_GOLDEN=1 pytest relay/tests/test_render.py
+    SPECS_UPDATE_GOLDEN=1 pytest relay/tests/test_render.py
 """
 
 import io
@@ -12,13 +12,13 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from margin_relay.diagrams import render as R
+from specs_relay.diagrams import render as R
 
 FIX = Path(__file__).parent / "fixtures" / "diagrams"
 REPO = Path(__file__).resolve().parents[2]
 SEAL_FIGURE = REPO / "corpus" / "materials" / "figures" / "SOP-150-figure-1.png"
 MATERIALS = REPO / "corpus" / "materials"
-UPDATE = os.environ.get("MARGIN_UPDATE_GOLDEN") == "1"
+UPDATE = os.environ.get("SPECS_UPDATE_GOLDEN") == "1"
 
 
 def spec(name):

@@ -25,9 +25,9 @@ const box = {
   viewBox: '0 0 24 24',
   fill: 'none',
   stroke: 'currentColor',
-  strokeWidth: 1.7,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeWidth: 1.5,
+  strokeLinecap: 'square' as const,
+  strokeLinejoin: 'miter' as const,
 };
 
 function ListIcon() {

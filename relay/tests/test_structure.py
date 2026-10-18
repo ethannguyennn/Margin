@@ -13,7 +13,7 @@ from types import SimpleNamespace as NS
 import pytest
 from PIL import Image
 
-from margin_relay.convert import structure as S
+from specs_relay.convert import structure as S
 from test_verify_step import MATERIAL
 
 GOOD_STEP = {

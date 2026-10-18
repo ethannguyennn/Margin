@@ -1,11 +1,11 @@
-# Margin v2 — Build Plan
+# Specs v2 — Build Plan
 
 v1 proved the trust layer: ask a question, get an answer quoted from an approved
 SOP, or an honest "Not in approved SOPs". v1 does not do what the product is for:
 
 | What we promised | v1 reality | v2 |
 |---|---|---|
-| Employer hands the worker their instructions | SOPs are hand-written markdown in `corpus/`, seeded by a developer | Supervisor uploads a PDF, DOCX, text or a phone photo of a paper SOP in a web portal; Margin turns it into an interactive procedure; supervisor reviews, approves, assigns |
+| Employer hands the worker their instructions | SOPs are hand-written markdown in `corpus/`, seeded by a developer | Supervisor uploads a PDF, DOCX, text or a phone photo of a paper SOP in a web portal; Specs turns it into an interactive procedure; supervisor reviews, approves, assigns |
 | Interactive, progressive steps | Walkthrough exists, but only if the worker *says* "walk me through" and the retriever guesses the right doc | The assigned task is waiting on the lens; one step at a time, with warnings and checkpoints; progress is reported back to the supervisor |
 | Hands-free | Every interaction needs a tap on the temple; the mic needs a press to open **and** a press to send | Double head-nod opens the mic, silence closes it, voice drives navigation ("next", "back", "show diagram"); head-shake cancels. Taps stay as a fallback |
 | Diagrams | None. Text containers only | Per-step diagrams on the lens: figures cropped from the uploaded material, or schematics generated from it, rendered to the G2's 4-bit greyscale |
@@ -97,7 +97,7 @@ command (so "what's the next step's torque" stays a question):
 | "diagram", "show diagram", "picture", "show me" | `diagram` | DIAGRAM, or "No diagram for this step" |
 | "pause", "stop task" | `pause` | IDLE, task kept |
 | "resume", "continue" | `resume` | back to the current step |
-| "exit", "close margin" | `exit` | native exit confirmation |
+| "exit", "close specs" | `exit` | native exit confirmation |
 
 Anything else goes through v1's pipeline unchanged (question / deviation /
 walkthrough), with the current `doc_id` + `step_id` as context.

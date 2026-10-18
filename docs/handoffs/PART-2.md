@@ -194,7 +194,7 @@ Also covered:
   `not_found`, `server_error`, `network` or `timeout`.
 
 **Progress queue:**
-- Text only, capped at 200 (oldest dropped), mirrored to `localStorage['margin.progressQueue']`.
+- Text only, capped at 200 (oldest dropped), mirrored to `localStorage['specs.progressQueue']`.
 - Flushed as one batch every 5 s or on the 10th event, and on `FOREGROUND_EXIT_EVENT`, on hide and
   on `online`.
 - Backs off 5 → 60 s while offline. A 4xx batch is dropped.
@@ -265,8 +265,8 @@ node tests/motion/synth.ts                       # regenerate the synthetic fixt
 npm run dev:mock                                 # then open the simulator on
 npx evenhub-simulator "http://localhost:5174/?imu=double-nod" --automation-port 9898   # IMU replay (also bench-work, shake, walking...)
 # v1 relay contract e2e:
-#   (relay) MOCK_MODE=1 ALLOWED_ORIGINS=http://localhost:5174 uvicorn margin_relay.main:create_app --factory --port 8091
-MARGIN_E2E_RELAY=http://127.0.0.1:8091 npx vitest run tests/relay.e2e.test.ts
+#   (relay) MOCK_MODE=1 ALLOWED_ORIGINS=http://localhost:5174 uvicorn specs_relay.main:create_app --factory --port 8091
+SPECS_E2E_RELAY=http://127.0.0.1:8091 npx vitest run tests/relay.e2e.test.ts
 # Recorder on glasses: open the app with ?dev=1 (after Part 1 adds the mount line, §1)
 ```
 

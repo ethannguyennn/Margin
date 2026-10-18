@@ -2,7 +2,7 @@
 
 import pytest
 
-from margin_relay.pipeline.verify import check_draft, number_tokens, quote_in_text
+from specs_relay.pipeline.verify import check_draft, number_tokens, quote_in_text
 
 C41 = {
     "chunk_id": "SOP-114:C:4.1",

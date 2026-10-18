@@ -8,8 +8,8 @@ import logging
 import pytest
 
 from _relay_helpers import PORTAL, PORTAL_TOKEN, device, pair_and_claim, sid, v2_client
-from margin_relay.auth import RateLimiter, RateLimited, new_pair_code
-from margin_relay.schemas import PAIR_CODE_ALPHABET
+from specs_relay.auth import RateLimiter, RateLimited, new_pair_code
+from specs_relay.schemas import PAIR_CODE_ALPHABET
 
 PORTAL_ROUTES = [
     ("get", "/v1/devices"), ("post", "/v1/devices/claim"), ("post", "/v1/assignments"),

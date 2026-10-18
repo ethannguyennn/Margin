@@ -29,7 +29,7 @@ from ..pipeline import BadRequest, DbDown
 from ..schemas import ClaimRequest, DeviceInfo, Pairing, PairRequest
 from .common import NotFound, guarded, iso
 
-log = logging.getLogger("margin.devices")
+log = logging.getLogger("specs.devices")
 router = APIRouter()
 
 PAIR_ATTEMPTS = 8  # a fresh code per attempt; collisions only among open codes
@@ -84,7 +84,7 @@ async def claim(req: ClaimRequest, request: Request) -> Pairing:
         raise BadRequest(str(exc)) from exc
     if row is None:
         raise NotFound("No unclaimed lens shows that pair code. It may have expired: "
-                       "reopen Margin on the glasses for a new one.")
+                       "reopen Specs on the glasses for a new one.")
     log.info("lens %s claimed", row["device_id"])
     # The device token never goes to the portal: whoever holds it can act as the lens.
     return Pairing(device_id=row["device_id"], device_token="", pair_code=row.get("pair_code") or "",

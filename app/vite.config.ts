@@ -7,5 +7,7 @@ export default defineConfig({
   // web server root, so /assets/... would not resolve.
   base: './',
   server: { host: true, port: 5173 },
-  build: { target: 'esnext' },
+  // es2020, not esnext: the Even app's WebView (WKWebView / Android System WebView) can lag
+  // desktop browsers, and the bundle must parse on the oldest phone the app supports.
+  build: { target: 'es2020' },
 })

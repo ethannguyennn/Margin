@@ -5,10 +5,10 @@ import sys
 
 import pytest
 
-from margin_relay import db
+from specs_relay import db
 
-LIVE = pytest.mark.skipif(os.environ.get('MARGIN_TEST_V2_DATABASE') != '1',
-                          reason='live database test; set MARGIN_TEST_V2_DATABASE=1 and DATABASE_URL')
+LIVE = pytest.mark.skipif(os.environ.get('SPECS_TEST_V2_DATABASE') != '1',
+                          reason='live database test; set SPECS_TEST_V2_DATABASE=1 and DATABASE_URL')
 
 
 def run(coro):

@@ -1,4 +1,4 @@
-# Margin
+# Specs
 
 Hands-free, citation-verified work instructions on Even Realities G2 glasses.
 

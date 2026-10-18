@@ -107,9 +107,9 @@ npm --prefix ios ci
 npm --prefix ios run build
 
 # Opt in to the live rollback-only probe once access is ready:
-$env:MARGIN_TEST_V2_DATABASE = '1'
+$env:SPECS_TEST_V2_DATABASE = '1'
 & .venv/Scripts/python.exe -m pytest relay/tests/test_db_v2_live.py -q
-Remove-Item Env:MARGIN_TEST_V2_DATABASE
+Remove-Item Env:SPECS_TEST_V2_DATABASE
 ```
 
 When GNU make is available, run `make test` and `make test-ios`. Part 3 still
@@ -119,7 +119,7 @@ The existing v1 mock evaluation was run with:
 
 ```powershell
 $env:MOCK_MODE = '1'
-& .venv/Scripts/python.exe -m uvicorn margin_relay.main:create_app --factory --host 127.0.0.1 --port 8086
+& .venv/Scripts/python.exe -m uvicorn specs_relay.main:create_app --factory --host 127.0.0.1 --port 8086
 # In a second shell:
 & .venv/Scripts/python.exe eval/run_eval.py --base-url http://127.0.0.1:8086 --allow-mock --output portal/tests/v1-mock-eval.json
 ```
@@ -234,7 +234,7 @@ No Tiger service ID, database hostname or branch identifier has been supplied
 for this task; none is invented. Runtime settings are exclusively Part 3's
 DATABASE_URL/EMBED_DIM and existing embedding config. IDs in fixture evidence
 (MAT-1, DGM-1, LNS-1, ASN-1, SOP-150/A) are synthetic local fixture identifiers,
-not cloud records. The live probe uses a unique margin_v2_probe_* schema and
+not cloud records. The live probe uses a unique specs_v2_probe_* schema and
 rolls it back.
 
 This is one organisation with one shared portal token. V1 deviations contain

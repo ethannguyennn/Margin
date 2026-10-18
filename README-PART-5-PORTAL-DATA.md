@@ -2,7 +2,7 @@
 
 **Branch:** `part-5-portal-data`
 **Read first:** `BUILD-PLAN-V2.md` (§2 flow, §5 routes and shapes).
-**Owns:** everything Margin stores and the only screen the employer ever sees:
+**Owns:** everything Specs stores and the only screen the employer ever sees:
 migration 002, `db.py` v2, publishing an approved draft into the corpus the
 lens and Q&A already use, and the web portal (upload, review, approve, pair,
 assign, live progress).
@@ -17,9 +17,9 @@ end to end against the real relay), M5 (progress board + pitch numbers).
 ```
 db/migrations/002_v2.sql
 db/seed.py                                # + accepts published drafts; v1 corpus still seeds
-relay/src/margin_relay/db.py              # + every v2 query
-relay/src/margin_relay/walkthrough.py     # + step extras (warning, checkpoint, diagram), publish_draft()
-relay/src/margin_relay/notify/
+relay/src/specs_relay/db.py              # + every v2 query
+relay/src/specs_relay/walkthrough.py     # + step extras (warning, checkpoint, diagram), publish_draft()
+relay/src/specs_relay/notify/
 corpus/*.md, eval/qa.jsonl, eval/run_eval.py  # v1, maintenance
 portal/                                   # NEW: Vite + vanilla TypeScript, no framework
 relay/tests/test_db*.py, test_publish.py

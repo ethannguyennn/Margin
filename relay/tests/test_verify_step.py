@@ -5,7 +5,7 @@ These fixtures are synthetic and hand-written; they are not converter output.
 
 import pytest
 
-from margin_relay.convert.verify_step import step_failures, verify_step
+from specs_relay.convert.verify_step import step_failures, verify_step
 
 PAGE_1 = """# SOP-150 Pump seal swap
 

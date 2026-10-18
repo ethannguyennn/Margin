@@ -192,7 +192,7 @@ const COMMAND_PHRASES: Record<Command, string[]> = {
   diagram: ['diagram', 'show diagram', 'picture', 'show me'],
   pause: ['pause', 'stop task'],
   resume: ['resume', 'continue'],
-  exit: ['exit', 'close margin'],
+  exit: ['exit', 'close specs'],
 };
 
 export function mockCommandFor(transcript: string): Command | null {

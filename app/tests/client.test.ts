@@ -284,14 +284,14 @@ test('progress: queued, mirrored to localStorage, flushed as one batch', async (
   const calls = stubFetch({ body: { accepted: 3 } });
   for (let i = 0; i < 3; i++) client.reportProgress(ev(i));
   assert.equal(calls.length, 0, 'not sent per event');
-  assert.equal(JSON.parse(store['margin.progressQueue']).length, 3, 'mirrored for a reload');
+  assert.equal(JSON.parse(store['specs.progressQueue']).length, 3, 'mirrored for a reload');
   await client.flushProgress();
   assert.equal(calls.length, 1);
   assert.equal(calls[0].url, 'http://relay.test/v1/progress');
   assert.equal(headers(calls[0]).authorization, 'Bearer tok-1');
   assert.deepEqual(JSON.parse(calls[0].init.body as string).events, [ev(0), ev(1), ev(2)]);
   assert.equal(client.pendingProgress().length, 0);
-  assert.equal(JSON.parse(store['margin.progressQueue']).length, 0);
+  assert.equal(JSON.parse(store['specs.progressQueue']).length, 0);
 });
 
 test('progress: the 10th event flushes immediately; the 5 s timer flushes fewer', async () => {
@@ -367,11 +367,11 @@ test('progress: capped at 200 (oldest dropped); a 4xx batch is dropped, not retr
 });
 
 test('progress survives a reload: a fresh client instance picks up the persisted queue', async () => {
-  store['margin.progressQueue'] = JSON.stringify([ev(7), { junk: true }]);
+  store['specs.progressQueue'] = JSON.stringify([ev(7), { junk: true }]);
   vi.resetModules();
   const fresh = await import('../src/api/client.ts');
   assert.deepEqual(fresh.pendingProgress(), [ev(7)]);
-  store['margin.progressQueue'] = '[]';
+  store['specs.progressQueue'] = '[]';
 });
 
 const tile = mockDiagramImage('dg-sop114-bracket')!;
@@ -417,7 +417,7 @@ test('mock commands: whole-utterance only, every command phrase from BUILD-PLAN-
     ['details', 'details'], ['more', 'details'], ['read it', 'details'],
     ['show diagram', 'diagram'], ['diagram', 'diagram'], ['picture', 'diagram'], ['Show me!', 'diagram'],
     ['pause', 'pause'], ['stop task', 'pause'], ['resume', 'resume'], ['continue', 'resume'],
-    ['exit', 'exit'], ['close margin', 'exit'],
+    ['exit', 'exit'], ['close specs', 'exit'],
   ];
   for (const [said, cmd] of cases) {
     const r = mock.mockResponseFor(said);

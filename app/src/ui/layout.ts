@@ -40,7 +40,7 @@ export class LensDisplay {
             if (!await this.bridge.rebuildPageContainer(new RebuildPageContainer(createLayout(starting, layout))))
                 throw new Error('Layout switch failed');
             this.rebuildCount++;
-            console.info(`[Margin] layout=${layout} rebuilds=${this.rebuildCount}`);
+            console.info(`[Specs] layout=${layout} rebuilds=${this.rebuildCount}`);
             this.layout = layout;
             this.previous = { ...starting };
             this.image = undefined;
@@ -54,7 +54,7 @@ export class LensDisplay {
                 const status = await this.bridge.updateImageRawData(new ImageRawDataUpdate({ containerID: c.containerID, containerName: c.containerName, imageData: tile.image }));
                 if (status !== 'success')
                     throw new DiagramRenderError(`Diagram tile ${tile.slot} failed: ${status}`);
-                console.info(`[Margin] diagram=${image.diagram_id} tile=${tile.slot} status=success`);
+                console.info(`[Specs] diagram=${image.diagram_id} tile=${tile.slot} status=success`);
             }
             this.image = image;
         }

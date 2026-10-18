@@ -63,7 +63,7 @@ export function renderScreen(state: LensState, level = 0): ScreenText {
         switch (state.screen) {
             case 'PRIVACY': return safe(privacyScreen());
             case 'CALIBRATE': return safe({ header: 'CALIBRATE', main: `Nod twice now (${state.calibrationDone}/${state.calibrationNeeded})`, footer: state.notice || 'tap: use default gestures' });
-            case 'PAIRING': return safe({ header: 'PAIRING', main: state.pairing ? `Pair code ${short(state.pairing.pair_code, 16)}\nEnter it in the Margin portal.` : 'Getting pair code...', footer: 'waiting for supervisor' });
+            case 'PAIRING': return safe({ header: 'PAIRING', main: state.pairing ? `Pair code ${short(state.pairing.pair_code, 16)}\nEnter it in the Specs portal.` : 'Getting pair code...', footer: 'waiting for supervisor' });
             case 'TASK_READY': return safe({ header: 'TASK READY', main: `Task ready: ${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: 'nod twice to start' });
             case 'STEP': return safe(stepScreen(state));
             case 'STEP_DETAILS': return safe({ header: `STEP DETAILS ${state.page + 1}/${state.pages.length}`, main: state.pages[state.page] ?? '', footer: 'swipe: page   shake: back' });

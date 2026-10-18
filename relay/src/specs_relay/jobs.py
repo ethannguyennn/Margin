@@ -23,7 +23,7 @@ import sentry_sdk
 from .pipeline import PipelineError
 from .schemas import DraftStep, MaterialText, VerifyResult
 
-log = logging.getLogger("margin.jobs")
+log = logging.getLogger("specs.jobs")
 
 
 def readable(exc: BaseException) -> str:

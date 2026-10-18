@@ -6,10 +6,12 @@ import { createRoot } from 'react-dom/client';
 import { HashRouter } from 'react-router-dom';
 import App from './App';
 import { StoreProvider } from './store';
+import { initTheme } from './theme';
 import './styles.css';
 
 export function mountPhone(root: HTMLElement | null): void {
   if (!root) throw new Error('#root missing from index.html');
+  initTheme();
   createRoot(root).render(
     <StrictMode>
       <HashRouter>

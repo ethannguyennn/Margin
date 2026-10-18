@@ -9,14 +9,14 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from margin_relay.config import Settings
-from margin_relay.main import Pipeline, _adapt_intent, create_app
-from margin_relay.pipeline import mock
-from margin_relay.pipeline.intent import classify_intent, deviation_text
-from margin_relay.pipeline.sanitize import sanitize
-from margin_relay.pipeline.transcribe import MockTranscriber
-from margin_relay.pipeline.verify import verify
-from margin_relay.schemas import Draft, RetrievalResult
+from specs_relay.config import Settings
+from specs_relay.main import Pipeline, _adapt_intent, create_app
+from specs_relay.pipeline import mock
+from specs_relay.pipeline.intent import classify_intent, deviation_text
+from specs_relay.pipeline.sanitize import sanitize
+from specs_relay.pipeline.transcribe import MockTranscriber
+from specs_relay.pipeline.verify import verify
+from specs_relay.schemas import Draft, RetrievalResult
 
 from test_generate import CHUNKS, GOOD, HALLUCINATED
 

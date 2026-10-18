@@ -1,4 +1,4 @@
-# Margin -- team build contract. Works with GNU make on Linux/macOS and
+# Specs -- team build contract. Works with GNU make on Linux/macOS and
 # mingw32-make / GNU make on Windows (no shell-specific syntax in recipes).
 #
 #   make install     # one-time: venv deps for the relay (+ dev/test tools)
@@ -7,7 +7,7 @@
 #   make sim         # even simulator against the dev app
 #   make dev-portal  # employer portal dev server (Part 5), proxies /v1 to the relay on :8080
 #   make test        # relay + app (tests, typecheck, build) + portal (must stay green)
-#   make pack        # build app/margin.ehpk for Even Hub
+#   make pack        # build app/specs.ehpk for Even Hub
 #   make seed        # python db/seed.py            (Part 5)
 #   make eval        # python eval/run_eval.py      (Part 5)
 #   make eval-conversion  # material -> procedure eval, 0 fabricated values (Part 4)
@@ -49,7 +49,7 @@ ifneq ($(wildcard portal/package.json),)
 endif
 
 dev-relay:
-	$(PY) -m uvicorn margin_relay.main:create_app --factory --reload --reload-dir relay/src --host 0.0.0.0 --port $(PORT)
+	$(PY) -m uvicorn specs_relay.main:create_app --factory --reload --reload-dir relay/src --host 0.0.0.0 --port $(PORT)
 
 dev-app:
 	cd app && npm run dev
@@ -102,14 +102,14 @@ else
 endif
 
 latency:
-	$(PY) -m margin_relay.latency $(ARGS)
+	$(PY) -m specs_relay.latency $(ARGS)
 
 deploy:
 	$(COMPOSE) up -d --build
 	$(COMPOSE) ps
 
 deploy-remote:
-	ssh $(VM_HOST) "cd margin && git pull --ff-only && make deploy"
+	ssh $(VM_HOST) "cd specs && git pull --ff-only && make deploy"
 
 logs:
 	$(COMPOSE) logs -f --tail=200 relay

@@ -1,4 +1,4 @@
-# Margin v2 — actual native simulator evidence
+# Specs v2 — actual native simulator evidence
 
 SDK 0.0.16; official simulator 0.9.5; Windows WebView2; VITE_MOCK=1.
 Implementation tested: `82fc3339e0f48107788416878d6f53d8faf07ecd`.

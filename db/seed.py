@@ -15,7 +15,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "relay/src"))
-from margin_relay import db
+from specs_relay import db
 
 HEADING = re.compile(r"^#{2,6}\s+(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.MULTILINE)
 ORDERED = re.compile(r"^\s*(\d+)\.\s+", re.MULTILINE)
@@ -197,7 +197,7 @@ async def main(argv=None) -> int:
             if args.migrate_only:
                 print("Migration row counts:", json.dumps({"before": before, "after": await db.storage_counts()}, sort_keys=True))
             elif args.from_drafts:
-                from margin_relay.walkthrough import publish_draft
+                from specs_relay.walkthrough import publish_draft
                 for draft in await db.approved_drafts():
                     print(json.dumps(await publish_draft(draft, settings=settings), sort_keys=True))
             elif not args.migrate_only:

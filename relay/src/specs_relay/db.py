@@ -214,7 +214,7 @@ def seed_module():
     working directory. The relay image must include the root db/ and corpus/.
     """
     import importlib.util
-    spec = importlib.util.spec_from_file_location("_margin_corpus_seed", ROOT / "db/seed.py")
+    spec = importlib.util.spec_from_file_location("_specs_corpus_seed", ROOT / "db/seed.py")
     if spec is None or spec.loader is None:
         raise RuntimeError("The relay image must include db/seed.py")
     module = importlib.util.module_from_spec(spec)
@@ -305,7 +305,7 @@ async def validate_capabilities() -> dict:
     """
     if _embed_dim is None:
         raise RuntimeError("Call init_pool before checking capabilities")
-    schema = "margin_probe_" + uuid4().hex
+    schema = "specs_probe_" + uuid4().hex
     report = {}
     async with pool().connection() as conn:
         async with conn.transaction():
@@ -352,7 +352,7 @@ async def apply_migrations() -> None:
         raise RuntimeError("Call init_pool before migrating")
     async with pool().connection() as conn:
         async with conn.transaction():
-            await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended('margin:migrate', 0))")
+            await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended('specs:migrate', 0))")
             cursor = await conn.execute(
                 """SELECT format_type(atttypid, atttypmod) AS type FROM pg_attribute
                 WHERE attrelid = to_regclass('chunks') AND attname = 'embedding' AND NOT attisdropped""")
@@ -383,7 +383,7 @@ async def upsert_corpus(documents: list[dict], chunks: list[dict]) -> list[dict]
     vectors = {chunk["chunk_id"]: vector_literal(chunk["embedding"]) for chunk in chunks}
     async with pool().connection() as conn:
         async with conn.transaction():
-            await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended('margin:seed', 0))")
+            await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended('specs:seed', 0))")
             for doc in sorted(documents, key=lambda d: (d["doc_id"], d["revision"])):
                 await _lock_document(conn, doc["doc_id"])
                 cursor = await conn.execute(
@@ -453,7 +453,7 @@ async def _next_id(sequence: str, prefix: str) -> str:
 
 
 async def _lock_document(conn, doc_id: str) -> None:
-    await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", ("margin:publish:" + doc_id,))
+    await conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s, 0))", ("specs:publish:" + doc_id,))
 
 
 async def _editable_draft(conn, doc_id: str, revision: str) -> dict:
@@ -875,7 +875,7 @@ async def validate_v2_migration() -> dict:
     """
     if _embed_dim is None:
         raise RuntimeError('Call init_pool before the v2 migration probe')
-    schema = 'margin_v2_probe_' + uuid4().hex
+    schema = 'specs_v2_probe_' + uuid4().hex
     report = {'schema': schema, 'rolled_back': True}
     async with pool().connection() as conn:
         async with conn.transaction():

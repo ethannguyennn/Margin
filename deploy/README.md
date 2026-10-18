@@ -18,9 +18,29 @@ origin, so it needs no CORS entry.
    ```bash
    curl -fsSL https://get.docker.com | sh
    apt-get install -y make git
-   git clone -b main https://github.com/ethannguyennn/Margin.git margin
-   cd margin && cp .env.example .env && nano .env
+   git clone -b main https://github.com/ethannguyennn/Specs.git specs
+   cd specs && cp .env.example .env && nano .env
    ```
+
+### Moving a VM from the Margin name to Specs (once)
+
+The project was renamed from Margin. A VM set up before the rename still has a
+`~/margin` checkout, a `MARGIN_DOMAIN` line in `.env` and a running compose
+project named `margin`, which holds ports 80/443. Before the first deploy after
+the rename:
+
+```bash
+cd ~/margin && docker compose -p margin -f deploy/docker-compose.yml down
+cd ~ && mv margin specs && cd specs
+git remote set-url origin https://github.com/ethannguyennn/Specs.git
+git pull --ff-only
+sed -i 's/^MARGIN_/SPECS_/' .env
+make deploy
+```
+
+The new `specs` project starts with empty `caddy_data`, so Caddy requests fresh
+certificates on the first start (one issuance per host; well inside Let's
+Encrypt limits). The database is external, so no data moves.
 
 ## 2. DNS (Porkbun)
 
@@ -38,7 +58,7 @@ starting Caddy, or the Let's Encrypt challenge fails (and rate-limits retries).
 
 ```
 MOCK_MODE=1
-MARGIN_DOMAIN=getyourassto.work
+SPECS_DOMAIN=getyourassto.work
 ACME_EMAIL=<you@...>
 PUBLIC_ORIGIN=https://getyourassto.work
 ALLOWED_ORIGINS=<origins the WebView sends; see step 5>
@@ -58,8 +78,8 @@ MAX_UPLOAD_MB=20          # Caddy also caps request bodies at 22 MB
 CONVERT_TIMEOUT_S=180
 ```
 
-`MARGIN_DOMAIN` may list several hosts while switching, e.g.
-`MARGIN_DOMAIN=getyourassto.work, 45-32-88-132.sslip.io`; Caddy gets a
+`SPECS_DOMAIN` may list several hosts while switching, e.g.
+`SPECS_DOMAIN=getyourassto.work, 45-32-88-132.sslip.io`; Caddy gets a
 certificate for each. Apply a `.env` change with `make deploy` (or, for Caddy
 only, `docker compose -f deploy/docker-compose.yml --env-file .env up -d caddy`).
 

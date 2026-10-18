@@ -5,8 +5,8 @@ import pytest
 
 from part5_support import RecordingConnection, RecordingPool, schema_dependencies
 from db.seed import load_corpus
-from margin_relay import db, walkthrough
-from margin_relay.notify import ConsoleNotifier, get_notifier
+from specs_relay import db, walkthrough
+from specs_relay.notify import ConsoleNotifier, get_notifier
 
 
 def test_every_corpus_step_preserves_its_full_sanitized_text(schema_dependencies):

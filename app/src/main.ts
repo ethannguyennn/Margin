@@ -50,7 +50,7 @@ app.id = 'app';
 if (dev)
     document.body.append(app);
 const heading = document.createElement('h1');
-heading.textContent = 'Margin';
+heading.textContent = 'Specs';
 const status = document.createElement('p');
 status.textContent = 'Connecting...';
 const mode = document.createElement('p');
@@ -79,8 +79,8 @@ async function boot() {
         textContainerUpgrade: p => queue.run(() => bridge.textContainerUpgrade(p)),
         updateImageRawData: p => queue.run(() => bridge.updateImageRawData(p)),
     });
-    await display.render({ header: 'MARGIN', main: '', footer: 'starting...' });
-    const report = (error: unknown) => { console.warn('[Margin] integration failure', error instanceof Error ? error.message : 'unknown'); };
+    await display.render({ header: 'SPECS', main: '', footer: 'starting...' });
+    const report = (error: unknown) => { console.warn('[Specs] integration failure', error instanceof Error ? error.message : 'unknown'); };
     const paths = ['./audio/capture.ts', './api/client.ts', './obs/sentry.ts', './motion/gestures.ts'];
     if (!paths.every(path => !!loaders[path]))
         throw new Error('Part 2 v2 motion/client modules are missing');
@@ -130,7 +130,7 @@ async function boot() {
         app.dataset.screen = value.screen;
         mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
         lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent });
-        console.info(`[Margin] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
+        console.info(`[Specs] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
         syncMotion(value);
         if (!rendering)
             rendering = (async () => {
@@ -148,7 +148,7 @@ async function boot() {
                         else
                             throw error;
                     }
-                    console.info(`[Margin] rendered screen=${next.screen} page=${next.page} step=${next.step} rebuilds=${display.rebuildCount}`);
+                    console.info(`[Specs] rendered screen=${next.screen} page=${next.page} step=${next.step} rebuilds=${display.rebuildCount}`);
                 }
             })().finally(() => { rendering = null; });
         return rendering;
@@ -172,8 +172,8 @@ async function boot() {
     };
     const ports: LensPorts = {
         now: Date.now, onError: report, render, persist: value => store.save(serializeSession(value)),
-        exit: async () => { await store.flush(); console.info('[Margin] native exit confirmation requested'); if (!await queue.run(() => bridge.shutDownPageContainer(1)))
-            throw new Error('Native exit failed'); console.info('[Margin] native exit accepted'); },
+        exit: async () => { await store.flush(); console.info('[Specs] native exit confirmation requested'); if (!await queue.run(() => bridge.shutDownPageContainer(1)))
+            throw new Error('Native exit failed'); console.info('[Specs] native exit accepted'); },
         startCapture: (onLevel, onEndpoint) => {
             if (mockApi) {
                 mockApi.clearMockTranscripts();
@@ -184,7 +184,7 @@ async function boot() {
             return queue.run(() => io.audio.startCapture(onLevel, onEndpoint));
         },
         stopCapture: () => queue.run(() => io.audio.stopCapture()),
-        ask: async (req: AskRequest, opts): Promise<AskResponse> => { if (mockApi && req.audio) console.info('[Margin] mock-ask=' + said()); const span = io.obs.startAsk(); try {
+        ask: async (req: AskRequest, opts): Promise<AskResponse> => { if (mockApi && req.audio) console.info('[Specs] mock-ask=' + said()); const span = io.obs.startAsk(); try {
             const answer = await io.api.ask(req, opts);
             span.end(answer.outcome);
             // The phone screen shows the full answer the glance line had to compress.
@@ -195,7 +195,7 @@ async function boot() {
             span.end('error');
             throw error;
         } },
-        reportProgress: ev => { console.info('[Margin] progress=' + JSON.stringify(ev)); io.api.reportProgress(ev); },
+        reportProgress: ev => { console.info('[Specs] progress=' + JSON.stringify(ev)); io.api.reportProgress(ev); },
         // Controller prefetches current + next on every step change, using Part 2's cache.
         getDiagram: id => io.api.getDiagram(id), pollAssignment: () => { void poll(); },
         calibrate: onProgress => io.motion.calibrate(onProgress),
@@ -261,4 +261,4 @@ async function boot() {
         import.meta.hot.dispose(() => { void cleanup(); });
     startPolling();
 }
-void boot().catch(error => { console.error('[Margin] boot failed', error); status.textContent = 'Unable to start. ' + String(error); lensLink.update({ status: status.textContent }); });
+void boot().catch(error => { console.error('[Specs] boot failed', error); status.textContent = 'Unable to start. ' + String(error); lensLink.update({ status: status.textContent }); });
