@@ -1,0 +1,22 @@
+{
+  "material_id": "SOP-151",
+  "pages": [
+    {
+      "page": 1,
+      "text": "# SOP-151 Filter Element Change\n\nHalcyon HX-2 portable fluid pump. Revision B. SYNTHETIC TRAINING DOCUMENT: all names, parts, limits and records are fictional demo data.\n\n## 1 Scope\n\nReplace the inline filter element of an HX-2 pump. Use element HX2-420 only.\n\n## 2 Warning\n\nWARNING: Relieve line pressure before opening the filter bowl. Never open the bowl while the pump runs.\n\n## 3 Torque values\n\n| Fastener | Size | Torque |\n\n| --- | --- | --- |\n\n| Bowl clamp screw | M5 | 3 N-m |\n\n| Drain plug | M10 | 8 N-m |\n\nTable 1. Torque values for the filter assembly.\n\nFigure 1. Filter bowl, element and clamp screws.\n\n## 4 Procedure\n\n1. Stop the pump and close inlet valve V1 and outlet valve V2.\n\n2. Place a drip tray under the bowl and remove the drain plug to drain about 0.5 L of fluid.\n\n3. Loosen the two M5 bowl clamp screws and remove the filter bowl.\n\n4. Replace the filter element with a new element HX2-420 (25 µm rating).\n\n5. Refit the bowl and torque the two M5 bowl clamp screws to 3 N-m (Table 1).\n\n6. Refit the drain plug and torque it to 8 N-m (Table 1).\n\n7. Open V1, then V2, and watch the bowl seam for leaks for 60 s."
+    }
+  ],
+  "figures": [
+    {
+      "page": 1,
+      "bbox": [
+        0.0,
+        0.0,
+        1.0,
+        1.0
+      ],
+      "caption": "Figure 1. Filter bowl, element and clamp screws.",
+      "figure_id": "F1"
+    }
+  ]
+}

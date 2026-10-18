@@ -31,6 +31,7 @@ REPLACEMENTS: dict[str, str] = {
     "°": " deg",  # degree sign
     "µ": "u",     # micro sign
     "Ω": " ohm",  # ohm sign
+    "Ω": " ohm",  # Greek capital omega: how most documents type ohms; the app maps it too
     "–": "-",     # en dash
     "—": "-",     # em dash
     "“": '"',     # left double quote
@@ -49,11 +50,13 @@ def sanitize(text: str) -> str:
     """Return ``text`` with every glyph the G2 cannot render mapped or dropped.
 
     Character by character over code points, no Unicode normalization and no
-    whitespace changes, so the app can reproduce it byte for byte.
+    whitespace changes, so the app can reproduce it byte for byte. Kept as is:
+    newline, tab, printable ASCII and the allow-list; other control characters
+    (NUL, CR, DEL, ...) are dropped, as in the app's sanitizeForG2.
     """
     out: list[str] = []
     for ch in text:
-        if ch < "\x80" or ch in G2_ALLOWED_NON_ASCII:
+        if " " <= ch <= "~" or ch in "\n\t" or ch in G2_ALLOWED_NON_ASCII:
             out.append(ch)
         else:
             out.append(REPLACEMENTS.get(ch, ""))
