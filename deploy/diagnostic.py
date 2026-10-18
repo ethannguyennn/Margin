@@ -97,6 +97,7 @@ def run_loop(relay: str, seconds: float) -> None:
     if target.exists():
         raise RuntimeError("app/tests/zz-diagnostic-loop.test.ts already exists; preserve it before running diag-loop")
     env = {**os.environ, "SPECS_DIAG_RELAY": relay, "SPECS_DIAG_PACE_MS": str(round(seconds * 1000)),
+           "SPECS_DIAG_V3": "1",
            "SPECS_DIAG_TIMEOUT_MS": "50000", "SPECS_DIAG_WAV": (DIAG / "wav").as_uri() + "/"}
     try:
         shutil.copyfile(DIAG / "loop.test.ts", target)

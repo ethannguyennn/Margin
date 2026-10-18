@@ -178,6 +178,7 @@ def test_loop_diagnostic_cleans_copy_after_failure(diagnostic_tool, tmp_path, mo
     def fail(command, **kwargs):
         assert kwargs["env"]["SPECS_DIAG_RELAY"] == "https://relay.example"
         assert kwargs["env"]["SPECS_DIAG_PACE_MS"] == "10000"
+        assert kwargs["env"]["SPECS_DIAG_V3"] == "1"
         assert (tmp_path / "app/tests/zz-diagnostic-loop.test.ts").is_file()
         raise subprocess.CalledProcessError(1, command)
 
