@@ -1,83 +1,100 @@
 # Margin TODO
 
-Updated 2026-10-17 for v2 (BUILD-PLAN-V2), after Part 3's v2 relay landed on
-`part-3-relay-platform` and a trial merge of Parts 1, 4 and 5 on top of it.
+Updated 2026-10-17 after **all five v2 parts were merged into `main`** (order 1, 3, 2, 4, 5, on
+top of the phone-UI merge from PR #3) and the cross-part follow-ups were closed.
 Windows: `make` = `mingw32-make`.
 
-**Where we are:** Part 3's v2 relay implements every BUILD-PLAN-V2 §5 route on mocks and
-on the real Part 4/5 modules. Trial merge of `part-1-lens-hands-free-ui`,
-`part-4-conversion-diagrams`, `part-5-portal-data` onto it: **no conflicts; relay 650 passed,
-app 418 passed, portal 8 passed; `test-ios` fails** (see §2). A real conversion ran end to end
-on live Gemini through the v2 job (SOP-153: 4 steps, all verified, published, delivered as a
-walkthrough). Nothing v2 is deployed yet; nothing has run on glasses.
+**Where we are:** `main` holds v2 end to end on mocks.
+
+- **Tests:** `make test` is green: relay 652 passed (11 opt-in live/PG skipped, 0 xfail), app
+  546 passed + typecheck + build, portal 8 passed + build.
+- **Simulator, mock app:** Part 1's v2 smoke runs on Part 2's real mocks (M1, M2, returnTo,
+  native exit, cold start; 25 screen assertions).
+- **Simulator, live app vs. Part 3's v2 relay (`MOCK_MODE=1`):** pairing → supervisor claim →
+  assignment → TASK_READY → STEP → progress on the board → relay diagram DGM-0001 rendered in
+  both tiles.
+- **Client v2 e2e:** 12/12 against that relay.
+- **Live Postgres tests:** 3/3 on a local PG17 + TimescaleDB + pgvector.
+- **Not done yet:** nothing v2 is deployed (the live relay is the v1 build) and **nothing has
+  run on glasses.**
 
 ---
 
-## 1. Part 3 open (mine)
+## 1. Deploy (Part 3)
 
-- [ ] **Deploy v2 to the VM** (`make deploy`): relay + Caddy image with the portal at
-      `/portal/`. Add `PORTAL_TOKEN` (and `GEMINI_MODEL_CONVERT`) to the VM's `.env` first
-      ([[deploy/README]]). The live relay today is the v1 build on `45-32-88-132.sslip.io`
-- [ ] **Domain switch:** `MARGIN_DOMAIN=getyourassto.work, 45-32-88-132.sslip.io` on the VM so
-      Caddy gets a certificate for the root domain (DNS is already correct: A -> 45.32.88.132);
-      ~5 s Caddy restart. Then give Part 1 `https://getyourassto.work` for `app.json`
+- [ ] **Deploy v2 to the VM** (`make deploy`): relay + Caddy with the portal at `/portal/`. Add
+      `PORTAL_TOKEN` and `GEMINI_MODEL_CONVERT` to the VM's `.env` first ([[deploy/README]]).
+      Today both `https://45-32-88-132.sslip.io` and `https://getyourassto.work` serve the
+      **v1** build (`/v1/devices/pair` and `/portal/` are 404)
+- [ ] **Domain switch:** the root domain already answers over TLS. After the v2 deploy, build the
+      app with `VITE_RELAY_ORIGIN=https://getyourassto.work`. `app.json` already whitelists both
+      origins - Parts 1 + 3
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`
 - [ ] **Device CORS origin:** read the `CORS rejected origin` WARN line when the glasses first call
       the relay; add that exact origin to `ALLOWED_ORIGINS`
 - [ ] **`make latency`** on real traffic; report `intent='command'` rows separately (target:
       command = STT + < 50 ms, answer p50 <= 3 s)
-- [ ] **Merge into main** in plan order (1, 3, 2, 4, 5). `main` already has the phone UI merged
-      into `app/` (PR #3) while the v2 branches predate it: expect `app/` conflicts (Parts 1/2)
-      and drop `test-ios` from the Makefile once `ios/` is gone on main
+- [ ] **Live database:** apply migrations on Tiger (`python db/seed.py --migrate-only`), then the
+      opt-in live tests (`MARGIN_TEST_V2_DATABASE=1`, `DATABASE_URL`) - Part 5
 
-## 2. Requests to other parts (found while integrating)
+## 2. Open requests between parts
 
-- [ ] **`test-ios` / phone UI:** `Pills.tsx` has exhaustive `Record<Outcome, ...>` maps without the
-      new `command` outcome, so the companion stops typechecking on contract v2. On this base it
-      is `ios/src/components/Pills.tsx` (companion owner; Part 5's README: keep `test-ios` green);
-      on main the same file is `app/src/phone/components/Pills.tsx` (Parts 1/2)
-- [ ] **Part 5 - assignment delivery can lose a task:** `next_assignment` marks the row delivered
-      before the lens has received it. If that response is lost (Wi-Fi drop), the task is never
-      re-sent. Suggest: keep returning a delivered assignment until its first progress event (or
-      a `delivered_at` older than ~30 s with no progress counts as undelivered)
-- [ ] **Part 5 - events.assignment_id:** the plan records `context.assignment_id` on the events row.
-      `/v1/ask` already passes `assignment_id=` to `write_event` when the writer accepts it; add
-      the column + parameter and it flows with no Part 3 change
-- [ ] **Part 5 / Part 1 - port clash:** the portal dev server (5176) and Part 1's v2 lens dev
-      server (5176) use the same port
-- [ ] **Part 4 - `test_ask_trust` xfail:** per BUILD-PLAN-V2 §3, "say that again" *outside a task* is
-      v1 `repeat` (the relay returns `intent: repeat`); inside a task (`context.step_id`) it is
-      `command: repeat`. Replace the strict-xfail `("say that again", "command")` with those two cases
-- [ ] **Part 4 - model + quota:** `gemini-3.8-flash` hit the free-tier daily cap (429) during
-      integration; a paid key is needed before the M3 demo. On `gemini-3.5-flash-lite` SOP-153
-      converted with every value kept but **no schematic** for the star-pattern step
-- [ ] **Part 1:** `U+2126` ohm sign -> `" ohm"` in `glyphs.ts` (Part 4's request)
-- [ ] **Part 2:** client v2 against the mock relay: `POST /v1/devices/pair`, poll `/me` until
-      claimed, `Bearer <device_token>` on every lens route, 401 -> re-pair, `204` = no task,
-      `POST /v1/progress` batches up to 500 (the relay splits them for Part 5's 100 cap)
+- [ ] **Parts 3 + 5 - walkthrough citations:** `ask.py` builds walkthrough citations with
+      `quote=step.body`. For authored v2 steps the body may paraphrase; the verbatim support is the
+      published chunk's `text` (the joined source quotes). Cite that instead (needs `steps_for` /
+      `build_walkthrough` to expose it, since `Step` has no quote field)
+- [ ] **Part 4 - model + quota:** `gemini-3.8-flash` hit the free-tier daily cap (429); a paid key is
+      needed before the M3 demo. On `gemini-3.5-flash-lite` SOP-153 converted with every value
+      kept but **no schematic** for the star-pattern step
+- [ ] **Phone screen in mock mode:** with `VITE_MOCK=1` the lens uses Part 2's mocks, but the phone
+      screen's procedures/steps/deviation calls still go to the relay. Run a `MOCK_MODE=1` relay
+      alongside - Parts 2 + 3
+- [ ] **Base44:** `ios/` came from a Base44 project (`ios-base-44`). If Base44 still syncs to that
+      folder, point it at `app/` or stop syncing, or it may recreate `ios/` - owner of PR #1
 
-## 3. v1 bring-up still open
+## 3. Hardware (glasses + phone) - Parts 1 + 2
+
+Protocols and the recorder are in `docs/handoffs/PART-2.md`. Open the dev server with `?dev=1`
+for the IMU recorder.
+
+- [ ] **IMU characterisation:** x/y/z meaning, units, axes, Hz per pace code. Record still, double
+      nods, shakes, bench work, walking and talking at P100/P500/P1000; set `DEFAULT_PARAMS` in
+      `motion/gestures.ts`; commit the fixtures
+- [ ] **PNG tiles on the real lens** + BLE time per tile (Part 4's four real tiles too)
+- [ ] **M4, two wearers:** 20 double nods each (>= 95 %), 30 min bench work each (<= 1 false
+      trigger), nod -> LISTENING < 300 ms; a false trigger with nobody speaking sends nothing
+- [ ] "next" p50 < 1.2 s end of speech -> new step; progress survives 2 min airplane mode
+- [ ] v1 checks: transcript within ~2 s, mic closed outside LISTENING, 8 s cap, relaunch after lock,
+      permission denied, glasses vs phone mic A/B, `speakerRole` reliability
+- [ ] Font coverage, brightness, 14 px diagram labels, scan inversion, double-press root exit
+- [ ] **Phone screen** in the Even app's WebView: height, scrolling, safe areas, dark theme, on iOS
+      and Android
+
+## 4. v1 bring-up still open
 
 - [ ] **Gate thresholds:** `NOT_FOUND_MIN_SIM` / `NOT_FOUND_MIN_RRF` (Part 4's live v1 eval ran with
       them unset: 0 unverified, 93.8 % answered-correct, not_found P/R 95/95 %) - Parts 4 + 5
 - [ ] **`db.latency_summary()` 0 ms rows** for stages that did not run - Part 5
-- [ ] **Hardware:** transcript on the lens within ~2 s, mic closed outside LISTENING, 8 s cap,
-      relaunch after lock, permission denied, glasses vs phone mic, font + brightness, root exit,
-      double-nod detection, diagram legibility, BLE tile timing - Parts 1 + 2
 
-## 4. Done
+## 5. Done
 
-- [x] **v2 relay (Part 3):** contract v2 in `schemas.py`; v2 pipeline Protocols; `/v1/ask` command
-      fast path; device + portal auth; conversion job; devices / assignments / progress /
-      diagrams / materials / drafts routes; mock relay for every route (M2 demo diagram on
-      SOP-114 4.2); real-mode factory for Part 4/5 v2 modules; Caddy serves the portal; Makefile
-      `dev-portal`, `test-portal`, `eval-conversion`
-- [x] **v1 sanitizer mismatch** fixed (Part 4: 8/8 app fixtures agree)
-- [x] **Lexical leg** OR'ed query adopted in `db.py` (Part 5)
-- [x] **Live v1 eval:** 0 unverified answers (Part 4, on the seeded shared database)
-- [x] **VM + DNS:** `45.32.88.132`, real mode (Gemini + Tiger) live on the sslip host; the root
-      domain's A record points at the VM
-- [x] **Diagram byte format:** 8-bit grey PNG at lens levels, proven by Part 2; Part 4 renders it
+- [x] **v2 merged into `main`:** Parts 1-5 on top of the phone-UI merge. Conflicts resolved:
+      - `state.ts`/`main.ts`: Part 1's v2, with main's typed-ask/lensLink seam replayed on top
+      - `Pills.tsx`: gained the `command` outcome
+      - Makefile: portal/conversion targets plus `pack` and the app build; `test-ios` dropped
+- [x] **Part 1's temporary v2 stubs retired:** the app runs only on Part 2's modules and mocks
+      (dev utterance box, `?scenario=m1`, simulated calibration without an IMU)
+- [x] **Client v2 vs Part 3's v2 relay:** pair, claim, 204, assignment, PNG diagram + cache,
+      progress de-dup on the board, command fast path, 401 drops the token (12/12 e2e)
+- [x] **Lost assignment re-sent** (no progress after 30 s, within the lens's 12 h TTL);
+      `events.assignment_id` recorded; both verified on a live PG17 + TimescaleDB + pgvector
+- [x] **"say that again"** = v1 `repeat` outside a task, `command: repeat` inside (xfail removed)
+- [x] **Glyphs:** ohm sign U+2126 -> " ohm"; the app runs the relay's 32 glyph cases in place
+- [x] **Port clash:** portal dev server moved to 5178 (lens v2 dev server keeps 5176)
+- [x] **v2 relay (Part 3):** contract v2, auth, conversion job, every v2 route, mocks, Caddy portal
+- [x] **Diagram byte format:** 8-bit grey PNG at lens levels, proven by Part 2 in the simulator;
+      Part 4 renders it; it shows on the lens in the simulator from the relay
+- [x] v1 sanitizer mismatch fixed; lexical OR'ed query; live v1 eval 0 unverified; VM + DNS live
 
 ## Backburner
 
