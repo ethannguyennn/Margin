@@ -22,18 +22,23 @@ Windows: `make` = `mingw32-make`.
 
 ## 1. Deploy (Part 3)
 
-- [ ] **Deploy v2 to the VM** (`make deploy`): relay + Caddy with the portal at `/portal/`. Add
-      `PORTAL_TOKEN` and `GEMINI_MODEL_CONVERT` to the VM's `.env` first ([[deploy/README]]).
-      Today both `https://45-32-88-132.sslip.io` and `https://getyourassto.work` serve the
-      **v1** build (`/v1/devices/pair` and `/portal/` are 404)
+- [x] **Deploy v2 to the VM** (checked 2026-10-18): `/root/specs` on the VM runs `54f6f0a`
+      (Build 0.3.0) on both domains; `/portal/` is 200, `/v1/devices/me` is 401 (v2 auth).
+      `PORTAL_TOKEN` and `GEMINI_MODEL_CONVERT=gemini-3.8-flash` are set in the VM's `.env`
+- [ ] **Redeploy `origin/main`** (2 commits ahead of the VM: `3b141a4` + its conflict fix `ff94e84`,
+      ask latency budget / Gemini 429 retry). No conflict markers left; relay 680 passed
+- [ ] **VM `.env`:** `PUBLIC_ORIGIN` is still `https://45-32-88-132.sslip.io`; `ALLOWED_ORIGINS` is only
+      `http://localhost:5174` (the relay logs `CORS rejected origin 'https://getyourassto.work'`).
+      Same-origin portal requests still work; add the root domain to silence it, then the lens origin
 - [ ] **Domain switch:** the root domain already answers over TLS. After the v2 deploy, build the
       app with `VITE_RELAY_ORIGIN=https://getyourassto.work`. `app.json` already whitelists both
       origins - Parts 1 + 3
 - [ ] **From a phone on cellular:** `https://getyourassto.work/v1/health` and `/portal/`
 - [ ] **Device CORS origin:** read the `CORS rejected origin` WARN line when the glasses first call
       the relay; add that exact origin to `ALLOWED_ORIGINS`
-- [ ] **`make latency`** on real traffic; report `intent='command'` rows separately (target:
-      command = STT + < 50 ms, answer p50 <= 3 s)
+- [ ] **`make latency`** on real traffic. Now runs on Windows and prints all events, answers and
+      `intent='command'` separately. Live DB 2026-10-18: relay p50 total 1208 ms, p95 2850 ms
+      (159 events); **0 command events yet** - needs real v2 lens traffic (target: STT + < 50 ms)
 - [x] **Live database (2026-10-17):** both migrations applied on Tiger; the demo bank (SOP-201..230 rev C,
       134 chunks) is seeded and the HX-2 rows removed (backup outside the repo:
       `db-backups/hx2-bank-2026-10-17.json`). The live v1 relay answers from it
@@ -76,7 +81,7 @@ for the IMU recorder.
 
 - [ ] **Gate thresholds:** `NOT_FOUND_MIN_SIM` / `NOT_FOUND_MIN_RRF` (Part 4's live v1 eval ran with
       them unset: 0 unverified, 93.8 % answered-correct, not_found P/R 95/95 %) - Parts 4 + 5
-- [ ] **`db.latency_summary()` 0 ms rows** for stages that did not run - Part 5
+- [x] **`db.latency_summary()` 0 ms rows:** already excluded (`value > 0`); the report header said otherwise
 
 ## 5. Done
 

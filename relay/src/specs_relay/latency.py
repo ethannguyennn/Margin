@@ -51,28 +51,47 @@ def verdict(rows: Iterable[Mapping[str, Any]]) -> str | None:
 
 
 async def fetch() -> list[dict]:
+    """All events, one summary (kept for callers that want a single table)."""
+    return (await fetch_report())["all"]
+
+
+async def fetch_report() -> dict[str, list[dict]]:
+    """Three summaries in one pool session: all events, answers (every intent but
+    ``command``) and voice commands (TODO section 1: report commands separately)."""
     try:
         from . import db
     except ImportError as exc:
         raise SystemExit(f"specs_relay.db is not available: {exc}") from exc
     await db.init_pool()
     try:
-        return [dict(r) for r in await db.latency_summary()]
+        return {
+            "all": [dict(r) for r in await db.latency_summary()],
+            "answers": [dict(r) for r in await db.latency_summary(exclude_intent="command")],
+            "commands": [dict(r) for r in await db.latency_summary(intent="command")],
+        }
     finally:
         await db.close_pool()
 
 
 def main() -> int:
+    # psycopg's async pool cannot run on Windows' default Proactor loop (same fix as db/seed.py).
+    win = {"loop_factory": asyncio.SelectorEventLoop} if sys.platform == "win32" else {}
     try:
-        rows = asyncio.run(fetch())
+        report = asyncio.run(fetch_report(), **win)
     except ValueError as exc:  # e.g. DATABASE_URL not set
         print(f"make latency: {exc}", file=sys.stderr)
         return 1
-    print("events (all requests; a stage that did not run records 0 ms)")
-    print(render(rows))
-    line = verdict(rows)
-    if line:
-        print(line)
+    titles = {
+        "all": "all events (stages that did not run are excluded, not counted as 0 ms)",
+        "answers": "answers and refusals (every intent except command)",
+        "commands": "voice commands (target: STT + < 50 ms relay work)",
+    }
+    for key, title in titles.items():
+        print(f"\n{title}")
+        print(render(report[key]))
+        line = verdict(report[key]) if key != "commands" else None
+        if line:
+            print(line)
     return 0
 
 

@@ -9,6 +9,7 @@ import pytest
 from pydantic import ValidationError
 
 from _relay_helpers import ask, make_client, sid
+from specs_relay import __version__
 from specs_relay.pipeline import DbDown, SttFailed
 from specs_relay.pipeline.mock import MockGenerator
 from specs_relay.schemas import (
@@ -50,7 +51,7 @@ def audio_req(seconds: float) -> dict:
 def test_health_mock(client):
     r = client.get("/v1/health")
     assert r.status_code == 200
-    assert r.json() == {"ok": True, "mock": True, "db": "mock", "version": "0.1.0"}
+    assert r.json() == {"ok": True, "mock": True, "db": "mock", "version": __version__}
     assert r.headers["x-trace-id"]
 
 
