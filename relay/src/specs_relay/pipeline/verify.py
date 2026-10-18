@@ -164,8 +164,11 @@ def check_draft(draft: Any, chunks: list[Any]) -> tuple[str | None, list[dict]]:
         chunk = by_id.get(cid)
         if chunk is None:
             return f"chunk_not_retrieved: {cid} is not one of the provided chunks", []
-        if not quote_in_text(quote, _get(chunk, "text") or ""):
+        source_text = _get(chunk, "text") or ""
+        if not quote_in_text(quote, source_text):
             return f"quote_not_found: the quote cited for {cid} is not verbatim in that chunk", []
+        if quote not in source_text:
+            quote = source_text  # cite stored text when normalization accepted a formatting variant
         out.append({
             "chunk_id": cid,
             "doc_id": _get(chunk, "doc_id"),
