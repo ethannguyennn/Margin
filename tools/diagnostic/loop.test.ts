@@ -87,6 +87,7 @@ test('worker loop: voice-open SOP, step through, clarify, images, IMU nods', { t
   // 1. Open a procedure by voice, not by its name.
   await speak(SAY.open, ['STEP']);
   const w = c.state.walkthrough!;
+  const end = w.scope?.end ?? w.total;
   console.info(`[diag] opened ${w.doc_id} "${w.title}" ${w.total} steps; first: ${w.steps[0].label} ${w.steps[0].glance}`);
   assert.equal(w.doc_id, 'SOP-210');
   const start = step();
@@ -117,7 +118,7 @@ test('worker loop: voice-open SOP, step through, clarify, images, IMU nods', { t
 
   // 4. Images: every illustrated step renders its graphic on STEP or STEP_DETAILS, with lens + phone assets.
   const shown: string[] = [];
-  for (let i = step(); i < w.total; i++) {
+  for (let i = step(); i < end; i++) {
     const s = w.steps[i];
     if (s.graphic_id) {
       c.dispatch({ type: 'PRESS' }); // details
@@ -129,7 +130,7 @@ test('worker loop: voice-open SOP, step through, clarify, images, IMU nods', { t
       shown.push(`${s.label}:${id}`);
       c.dispatch({ type: 'DOUBLE_PRESS' }); // back to step
     }
-    if (i < w.total - 1) c.dispatch({ type: 'DOWN' });
+    if (i < end - 1) c.dispatch({ type: 'DOWN' });
   }
   console.info(`[diag] step images shown: ${shown.join(', ')}`);
   assert.ok(shown.length > 0);
