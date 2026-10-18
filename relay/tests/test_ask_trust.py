@@ -188,3 +188,11 @@ def test_walkthrough_starts_at_the_first_step_of_the_asked_section():
     w = out["walkthrough"]
     assert out["intent"] == "walkthrough" and (w["total"], w["index"]) == (5, 2), out
     assert w["steps"][w["index"]]["label"] == "7.1" and out["source"] == "SOP-202 Sec 7.1 rev C"
+
+
+def test_uncited_graphic_is_dropped_not_the_answer():
+    gen = ScriptedGenerator({**GOOD, "graphic_id": "allergen-binder"})
+    with client_for(gen) as c:
+        out = ask(c, M5)
+    assert out["outcome"] == "answered" and out["verified"] is True, out
+    assert out["graphic_id"] is None and gen.calls == 1

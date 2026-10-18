@@ -230,6 +230,10 @@ async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult,
             return None  # the model refusing is a success state, not something to retry
         with obs.stage("verify"):
             result = p.verify(draft, r.chunks)
+            if not result.ok and (result.reason or "").startswith("unsupported_graphic"):
+                # A wrong picture never sinks a verified answer: drop it, check the text alone.
+                draft = draft.model_copy(update={"graphic_id": None})
+                result = p.verify(draft, r.chunks)
         if result.ok and result.citations:
             glance = p.sanitize(draft.glance).strip()
             body = p.sanitize(draft.body).strip()
