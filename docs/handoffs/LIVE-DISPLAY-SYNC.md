@@ -39,7 +39,7 @@ grey tiles. Viewer polling is one request chain in flight, once per second.
 
 ## Validation
 
-`mingw32-make test`: 899 relay passed / 13 skipped; 632 app passed / 12 skipped;
+`mingw32-make test`: 899 relay passed / 13 skipped; 634 app passed / 12 skipped;
 10 portal passed. Both production builds pass. Targeted feed/display tests pass
 after the final adjustments. Existing dynamic/static client import warning remains.
 Evidence: `app/tests/evidence/display-sync/`. Cross-browser tests used a labeled
