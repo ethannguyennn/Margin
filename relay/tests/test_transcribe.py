@@ -10,7 +10,9 @@ from pathlib import Path
 from types import SimpleNamespace as NS
 
 import pytest
+from google.genai.errors import APIError
 
+from specs_relay.pipeline.generate import TRANSIENT_CODES
 from specs_relay.pipeline.transcribe import (
     GeminiTranscriber,
     MockTranscriber,
@@ -49,8 +51,9 @@ class FakeModels:
     async def generate_content(self, *, model, contents, config):
         self.requests.append(NS(model=model, contents=contents, config=config))
         await asyncio.sleep(self.delay)
-        if self.exc:
-            raise self.exc
+        exc = self.exc.pop(0) if isinstance(self.exc, list) else self.exc
+        if exc:
+            raise exc
         return NS(text=self.text)
 
 
@@ -76,10 +79,61 @@ def test_sends_inline_wav_and_never_touches_disk(monkeypatch):
 
 
 def test_timeout_raises_stt_failed():
-    t = GeminiTranscriber(client(delay=0.5), "m", timeout=0.01)
+    cl = client(delay=0.5)
+    t = GeminiTranscriber(cl, "m", timeout=0.01)
     with pytest.raises(TranscriptionError) as e:
         asyncio.run(t.transcribe(PCM, 16000))
     assert e.value.code == "stt_failed"
+    assert len(cl.aio.models.requests) <= 1
+
+
+def api_error(code):
+    return APIError(code, {"error": {"message": "api"}})
+
+
+@pytest.mark.parametrize("code", sorted(TRANSIENT_CODES))
+def test_transient_error_then_success_returns_text(code):
+    cl = client(text="  cleaning procedure  ", exc=[api_error(code), None])
+    assert asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000)) == "cleaning procedure"
+    assert len(cl.aio.models.requests) == 2
+
+
+def test_transient_error_twice_raises_stt_failed():
+    cl = client(exc=[api_error(429), api_error(429)])
+    with pytest.raises(TranscriptionError) as e:
+        asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000))
+    assert e.value.code == "stt_failed"
+    assert len(cl.aio.models.requests) == 2
+
+
+def test_bad_request_does_not_retry():
+    cl = client(exc=[api_error(400), None])
+    with pytest.raises(TranscriptionError):
+        asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000))
+    assert len(cl.aio.models.requests) == 1
+
+
+def test_transient_error_does_not_retry_without_time_for_backoff():
+    cl = client(delay=0.02, exc=[api_error(429), None])
+    with pytest.raises(TranscriptionError):
+        asyncio.run(GeminiTranscriber(cl, "m", timeout=0.41).transcribe(PCM, 16000))
+    assert len(cl.aio.models.requests) == 1
+
+
+def test_retry_uses_remaining_timeout(monkeypatch):
+    timeouts = []
+    wait_for = asyncio.wait_for
+
+    async def record_timeout(coro, *, timeout):
+        timeouts.append(timeout)
+        return await wait_for(coro, timeout=timeout)
+
+    monkeypatch.setattr(asyncio, "wait_for", record_timeout)
+    cl = client(delay=0.1, exc=[api_error(429), None])
+    with pytest.raises(TranscriptionError, match="transcription timed out"):
+        asyncio.run(GeminiTranscriber(cl, "m", timeout=0.55).transcribe(PCM, 16000))
+    assert len(cl.aio.models.requests) == 2
+    assert 0 < timeouts[1] < 0.1
 
 
 def test_api_error_raises_stt_failed():
