@@ -1,0 +1,327 @@
+{
+  "date": "2026-10-17",
+  "model": "gemini-3.8-flash",
+  "commit": "bc08066",
+  "source": "saved: C:/Users/matp2/AppData/Local/Temp/claude/c--Users-matp2-OneDrive-Documents-GitHub-Margin/874498ff-4360-4747-b4b2-67bfb2be9ab3/scratchpad/saved-real",
+  "forced_hallucination": false,
+  "results": [
+    {
+      "doc_id": "SOP-150",
+      "material": "corpus/materials/SOP-150-pump-seal-swap.pdf",
+      "seconds": null,
+      "gemini_calls": null,
+      "pages": 2,
+      "failed_pages": 0,
+      "figures": 1,
+      "steps_expected": 6,
+      "steps_found": 6,
+      "labels": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5",
+        "3.6"
+      ],
+      "values_total": 9,
+      "values_preserved": 9,
+      "values_missing": [],
+      "failing_steps": [],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 1,
+      "diagrams_detail": [
+        {
+          "step": 4,
+          "kind": "crop",
+          "label": "3.4",
+          "ok": true
+        }
+      ],
+      "diagrams_rendered": {
+        "3.1": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2244,
+            1005
+          ]
+        },
+        "3.2": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2244,
+            1005
+          ]
+        },
+        "3.3": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2244,
+            1005
+          ]
+        },
+        "3.4": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            1298,
+            1306
+          ]
+        }
+      },
+      "doc_warnings": [
+        "Isolate power and drain the pump before opening the seal housing.",
+        "Do not reuse the old O-ring.",
+        "Do not lubricate the new O-ring."
+      ],
+      "fabricated": [],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    },
+    {
+      "doc_id": "SOP-151",
+      "material": "corpus/materials/SOP-151-filter-change.docx",
+      "seconds": null,
+      "gemini_calls": null,
+      "pages": 1,
+      "failed_pages": 0,
+      "figures": 1,
+      "steps_expected": 7,
+      "steps_found": 7,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "values_total": 9,
+      "values_preserved": 9,
+      "values_missing": [],
+      "failing_steps": [],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 1,
+      "diagrams_detail": [
+        {
+          "step": 4,
+          "kind": "crop",
+          "label": "4",
+          "ok": true
+        }
+      ],
+      "diagrams_rendered": {
+        "2": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2187,
+            2328
+          ]
+        },
+        "3": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            3334,
+            1176
+          ]
+        },
+        "4": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            1281,
+            702
+          ]
+        },
+        "5": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            3334,
+            1176
+          ]
+        },
+        "6": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2187,
+            2328
+          ]
+        }
+      },
+      "doc_warnings": [
+        "WARNING: Relieve line pressure before opening the filter bowl. Never open the bowl while the pump runs."
+      ],
+      "fabricated": [],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    },
+    {
+      "doc_id": "SOP-152",
+      "material": "corpus/materials/SOP-152-valve-lineup-photo.jpg",
+      "seconds": null,
+      "gemini_calls": null,
+      "pages": 1,
+      "failed_pages": 0,
+      "figures": 1,
+      "steps_expected": 5,
+      "steps_found": 5,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ],
+      "values_total": 7,
+      "values_preserved": 7,
+      "values_missing": [],
+      "failing_steps": [],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 1,
+      "diagrams_detail": [
+        {
+          "step": 1,
+          "kind": "crop",
+          "label": "1",
+          "ok": true
+        }
+      ],
+      "diagrams_rendered": {
+        "1": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2366,
+            2834
+          ]
+        },
+        "2": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2385,
+            2366
+          ]
+        },
+        "3": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2528,
+            2415
+          ]
+        },
+        "5": {
+          "kind": "crop",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            2312,
+            2333
+          ]
+        }
+      },
+      "doc_warnings": [
+        "WARNING: Wear splash goggles. Never open V2 before V4 is set."
+      ],
+      "fabricated": [],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    },
+    {
+      "doc_id": "SOP-153",
+      "material": "corpus/materials/SOP-153-quick-start.md",
+      "seconds": null,
+      "gemini_calls": null,
+      "pages": 1,
+      "failed_pages": 0,
+      "figures": 0,
+      "steps_expected": 4,
+      "steps_found": 4,
+      "labels": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "values_total": 5,
+      "values_preserved": 5,
+      "values_missing": [],
+      "failing_steps": [],
+      "diagrams_expected": 1,
+      "diagrams_expected_ok": 1,
+      "diagrams_detail": [
+        {
+          "step": 3,
+          "kind": "schematic",
+          "label": "3",
+          "ok": true
+        }
+      ],
+      "diagrams_rendered": {
+        "3": {
+          "kind": "schematic",
+          "tile_bytes": [
+            41472,
+            41472
+          ],
+          "deflated": [
+            1099,
+            1129
+          ]
+        }
+      },
+      "doc_warnings": [
+        "Do not overtighten the cover screws; the plastic cover cracks."
+      ],
+      "fabricated": [],
+      "fabricated_in_passing_steps": 0,
+      "converted_units": []
+    }
+  ]
+}

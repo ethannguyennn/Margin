@@ -1,0 +1,196 @@
+{
+  "doc_id": "SOP-151",
+  "revision": "B",
+  "title": "Filter Element Change",
+  "material_id": "SOP-151",
+  "status": "ready",
+  "steps": [
+    {
+      "label": "1",
+      "glance": "Stop pump and close valves V1 and V2",
+      "body": "Stop the pump and close inlet valve V1 and outlet valve V2.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Stop the pump and close inlet valve V1 and outlet valve V2."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "2",
+      "glance": "Remove drain plug and drain 0.5 L",
+      "body": "Place a drip tray under the bowl and remove the drain plug to drain about 0.5 L of fluid.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "2. Place a drip tray under the bowl and remove the drain plug to drain about 0.5 L of fluid.",
+        "| Drain plug | M10 | 8 N-m |"
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.38,
+          0.81,
+          0.62,
+          0.98
+        ],
+        "elements": [],
+        "alt": "Drain plug M10 at bottom of filter bowl"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3",
+      "glance": "Loosen two M5 clamp screws and remove bowl",
+      "body": "Loosen the two M5 bowl clamp screws and remove the filter bowl.",
+      "warning": "Relieve line pressure before opening the filter bowl.",
+      "checkpoint": null,
+      "quotes": [
+        "Loosen the two M5 bowl clamp screws and remove the filter bowl.",
+        "Relieve line pressure before opening the filter bowl."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.195,
+          0.05,
+          0.715,
+          0.23
+        ],
+        "elements": [],
+        "alt": "Clamp screw M5 locations on the filter bowl assembly."
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "4",
+      "glance": "Replace element with element HX2-420",
+      "body": "Replace the filter element with a new element HX2-420 (25 um rating).",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Replace the filter element with a new element HX2-420 (25 µm rating)."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.43,
+          0.265,
+          0.86,
+          0.76
+        ],
+        "elements": [],
+        "alt": "Element HX2-420 installed inside the filter bowl."
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "5",
+      "glance": "Torque two M5 bowl clamp screws to 3 N-m",
+      "body": "Refit the bowl and torque the two M5 bowl clamp screws to 3 N-m (Table 1).",
+      "warning": null,
+      "checkpoint": "Torque the two M5 bowl clamp screws to 3 N-m",
+      "quotes": [
+        "Refit the bowl and torque the two M5 bowl clamp screws to 3 N-m (Table 1)."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.195,
+          0.05,
+          0.715,
+          0.23
+        ],
+        "elements": [],
+        "alt": "Clamp screw M5 locations for torquing."
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "6",
+      "glance": "Refit drain plug and torque to 8 N-m",
+      "body": "Refit the drain plug and torque it to 8 N-m.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "6. Refit the drain plug and torque it to 8 N-m (Table 1).",
+        "| Drain plug | M10 | 8 N-m |"
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.38,
+          0.81,
+          0.62,
+          0.98
+        ],
+        "elements": [],
+        "alt": "Drain plug M10 at bottom of filter bowl"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "7",
+      "glance": "Open V1, then V2, and watch seam for 60 s",
+      "body": "Open V1, then V2, and watch the bowl seam for leaks for 60 s.",
+      "warning": null,
+      "checkpoint": "Watch the bowl seam for leaks for 60 s",
+      "quotes": [
+        "Open V1, then V2, and watch the bowl seam for leaks for 60 s."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    }
+  ],
+  "warnings": [
+    "WARNING: Relieve line pressure before opening the filter bowl. Never open the bowl while the pump runs."
+  ]
+}

@@ -1,10 +1,11 @@
 """Live Gemini checks. Skipped unless Part 3's config provides GEMINI_API_KEY
 and the three model IDs; keys are read only through that config.
 
-Run: pytest relay/tests/test_live_gemini.py -v
+Run: MARGIN_LIVE_GEMINI=1 pytest relay/tests/test_live_gemini.py -v
 """
 
 import asyncio
+import os
 from pathlib import Path
 
 import pytest
@@ -24,7 +25,11 @@ def _settings():
 S = _settings()
 _key = getattr(S, "gemini_api_key", None)
 _key = _key.get_secret_value() if hasattr(_key, "get_secret_value") else _key
-pytestmark = pytest.mark.skipif(not _key, reason="GEMINI_API_KEY not configured")
+# Opt-in: a key in .env must not make `make test` spend quota or flake on 429s
+# (the free tier allows 15 requests/min and 20/day on some models).
+pytestmark = [pytest.mark.skipif(os.environ.get("MARGIN_LIVE_GEMINI") != "1",
+                                 reason="live Gemini tests are opt-in: MARGIN_LIVE_GEMINI=1"),
+              pytest.mark.skipif(not _key, reason="GEMINI_API_KEY not configured")]
 
 
 def test_live_transcribe_fixture():

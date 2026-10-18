@@ -29,7 +29,7 @@ from typing import Any
 
 log = logging.getLogger("margin.convert")
 
-EXTRACT_TIMEOUT_S = 60.0
+EXTRACT_TIMEOUT_S = 90.0  # gemini-3.7-flash took > 60 s on a figure page; conversion is a background job
 RENDER_DPI = 150
 MIME_PDF = "application/pdf"
 MIME_DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

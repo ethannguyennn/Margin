@@ -318,14 +318,21 @@ class GeminiConverter:
         model = getattr(settings, "gemini_model_convert", "")
         return cls(client or gemini_client(settings.gemini_api_key), model)
 
-    async def extract(self, data: bytes, mime: str, material_id: str):
-        from ..schemas import MaterialText
+    async def extract_dict(self, data: bytes, mime: str, material_id: str) -> dict:
         from .extract import extract_dict
 
         self._sources[material_id] = (data, mime)
         while len(self._sources) > self._keep:
             self._sources.pop(next(iter(self._sources)))
-        return MaterialText.model_validate(await extract_dict(data, mime, material_id, self.reader))
+        return await extract_dict(data, mime, material_id, self.reader)
+
+    async def convert_dict(self, text: Any, doc_id: str, revision: str, title: str) -> dict:
+        return await convert_dict(text, doc_id, revision, title, self.structurer, self.figure_images(text))
+
+    async def extract(self, data: bytes, mime: str, material_id: str):
+        from ..schemas import MaterialText
+
+        return MaterialText.model_validate(await self.extract_dict(data, mime, material_id))
 
     def figure_images(self, text: Any) -> dict[str, bytes]:
         source = self._sources.get(_get(text, "material_id"))
@@ -346,5 +353,4 @@ class GeminiConverter:
     async def convert(self, text: Any, doc_id: str, revision: str, title: str):
         from ..schemas import ProcedureDraft
 
-        draft = await convert_dict(text, doc_id, revision, title, self.structurer, self.figure_images(text))
-        return ProcedureDraft.model_validate(draft)
+        return ProcedureDraft.model_validate(await self.convert_dict(text, doc_id, revision, title))
