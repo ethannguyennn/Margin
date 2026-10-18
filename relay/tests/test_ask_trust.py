@@ -128,7 +128,7 @@ RINSE = "Rinse the wetted path with purified water at 60°C for 5 min."
 class StepRetriever(FakeRetriever):
     async def steps_for(self, doc_id, revision):
         from specs_relay.schemas import Step
-        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE)] if doc_id == "SOP-120" else []
+        return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE, text=RINSE)] if doc_id == "SOP-120" else []
 
 
 class RecordingGenerator(ScriptedGenerator):
@@ -176,7 +176,7 @@ class TillRetriever:
 
     async def steps_for(self, doc_id, revision):
         from specs_relay.schemas import Step
-        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.")
+        return [Step(step_id=f"SOP-202:C:{s}", label=s, glance=f"Step {s}", body=f"Do {s}.", text=f"Do {s}.")
                 for s in ("2.3", "5.1", "7.1", "7.2", "7.3")]
 
 
@@ -196,3 +196,39 @@ def test_uncited_graphic_is_dropped_not_the_answer():
         out = ask(c, M5)
     assert out["outcome"] == "answered" and out["verified"] is True, out
     assert out["graphic_id"] is None and gen.calls == 1
+
+
+# --- v3 trust fix (4.7): walkthrough citations quote the stored source, never the body ---
+SOURCE = "Count the drawer twice. Record the total on form T-7."
+PARAPHRASE = "Count the money and write it down."
+
+
+class AuthoredRetriever(TillRetriever):
+    async def steps_for(self, doc_id, revision):
+        from specs_relay.schemas import Step
+        return [Step(step_id="SOP-202:C:7.1", label="7.1", glance="Count the drawer", body=PARAPHRASE,
+                     text=SOURCE),
+                Step(step_id="SOP-202:C:7.2", label="7.2", glance="Lock the till", body="Lock it.")]  # no source
+
+
+def test_a_paraphrased_body_never_appears_as_a_citation_quote():
+    c = client_for(ScriptedGenerator(GOOD))
+    c.app.state.pipeline.retriever = AuthoredRetriever()
+    with c:
+        out = ask(c, "take me through closing out the till")
+    quotes = [x["quote"] for x in out["citations"]]
+    assert out["verified"] is True and quotes == [SOURCE]   # 7.2 has no source text: not cited
+    assert PARAPHRASE not in quotes and "Lock it." not in quotes
+
+
+def test_step_context_without_source_text_is_not_used():
+    class NoText(StepRetriever):
+        async def steps_for(self, doc_id, revision):
+            from specs_relay.schemas import Step
+            return [Step(step_id="SOP-120:B:3.1", label="3.1", glance="Rinse", body=RINSE)]
+    gen = RecordingGenerator(FIVE_MIN)
+    c = client_for(gen)
+    c.app.state.pipeline.retriever = NoText()
+    with c:
+        out = ask(c, "how long do I do that for", context=HERE)
+    assert out["outcome"] == "not_found" and gen.calls == 0   # no paraphrase to quote from

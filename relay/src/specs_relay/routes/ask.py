@@ -161,11 +161,10 @@ async def _current_step(p: Pipeline, req: AskRequest) -> Chunk | None:
         log.info("step context unavailable: %s", type(exc).__name__)
         return None
     step = next((s for s in walk.steps if s.step_id == step_id), None) if walk else None
-    if step is None:
-        return None
+    if step is None or not step.text:
+        return None  # no verbatim source text: never let a follow-up quote the paraphrase
     return Chunk(chunk_id=step.step_id, doc_id=walk.doc_id, revision=walk.revision, section=step.label,
-                 heading=step.glance, is_step=True,
-                 text="\n".join(t for t in (step.body, step.warning, step.checkpoint) if t))
+                 heading=step.glance, is_step=True, text=step.text)
 
 
 def _group(label: str) -> str:
@@ -374,8 +373,14 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         # Re-validated (not model_copy), so the scope invariant is checked.
         walk = Walkthrough.model_validate({**walk.model_dump(), "index": _start_index(walk, retrieved.chunks),
                                            "scope": _scope(walk, retrieved.chunks)})
+        # v3 trust fix: cite each step's stored verbatim text, never its authored body (which
+        # may paraphrase). A step with no source text is not cited at all.
         citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
-                              section=s.label, quote=s.body) for s in walk.steps]
+                              section=s.label, quote=s.text) for s in walk.steps if s.text]
+        if not citations:
+            ctx.outcome = "not_found"
+            return _response(trace_id, ctx, timer)
+        cited = {c.chunk_id: c for c in citations}
         n = walk.total
         glance = f"{walk.title}, {n} steps"
         if len(glance) > GLANCE_MAX:
@@ -384,7 +389,8 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         ctx.doc_ids = [walk.doc_id]
         return _response(trace_id, ctx, timer, glance=glance,
                          body=f"{walk.title}, {n} steps. Swipe to advance."[:BODY_MAX],
-                         source=_source(citations[walk.index]), citations=citations, verified=True,
+                         source=_source(cited.get(walk.steps[walk.index].step_id, citations[0])),
+                         citations=citations, verified=True,
                          walkthrough=walk)
 
     # question

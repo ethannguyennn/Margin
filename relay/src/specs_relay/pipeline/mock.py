@@ -344,7 +344,7 @@ class MockRetriever:
                 glance=extra.get("glance") or _fit(f"{c.section} {c.heading or ''}".strip(), GLANCE_MAX),
                 body=extra.get("body") or _fit(c.text, BODY_MAX),
                 warning=extra.get("warning"), checkpoint=extra.get("checkpoint"),
-                diagram=extra.get("diagram")))
+                diagram=extra.get("diagram"), text=c.text))
         return out
 
 

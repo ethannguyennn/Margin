@@ -162,6 +162,7 @@ def step_from_row(row: Any) -> dict:
         "glance": glance,
         "body": _fit_sentences(text, BODY_MAX),
         "graphic_id": graphic_for_chunk({"chunk_id": _get(row, "chunk_id"), "text": _get(row, "text") or ""}),
+        "text": _get(row, "text") or None,  # verbatim, for citations (v3)
     }
 
 

@@ -31,7 +31,8 @@ def step_from_chunk(chunk: dict):
     extras = {k: chunk[k] for k in ("warning", "checkpoint", "diagram") if chunk.get(k) is not None}
     from .illustrations import graphic_for_chunk
     extras["graphic_id"] = graphic_for_chunk(chunk)
-    return Step(step_id=chunk["chunk_id"], label=chunk["section"], glance=glance, body=body, **extras)
+    return Step(step_id=chunk["chunk_id"], label=chunk["section"], glance=glance, body=body,
+                text=chunk["text"], **extras)
 
 
 def verify_for_publication(step, material):

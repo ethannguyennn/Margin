@@ -129,6 +129,10 @@ class Step(_Model):
     checkpoint: CheckpointText | None = None  # v2, e.g. "0.20 mm gauge must not enter"
     diagram: Diagram | None = None  # v2, only approved diagrams are ever sent
     graphic_id: str | None = None  # revision-pinned synthetic reference
+    # v3: the step's stored chunk text, verbatim (for published drafts: the joined source
+    # quotes). Walkthrough citations and step context quote this, never the authored
+    # body, which may paraphrase. The lens ignores it.
+    text: str | None = None
 
 
 class Scope(_Model):
