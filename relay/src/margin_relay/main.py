@@ -48,6 +48,7 @@ class Pipeline:
     notifier: Any
     db: Any
     real_db: bool
+    walkthrough: Any = None  # Part 5's walkthrough module in real mode (walkthroughs, deviations)
     mocked: list[str] = field(default_factory=list)  # components running on mocks
     min_sim: float = float("-inf")  # gate thresholds; -inf disables the gate
     min_rrf: float = float("-inf")
@@ -94,27 +95,11 @@ def _adapt_intent(classify: Callable[[str], Any],
     return run
 
 
-class _PoolStore:
-    """Part 4's retrieval Store over Part 5's pool, resolved per call because the pool
-    only opens in the lifespan (after the factory ran). Falls back to Part 5's own
-    vector_top/fts_top/steps_for when the db module exposes no pool."""
-
-    def __init__(self, retrieve_mod: ModuleType, db: Any) -> None:
-        self._retrieve, self._db = retrieve_mod, db
-
-    def _store(self) -> Any:
-        pool = getattr(self._db, "get_pool", None) or getattr(self._db, "pool", None)
-        pool = pool() if callable(pool) else pool  # Part 5's db.pool is a function
-        return self._retrieve.PgStore(pool) if pool is not None else self._db
-
-    async def vector_top(self, q_embedding: list[float], k: int, revision: str | None) -> list[Any]:
-        return await self._store().vector_top(q_embedding, k, revision)
-
-    async def fts_top(self, query: str, k: int, revision: str | None) -> list[Any]:
-        return await self._store().fts_top(query, k, revision)
-
-    async def steps_for(self, doc_id: str, revision: str | None) -> list[Any]:
-        return await self._store().steps_for(doc_id, revision)
+def _retrieval_store(db_mod: ModuleType) -> Any:
+    """Part 4's raw-row Store. Part 5's db.RetrievalStore keeps every connection and all
+    SQL inside db.py; a db module without it is used directly (same three methods)."""
+    store_cls = getattr(db_mod, "RetrievalStore", None)
+    return store_cls() if store_cls is not None else db_mod
 
 
 def build_pipeline(settings: Settings) -> Pipeline:
@@ -177,7 +162,7 @@ def build_pipeline(settings: Settings) -> Pipeline:
         if db_mod is None:
             raise ImportError("db module not present")
         embedder = mod.GeminiEmbedder(gemini(), settings.gemini_model_embed, settings.embed_dim)
-        return mod.Retriever(_PoolStore(mod, db_mod), embedder)
+        return mod.Retriever(_retrieval_store(db_mod), embedder)
 
     def mock_retriever() -> Any:
         nonlocal retriever_is_mock
@@ -188,20 +173,21 @@ def build_pipeline(settings: Settings) -> Pipeline:
 
     transcribe_mod = _import("pipeline.transcribe")
     transcriber = attempt("transcribe", lambda: _construct(
-        need(transcribe_mod).GeminiTranscriber, settings), mock.MockTranscriber)
+        need(transcribe_mod).GeminiTranscriber, settings, client=gemini()), mock.MockTranscriber)
 
     def real_notifier() -> Any:
-        name = settings.notifier.strip().lower() or "console"
-        mod = need(_import(f"notify.{name}"))
-        cls = getattr(mod, f"{name.capitalize()}Notifier")
-        return cls.from_settings(settings) if hasattr(cls, "from_settings") else (
-            cls(settings) if name != "console" else cls())
+        # Part 5's selector: NOTIFIER=console today; anything unverified raises -> mock.
+        return need(_import("notify")).get_notifier(settings)
 
     notifier = attempt("notify", real_notifier, mock.MockNotifier)
 
+    walkthrough_mod = _import("walkthrough") if db_mod is not None else None
+    if db_mod is not None and walkthrough_mod is None:
+        mocked.append("walkthrough")
+
     p = Pipeline(transcriber=transcriber, classify=classify, retriever=retriever,
                  generator=generator, verify=verify, sanitize=sanitize, notifier=notifier,
-                 db=db, real_db=db_mod is not None, mocked=mocked)
+                 db=db, real_db=db_mod is not None, walkthrough=walkthrough_mod, mocked=mocked)
     _set_thresholds(p, settings, mock_retriever=retriever_is_mock)
     if mocked:
         log.warning("MOCK_MODE=0 but running on mocks for: %s", ", ".join(mocked))

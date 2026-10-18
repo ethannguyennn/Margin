@@ -15,13 +15,13 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from ..schemas import NOT_FOUND_BODY, NOT_FOUND_GLANCE
+from ..schemas import DisplaySpec, NOT_FOUND_BODY, NOT_FOUND_GLANCE
 from . import LlmTimeout
 from .retrieve import should_refuse
 from .sanitize import sanitize
 from .verify import check_draft
 
-GENERATE_TIMEOUT_S = 6.0
+GENERATE_TIMEOUT_S = 20.0
 TEMPERATURE = 0.1
 
 SYSTEM_PROMPT = """\
@@ -35,8 +35,20 @@ Rules:
 5. Preserve numbers, units, and warnings exactly as written. Never convert units.
    Every number and part code in glance or body must appear in one of your quotes.
 6. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
-Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}]}
-When answerable=false, return empty glance, body and citations."""
+7. Choose display.kind: warning for a relevant safety warning or stop condition;
+   otherwise checklist for multiple actions or checks; otherwise answer for a single fact.
+   display.items: 1-4 complete SOP sentences, each <= 180 characters, copied verbatim
+   from the context AND your cited quotes. Preserve negations, conditions and warnings.
+   If no complete sentence fits, use display=null and the ordinary answer text.
+   Do not invent actions, check results, or text.
+   A checklist describes required checks, never claims they were completed.
+8. Accompany the answer with a relevant visual reference: choose graphic_id from
+   AVAILABLE VISUAL REFERENCES. Cite its source chunk and include its reference quote
+   in your citations. Use null if none is relevant. Never invent a graphic ID or URL.
+   Reference drawings are synthetic training illustrations, not measured geometry.
+Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}],
+              display:{kind, items}, graphic_id}
+When answerable=false, return empty glance, body and citations, display=null, graphic_id=null."""
 
 RESPONSE_SCHEMA: dict = {
     "type": "object",
@@ -45,6 +57,17 @@ RESPONSE_SCHEMA: dict = {
         "needs_clarification": {"type": "boolean"},
         "glance": {"type": "string"},
         "body": {"type": "string"},
+        "graphic_id": {"anyOf": [{"type": "string"}, {"type": "null"}]},
+        "display": {
+            "anyOf": [
+                {"type": "null"},
+                {"type": "object", "properties": {
+                    "kind": {"type": "string", "enum": ["answer", "checklist", "warning"]},
+                    "items": {"type": "array", "minItems": 1, "maxItems": 4,
+                              "items": {"type": "string", "minLength": 1, "maxLength": 180}},
+                }, "required": ["kind", "items"], "additionalProperties": False},
+            ],
+        },
         "citations": {
             "type": "array",
             "items": {
@@ -54,7 +77,7 @@ RESPONSE_SCHEMA: dict = {
             },
         },
     },
-    "required": ["answerable", "needs_clarification", "glance", "body", "citations"],
+    "required": ["answerable", "needs_clarification", "glance", "body", "citations", "display", "graphic_id"],
 }
 
 
@@ -87,12 +110,15 @@ def gemini_client(api_key: Any):
 
 
 def build_prompt(query: str, chunks: list[Any], feedback: str | None = None) -> str:
+    from ..illustrations import available_graphics
+
     parts = ["CONTEXT:"]
     for c in chunks:
         head = f"{_get(c, 'doc_id')} rev {_get(c, 'revision')} Sec {_get(c, 'section')}"
         if _get(c, "heading"):
             head += f" - {_get(c, 'heading')}"
         parts.append(f"[chunk_id: {_get(c, 'chunk_id')}] {head}\n{_get(c, 'text')}\n")
+    parts.append("AVAILABLE VISUAL REFERENCES:\n" + json.dumps(available_graphics(chunks)))
     parts.append(f"QUESTION: {query}")
     if feedback:
         parts.append(
@@ -122,7 +148,8 @@ class GeminiGenerator:
 
     @classmethod
     def from_settings(cls, settings: Any, client: Any = None) -> "GeminiGenerator":
-        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate)
+        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate,
+                   timeout=getattr(settings, "generate_timeout_s", GENERATE_TIMEOUT_S))
 
     async def generate(self, query: str, chunks: list[Any], feedback: str | None = None):
         from google.genai import types
@@ -161,6 +188,8 @@ class GroundedAnswer:
     llm_calls: int = 0
     reasons: list[str] = field(default_factory=list)  # verifier failures, for logs/eval
     retrieval: Any = None
+    display: DisplaySpec | None = None
+    graphic_id: str | None = None
 
 
 async def answer_question(query: str, retriever: Any, generator: Any, *, revision: str | None,
@@ -192,6 +221,7 @@ async def answer_question(query: str, retriever: Any, generator: Any, *, revisio
         reason, cites = check_draft(draft, result.chunks)
         if reason is None:
             first = cites[0]
+            display = _get(draft, "display")
             return GroundedAnswer(
                 outcome="answered",
                 glance=sanitize(_get(draft, "glance")).strip(),
@@ -199,6 +229,10 @@ async def answer_question(query: str, retriever: Any, generator: Any, *, revisio
                 source=f"{first['doc_id']} Sec {first['section']} rev {first['revision']}",
                 citations=[Citation(**c) for c in cites],
                 verified=True,
+                graphic_id=_get(draft, "graphic_id"),
+                display=DisplaySpec(kind=_get(display, "kind"),
+                                    items=[sanitize(item).strip() for item in _get(display, "items")])
+                        if display else None,
                 llm_calls=answer.llm_calls,
                 reasons=answer.reasons,
                 retrieval=result,

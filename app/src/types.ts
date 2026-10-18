@@ -3,9 +3,10 @@ export type Intent = 'question' | 'walkthrough' | 'deviation' | 'repeat' | 'unkn
 export type Outcome = 'answered' | 'not_found' | 'logged' | 'clarify' | 'error';
 
 export interface Citation { chunk_id: string; doc_id: string; revision: string; section: string; quote: string; }
-export interface Step { step_id: string; label: string; glance: string; body: string; }
+export interface Step { step_id: string; label: string; glance: string; body: string; graphic_id?: string | null; }
 export interface Walkthrough { doc_id: string; revision: string; title: string; total: number; index: number; steps: Step[]; }
 export interface Latency { stt: number; embed: number; retrieve: number; generate: number; verify: number; total: number; }
+export interface DisplaySpec { kind: 'answer' | 'checklist' | 'warning'; items: string[]; }
 
 export interface AskRequest {
   session_id: string;
@@ -26,6 +27,8 @@ export interface AskResponse {
   citations: Citation[];
   verified: boolean;
   walkthrough: Walkthrough | null;
+  display?: DisplaySpec | null;
+  graphic_id?: string | null;
   latency_ms: Latency;
   error?: { code: string; message: string };
 }

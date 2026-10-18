@@ -1,6 +1,8 @@
 import type { AskRequest, AskResponse, Walkthrough } from './types';
 import { sanitizeForG2 } from './ui/glyphs';
 import { BODY_PAGE_CHARS, paginate } from './ui/paginate';
+import { parseDisplay, displayPages } from './ui/generated-display';
+import { answerGraphic, stepGraphic, ILLUSTRATED_PAGE_CHARS } from './ui/sop-graphics';
 
 export const GLANCE_TIMEOUT_MS = 20_000;
 export const INACTIVITY_TIMEOUT_MS = 60_000;
@@ -11,8 +13,11 @@ export type Screen = 'PRIVACY' | 'IDLE' | 'LISTENING' | 'THINKING' | 'ANSWER_GLA
 export type Gesture = 'PRESS' | 'DOUBLE_PRESS' | 'UP' | 'DOWN' | 'LONG_PRESS';
 export type Action = { type: Gesture | 'TIMEOUT' | 'DISMISS' } |
   { type: 'RESPONSE'; response: AskResponse; now: number } |
-  { type: 'FAIL' };
-export type Effect = 'START_CAPTURE' | 'STOP_AND_SEND' | 'CANCEL' | 'EXIT';
+  { type: 'FAIL' } |
+  // A question typed on the phone screen: same THINKING -> answer path as speech.
+  { type: 'TEXT_ASK' };
+export type Effect = 'START_CAPTURE' | 'STOP_AND_SEND' | 'SEND_TEXT' | 'CANCEL' | 'EXIT';
+export interface AskContext { doc_id: string | null; step_id: string | null; }
 export interface LensState {
   screen: Screen;
   session_id: string;
@@ -60,14 +65,22 @@ function receive(state: LensState, response: AskResponse, now: number): LensStat
     if (response.walkthrough !== null) {
       if (!validWalkthrough(response.walkthrough)) return failed(state);
       // Preflight every step locally. Swiping will never fetch more data.
-      response.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body), BODY_PAGE_CHARS));
+      response.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body),
+        stepGraphic(step) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS));
       return { ...state, screen: 'WALKTHROUGH', response,
         walkthrough: structuredClone(response.walkthrough), walkthroughReceivedAt: now, page: 0 };
     }
     if (response.outcome === 'logged') return { ...idle(state), screen: 'LOGGED' };
     if (response.outcome !== 'answered' || !response.glance?.trim() || !response.body?.trim()) return failed(state);
-    const pages = paginate(sanitizeForG2(response.body), BODY_PAGE_CHARS);
-    return { ...idle(state), screen: 'ANSWER_GLANCE', response, pages };
+    const display = parseDisplay(response.display);
+    const card = display && display.kind !== 'answer' ? display : null;
+    const budget = answerGraphic(response) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS;
+    const pages = [
+      ...displayPages(card, budget),
+      ...paginate(sanitizeForG2(response.body), budget),
+    ];
+    return { ...idle(state), screen: card ? 'ANSWER_EXPANDED' : 'ANSWER_GLANCE',
+      response: { ...response, display }, pages };
   } catch {
     return failed(state);
   }
@@ -80,6 +93,12 @@ export function transition(state: LensState, action: Action): Transition {
   if (action.type === 'LONG_PRESS') return done();
   if (action.type === 'FAIL') return done(failed(state), ['CANCEL']);
   if (action.type === 'RESPONSE') return state.screen === 'THINKING' ? done(receive(state, action.response, action.now)) : done();
+  if (action.type === 'TEXT_ASK') {
+    // One question in flight at a time; the privacy notice must be acknowledged on the
+    // glasses first. From LISTENING the open mic is cancelled before the text is sent.
+    if (state.screen === 'THINKING' || state.screen === 'PRIVACY') return done();
+    return done({ ...idle(state), screen: 'THINKING' }, ['CANCEL', 'SEND_TEXT']);
+  }
 
   if (action.type === 'DOUBLE_PRESS') {
     if (state.screen === 'IDLE' || state.screen === 'PRIVACY') return done(state, ['EXIT']);
@@ -107,7 +126,7 @@ export function transition(state: LensState, action: Action): Transition {
       const step = state.walkthrough?.steps[state.walkthrough.index];
       if (!step) return done(failed(state));
       return done({ ...state, screen: 'ANSWER_EXPANDED', detailReturn: 'WALKTHROUGH', page: 0,
-        pages: paginate(sanitizeForG2(step.body), BODY_PAGE_CHARS) });
+        pages: paginate(sanitizeForG2(step.body), stepGraphic(step) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS) });
     }
     case 'LOGGED': return done(idle(state));
     case 'THINKING': return done();
@@ -143,7 +162,8 @@ export function restoreSession(raw: string, now: number, newSessionId: string): 
     state.screen = state.privacySeen ? 'IDLE' : 'PRIVACY';
     const age = now - saved.walkthroughReceivedAt;
     if (state.privacySeen && typeof saved.walkthroughReceivedAt === 'number' && age >= 0 && age < WALKTHROUGH_TTL_MS && validWalkthrough(saved.walkthrough)) {
-      try { saved.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body), BODY_PAGE_CHARS)); }
+      try { saved.walkthrough.steps.forEach(step => paginate(sanitizeForG2(step.body),
+        stepGraphic(step) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS)); }
       catch { return state; }
       return { ...state, screen: 'WALKTHROUGH', walkthrough: saved.walkthrough,
         walkthroughReceivedAt: saved.walkthroughReceivedAt };
@@ -180,8 +200,18 @@ export class LensController {
   private disposed = false;
   private suspended = false;
   private level = 0;
+  private pendingText: { text: string; context: AskContext } | null = null;
   constructor(state: LensState, private readonly ports: LensPorts) { this.state = state; }
   async start(): Promise<void> { await this.ports.render(this.state, this.level); this.armTimer(); }
+  /** Ask a typed question (from the phone screen). False when one is already in flight
+   * or the privacy notice has not been acknowledged yet. */
+  askText(text: string, context: AskContext = { doc_id: null, step_id: null }): boolean {
+    const question = text.trim();
+    if (this.disposed || !question || this.state.screen === 'THINKING' || this.state.screen === 'PRIVACY') return false;
+    this.pendingText = { text: question, context };
+    this.dispatch({ type: 'TEXT_ASK' });
+    return true;
+  }
   dispatch(action: Action): void {
     if (this.disposed) return;
     const { state, effects } = transition(this.state, action);
@@ -223,6 +253,24 @@ export class LensController {
       }).catch(error => {
         this.ports.onError(error);
         if (epoch === this.epoch && !this.disposed) this.dispatch({ type: 'FAIL' });
+      });
+      return;
+    }
+    if (effect === 'SEND_TEXT') {
+      const pending = this.pendingText; this.pendingText = null;
+      if (!pending) return;
+      const epoch = this.epoch;
+      const request = new AbortController(); this.request = request;
+      const req: AskRequest = { session_id: this.state.session_id, text: pending.text,
+        revision: null, context: pending.context };
+      // Queued behind the cancelled capture so the mic is closed before the ask goes out.
+      this.capture = this.capture.then(() => {
+        if (epoch !== this.epoch || this.disposed) return;
+        void this.ports.ask(req, { signal: request.signal }).then(response => {
+          if (epoch === this.epoch && !this.disposed && !request.signal.aborted) this.dispatch({ type: 'RESPONSE', response, now: this.ports.now() });
+        }).catch(error => {
+          if (epoch === this.epoch && !this.disposed && !request.signal.aborted) { this.ports.onError(error); this.dispatch({ type: 'FAIL' }); }
+        });
       });
       return;
     }

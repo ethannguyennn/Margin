@@ -56,6 +56,11 @@ def normalize(text: str) -> str:
     return " ".join(_NON_ALNUM.sub(" ", sanitize(text).casefold()).split())
 
 
+def _display_text(text: str) -> str:
+    # Preserve signs and comparisons that punctuation-insensitive quote matching ignores.
+    return " ".join(sanitize(text).casefold().split()).rstrip(".!?")
+
+
 def quote_in_text(quote: str, text: str) -> bool:
     nq, nt = normalize(quote), normalize(text)
     if not nq:
@@ -152,6 +157,29 @@ def check_draft(draft: Any, chunks: list[Any]) -> tuple[str | None, list[dict]]:
         })
 
     quotes = [c["quote"] for c in out]
+    graphic_id = _get(draft, "graphic_id")
+    if graphic_id is not None:
+        from ..illustrations import verify_graphic
+
+        if not verify_graphic(graphic_id, out, chunks):
+            return "graphic_not_cited: choose a provided graphic and cite its reference quote, or use null", []
+    display = _get(draft, "display")
+    if display is not None:
+        items = _get(display, "items") or []
+        if _get(display, "kind") not in {"answer", "checklist", "warning"} or not 1 <= len(items) <= 4:
+            return "invalid_display", []
+        for item in items:
+            text = sanitize(item).strip()
+            if not text or len(text) > 180 or not normalize(text):
+                return "invalid_display_item", []
+            # Whole source sentences keep an excerpt from dropping "do not" or a condition.
+            if not any(
+                _display_text(text) in _display_text(cite["quote"]) and
+                any(_display_text(text) == _display_text(sentence) for sentence in
+                    re.split(r"(?<=[.!?])\s+|\n+", _get(by_id[cite["chunk_id"]], "text")))
+                for cite in out
+            ):
+                return "display_not_cited: copy complete source sentences into items and quotes", []
     sections = [c["section"] for c in out]
     for field, text in (("glance", glance), ("body", body)):
         bad = _unsupported(text, quotes, sections)

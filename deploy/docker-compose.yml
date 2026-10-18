@@ -31,7 +31,7 @@ services:
       - "443:443"
       - "443:443/udp"
     environment:
-      MARGIN_DOMAIN: ${MARGIN_DOMAIN:?set MARGIN_DOMAIN in .env, e.g. margin.example.com}
+      MARGIN_DOMAIN: ${MARGIN_DOMAIN:?set MARGIN_DOMAIN in .env, e.g. getyourassto.work}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env for the Let's Encrypt account}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro

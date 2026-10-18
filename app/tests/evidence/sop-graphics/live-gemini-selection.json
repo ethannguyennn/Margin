@@ -1,0 +1,20 @@
+[
+  {
+    "question": "How tight should I torque the M5 bracket screws?",
+    "seconds": 8.45,
+    "outcome": "answered",
+    "verified": true,
+    "graphic_id": "bracket-overview",
+    "reasons": [
+      "malformed_output: generation failed: ServerError. Return JSON matching the schema."
+    ]
+  },
+  {
+    "question": "Where do I apply the feeler gauge to check the bracket gap?",
+    "seconds": 15.34,
+    "outcome": "answered",
+    "verified": true,
+    "graphic_id": "bracket-gap",
+    "reasons": []
+  }
+]

@@ -31,3 +31,4 @@ Thumbs.db
 *.wav
 *.pcm
 !relay/tests/fixtures/*.pcm
+.gstack/

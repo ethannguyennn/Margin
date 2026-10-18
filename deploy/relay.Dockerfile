@@ -9,10 +9,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /srv/margin
 
-# Dependencies first so code edits do not reinstall them.
+# Dependencies first so code edits do not reinstall them. Editable, so the package
+# lives at /srv/margin/relay/src and db.py resolves /srv/margin/db/seed.py and
+# /srv/margin/corpus for POST /v1/ingest.
 COPY relay/pyproject.toml relay/pyproject.toml
 COPY relay/src relay/src
-RUN pip install ./relay
+RUN pip install -e ./relay
 
 # Everything else the relay may read at runtime (corpus for /v1/ingest, db/ migrations).
 COPY . .

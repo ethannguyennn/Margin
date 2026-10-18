@@ -48,6 +48,16 @@ test('200 answered passes through and sends x-session-id', async () => {
   assert.ok((calls[0].init.headers as Record<string, string>)['x-session-id']);
 });
 
+test('generated display survives response validation and is removed on refusal', async () => {
+  const display = { kind: 'warning', items: ['Disconnect power.'] };
+  stubFetch({ body: { ...ANSWERED, display } });
+  assert.deepEqual((await ask(REQ)).display, display);
+  stubFetch({ body: { ...ANSWERED, display, verified: false } });
+  assert.equal((await ask(REQ)).display, null);
+  stubFetch({ body: { ...ANSWERED, display: { kind: 'html', items: ['unsafe'] } } });
+  assert.equal((await ask(REQ)).display, null);
+});
+
 test('answered without verified is downgraded to not_found', async () => {
   stubFetch({ body: { ...ANSWERED, verified: false } });
   const res = await ask(REQ);
@@ -116,7 +126,10 @@ test('mock fixtures cover the whole trigger table', () => {
   assert.equal(mockResponseFor('how tight is the m5').outcome, 'answered');
   assert.equal(mockResponseFor('TORQUE the bracket').source, 'SOP-114 Sec 4.2 rev C');
   assert.equal(mockResponseFor('walk me through it').walkthrough?.steps.length, 7);
-  assert.ok(mockResponseFor('how do i clean it').body.length > 600); // paginates to 2 pages
+  const cleaning = mockResponseFor('how do i clean it');
+  assert.ok(cleaning.body.includes('60 s') && cleaning.body.length <= 450);
+  assert.equal(cleaning.graphic_id, 'housing-cleaning');
+  assert.ok(mockResponseFor('torque the M5').body.includes('do not click twice'));
   assert.equal(mockResponseFor('log deviation, screw was stripped').outcome, 'logged');
   assert.equal(mockResponseFor('boom').error?.code, 'llm_timeout');
   assert.equal(mockResponseFor('where is the good coffee').outcome, 'not_found');

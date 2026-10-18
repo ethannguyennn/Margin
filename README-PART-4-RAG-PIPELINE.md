@@ -154,7 +154,42 @@ Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_i
 Rule 5 is a safety rule, not a style rule: a unit conversion on a torque spec
 is how someone strips a thread. Never "helpfully" normalize.
 
-Timeout ~6 s, raise a typed error Part 3 maps to `llm_timeout`.
+Generation uses `GENERATE_TIMEOUT_S` (20 s by default) for both the Gemini call
+and the route guard. The app allows 50 s for two attempts plus STT/retrieval.
+Timeout raises a typed error Part 3 maps to `llm_timeout`.
+
+The implemented schema also requests `display: {kind, items} | null`. Gemini chooses
+`answer`, `checklist`, or `warning` from the retrieved context. Each of 1-4 items is a
+complete source sentence, at most 180 characters after sanitization, present in a
+cited quote. If no complete sentence fits, it returns `display=null`. The verifier
+rejects paraphrased instructions, dropped negations/conditions, and changed signs
+or comparisons. Rejected cards follow the same one-retry/refusal path as answer text.
+The relay returns this optional field only with a verified answer; repeat preserves it.
+Older clients can ignore it and older relays can omit it.
+
+The lens opens checklist/warning cards immediately, one complete item per swipe,
+followed by ordinary answer details. The phone renders the same card with citations.
+The SDK's three native text containers and existing gestures remain in use; Gemini
+selects a supported presentation, with no executable HTML or arbitrary SDK commands.
+Walkthroughs still use the approved corpus step order rather than generated steps.
+
+### Accompanying reference images
+
+`corpus/illustrations.json` links inspected synthetic reference drawings to exact
+SOP sections and revisions. The five generated PNGs live in `app/src/assets/sops/`;
+`corpus/illustration-prompts.json` records their generation and edit prompts.
+`build_prompt` offers only references supported by the retrieved chunks. Gemini
+returns `graphic_id`; the verifier rejects unknown IDs and references not supported
+by a citation containing the catalog's source quote. It never accepts model URLs.
+
+The app packages the images locally. It uses the same source picture and crop on
+the phone and glasses, with a 288x144 native image container beside the text.
+High-contrast Gray8 pixels are sent through `updateImageRawData`; image entry/exit
+uses `rebuildPageContainer`. Longer instructions paginate at the narrower text
+width. Old references are cleared before changing steps so an upload failure cannot
+pair an old picture with a new instruction. Walkthrough steps receive matching
+references directly from their corpus section. Older relay responses can resolve
+the same references from their cited section when the new field is absent.
 
 ## 9. Verification (`verify.py`) — deterministic, no LLM, the whole thesis
 

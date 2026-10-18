@@ -84,6 +84,32 @@ def test_origin_regex_for_lan_dev():
     assert preflight(client, "/v1/ask", "http://10.0.0.2:5174").status_code == 400
 
 
+LAN_REGEX = r"^http://(192\.168|10)\.\d+\.\d+(\.\d+)?:517[45]$"  # as in .env.example
+
+
+@pytest.mark.parametrize("origin,ok", [
+    ("http://192.168.1.23:5174", True),   # lens app from a phone on the LAN
+    ("http://192.168.1.23:5175", True),   # iPhone companion on the LAN
+    ("http://10.0.0.7:5175", True),
+    ("http://192.168.1.23:5176", False),
+    ("https://192.168.1.23:5175", False),
+    ("http://evil.example:5175", False),
+])
+def test_documented_lan_regex(origin, ok):
+    client, _ = make_client(allowed_origins="", allowed_origin_regex=LAN_REGEX)
+    assert (preflight(client, "/v1/ask", origin).status_code == 200) is ok
+
+
+def test_companion_origin_preflights_its_routes():
+    client, _ = make_client(allowed_origins="http://localhost:5174,http://localhost:5175")
+    for method, path in [("GET", "/v1/health"), ("GET", "/v1/procedures"),
+                         ("GET", "/v1/procedures/SOP-114/steps"), ("POST", "/v1/ask"),
+                         ("POST", "/v1/deviation")]:
+        r = preflight(client, path, "http://localhost:5175", method)
+        assert r.status_code == 200 and r.headers["access-control-allow-origin"] == \
+            "http://localhost:5175"
+
+
 def test_trailing_slash_in_config_is_tolerated():
     client, _ = make_client(allowed_origins=f" {ORIGIN}/ , ")
     assert preflight(client, "/v1/ask", ORIGIN).status_code == 200

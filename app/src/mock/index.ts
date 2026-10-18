@@ -1,6 +1,6 @@
 // Canned relay responses + a fake mic, so Part 1 can drive real screens with no
 // relay, no glasses and no network. Enabled by VITE_MOCK=1.
-import type { AskRequest, AskResponse, Step } from '../types.ts';
+import type { AskRequest, AskResponse } from '../types.ts';
 import { SAMPLE_RATE } from '../settings.ts';
 
 /** Artificial ask latency so THINKING is actually visible. Set to 0 in tests. */
@@ -28,125 +28,162 @@ function base(partial: Partial<AskResponse>): AskResponse {
   };
 }
 
+// Synthetic fixtures mirror the checked-in SOP corpus, including its visual references.
 const TORQUE: AskResponse = base({
-  transcript: 'how tight is the m5 on the mounting bracket',
-  outcome: 'answered',
-  glance: 'Step 4.2: torque M5 to 4 N-m',
-  body:
-    'Torque all four M5 bracket screws to 4 N-m in a diagonal pattern. Re-check the ' +
-    'first screw after the fourth is seated. Do not exceed 4.4 N-m; the bracket boss ' +
-    'strips above that.',
-  source: 'SOP-114 Sec 4.2 rev C',
-  citations: [
+  "transcript": "how tight is the m5 on the mounting bracket",
+  "outcome": "answered",
+  "glance": "Step 4.2: torque M5 to 4 N-m",
+  "body": "Torque all four M5 bracket screws to 4 N-m in a star pattern using a calibrated torque wrench (see SOP-131). Tighten in the order upper left, lower right, upper right, lower left. Stop at the first click on each screw; do not click twice.",
+  "source": "SOP-114 Sec 4.2 rev C",
+  "citations": [
     {
-      chunk_id: 'SOP-114:C:4.2',
-      doc_id: 'SOP-114',
-      revision: 'C',
-      section: '4.2',
-      quote: 'Torque all four M5 bracket screws to 4 N-m',
-    },
+      "chunk_id": "SOP-114:C:4.2",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.2",
+      "quote": "Torque all four M5 bracket screws to 4 N-m in a star pattern using a calibrated torque wrench (see SOP-131). Tighten in the order upper left, lower right, upper right, lower left. Stop at the first click on each screw; do not click twice."
+    }
   ],
-  verified: true,
+  "verified": true,
+  "graphic_id": "bracket-fasteners"
 });
-
-const WALKTHROUGH_STEPS: Step[] = [
-  {
-    step_id: 'SOP-114:C:5.1',
-    label: 'Step 1 of 7',
-    glance: 'Lock out power at the panel',
-    body: 'Open the service panel, move the disconnect to OFF and apply your personal lock and tag.',
-  },
-  {
-    step_id: 'SOP-114:C:5.2',
-    label: 'Step 2 of 7',
-    glance: 'Verify zero energy',
-    body: 'Probe L1-L2, L2-L3 and L1-L3. All three must read under 2 V before you continue.',
-  },
-  {
-    step_id: 'SOP-114:C:5.3',
-    label: 'Step 3 of 7',
-    glance: 'Remove the guard',
-    body: 'Back out the six M4 guard screws and set the guard aside. Keep the screws in the tray.',
-  },
-  {
-    step_id: 'SOP-114:C:5.4',
-    label: 'Step 4 of 7',
-    glance: 'Seat the bracket',
-    body: 'Align the bracket dowels with the frame holes and press until both dowels bottom out.',
-  },
-  {
-    step_id: 'SOP-114:C:5.5',
-    label: 'Step 5 of 7',
-    glance: 'Torque M5 to 4 N-m',
-    body: 'Torque all four M5 screws to 4 N-m in a diagonal pattern, then re-check the first.',
-  },
-  {
-    step_id: 'SOP-114:C:5.6',
-    label: 'Step 6 of 7',
-    glance: 'Refit the guard',
-    body: 'Refit the guard and torque the six M4 screws to 1.5 N-m. The guard must not rock.',
-  },
-  {
-    step_id: 'SOP-114:C:5.7',
-    label: 'Step 7 of 7',
-    glance: 'Restore power and sign off',
-    body: 'Remove your lock, close the disconnect and record the torque values on the job card.',
-  },
-];
 
 const WALKTHROUGH: AskResponse = base({
-  transcript: 'walk me through the bracket replacement',
-  intent: 'walkthrough',
-  outcome: 'answered',
-  glance: 'Bracket replacement, 7 steps',
-  body: 'Bracket replacement, 7 steps. Swipe to advance.',
-  source: 'SOP-114 Sec 5 rev C',
-  citations: [
+  "transcript": "walk me through mounting bracket assembly",
+  "intent": "walkthrough",
+  "outcome": "answered",
+  "glance": "Mounting bracket assembly, 7 steps",
+  "body": "Mounting bracket assembly, 7 steps. Swipe to advance.",
+  "source": "SOP-114 Sec 4.1 rev C",
+  "citations": [
     {
-      chunk_id: 'SOP-114:C:5',
-      doc_id: 'SOP-114',
-      revision: 'C',
-      section: '5',
-      quote: 'Bracket replacement procedure',
+      "chunk_id": "SOP-114:C:4.1",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.1",
+      "quote": "Disconnect power. Confirm the green RECEIVED label from SOP-101. Check the torque wrench under SOP-131. Seat bracket HX2-210 with the arrow toward the outlet. Fit all four washers and start all four M5 screws by hand for 3 full turns. Keep threads dry."
     },
+    {
+      "chunk_id": "SOP-114:C:4.2",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.2",
+      "quote": "Torque all four M5 bracket screws to 4 N-m in a star pattern using a calibrated torque wrench (see SOP-131). Tighten in the order upper left, lower right, upper right, lower left. Stop at the first click on each screw; do not click twice."
+    },
+    {
+      "chunk_id": "SOP-114:C:4.3",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.3",
+      "quote": "Check the gap between the bracket foot and housing with a 0.20 mm feeler gauge. The gauge must not enter at any of the four screw positions. If it enters, stop and report the gap under SOP-140; do not add torque."
+    },
+    {
+      "chunk_id": "SOP-114:C:4.4",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.4",
+      "quote": "Apply one blue witness line across each screw head and onto the bracket. Each line must be continuous and visible from the front. Do not mark the pump serial label."
+    },
+    {
+      "chunk_id": "SOP-114:C:4.5",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.5",
+      "quote": "Measure the clearance between the bracket edge and outlet collar. Accept at least 6 mm clearance. Route the disconnected power lead outside the bracket opening without pinching it."
+    },
+    {
+      "chunk_id": "SOP-114:C:4.6",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.6",
+      "quote": "Record the pump serial number, wrench asset number, 4 N-m setting, and assembler initials on assembly form AS-114. Record revision C. Do not record a measured torque when only a wrench setting was used."
+    },
+    {
+      "chunk_id": "SOP-114:C:4.7",
+      "doc_id": "SOP-114",
+      "revision": "C",
+      "section": "4.7",
+      "quote": "Confirm all four witness marks and the completed AS-114. Place the pump in the ASSEMBLED tray. Keep power disconnected; this procedure does not authorize a powered run test."
+    }
   ],
-  verified: true,
-  walkthrough: {
-    doc_id: 'SOP-114',
-    revision: 'C',
-    title: 'Bracket replacement',
-    total: 7,
-    index: 0,
-    steps: WALKTHROUGH_STEPS,
-  },
+  "verified": true,
+  "walkthrough": {
+    "doc_id": "SOP-114",
+    "revision": "C",
+    "title": "Mounting Bracket Assembly",
+    "total": 7,
+    "index": 0,
+    "steps": [
+      {
+        "step_id": "SOP-114:C:4.1",
+        "label": "4.1",
+        "glance": "Prepare and seat the bracket",
+        "body": "Disconnect power. Confirm the green RECEIVED label from SOP-101. Check the torque wrench under SOP-131. Seat bracket HX2-210 with the arrow toward the outlet. Fit all four washers and start all four M5 screws by hand for 3 full turns. Keep threads dry.",
+        "graphic_id": "bracket-overview"
+      },
+      {
+        "step_id": "SOP-114:C:4.2",
+        "label": "4.2",
+        "glance": "Fasten the M5 bracket screws",
+        "body": "Torque all four M5 bracket screws to 4 N-m in a star pattern using a calibrated torque wrench (see SOP-131). Tighten in the order upper left, lower right, upper right, lower left. Stop at the first click on each screw; do not click twice.",
+        "graphic_id": "bracket-fasteners"
+      },
+      {
+        "step_id": "SOP-114:C:4.3",
+        "label": "4.3",
+        "glance": "Check the bracket gap",
+        "body": "Check the gap between the bracket foot and housing with a 0.20 mm feeler gauge. The gauge must not enter at any of the four screw positions. If it enters, stop and report the gap under SOP-140; do not add torque.",
+        "graphic_id": "bracket-gap"
+      },
+      {
+        "step_id": "SOP-114:C:4.4",
+        "label": "4.4",
+        "glance": "Apply witness marks",
+        "body": "Apply one blue witness line across each screw head and onto the bracket. Each line must be continuous and visible from the front. Do not mark the pump serial label.",
+        "graphic_id": "bracket-fasteners"
+      },
+      {
+        "step_id": "SOP-114:C:4.5",
+        "label": "4.5",
+        "glance": "Check outlet clearance",
+        "body": "Measure the clearance between the bracket edge and outlet collar. Accept at least 6 mm clearance. Route the disconnected power lead outside the bracket opening without pinching it.",
+        "graphic_id": "bracket-overview"
+      },
+      {
+        "step_id": "SOP-114:C:4.6",
+        "label": "4.6",
+        "glance": "Record assembly",
+        "body": "Record the pump serial number, wrench asset number, 4 N-m setting, and assembler initials on assembly form AS-114. Record revision C. Do not record a measured torque when only a wrench setting was used.",
+        "graphic_id": null
+      },
+      {
+        "step_id": "SOP-114:C:4.7",
+        "label": "4.7",
+        "glance": "Release to the next station",
+        "body": "Confirm all four witness marks and the completed AS-114. Place the pump in the ASSEMBLED tray. Keep power disconnected; this procedure does not authorize a powered run test.",
+        "graphic_id": null
+      }
+    ]
+  }
 });
 
-// Body is long on purpose: it must paginate to 2 pages on the lens.
 const CLEAN: AskResponse = base({
-  transcript: 'how do i clean the optical window',
-  outcome: 'answered',
-  glance: 'Sec 3.4: IPA wipe, 30 s dwell',
-  body:
-    'Wear nitrile gloves. Power down the sensor head and wait 60 seconds for the lamp to cool. ' +
-    'Flood a lint-free wipe with 70% isopropyl alcohol - do not spray the window directly, the ' +
-    'solvent wicks behind the gasket and fogs the inner face. Wipe in one direction from the ' +
-    'centre outward, never in circles. Let the surface dwell wet for 30 seconds so protein ' +
-    'residue lifts, then dry with a second unused wipe before the alcohol flashes off, or you ' +
-    'will leave a ring. Inspect at a glancing angle under the inspection lamp. If any haze ' +
-    'remains, repeat once; two passes is the limit before the window must be logged for ' +
-    'replacement. Dispose of both wipes in the solvent waste bin, not the general waste. ' +
-    'Record the clean on the sensor log with your badge number and the date.',
-  source: 'SOP-120 Sec 3.4 rev B',
-  citations: [
+  "transcript": "how do i disinfect the housing",
+  "outcome": "answered",
+  "glance": "Use a 70 % IPA wipe; keep wet for 60 s",
+  "body": "Wipe the external housing with a premixed 70 % isopropyl alcohol wipe. Keep the surface visibly wet for 60 s. Use a fresh wipe if the surface dries before the contact time ends. Do not dilute the premixed wipe.",
+  "source": "SOP-120 Sec 4.3 rev B",
+  "citations": [
     {
-      chunk_id: 'SOP-120:B:3.4',
-      doc_id: 'SOP-120',
-      revision: 'B',
-      section: '3.4',
-      quote: 'Let the surface dwell wet for 30 seconds',
-    },
+      "chunk_id": "SOP-120:B:4.3",
+      "doc_id": "SOP-120",
+      "revision": "B",
+      "section": "4.3",
+      "quote": "Wipe the external housing with a premixed 70 % isopropyl alcohol wipe. Keep the surface visibly wet for 60 s. Use a fresh wipe if the surface dries before the contact time ends. Do not dilute the premixed wipe."
+    }
   ],
-  verified: true,
+  "verified": true,
+  "graphic_id": "housing-cleaning"
 });
 
 const NOT_FOUND: AskResponse = base({

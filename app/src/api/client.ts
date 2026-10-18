@@ -4,6 +4,8 @@ import type { AskRequest, AskResponse, Outcome } from '../types.ts';
 import { ASK_TIMEOUT_MS, MOCK, RELAY_ORIGIN, SESSION_ID } from '../settings.ts';
 import { mockAsk, mockHealth, mockLogDeviation } from '../mock/index.ts';
 import { captureError, logAsk, traceHeaders, traceSpan } from '../obs/sentry.ts';
+import { parseDisplay } from '../ui/generated-display';
+import { answerGraphic } from '../ui/sop-graphics';
 
 /** Client-side codes on top of the relay's stt_failed | db_down | llm_timeout | bad_request. */
 export type ErrorCode = 'stt_failed' | 'db_down' | 'llm_timeout' | 'bad_request' | 'network' | 'timeout';
@@ -25,6 +27,8 @@ function errorResponse(code: ErrorCode, message: string, trace_id = ''): AskResp
     citations: [],
     verified: false,
     walkthrough: null,
+    display: null,
+    graphic_id: null,
     latency_ms: EMPTY_LATENCY,
     error: { code, message },
   };
@@ -39,6 +43,8 @@ function notFound(raw: Partial<AskResponse>): AskResponse {
     citations: [],
     verified: false,
     walkthrough: null,
+    display: null,
+    graphic_id: null,
   };
 }
 
@@ -60,6 +66,8 @@ function validate(raw: unknown): AskResponse {
     citations: r.citations ?? [],
     verified: r.verified === true,
     walkthrough: r.walkthrough ?? null,
+    display: r.outcome === 'answered' && r.verified === true ? parseDisplay(r.display) : null,
+    ...(r.graphic_id !== undefined ? { graphic_id: r.graphic_id } : {}),
     latency_ms: r.latency_ms ?? EMPTY_LATENCY,
     ...(r.error ? { error: r.error } : {}),
   };
@@ -70,6 +78,7 @@ function validate(raw: unknown): AskResponse {
     console.warn('[client] unverified answer downgraded to not_found', res.trace_id);
     return notFound(res);
   }
+  res.graphic_id = answerGraphic(res)?.id ?? null;
   return res;
 }
 

@@ -46,7 +46,7 @@ let relay = await makeRelay();
 const port = (relay.address() as AddressInfo).port;
 process.env.VITE_RELAY_ORIGIN = `http://127.0.0.1:${port}`;
 process.env.VITE_MOCK = '0';
-process.env.VITE_ASK_TIMEOUT_MS = '500'; // the 8 s contract timeout, shortened for the test
+process.env.VITE_ASK_TIMEOUT_MS = '500'; // shorten the production budget for the timeout test
 
 const { ask, health, logDeviation } = await import('../src/api/client.ts');
 

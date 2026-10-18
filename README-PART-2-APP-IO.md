@@ -114,7 +114,8 @@ Rules:
   full origin** in `app.json`'s whitelist (`https://api.example.com` — no
   wildcards, no bare hosts), or the request is blocked by the Even network
   layer before CORS even matters.
-- Timeout **8 s** on `/v1/ask` via `AbortController`; a new press aborts the
+- Timeout **50 s** on `/v1/ask` via `AbortController` (two 20 s generation attempts
+  plus STT/retrieval); a new press aborts the
   in-flight request.
 - One retry on a network error or 5xx. **Never retry a 4xx.** Never retry
   twice — the technician would rather see ERROR than wait.

@@ -68,7 +68,7 @@ class Settings(BaseSettings):
     admin_token: SecretStr | None = None
     corpus_dir: str = ""  # default: <repo>/corpus
     stt_timeout_s: float = 5.0  # outer guard; Part 4 times out at ~4 s itself
-    generate_timeout_s: float = 7.0  # outer guard; Part 4 times out at ~6 s itself
+    generate_timeout_s: float = 20.0  # shared per-attempt budget for Gemini + the route
     log_level: str = "INFO"
     git_sha: str = ""
 

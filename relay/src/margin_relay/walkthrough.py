@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 
 
 def step_from_chunk(chunk: dict):
+    from .illustrations import graphic_for_chunk
     from .pipeline.sanitize import sanitize
     from .schemas import Step
 
@@ -24,7 +25,8 @@ def step_from_chunk(chunk: dict):
         raise ValueError(f"Step {chunk['chunk_id']} must have 1..449 sanitized body characters")
     if len(glance) >= 60:
         glance = glance[:56].rstrip() + "..."
-    return Step(step_id=chunk["chunk_id"], label=chunk["section"], glance=glance, body=body)
+    return Step(step_id=chunk["chunk_id"], label=chunk["section"], glance=glance, body=body,
+                graphic_id=graphic_for_chunk(chunk))
 
 
 async def build_walkthrough(doc_id: str, revision: str | None = None) -> dict:

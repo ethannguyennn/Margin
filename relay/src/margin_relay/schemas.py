@@ -81,6 +81,7 @@ class Step(_Model):
     label: str  # human section number, e.g. '4.1'
     glance: GlanceText
     body: BodyText
+    graphic_id: str | None = None
 
 
 class Walkthrough(_Model):
@@ -101,6 +102,12 @@ class Latency(_Model):
     total: int = 0
 
 
+class DisplaySpec(_Model):
+    kind: Literal["answer", "checklist", "warning"]
+    items: list[Annotated[str, Field(min_length=1, max_length=180)]] = Field(
+        min_length=1, max_length=4)
+
+
 class AskResponse(_Model):
     trace_id: str
     transcript: str
@@ -112,12 +119,21 @@ class AskResponse(_Model):
     citations: list[Citation]
     verified: bool
     walkthrough: Walkthrough | None = None
+    display: DisplaySpec | None = None
+    graphic_id: str | None = None
     latency_ms: Latency
+    # Additive field: true only on a not_found the model judged ambiguous between
+    # procedures (Part 5's eval checks it; clients that ignore it render NOT FOUND).
+    needs_clarification: bool = False
 
     @model_validator(mode="after")
     def _never_unverified_answer(self) -> AskResponse:
         if self.outcome == "answered" and (not self.verified or not self.citations):
             raise ValueError("an `answered` response must be verified and carry citations")
+        if self.display is not None and (self.outcome != "answered" or not self.verified):
+            raise ValueError("generated displays require a verified answer")
+        if self.graphic_id is not None and (self.outcome != "answered" or not self.verified):
+            raise ValueError("visual references require a verified answer")
         return self
 
 
@@ -203,6 +219,8 @@ class Draft(BaseModel):
     glance: str = ""
     body: str = ""
     citations: list[DraftCitation] = Field(default_factory=list)
+    display: DisplaySpec | None = None
+    graphic_id: str | None = None
 
 
 class VerifyResult(BaseModel):
