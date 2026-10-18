@@ -87,6 +87,18 @@ def test_timeout_raises_stt_failed():
     assert len(cl.aio.models.requests) <= 1
 
 
+def test_coffee_vocabulary_is_sent_without_rewriting_spoken_units():
+    cl = client(text="two pumps for the cappuccino at one hundred fifty degrees Fahrenheit")
+    text = asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000))
+    assert text == cl.aio.models.text
+    prompt = cl.aio.models.requests[0].contents[0]
+    for word in ("espresso", "cappuccino", "latte", "flat white", "americano", "mocha",
+                 "pumps", "oz", "ppm", "Fahrenheit"):
+        assert word in prompt
+    assert "never add unheard words or convert numbers or units" in prompt
+    assert "If there is no speech, output nothing" in prompt
+
+
 def api_error(code):
     return APIError(code, {"error": {"message": "api"}})
 
@@ -104,6 +116,15 @@ def test_transient_error_twice_raises_stt_failed():
         asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000))
     assert e.value.code == "stt_failed"
     assert len(cl.aio.models.requests) == 2
+
+
+def test_recovered_quota_error_reaches_observability(monkeypatch):
+    from specs_relay import obs
+    recorded = []
+    monkeypatch.setattr(obs, "record_quota_error", lambda error, stage: recorded.append((error.code, stage)), raising=False)
+    cl = client(text="next", exc=[api_error(429), None])
+    assert asyncio.run(GeminiTranscriber(cl, "m").transcribe(PCM, 16000)) == "next"
+    assert recorded == [(429, "stt")]
 
 
 def test_bad_request_does_not_retry():
