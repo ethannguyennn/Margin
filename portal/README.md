@@ -94,3 +94,18 @@ parsing, authorization or conversion correctness in Part 3's relay.
 
 See `../docs/handoffs/PART-5.md` for database commands, integration requests,
 actual test results and the deferred real-system gates.
+
+## Glasses simulator
+
+Open **Simulator** in the portal navigation to test questions and commands with
+the current workspace's SOPs. The responsive 576×288 preview uses the same lens
+controller, screen renderer and container positions as the G2 app. Tap/swipe
+buttons run locally; typed questions use `/v1/simulator/ask` with portal auth.
+Approved diagram tiles are checked against the workspace's effective procedures.
+No fake device or assignment is created. The portal uses a separate browser
+session rather than mirroring a remote worker's glasses.
+
+The worker app has the same simulator on its **Lens** tab. Connected glasses
+switch that preview to a live mirror of lens text, references and diagrams.
+See `../app/tests/evidence/browser-simulator/README.md` for reproduction commands,
+screenshots, test counts and the distinction between mock and hardware evidence.

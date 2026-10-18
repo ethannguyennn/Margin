@@ -130,7 +130,8 @@ async function boot() {
         status.textContent = value.screen;
         app.dataset.screen = value.screen;
         mirror.textContent = [text.header, text.main, text.footer].join('\n\n');
-        lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent, graphic_id: text.graphic_id });
+        lensLink.update({ screen: value.screen, status: value.screen, lensText: mirror.textContent,
+            graphic_id: text.graphic_id, frame: text, diagram: value.screen === 'DIAGRAM' ? diagram : undefined });
         console.info(`[Specs] screen=${value.screen} page=${value.page} step=${value.walkthrough?.index ?? '-'} assignment=${!!value.assignment_id}`);
         syncMotion(value);
         if (!rendering)
@@ -264,4 +265,11 @@ async function boot() {
         import.meta.hot.dispose(() => { void cleanup(); });
     startPolling();
 }
-void boot().catch(error => { console.error('[Specs] boot failed', error); status.textContent = 'Unable to start. ' + String(error); lensLink.update({ status: status.textContent }); });
+void boot().catch(error => {
+    console.error('[Specs] boot failed', error);
+    status.textContent = 'Unable to start. ' + String(error);
+    lensLink.update({ status: status.textContent });
+    // Plain browsers use the themed simulator above. Keep legacy bridge debug
+    // controls available only when explicitly requested after a bridge failure.
+    if (params.get('dev') !== '1') app.remove();
+});

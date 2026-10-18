@@ -60,6 +60,7 @@ interface StoreValue {
   repeatLast: () => Promise<AskResponse | null>;
   submitDeviation: (text: string) => Promise<DeviationResult | null>;
   startNewSession: () => void;
+  recordSimulatorAnswer: (response: AskResponse, question: string) => void;
 }
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -211,6 +212,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   const canPushToTalk = linked && lensLink.canTogglePushToTalk();
 
+  const recordSimulatorAnswer = useCallback((response: AskResponse, question: string) => {
+    setState(s => ({ ...s, lastAnswer: response,
+      history: [exchangeOf(question, response), ...s.history].slice(0, HISTORY_MAX) }));
+    setError(errorOf(response));
+  }, []);
+
   const value = useMemo<StoreValue>(
     () => ({
       state: { ...state, listening: lens.screen === 'LISTENING' },
@@ -232,6 +239,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       },
       askNow: runAsk,
       repeatLast,
+      recordSimulatorAnswer,
       submitDeviation,
       startNewSession: () => {
         setError(null);
@@ -239,7 +247,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setState((s) => (linkedRef.current ? { ...s, lastAnswer: null, history: [] } : newSession(uuid())));
       },
     }),
-    [state, lens, sessionId, health, healthChecked, checkHealth, busy, error, canPushToTalk, runAsk, repeatLast, submitDeviation],
+    [state, lens, sessionId, health, healthChecked, checkHealth, busy, error, canPushToTalk, runAsk, repeatLast, submitDeviation, recordSimulatorAnswer],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

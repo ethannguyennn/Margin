@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { TOKEN_KEY } from '../src/api';
+import { UI_FIXTURES } from '../../app/src/ui/fixtures';
 
 // Contract-shaped fixture API, explicitly not Part 3's missing mock relay.
 const step = { label: '1', glance: 'Torque to 5 N-m', body: 'Torque to 5 N-m.', warning: null, checkpoint: null, quotes: ['Torque to 4 N-m.'], diagram: null, diagram_id: null, diagram_approved: false, verify: { ok: false, reason: '5 N-m is not in the source quotes' } };
@@ -16,7 +17,10 @@ beforeEach(async () => {
   paired = assigned = progress = false; calls = [];
   vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit = {}) => {
     calls.push([url, init]); let data: any = {};
-    if (url.startsWith('/v1/materials?')) {
+    if (url === '/v1/simulator/ask') data = JSON.parse(init.body as string).text === 'next'
+      ? { ...UI_FIXTURES.answer, outcome: 'command', verified: false, command: 'next' }
+      : structuredClone(UI_FIXTURES.walkthrough);
+    else if (url.startsWith('/v1/materials?')) {
       const q = new URL(url, 'http://localhost').searchParams.get('q') ?? '';
       data = { items: q === 'missing' ? [] : [{ ...draft, filename: 'synthetic.txt', created_at: '2026-10-18T12:00:00Z', size_bytes: 64, status: 'failed', error: 'Conversion unavailable' }], next_offset: null };
     }
@@ -105,4 +109,25 @@ it('finds persisted uploads after navigation and downloads failed conversions wi
   input('q', 'missing'); click('Search uploads');
   await until(() => expect(document.body.textContent).toContain('No saved uploads match this search.'));
   location.hash = 'upload';
+});
+
+it('opens the glasses simulator and drives a real lens walkthrough with authenticated questions', async () => {
+  input('token', 'fixture-token'); click('Open workspace');
+  await until(() => expect(document.querySelector('[name="file"]')).toBeTruthy());
+  location.hash = 'simulator';
+  await until(() => expect(document.querySelector('h1')?.textContent).toBe('Glasses simulator'));
+  expect(document.querySelector('nav')?.textContent).toContain('Simulator');
+  const question = document.querySelector<HTMLInputElement>('.lens-sim-form input')!;
+  question.value = 'Walk me through the bracket'; question.dispatchEvent(new Event('input'));
+  click('Send to simulator');
+  await until(() => expect(document.querySelector('[data-screen="STEP"]')).toBeTruthy());
+  expect(document.querySelector('.lens-sim-main')?.textContent).toContain('Seat bracket');
+  click('Swipe down');
+  expect(document.querySelector('.lens-sim-main')?.textContent).toContain('4 N-m');
+  const asks = calls.filter(([url]) => url === '/v1/simulator/ask');
+  expect(asks).toHaveLength(1); // gestures are local, not extra API calls
+  expect(new Headers(asks[0][1].headers).get('Authorization')).toBe('Bearer fixture-token');
+  expect(JSON.parse(asks[0][1].body as string).session_id).toMatch(/^[\da-f-]{36}$/);
+  location.hash = 'upload';
+  await until(() => expect(document.querySelector('.lens-simulator')).toBeNull());
 });
