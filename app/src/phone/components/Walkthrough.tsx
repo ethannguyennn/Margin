@@ -1,3 +1,5 @@
+import { stepGraphic } from '../../ui/sop-graphics';
+import { SopGraphic } from './SopGraphic';
 import { useRef, useState } from 'react';
 import type { Step, Walkthrough as WalkthroughShape } from '../contract';
 import { ChevronIcon } from './Icons';
@@ -85,6 +87,7 @@ export function Walkthrough({
           </p>
         )}
         <p className="body">{step.body}</p>
+        <SopGraphic graphic={stepGraphic(step)} />
         {step.checkpoint && (
           <p className="wt-flag">
             <strong>Checkpoint</strong>

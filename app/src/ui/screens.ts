@@ -1,14 +1,17 @@
+import { answerGraphic, stepGraphic, ILLUSTRATED_PAGE_CHARS } from './sop-graphics';
 import type { LensState } from '../state';
 import { sanitizeForG2 } from './glyphs';
 import { paginate } from './paginate';
 export interface ScreenText {
+    graphic_id?: string;
     header: string;
     main: string;
     footer: string;
 }
 const short = (text: string, cap: number) => paginate(sanitizeForG2(text), cap)[0];
 const safe = (text: ScreenText): ScreenText => ({ header: sanitizeForG2(text.header),
-    main: sanitizeForG2(text.main), footer: sanitizeForG2(text.footer) });
+    main: sanitizeForG2(text.main), footer: sanitizeForG2(text.footer),
+    ...(text.graphic_id ? { graphic_id: text.graphic_id } : {}) });
 export function privacyScreen(): ScreenText {
     return { header: 'PRIVACY', main: 'Audio is processed to answer, not stored. Ask before recording others.\nNod twice to talk. The mic closes when you stop speaking.', footer: 'press: continue   double: exit' };
 }
@@ -25,7 +28,7 @@ export function loggedScreen(): ScreenText { return { header: 'LOGGED', main: 'D
 export function glanceScreen(state: LensState): ScreenText {
     if (state.response?.verified !== true)
         return errorScreen();
-    return { header: '', main: short(state.response.glance, 60), footer: `${short(state.response.source, 46)}  [+]` };
+    return { graphic_id: answerGraphic(state.response)?.id, header: '', main: short(state.response.glance, 60), footer: `${short(state.response.source, 46)}  [+]` };
 }
 export function expandedScreen(state: LensState): ScreenText {
     if (state.response !== null && state.response.verified !== true)
@@ -36,7 +39,8 @@ export function expandedScreen(state: LensState): ScreenText {
     if (state.detailReturn === 'WALKTHROUGH' && !state.walkthrough)
         return errorScreen();
     const source = state.detailReturn === 'WALKTHROUGH' ? `${state.walkthrough!.doc_id} rev ${state.walkthrough!.revision}` : state.response!.source;
-    return { header: `DETAILS ${state.page + 1}/${state.pages.length}`,
+    const graphic = state.detailReturn === "WALKTHROUGH" ? stepGraphic(state.walkthrough!.steps[state.walkthrough!.index]) : answerGraphic(state.response);
+    return { graphic_id: graphic?.id, header: `DETAILS ${state.page + 1}/${state.pages.length}`,
         main: state.pages[state.page] ?? '', footer: `${short(source, 32)}  swipe: page  press: back` };
 }
 export function walkthroughScreen(state: LensState): ScreenText {
@@ -45,7 +49,7 @@ export function walkthroughScreen(state: LensState): ScreenText {
         return errorScreen();
     const step = w.steps[w.index];
     const progress = Math.max(1, Math.round(((w.index + 1) / w.total) * 10));
-    return { header: `${short(`${w.doc_id} rev ${w.revision}`, 30)}  step ${w.index + 1}/${w.total}`,
+    return { graphic_id: stepGraphic(step)?.id, header: `${short(`${w.doc_id} rev ${w.revision}`, 30)}  step ${w.index + 1}/${w.total}`,
         main: `${'━'.repeat(progress)}${'─'.repeat(10 - progress)}\n${short(step.glance, 130)}`,
         footer: 'swipe: step   press: details' };
 }
@@ -54,7 +58,8 @@ export function stepScreen(state: LensState): ScreenText {
     if (!w || !current)
         return errorScreen();
     const progress = Math.max(1, Math.round((w.index + 1) / w.total * 10));
-    return { header: `${short(`${w.doc_id} rev ${w.revision}`, 22)}  ${w.index + 1}/${w.total} ${'━'.repeat(progress)}${'─'.repeat(10 - progress)}`,
+    const copyLength = [current.glance, current.warning, current.checkpoint].filter(Boolean).join("\n\n! > ").length;
+    return { graphic_id: copyLength <= ILLUSTRATED_PAGE_CHARS ? stepGraphic(current)?.id : undefined, header: `${short(`${w.doc_id} rev ${w.revision}`, 22)}  ${w.index + 1}/${w.total} ${'━'.repeat(progress)}${'─'.repeat(10 - progress)}`,
         main: [short(current.glance, 60), current.warning ? `! ${short(current.warning, 80)}` : '', current.checkpoint ? `> ${short(current.checkpoint, 60)}` : ''].filter(Boolean).join('\n\n'),
         footer: state.notice || `nod: speak${current.diagram ? '   [diagram]' : ''}` };
 }
@@ -66,7 +71,7 @@ export function renderScreen(state: LensState, level = 0): ScreenText {
             case 'PAIRING': return safe({ header: 'PAIRING', main: state.pairing ? `Pair code ${short(state.pairing.pair_code, 16)}\nEnter it in the Specs portal.` : 'Getting pair code...', footer: 'waiting for supervisor' });
             case 'TASK_READY': return safe({ header: 'TASK READY', main: `Task ready: ${short(state.walkthrough?.title ?? '', 90)}\n${state.walkthrough?.total ?? 0} steps`, footer: 'nod twice to start' });
             case 'STEP': return safe(stepScreen(state));
-            case 'STEP_DETAILS': return safe({ header: `STEP DETAILS ${state.page + 1}/${state.pages.length}`, main: state.pages[state.page] ?? '', footer: 'swipe: page   shake: back' });
+            case 'STEP_DETAILS': return safe({ graphic_id: state.walkthrough ? stepGraphic(state.walkthrough.steps[state.walkthrough.index])?.id : undefined, header: `STEP DETAILS ${state.page + 1}/${state.pages.length}`, main: state.pages[state.page] ?? '', footer: 'swipe: page   shake: back' });
             case 'DIAGRAM': return safe({ header: `${short(state.walkthrough?.doc_id ?? '', 24)}  diagram`, main: '', footer: state.diagramReady ? `${short(state.walkthrough?.steps[state.walkthrough.index].diagram?.alt ?? '', 45)}  shake: back` : 'loading diagram' });
             case 'TASK_DONE': return safe({ header: 'TASK COMPLETE', main: `Task complete. ${state.walkthrough?.total ?? 0}/${state.walkthrough?.total ?? 0} steps`, footer: 'nod: speak   tap: done' });
             case 'IDLE': return safe({ ...idleScreen(), footer: state.notice || (state.assignment_id ? 'nod: say resume   double: exit' : idleScreen().footer) });

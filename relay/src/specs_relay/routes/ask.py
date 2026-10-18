@@ -151,7 +151,7 @@ CLARIFY = "clarify"  # _answer's marker: the model found the question ambiguous
 
 
 async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
-                  ) -> tuple[str, str, list[Citation]] | str | None:
+                  ) -> tuple[str, str, list[Citation], str | None] | str | None:
     """generate -> verify, retried once with the failure reason. None means not_found,
     CLARIFY means not_found with needs_clarification."""
     feedback: str | None = None
@@ -178,7 +178,7 @@ async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
         if result.ok and result.citations:
             glance = p.sanitize(draft.glance).strip()
             body = p.sanitize(draft.body).strip()
-            return glance, body, list(result.citations)
+            return glance, body, list(result.citations), draft.graphic_id
         feedback = result.reason or "verification failed"
         log.info("verify failed (attempt %d): %s", _attempt + 1, feedback.split(":")[0])
     if last_exc is not None:
@@ -289,11 +289,11 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
     if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)
-    glance, body, citations = answer
+    glance, body, citations, graphic_id = answer
     ctx.outcome = "answered"
     ctx.doc_ids = sorted({c.doc_id for c in citations})
     return _response(trace_id, ctx, timer, glance=glance, body=body,
-                     source=_source(citations[0]), citations=citations, verified=True)
+                     source=_source(citations[0]), citations=citations, verified=True, graphic_id=graphic_id)
 
 
 def _accepts(fn: Any, name: str) -> bool:

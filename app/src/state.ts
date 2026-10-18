@@ -1,4 +1,5 @@
 import type { AskRequest, AskResponse, Assignment, Command, DiagramImage, Pairing, ProgressEvent, ProgressKind, Walkthrough } from './types';
+import { answerGraphic, stepGraphic, ILLUSTRATED_PAGE_CHARS } from './ui/sop-graphics';
 import { sanitizeForG2 } from './ui/glyphs';
 import { BODY_PAGE_CHARS, paginate } from './ui/paginate';
 export const GLANCE_TIMEOUT_MS = 20000;
@@ -112,7 +113,7 @@ export function validWalkthrough(value: unknown): value is Walkthrough {
             [s.warning, s.checkpoint].every(v => v == null || typeof v === 'string') &&
             (!s.diagram || (typeof s.diagram.diagram_id === 'string' && typeof s.diagram.alt === 'string' && s.diagram.width === 576 && s.diagram.height === 144)));
 }
-function preflight(w: Walkthrough): void { w.steps.forEach(s => paginate(sanitizeForG2(s.body), BODY_PAGE_CHARS)); }
+function preflight(w: Walkthrough): void { w.steps.forEach(s => paginate(sanitizeForG2(s.body), stepGraphic(s) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS)); }
 function progress(s: LensState, kind: ProgressKind, step_id: string | null): Effect[] {
     return s.assignment_id ? [{ type: 'REPORT_PROGRESS', kind, step_id }] : [];
 }
@@ -138,7 +139,7 @@ function command(s: LensState, c: Command): Transition {
     if (c === 'resume' || c === 'repeat')
         return result(step(s), ['PREFETCH_DIAGRAMS']);
     if (c === 'details')
-        return result({ ...step(s), screen: 'STEP_DETAILS', pages: paginate(sanitizeForG2(current.body), BODY_PAGE_CHARS) });
+        return result({ ...step(s), screen: 'STEP_DETAILS', pages: paginate(sanitizeForG2(current.body), stepGraphic(current) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS) });
     if (c === 'diagram') {
         if (!current.diagram)
             return result({ ...step(s), notice: 'No diagram for this step' });
@@ -177,7 +178,7 @@ function receive(s: LensState, r: AskResponse, now: number): Transition {
             return result({ ...s, screen: 'LOGGED', response: null });
         if (r.outcome !== 'answered' || !r.glance?.trim() || !r.body?.trim())
             return result(failure(s));
-        return result({ ...s, screen: 'ANSWER_GLANCE', response: r, pages: paginate(sanitizeForG2(r.body), BODY_PAGE_CHARS), page: 0 });
+        return result({ ...s, screen: 'ANSWER_GLANCE', response: r, pages: paginate(sanitizeForG2(r.body), answerGraphic(r) ? ILLUSTRATED_PAGE_CHARS : BODY_PAGE_CHARS), page: 0 });
     }
     catch {
         return result(failure(s));

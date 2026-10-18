@@ -1,3 +1,5 @@
+import { stepGraphic } from '../../ui/sop-graphics';
+import { SopGraphic } from '../components/SopGraphic';
 import { useState } from 'react';
 import type { Step } from '../contract';
 import { DeviationForm } from '../components/DeviationForm';
@@ -91,6 +93,7 @@ function StepList({
             <p className="step-label">{s.label}</p>
             <p className="glance sm">{s.glance}</p>
             <p className="body">{s.body}</p>
+            <SopGraphic graphic={stepGraphic(s)} />
             <PinButton pinned={pinnedStepId === s.step_id} onPin={() => onUse(s)} />
           </li>
         ))}

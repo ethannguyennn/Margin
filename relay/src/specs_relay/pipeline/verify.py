@@ -171,6 +171,11 @@ def check_draft(draft: Any, chunks: list[Any]) -> tuple[str | None, list[dict]]:
                 "copy values and units exactly as the quote writes them",
                 [],
             )
+    graphic_id = _get(draft, "graphic_id")
+    if graphic_id is not None:
+        from ..illustrations import verify_graphic
+        if not verify_graphic(graphic_id, out, chunks):
+            return "unsupported_graphic: select a cited reference or null", []
     return None, out
 
 

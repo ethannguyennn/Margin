@@ -1,0 +1,61 @@
+from pathlib import Path
+from types import SimpleNamespace as NS
+import pytest
+from db.seed import load_corpus
+from specs_relay.illustrations import available_graphics, catalog, graphic_for_chunk
+from specs_relay.pipeline.generate import build_prompt, GeminiGenerator
+from specs_relay.pipeline.verify import verify
+from specs_relay.pipeline.sanitize import sanitize
+from specs_relay.schemas import Chunk, Draft, RetrievalResult
+from specs_relay.walkthrough import step_from_chunk
+from specs_relay.routes.common import sanitized_step
+from test_ask_trust import ScriptedGenerator, ask, client_for
+
+ROOT = Path(__file__).resolve().parents[2]
+_, CHUNKS = load_corpus()
+SOURCE = next(c for c in CHUNKS if c['chunk_id'] == 'SOP-220:C:4.4')
+CHUNK = Chunk(**{k: SOURCE[k] for k in ('chunk_id','doc_id','revision','section','heading','text')})
+GOOD = dict(answerable=True, glance='Purge the steam wand for 2 seconds.', body=SOURCE['text'],
+            citations=[dict(chunk_id=CHUNK.chunk_id, quote=SOURCE['text'])], graphic_id='milk-steaming')
+
+def test_catalog_covers_every_current_sop_with_exact_source_anchors_and_packaged_art():
+    docs, chunks = load_corpus(); by_id = {c['chunk_id']: c for c in chunks}; covered=set()
+    assert len({g['id'] for g in catalog()}) == len(catalog())
+    assert len({g['file'] for g in catalog()}) == 5
+    for g in catalog():
+        assert (ROOT/'app/src/assets/sops'/g['file']).read_bytes().startswith(b'\x89PNG')
+        x,y,w,h=g['crop']; assert 0<=x<1 and 0<=y<1 and 0<w and 0<h and x+w<=1+1e-9 and y+h<=1+1e-9
+        for ref in g['references']:
+            c=by_id[ref['chunk_id']]; assert ref['quote'] in c['text']; covered.add(c['doc_id'])
+    assert covered == {d['doc_id'] for d in docs}
+
+def test_prompt_and_walkthrough_keep_revision_and_source_binding():
+    assert 'milk-steaming' in build_prompt('purge wand', [CHUNK])
+    assert 'allergen-binder' not in build_prompt('purge wand', [CHUNK])
+    assert available_graphics([]) == []
+    step=step_from_chunk(SOURCE)
+    assert step.graphic_id == 'milk-steaming'
+    assert sanitized_step(NS(sanitize=sanitize),step).graphic_id == step.graphic_id
+    assert graphic_for_chunk({**SOURCE, 'chunk_id':'SOP-220:X:4.4'}) is None
+    assert graphic_for_chunk({**SOURCE, 'text':'Unrelated replacement content.'}) is None
+
+@pytest.mark.parametrize('graphic', ['https://unsafe.test/a.png','missing','allergen-binder'])
+def test_rejects_unknown_or_uncited_graphic(graphic):
+    assert not verify(Draft(**{**GOOD,'graphic_id':graphic}),[CHUNK]).ok
+
+def test_citation_must_include_the_selected_visual_anchor():
+    assert verify(Draft(**GOOD),[CHUNK]).ok
+    assert not verify(Draft(**{**GOOD,'glance':'Purge it.','body':'Purge it.',
+        'citations':[dict(chunk_id=CHUNK.chunk_id,quote='2 seconds')]}),[CHUNK]).ok
+
+def test_selected_graphic_survives_real_ask_route():
+    class Retriever:
+        async def retrieve(self,*args): return RetrievalResult(chunks=[CHUNK],best_sim=.9,best_rrf=.04)
+    with client_for(ScriptedGenerator(GOOD)) as client:
+        client.app.state.pipeline.retriever=Retriever()
+        out=ask(client,'How do I purge the steam wand?')
+    assert out['verified'] and out['graphic_id']=='milk-steaming'
+
+def test_generation_uses_configured_shared_timeout():
+    gen=GeminiGenerator.from_settings(NS(gemini_api_key='',gemini_model_generate='test',generate_timeout_s=23),client=object())
+    assert gen.timeout == 23

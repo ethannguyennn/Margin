@@ -21,7 +21,7 @@ from .retrieve import should_refuse
 from .sanitize import sanitize
 from .verify import check_draft
 
-GENERATE_TIMEOUT_S = 6.0
+GENERATE_TIMEOUT_S = 20.0
 TEMPERATURE = 0.1
 
 SYSTEM_PROMPT = """\
@@ -30,17 +30,21 @@ Rules:
 1. If the context does not contain the answer, return answerable=false. Never guess.
 2. Every claim must be supported by a verbatim quote copied from a chunk. Cite chunk_id and quote.
    Copy the quote character for character; do not paraphrase inside a quote.
+   For short instructions, cite the whole source instruction so all stated values remain supported.
 3. glance: <= 60 characters, ASCII only, imperative, include the key value/unit.
 4. body: <= 450 characters, ASCII only, plain sentences, no markdown.
 5. Preserve numbers, units, and warnings exactly as written. Never convert units.
    Every number and part code in glance or body must appear in one of your quotes.
 6. If the question is ambiguous between procedures, answerable=false and needs_clarification=true.
-Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}]}
+7. Choose graphic_id from AVAILABLE GRAPHICS only when its reference anchor occurs in a quote you cite.
+   Choose the most useful equipment view for this instruction; otherwise return null. Never invent a URL.
+Return JSON: {answerable, needs_clarification, glance, body, citations:[{chunk_id, quote}], graphic_id}
 When answerable=false, return empty glance, body and citations."""
 
 RESPONSE_SCHEMA: dict = {
     "type": "object",
     "properties": {
+        "graphic_id": {"type": ["string", "null"]},
         "answerable": {"type": "boolean"},
         "needs_clarification": {"type": "boolean"},
         "glance": {"type": "string"},
@@ -54,7 +58,7 @@ RESPONSE_SCHEMA: dict = {
             },
         },
     },
-    "required": ["answerable", "needs_clarification", "glance", "body", "citations"],
+    "required": ["answerable", "needs_clarification", "glance", "body", "citations", "graphic_id"],
 }
 
 
@@ -93,6 +97,8 @@ def build_prompt(query: str, chunks: list[Any], feedback: str | None = None) -> 
         if _get(c, "heading"):
             head += f" - {_get(c, 'heading')}"
         parts.append(f"[chunk_id: {_get(c, 'chunk_id')}] {head}\n{_get(c, 'text')}\n")
+    from ..illustrations import available_graphics
+    parts.append("AVAILABLE GRAPHICS: " + json.dumps(available_graphics(chunks)))
     parts.append(f"QUESTION: {query}")
     if feedback:
         parts.append(
@@ -122,7 +128,8 @@ class GeminiGenerator:
 
     @classmethod
     def from_settings(cls, settings: Any, client: Any = None) -> "GeminiGenerator":
-        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate)
+        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate,
+                   timeout=getattr(settings, "generate_timeout_s", GENERATE_TIMEOUT_S))
 
     async def generate(self, query: str, chunks: list[Any], feedback: str | None = None):
         from google.genai import types
@@ -158,6 +165,7 @@ class GroundedAnswer:
     source: str = ""
     citations: list = field(default_factory=list)   # schemas.Citation
     verified: bool = False
+    graphic_id: str | None = None
     llm_calls: int = 0
     reasons: list[str] = field(default_factory=list)  # verifier failures, for logs/eval
     retrieval: Any = None
@@ -199,6 +207,7 @@ async def answer_question(query: str, retriever: Any, generator: Any, *, revisio
                 source=f"{first['doc_id']} Sec {first['section']} rev {first['revision']}",
                 citations=[Citation(**c) for c in cites],
                 verified=True,
+                graphic_id=_get(draft, "graphic_id"),
                 llm_calls=answer.llm_calls,
                 reasons=answer.reasons,
                 retrieval=result,

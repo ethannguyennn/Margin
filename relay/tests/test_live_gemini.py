@@ -77,3 +77,34 @@ def test_live_generate_answers_and_refuses():
                                       gen, revision=None, min_sim=0.0, min_rrf=0.0))
     assert off.outcome in ("not_found", "clarify")
     assert not off.verified
+
+
+def test_live_reference_graphics_for_current_corpus():
+    import json
+    import time
+    from db.seed import load_corpus
+    from specs_relay.pipeline.generate import GeminiGenerator, answer_question
+    _, chunks = load_corpus()
+    cases = [
+        ('SOP-201:C:2.3', 'Where is the receipt printer and spare paper?', 'cashier-station'),
+        ('SOP-202:C:7.5', 'What do we do with the bank bag?', 'till-closing'),
+        ('SOP-210:C:3.7', 'Where is the test strip used?', 'sanitizer-test'),
+        ('SOP-220:C:4.4', 'How do I purge the steam wand?', 'milk-steaming'),
+        ('SOP-230:C:2.2', 'Where do I pump syrup for a latte?', 'recipe-pumps'),
+    ]
+    async def run():
+        generator=GeminiGenerator.from_settings(S); rows=[]
+        for cid, question, expected in cases:
+            c=next(c for c in chunks if c['chunk_id']==cid)
+            chunk=schemas.Chunk(**{k:c[k] for k in ('chunk_id','doc_id','revision','section','heading','text')})
+            retrieved=schemas.RetrievalResult(chunks=[chunk],best_sim=.9,best_rrf=.04)
+            start=time.perf_counter()
+            out=await answer_question(question,None,generator,revision=None,min_sim=0,min_rrf=0,retrieval=retrieved)
+            assert out.verified and out.graphic_id==expected, (cid,out.outcome,out.graphic_id,out.reasons)
+            rows.append(dict(chunk_id=cid,question=question,graphic_id=out.graphic_id,verified=out.verified,
+                             seconds=round(time.perf_counter()-start,2)))
+        return rows
+    rows=asyncio.run(run())
+    print(json.dumps(rows))
+    output=os.environ.get('SPECS_GRAPHICS_EVIDENCE')
+    if output: Path(output).write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')

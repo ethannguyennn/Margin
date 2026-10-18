@@ -17,6 +17,7 @@ export interface LensSnapshot {
   sessionId: string | null;
   /** Exactly what the glasses display right now (header, main, footer). */
   lensText: string;
+  graphic_id?: string;
 }
 
 export interface LensCommands {
@@ -64,7 +65,7 @@ export class LensLink {
 
   detach(status: string): void {
     this.commands = null;
-    this.update({ connected: false, screen: null, status, lensText: '' });
+    this.update({ connected: false, screen: null, status, lensText: '', graphic_id: undefined });
   }
 
   /** False when the lens is not connected, busy, or still on the privacy notice. */

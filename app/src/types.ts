@@ -8,6 +8,7 @@ export interface Step {
   step_id: string; label: string; glance: string; body: string;
   warning?: string | null;     // <= 80 chars, ASCII, shown on the step screen
   checkpoint?: string | null;  // <= 60 chars, e.g. "0.20 mm gauge must not enter"
+  graphic_id?: string | null;
   diagram?: Diagram | null;    // only approved diagrams are ever sent
 }
 export interface Walkthrough {
@@ -28,6 +29,7 @@ export interface AskResponse {
   trace_id: string; transcript: string; intent: Intent; outcome: Outcome;
   glance: string; body: string; source: string; citations: Citation[]; verified: boolean;
   walkthrough: Walkthrough | null; latency_ms: Latency;
+  graphic_id?: string | null;
   command?: Command | null;           // set iff outcome === 'command'
   needs_clarification?: boolean;      // the relay already sends it (TODO.md §4)
   error?: { code: string; message: string };

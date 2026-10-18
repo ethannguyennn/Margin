@@ -29,6 +29,8 @@ def step_from_chunk(chunk: dict):
     if len(glance) >= 60 and not authored:
         glance = glance[:56].rstrip() + "..."
     extras = {k: chunk[k] for k in ("warning", "checkpoint", "diagram") if chunk.get(k) is not None}
+    from .illustrations import graphic_for_chunk
+    extras["graphic_id"] = graphic_for_chunk(chunk)
     return Step(step_id=chunk["chunk_id"], label=chunk["section"], glance=glance, body=body, **extras)
 
 

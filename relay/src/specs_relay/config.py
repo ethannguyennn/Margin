@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     pair_code_ttl_s: int = 15 * 60
     pair_rate_per_min: int = 10  # POST /v1/devices/pair per client IP
     stt_timeout_s: float = 5.0  # outer guard; Part 4 times out at ~4 s itself
-    generate_timeout_s: float = 7.0  # outer guard; Part 4 times out at ~6 s itself
+    generate_timeout_s: float = 20.0  # shared by the provider and route guards
     log_level: str = "INFO"
     git_sha: str = ""
 

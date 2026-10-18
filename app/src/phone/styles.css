@@ -1330,3 +1330,8 @@ select {
 .flip {
   transform: rotate(180deg);
 }
+
+.sop-graphic { margin: 16px 0; overflow: hidden; border-radius: 12px; background: #000; }
+.sop-graphic svg { display: block; width: 100%; max-height: 320px; }
+.sop-graphic figcaption { padding: 12px; color: #eee; font-size: 13px; }
+.sop-graphic figcaption span { display: block; margin-top: 4px; color: #aaa; }

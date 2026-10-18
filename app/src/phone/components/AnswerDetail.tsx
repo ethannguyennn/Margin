@@ -1,3 +1,5 @@
+import { answerGraphic } from '../../ui/sop-graphics';
+import { SopGraphic } from './SopGraphic';
 import type { AskResponse, Citation, Latency, Step } from '../contract';
 import { errorTitle, seconds } from '../copy';
 import { ChevronIcon } from './Icons';
@@ -34,6 +36,7 @@ export function AnswerDetail({
         </div>
         <p className="glance">{res.glance || '—'}</p>
         {res.body && <p className="body">{res.body}</p>}
+        <SopGraphic graphic={answerGraphic(res)} />
         {res.transcript && <p className="meta">Asked · “{res.transcript}”</p>}
         {res.source && <p className="meta">Source · {res.source}</p>}
         {res.error && (

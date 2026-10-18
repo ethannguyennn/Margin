@@ -1,0 +1,37 @@
+[
+  {
+    "chunk_id": "SOP-201:C:2.3",
+    "question": "Where is the receipt printer and spare paper?",
+    "graphic_id": "cashier-station",
+    "verified": true,
+    "seconds": 1.12
+  },
+  {
+    "chunk_id": "SOP-202:C:7.5",
+    "question": "What do we do with the bank bag?",
+    "graphic_id": "till-closing",
+    "verified": true,
+    "seconds": 0.92
+  },
+  {
+    "chunk_id": "SOP-210:C:3.7",
+    "question": "Where is the test strip used?",
+    "graphic_id": "sanitizer-test",
+    "verified": true,
+    "seconds": 0.77
+  },
+  {
+    "chunk_id": "SOP-220:C:4.4",
+    "question": "How do I purge the steam wand?",
+    "graphic_id": "milk-steaming",
+    "verified": true,
+    "seconds": 0.9
+  },
+  {
+    "chunk_id": "SOP-230:C:2.2",
+    "question": "Where do I pump syrup for a latte?",
+    "graphic_id": "recipe-pumps",
+    "verified": true,
+    "seconds": 0.84
+  }
+]

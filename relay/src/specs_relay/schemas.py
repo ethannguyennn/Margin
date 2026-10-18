@@ -116,6 +116,7 @@ class Step(_Model):
     warning: WarningText | None = None  # v2, shown on the step screen
     checkpoint: CheckpointText | None = None  # v2, e.g. "0.20 mm gauge must not enter"
     diagram: Diagram | None = None  # v2, only approved diagrams are ever sent
+    graphic_id: str | None = None  # revision-pinned synthetic reference
 
 
 class Walkthrough(_Model):
@@ -154,11 +155,14 @@ class AskResponse(_Model):
     needs_clarification: bool = False
     # v2: set iff outcome == 'command'. The lens acts on it and never renders text.
     command: Command | None = None
+    graphic_id: str | None = None
 
     @model_validator(mode="after")
     def _never_unverified_answer(self) -> AskResponse:
         if self.outcome == "answered" and (not self.verified or not self.citations):
             raise ValueError("an `answered` response must be verified and carry citations")
+        if self.graphic_id is not None and (self.outcome != "answered" or not self.verified):
+            raise ValueError("a graphic requires a verified answer")
         if (self.outcome == "command") != (self.command is not None):
             raise ValueError("`command` is set iff outcome == 'command'")
         if self.outcome == "command" and (self.verified or self.glance or self.body or self.citations):
@@ -248,6 +252,7 @@ class Draft(BaseModel):
     glance: str = ""
     body: str = ""
     citations: list[DraftCitation] = Field(default_factory=list)
+    graphic_id: str | None = None
 
 
 class VerifyResult(BaseModel):

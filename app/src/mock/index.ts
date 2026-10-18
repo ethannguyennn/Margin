@@ -214,7 +214,16 @@ function commandResponse(transcript: string, command: Command): AskResponse {
 }
 
 /** Substring triggers, first match wins - order matters. */
+const COFFEE: AskResponse = base({
+  transcript: 'How do I purge the steam wand?', verified: true,
+  glance: 'Purge the steam wand for 2 seconds.',
+  body: 'Purge the steam wand for 2 seconds before and after every use.',
+  source: 'SOP-220 Sec 4.4 rev C', graphic_id: 'milk-steaming',
+  citations: [{ chunk_id: 'SOP-220:C:4.4', doc_id: 'SOP-220', revision: 'C', section: '4.4',
+    quote: 'Purge the steam wand for 2 seconds before and after every use.' }],
+});
 const TRIGGERS: Array<[string[], AskResponse]> = [
+  [['steam wand', 'coffee reference'], COFFEE],
   [['log deviation', 'deviation'], LOGGED],
   [['boom'], ERROR],
   [['guide me', 'walk me through', 'walkthrough'], WALKTHROUGH],
