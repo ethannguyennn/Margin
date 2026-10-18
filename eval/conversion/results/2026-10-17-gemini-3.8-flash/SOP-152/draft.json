@@ -1,0 +1,148 @@
+{
+  "doc_id": "SOP-152",
+  "revision": "A",
+  "title": "Valve Lineup for Flushing",
+  "material_id": "SOP-152",
+  "status": "ready",
+  "steps": [
+    {
+      "label": "1",
+      "glance": "Close suction valve V1",
+      "body": "Close suction valve V1 (handle across the pipe).",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "1. Close suction valve V1 (handle across the pipe)."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.137,
+          0.3771,
+          0.3214,
+          0.5362
+        ],
+        "elements": [],
+        "alt": "V1 closed position"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "2",
+      "glance": "Open bypass valve V3",
+      "body": "Open bypass valve V3 (handle along the pipe).",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "2. Open bypass valve V3 (handle along the pipe)."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.329,
+          0.3832,
+          0.4903,
+          0.5403
+        ],
+        "elements": [],
+        "alt": "V3 open position"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3",
+      "glance": "Set flush valve V4 to 45 deg",
+      "body": "Set flush valve V4 to 45 deg.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "3. Set flush valve V4 to 45°.",
+        "Figure 1. Valve handle positions for flushing."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.521,
+          0.3832,
+          0.6593,
+          0.5117
+        ],
+        "elements": [],
+        "alt": "Flush valve V4 handle position"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "4",
+      "glance": "Confirm gauge PG-1 reads below 0.5 bar",
+      "body": "Confirm gauge PG-1 reads below 0.5 bar.",
+      "warning": null,
+      "checkpoint": "gauge PG-1 reads below 0.5 bar",
+      "quotes": [
+        "4. Confirm gauge PG-1 reads below 0.5 bar."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "5",
+      "glance": "Open discharge valve V2 slowly over 10 s",
+      "body": "Open discharge valve V2 slowly over 10 s.",
+      "warning": "Never open V2 before V4 is set.",
+      "checkpoint": null,
+      "quotes": [
+        "Never open V2 before V4 is set.",
+        "5. Open discharge valve V2 slowly over 10 s."
+      ],
+      "diagram": {
+        "kind": "crop",
+        "figure_id": "F1",
+        "bbox": [
+          0.6823,
+          0.3914,
+          0.8513,
+          0.5525
+        ],
+        "elements": [],
+        "alt": "V2 open position"
+      },
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    }
+  ],
+  "warnings": [
+    "WARNING: Wear splash goggles. Never open V2 before V4 is set."
+  ]
+}

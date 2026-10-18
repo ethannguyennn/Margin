@@ -10,9 +10,9 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-schemas = pytest.importorskip("margin_relay.schemas")
+schemas = pytest.importorskip("specs_relay.schemas")
 
-from margin_relay.pipeline.generate import (  # noqa: E402
+from specs_relay.pipeline.generate import (  # noqa: E402
     NOT_FOUND_GLANCE,
     RESPONSE_SCHEMA,
     SYSTEM_PROMPT,

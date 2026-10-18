@@ -15,7 +15,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "relay/src"))
-from margin_relay import db
+from specs_relay import db
 
 HEADING = re.compile(r"^#{2,6}\s+(\d+(?:\.\d+)*)\s+(.+?)\s*$", re.MULTILINE)
 ORDERED = re.compile(r"^\s*(\d+)\.\s+", re.MULTILINE)
@@ -175,6 +175,9 @@ async def main(argv=None) -> int:
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check", action="store_true", help="Parse/count only; no config, DB, or API calls")
     mode.add_argument("--probe-only", action="store_true", help="Check actual DB capabilities; roll back probes")
+    mode.add_argument("--migrate-only", action="store_true", help="Apply idempotent migrations without seeding")
+    mode.add_argument("--probe-v2-only", action="store_true", help="Apply migrations twice in a rollback-only synthetic schema")
+    mode.add_argument("--from-drafts", action="store_true", help="Republish approved drafts stored in this database")
     args = parser.parse_args(argv)
     if args.check:
         documents, chunks = load_corpus()
@@ -184,10 +187,21 @@ async def main(argv=None) -> int:
     try:
         settings = db.get_settings()
         await db.init_pool(settings)
+        if args.probe_v2_only:
+            print("V2 synthetic migration probe:", json.dumps(await db.validate_v2_migration(), sort_keys=True))
+            return 0
         print("Database capability probe:", json.dumps(await db.validate_capabilities(), sort_keys=True))
         if not args.probe_only:
+            before = await db.storage_counts() if args.migrate_only else None
             await db.apply_migrations()
-            print_stats(await ingest(settings=settings))
+            if args.migrate_only:
+                print("Migration row counts:", json.dumps({"before": before, "after": await db.storage_counts()}, sort_keys=True))
+            elif args.from_drafts:
+                from specs_relay.walkthrough import publish_draft
+                for draft in await db.approved_drafts():
+                    print(json.dumps(await publish_draft(draft, settings=settings), sort_keys=True))
+            elif not args.migrate_only:
+                print_stats(await ingest(settings=settings))
         return 0
     finally:
         await db.close_pool()
@@ -195,7 +209,9 @@ async def main(argv=None) -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(asyncio.run(main()))
+        # psycopg async cannot run on Windows' default ProactorEventLoop.
+        win = {"loop_factory": asyncio.SelectorEventLoop} if sys.platform == "win32" else {}
+        raise SystemExit(asyncio.run(main(), **win))
     except Exception as exc:
         # Provider/connection errors may contain credentials. Do not print them.
         print(f"Seed failed ({type(exc).__name__}); check Part 3 config, credentials, and service access.",

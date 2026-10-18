@@ -35,7 +35,7 @@ export const SESSION_ID: string = uuid();
 // AudioInputSource values from @evenrealities/even_hub_sdk are these exact strings,
 // so we use the literals and avoid a runtime import of the SDK here.
 export type MicSource = 'glasses' | 'phone';
-const MIC_KEY = 'margin.micSource';
+const MIC_KEY = 'specs.micSource';
 
 export function getMicSource(): MicSource {
   try {
@@ -52,3 +52,60 @@ export function setMicSource(source: MicSource): void {
     /* non-fatal: the toggle just will not survive a reload */
   }
 }
+
+// --- v2: device credentials, gesture tuning ---------------------------------
+// localStorage is the only storage the WebView has; it is sandboxed per package_id.
+// Every read/write is wrapped: a blocked store must degrade, never crash.
+function load<T>(key: string, fallback: T): T {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw === null ? fallback : (JSON.parse(raw) as T);
+  } catch {
+    return fallback;
+  }
+}
+function save(key: string, value: unknown): void {
+  try {
+    if (value === null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* non-fatal: survives this session only */
+  }
+}
+
+/** This device's relay credential. The token authorises this device only; never logged. */
+export type DeviceCredential = { device_id: string; device_token: string };
+const DEVICE_KEY = 'specs.device';
+export const getDevice = (): DeviceCredential | null => {
+  const d = load<DeviceCredential | null>(DEVICE_KEY, null);
+  return d && typeof d.device_token === 'string' && d.device_token ? d : null;
+};
+export const setDevice = (d: DeviceCredential | null): void => save(DEVICE_KEY, d);
+
+/** Per-wearer detector overrides written by calibrate(); merged over DEFAULT_PARAMS. */
+const PARAMS_KEY = 'specs.detector';
+export const getDetectorOverrides = (): Record<string, unknown> | null => load(PARAMS_KEY, null);
+export const setDetectorOverrides = (p: Record<string, unknown> | null): void => save(PARAMS_KEY, p);
+
+/** 0.5 (stiffer) .. 2 (more sensitive). Divides the amplitude thresholds. */
+const SENS_KEY = 'specs.sensitivity';
+export const getSensitivity = (): number => {
+  const s = Number(load(SENS_KEY, 1));
+  return Number.isFinite(s) ? Math.min(2, Math.max(0.5, s)) : 1;
+};
+export const setSensitivity = (s: number): void => save(SENS_KEY, Math.min(2, Math.max(0.5, s)));
+
+/** 'single' stays off until the M4 false-positive data says it is safe. */
+export type NodMode = 'double' | 'single';
+const NOD_KEY = 'specs.nodMode';
+export const getNodMode = (): NodMode => (load<string>(NOD_KEY, 'double') === 'single' ? 'single' : 'double');
+export const setNodMode = (m: NodMode): void => save(NOD_KEY, m);
+
+/** ImuReportPace code (100..1000). A protocol code, not Hz; the default is provisional
+ * until the hardware characterisation picks the lowest pace that resolves a nod. */
+const PACE_KEY = 'specs.imuPace';
+export const getImuPace = (): number => {
+  const p = Number(load(PACE_KEY, 500));
+  return [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000].includes(p) ? p : 500;
+};
+export const setImuPace = (p: number): void => save(PACE_KEY, p);

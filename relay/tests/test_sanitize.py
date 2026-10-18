@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from margin_relay.pipeline.sanitize import G2_ALLOWED_NON_ASCII, REPLACEMENTS, sanitize
+from specs_relay.pipeline.sanitize import G2_ALLOWED_NON_ASCII, REPLACEMENTS, sanitize
 
 CASES = json.loads((Path(__file__).parent / "fixtures" / "glyph_cases.json").read_text("utf-8"))
 
@@ -32,3 +32,14 @@ def test_idempotent():
     for case in CASES:
         once = sanitize(case["in"])
         assert sanitize(once) == once
+
+
+APP_FIXTURES = Path(__file__).resolve().parents[2] / "app" / "tests" / "sanitize-fixtures.json"
+
+
+@pytest.mark.skipif(not APP_FIXTURES.exists(), reason="app fixtures not in this checkout")
+def test_relay_agrees_with_every_app_fixture():
+    # TODO.md section 4: the app's own suite, run against the relay sanitizer.
+    cases = json.loads(APP_FIXTURES.read_text("utf-8"))
+    mismatches = [c for c in cases if sanitize(c["input"]) != c["output"]]
+    assert mismatches == []

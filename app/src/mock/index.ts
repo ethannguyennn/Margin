@@ -1,7 +1,8 @@
 // Canned relay responses + a fake mic, so Part 1 can drive real screens with no
 // relay, no glasses and no network. Enabled by VITE_MOCK=1.
-import type { AskRequest, AskResponse, Step } from '../types.ts';
+import type { AskRequest, AskResponse, Assignment, Command, DiagramImage, Pairing, ProgressEvent, Step } from '../types.ts';
 import { SAMPLE_RATE } from '../settings.ts';
+import { mockDiagramImage } from './tiles.ts';
 
 /** Artificial ask latency so THINKING is actually visible. Set to 0 in tests. */
 export let MOCK_DELAY_MS = 900;
@@ -181,6 +182,37 @@ const ERROR: AskResponse = base({
   error: { code: 'llm_timeout', message: 'The model did not answer in time.' },
 });
 
+// v2 voice commands (BUILD-PLAN-V2 §3). Whole-utterance match, exactly like the relay's
+// parse_command, so "what's the next step's torque" stays a question.
+const COMMAND_PHRASES: Record<Command, string[]> = {
+  next: ['next', 'done', 'next step', 'finished', 'complete'],
+  back: ['back', 'previous', 'go back'],
+  repeat: ['repeat', 'say that again'],
+  details: ['details', 'more', 'read it'],
+  diagram: ['diagram', 'show diagram', 'picture', 'show me'],
+  pause: ['pause', 'stop task'],
+  resume: ['resume', 'continue'],
+  exit: ['exit', 'close specs'],
+};
+
+export function mockCommandFor(transcript: string): Command | null {
+  const t = transcript.toLowerCase().replace(/[^a-z' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  for (const [cmd, phrases] of Object.entries(COMMAND_PHRASES) as [Command, string[]][]) if (phrases.includes(t)) return cmd;
+  return null;
+}
+
+function commandResponse(transcript: string, command: Command): AskResponse {
+  return base({
+    trace_id: `mock-cmd-${command}`,
+    transcript,
+    intent: 'command',
+    outcome: 'command',
+    command,
+    verified: false,
+    latency_ms: { stt: 380, embed: 0, retrieve: 0, generate: 0, verify: 0, total: 400 },
+  });
+}
+
 /** Substring triggers, first match wins - order matters. */
 const TRIGGERS: Array<[string[], AskResponse]> = [
   [['log deviation', 'deviation'], LOGGED],
@@ -191,15 +223,29 @@ const TRIGGERS: Array<[string[], AskResponse]> = [
 ];
 
 export function mockResponseFor(transcript: string): AskResponse {
+  const cmd = mockCommandFor(transcript);
+  if (cmd) return commandResponse(transcript, cmd);
   const t = transcript.toLowerCase();
   for (const [keys, res] of TRIGGERS) if (keys.some((k) => t.includes(k))) return res;
   return { ...NOT_FOUND, transcript: transcript || NOT_FOUND.transcript };
 }
 
+/** What mock "STT" hears on the next audio asks, in order (dev buttons, tests). Empty = torque. */
+const heard: string[] = [];
+export function queueMockTranscripts(...texts: string[]): void {
+  heard.push(...texts);
+}
+export function clearMockTranscripts(): void {
+  heard.length = 0;
+}
+
 export async function mockAsk(req: AskRequest): Promise<AskResponse> {
-  await sleep(MOCK_DELAY_MS);
-  // Audio requests have no client-side transcript; pretend STT heard the torque question.
-  return req.text ? mockResponseFor(req.text) : TORQUE;
+  // Audio requests have no client-side transcript: use the queued one, else the torque question.
+  const said = req.text ?? heard.shift();
+  const res = said ? mockResponseFor(said) : TORQUE;
+  // Commands take the relay's fast path (no retrieval, no LLM), so they come back quicker.
+  await sleep(res.outcome === 'command' ? MOCK_DELAY_MS / 3 : MOCK_DELAY_MS);
+  return res;
 }
 
 export async function mockHealth() {
@@ -215,26 +261,176 @@ export async function mockLogDeviation() {
 let rampTimer: ReturnType<typeof setInterval> | null = null;
 let capturing = false;
 
+let endpointTimer: ReturnType<typeof setTimeout> | null = null;
+let mockNoSpeech = false;
+type MockEndpoint = 'speech_end' | 'no_speech' | 'cap';
+/** The mock endpoint: what fires and when after startCapture. Default speech_end at 1.5 s. */
+let endpointPlan: { reason: MockEndpoint; ms: number } = { reason: 'speech_end', ms: 1500 };
+export function setMockEndpoint(reason: MockEndpoint, ms = reason === 'no_speech' ? 3000 : 1500): void {
+  endpointPlan = { reason, ms };
+}
+
 /** 1.5 s level ramp so Part 1's input meter animates with no hardware. */
-export async function mockStartCapture(onLevel: (rms01: number) => void): Promise<void> {
+export async function mockStartCapture(
+  onLevel: (rms01: number) => void,
+  onEndpoint?: (reason: MockEndpoint) => void,
+): Promise<void> {
   if (capturing) return;
   capturing = true;
+  mockNoSpeech = false;
+  const plan = endpointPlan;
   let t = 0;
   rampTimer = setInterval(() => {
     t += 100;
-    onLevel(0.15 + 0.75 * Math.sin(((t % 1500) / 1500) * Math.PI));
+    onLevel(plan.reason === 'no_speech' ? 0.02 : 0.15 + 0.75 * Math.sin(((t % 1500) / 1500) * Math.PI));
   }, 100);
+  endpointTimer = setTimeout(() => {
+    if (rampTimer) clearInterval(rampTimer);
+    rampTimer = null;
+    mockNoSpeech = plan.reason === 'no_speech';
+    console.info(`[audio] mock endpoint ${plan.reason}`);
+    onEndpoint?.(plan.reason);
+  }, plan.ms);
 }
 
 export async function mockStopCapture(): Promise<{ data_b64: string; sample_rate: 16000 }> {
   if (rampTimer) clearInterval(rampTimer);
-  rampTimer = null;
+  if (endpointTimer) clearTimeout(endpointTimer);
+  rampTimer = endpointTimer = null;
   capturing = false;
-  return { data_b64: 'bW9jay1wY20=', sample_rate: SAMPLE_RATE };
+  return { data_b64: mockNoSpeech ? '' : 'bW9jay1wY20=', sample_rate: SAMPLE_RATE };
 }
 
 export function mockIsCapturing(): boolean {
   return capturing;
 }
 
-export const fixtures = { TORQUE, WALKTHROUGH, CLEAN, NOT_FOUND, LOGGED, ERROR };
+// --- v2: pairing, assignment, progress, diagrams ----------------------------
+let pairedAt = 0;
+const CLAIM_AFTER_MS = 5000;
+const DEVICE = { device_id: 'dev-mock-1', device_token: 'mock-device-token', pair_code: '4F7K' };
+
+function pairing(): Pairing {
+  const claimed = pairedAt > 0 && Date.now() - pairedAt >= CLAIM_AFTER_MS;
+  return { ...DEVICE, claimed, worker_name: claimed ? 'Bay 3' : null };
+}
+
+/** Code 4F7K; the "supervisor" claims it 5 s after the first pair(). */
+export async function mockPair(): Promise<Pairing> {
+  await sleep(MOCK_DELAY_MS / 3);
+  if (!pairedAt) pairedAt = Date.now();
+  return pairing();
+}
+
+export async function mockPairingStatus(): Promise<Pairing> {
+  await sleep(MOCK_DELAY_MS / 3);
+  return pairing();
+}
+
+const TASK_STEPS: Step[] = [
+  {
+    step_id: 'SOP-114:C:5.1',
+    label: 'Step 1 of 5',
+    glance: 'Lock out power at the panel',
+    body: 'Open the service panel, move the disconnect to OFF and apply your personal lock and tag.',
+    warning: 'Verify zero energy before touching any terminal',
+    checkpoint: null,
+    diagram: null,
+  },
+  {
+    step_id: 'SOP-114:C:5.3',
+    label: 'Step 2 of 5',
+    glance: 'Remove the guard',
+    body: 'Back out the six M4 guard screws and set the guard aside. Keep the screws in the tray.',
+    warning: null,
+    checkpoint: null,
+    diagram: { diagram_id: 'dg-sop114-guard', width: 576, height: 144, alt: 'Guard, six M4 screws' },
+  },
+  {
+    step_id: 'SOP-114:C:5.4',
+    label: 'Step 3 of 5',
+    glance: 'Seat the bracket',
+    body: 'Align the bracket dowels with the frame holes and press until both dowels bottom out.',
+    warning: null,
+    checkpoint: 'Both dowels bottomed out, no gap at the frame',
+    diagram: { diagram_id: 'dg-sop114-bracket', width: 576, height: 144, alt: 'Bracket, M5 torque order 1-4' },
+  },
+  {
+    step_id: 'SOP-114:C:5.5',
+    label: 'Step 4 of 5',
+    glance: 'Torque M5 to 4 N-m',
+    body: 'Torque all four M5 screws to 4 N-m in a diagonal pattern, then re-check the first.',
+    warning: null,
+    checkpoint: null,
+    diagram: null,
+  },
+  {
+    step_id: 'SOP-114:C:5.7',
+    label: 'Step 5 of 5',
+    glance: 'Refit guard, restore power',
+    body: 'Refit the guard, torque the six M4 screws to 1.5 N-m, remove your lock and close the disconnect.',
+    warning: null,
+    checkpoint: null,
+    diagram: null,
+  },
+];
+
+const ASSIGNMENT: Assignment = {
+  assignment_id: 'asg-mock-1',
+  assigned_at: '2026-10-17T09:00:00Z',
+  walkthrough: {
+    doc_id: 'SOP-114',
+    revision: 'C',
+    title: 'Bracket replacement',
+    total: TASK_STEPS.length,
+    index: 0,
+    steps: TASK_STEPS,
+    assignment_id: 'asg-mock-1',
+  },
+};
+
+/** Every progress event the mock "relay" accepted, de-duplicated like the real one. */
+export const mockProgressLog: ProgressEvent[] = [];
+
+/** The task, once the device is claimed, until it is reported task_completed. */
+/** Scenario m1 (hands-free ask, no task): the mock relay hands out nothing. */
+let assignmentEnabled = true;
+export function setMockAssignment(enabled: boolean): void {
+  assignmentEnabled = enabled;
+}
+
+export async function mockNextAssignment(): Promise<Assignment | null> {
+  await sleep(MOCK_DELAY_MS / 3);
+  if (!assignmentEnabled || !pairing().claimed) return null;
+  const done = mockProgressLog.some((e) => e.assignment_id === ASSIGNMENT.assignment_id && e.kind === 'task_completed');
+  // Stamped at hand-out: the lens refuses assignments older than 12 h (ASSIGNMENT_TTL_MS).
+  return done ? null : { ...structuredClone(ASSIGNMENT), assigned_at: new Date().toISOString() };
+}
+
+export async function mockPostProgress(events: ProgressEvent[]): Promise<{ accepted: number }> {
+  await sleep(MOCK_DELAY_MS / 3);
+  const key = (e: ProgressEvent) => `${e.assignment_id}|${e.step_id}|${e.kind}|${e.ts}`;
+  const seen = new Set(mockProgressLog.map(key));
+  for (const e of events) {
+    if (seen.has(key(e))) continue;
+    seen.add(key(e));
+    mockProgressLog.push(e);
+  }
+  return { accepted: events.length };
+}
+
+export async function mockGetDiagram(diagram_id: string): Promise<DiagramImage | null> {
+  await sleep(MOCK_DELAY_MS);
+  return mockDiagramImage(diagram_id);
+}
+
+/** Test seam: forget pairing, progress, queued transcripts and the endpoint plan. */
+export function resetMockV2(): void {
+  pairedAt = 0;
+  mockProgressLog.length = 0;
+  heard.length = 0;
+  endpointPlan = { reason: 'speech_end', ms: 1500 };
+  assignmentEnabled = true;
+}
+
+export const fixtures = { TORQUE, WALKTHROUGH, CLEAN, NOT_FOUND, LOGGED, ERROR, ASSIGNMENT };

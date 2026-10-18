@@ -10,7 +10,7 @@ import sentry_sdk
 from sentry_sdk.transport import Transport
 
 from _relay_helpers import make_client, make_settings, sid
-from margin_relay import obs
+from specs_relay import obs
 
 APP_TRACE = "771a43a4192642f0b136d5159a501700"
 APP_SPAN = "b0e6f15b45c36b12"
@@ -18,21 +18,37 @@ SENTRY_TRACE = f"{APP_TRACE}-{APP_SPAN}-1"
 BAGGAGE = f"sentry-trace_id={APP_TRACE},sentry-sample_rate=1.0,sentry-sampled=true"
 
 
-def test_stage_records_self_time_and_accumulates():
+class FakeClock:
+    """Deterministic perf_counter: real sleeps make timing asserts flaky under load."""
+
+    def __init__(self):
+        self.now = 100.0
+
+    def __call__(self):
+        return self.now
+
+    def advance(self, ms):
+        self.now += ms / 1000.0
+
+
+def test_stage_records_self_time_and_accumulates(monkeypatch):
+    clock = FakeClock()
+    monkeypatch.setattr(obs.time, "perf_counter", clock)
     timer = obs.start_timer()
     with obs.stage("retrieve"):
-        time.sleep(0.02)
+        clock.advance(20)
         with obs.stage("embed"):
-            time.sleep(0.03)
+            clock.advance(30)
     with obs.stage("generate"):
-        time.sleep(0.01)
+        clock.advance(10)
     with obs.stage("generate"):  # the retry accumulates
-        time.sleep(0.01)
+        clock.advance(10)
+    clock.advance(5)  # orchestration overhead outside any stage
     lat = timer.latency()
-    assert 25 <= lat.embed < 60
-    assert 15 <= lat.retrieve < 30  # embed is not double-counted inside retrieve
-    assert 18 <= lat.generate < 45
-    assert lat.total >= lat.embed + lat.retrieve + lat.generate
+    assert lat.embed == 30
+    assert lat.retrieve == 20  # embed is not double-counted inside retrieve
+    assert lat.generate == 20
+    assert lat.total == 75
     assert lat.stt == 0 and lat.verify == 0
 
 
@@ -66,7 +82,7 @@ def test_init_sentry_options(monkeypatch):
                                          sentry_environment="demo", git_sha="abc123"))
     assert seen["traces_sample_rate"] == 1.0 and seen["enable_logs"] is True
     assert seen["send_default_pii"] is False and seen["environment"] == "demo"
-    assert seen["release"] == "margin-relay@0.1.0+abc123"
+    assert seen["release"] == "specs-relay@0.1.0+abc123"
     assert seen["trace_propagation_targets"] == []
     names = {type(i).__name__ for i in seen["integrations"]}
     assert {"FastApiIntegration", "StarletteIntegration", "LoggingIntegration"} <= names

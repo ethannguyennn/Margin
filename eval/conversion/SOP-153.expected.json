@@ -1,0 +1,16 @@
+{
+  "material": "corpus/materials/SOP-153-quick-start.md",
+  "mime": "text/markdown",
+  "doc_id": "SOP-153",
+  "revision": "A",
+  "title": "Cover Plate Quick Start",
+  "exercises": "plain text, star pattern described in words, no figure: schematic path",
+  "steps": [
+    {"label": "1", "must_contain": ["arrow"]},
+    {"label": "2", "must_contain": ["M5"]},
+    {"label": "3", "must_contain": ["3 N-m", "M5"]},
+    {"label": "4", "must_contain": ["0.10 mm"]}
+  ],
+  "diagrams": [{"step": 3, "kind": "schematic"}],
+  "warning_must_contain": ["overtighten"]
+}

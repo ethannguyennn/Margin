@@ -2,7 +2,7 @@
 export const G2_ALLOWED_NON_ASCII = '▲△▶▷▼▽◀◁●○■□★☆━─█▇▆▅▄▃▂▁╭╮╯╰│';
 
 const replacements: Readonly<Record<string, string>> = {
-  '§': 'Sec ', '·': '-', '•': '-', '°': ' deg', 'µ': 'u', 'Ω': ' ohm',
+  '§': 'Sec ', '·': '-', '•': '-', '°': ' deg', 'µ': 'u', 'Ω': ' ohm', 'Ω': ' ohm', // Greek omega and the ohm sign
   '–': '-', '—': '-', '“': '"', '”': '"', '‘': "'", '’': "'",
   '×': 'x', '±': '+/-', '≥': '>=', '≤': '<=', '→': '->',
 };

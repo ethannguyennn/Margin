@@ -1,4 +1,5 @@
-// Push-to-talk capture from the G2 mic array (or the phone mic).
+// Capture from the G2 mic array (or the phone mic). v2: a silence endpointer (vad.ts)
+// replaces the press-to-send; v1 press-to-talk calls still work unchanged.
 // The mic is open ONLY between startCapture and stop/cancel/cap - that is the
 // privacy story and the only behaviour that survives Android WebView suspension.
 // Raw audio never leaves memory: base64 it, send it, drop the buffer.
@@ -11,6 +12,8 @@ import {
   type MicSource,
 } from '../settings.ts';
 import { mockIsCapturing, mockStartCapture, mockStopCapture } from '../mock/index.ts';
+import { Endpointer, type EndpointReason } from './vad.ts';
+import { span } from '../obs/sentry.ts';
 
 // Verified against @evenrealities/even_hub_sdk 0.0.x dist/index.d.ts:
 //   audioControl(isOpen: boolean, source?: AudioInputSource): Promise<boolean>
@@ -34,6 +37,7 @@ const FOREGROUND_EXIT_EVENT = 5;
 type Bridge = {
   audioControl: (isOpen: boolean, source?: string) => Promise<boolean>;
   onEvenHubEvent: (cb: (e: AudioEvent) => void) => () => void;
+  imuControl?: (isOpen: boolean, reportFrq?: number) => Promise<boolean>; // motion/imu.ts
 };
 
 let bridge: Bridge | null = null;
@@ -43,7 +47,8 @@ export function setBridge(b: Bridge | null): void {
   bridge = b;
 }
 
-async function getBridge(): Promise<Bridge> {
+/** Shared with motion/imu.ts so the app holds one bridge. */
+export async function getBridge(): Promise<Bridge> {
   if (bridge) return bridge;
   // Dynamic import: keeps this module loadable (and testable) without the SDK,
   // and guarantees Part 1's createStartUpPageContainer has run first - the
@@ -69,6 +74,13 @@ let level: ((rms01: number) => void) | null = null;
 // misclassified 'other' would eat the technician's own question - but logged so
 // the glasses-vs-phone mic A/B has numbers behind it.
 let roles: Record<string, number> = {};
+// v2 endpointing: the press-to-send is gone, so capture decides when the worker stopped.
+const PRE_ROLL_MS = 200; // kept before the speech start so the first word is not clipped
+const BYTES_PER_MS = (SAMPLE_RATE * 2) / 1000;
+let endpointer: Endpointer | null = null;
+let endpointCb: ((reason: EndpointReason) => void) | null = null;
+let noSpeech = false;
+let openedAt = 0;
 
 export function isCapturing(): boolean {
   return MOCK ? mockIsCapturing() : session;
@@ -121,6 +133,17 @@ async function closeMic(reason: string): Promise<void> {
   }
 }
 
+/** At most one endpoint per press. The mic closes on every endpoint; Part 1 then calls stopCapture. */
+function endpointReached(reason: EndpointReason): void {
+  const cb = endpointCb;
+  endpointCb = null;
+  if (reason === 'no_speech') noSpeech = true;
+  console.info(`[audio] endpoint ${reason}`, { speechStartMs: endpointer?.speechStartMs ?? null });
+  span('endpoint', openedAt, { reason });
+  void closeMic(`endpoint ${reason}`);
+  cb?.(reason);
+}
+
 function onAudio(e: AudioEvent): void {
   // The host's own lifecycle signal; visibilitychange below is the backup.
   const sys = e.sysEvent?.eventType;
@@ -140,19 +163,34 @@ function onAudio(e: AudioEvent): void {
   if (buf.byteLength > 0) {
     chunks.push(buf);
     bytes += buf.byteLength;
-    level?.(rms01(buf));
+    const r = rms01(buf);
+    level?.(r);
+    const reason = endpointer?.push(r, buf.byteLength / BYTES_PER_MS);
+    if (reason) return endpointReached(reason);
   }
-  if (bytes >= MAX_AUDIO_BYTES) void closeMic(`cap ${MAX_AUDIO_SECONDS}s reached`);
+  if (bytes >= MAX_AUDIO_BYTES) {
+    if (endpointCb) endpointReached('cap');
+    else void closeMic(`cap ${MAX_AUDIO_SECONDS}s reached`);
+  }
 }
 
-export async function startCapture(onLevel: (rms01: number) => void): Promise<void> {
-  if (MOCK) return mockStartCapture(onLevel);
+/** onEndpoint (v2) fires once: 'speech_end' after 800 ms of silence, 'no_speech' when nothing
+ * was said within 3 s (stopCapture then returns data_b64 '' - do not ask), 'cap' at 8 s. */
+export async function startCapture(
+  onLevel: (rms01: number) => void,
+  onEndpoint?: (reason: EndpointReason) => void,
+): Promise<void> {
+  if (MOCK) return mockStartCapture(onLevel, onEndpoint);
   if (session) return;
 
   chunks = [];
   bytes = 0;
   roles = {};
   level = onLevel;
+  endpointer = new Endpointer();
+  endpointCb = onEndpoint ?? null;
+  noSpeech = false;
+  openedAt = Date.now();
   const source: MicSource = getMicSource();
   const b = await getBridge();
 
@@ -183,13 +221,17 @@ export async function startCapture(onLevel: (rms01: number) => void): Promise<vo
   capturing = true;
   session = true;
   // Wall-clock backstop: if chunks stop arriving we still close the mic.
-  capTimer = setTimeout(() => void closeMic(`cap ${MAX_AUDIO_SECONDS}s timer`), MAX_AUDIO_SECONDS * 1000);
+  capTimer = setTimeout(() => {
+    if (endpointCb) endpointReached('cap');
+    else void closeMic(`cap ${MAX_AUDIO_SECONDS}s timer`);
+  }, MAX_AUDIO_SECONDS * 1000);
 }
 
 export async function stopCapture(): Promise<{ data_b64: string; sample_rate: 16000 }> {
   if (MOCK) return mockStopCapture();
   await closeMic('stopCapture');
   session = false;
+  endpointCb = null;
   const all = new Uint8Array(bytes);
   let off = 0;
   for (const c of chunks) {
@@ -198,7 +240,13 @@ export async function stopCapture(): Promise<{ data_b64: string; sample_rate: 16
   }
   chunks = []; // drop the buffer: nothing is persisted, ever
   bytes = 0;
-  return { data_b64: base64(all), sample_rate: SAMPLE_RATE };
+  // Nobody spoke: a stray nod costs 3 s of open mic and zero network.
+  if (noSpeech) return { data_b64: '', sample_rate: SAMPLE_RATE };
+  // Trim leading silence (smaller upload, faster STT). A manual stop before the VAD saw
+  // speech sends everything: in a loud shop the energy VAD may simply have missed it.
+  const start = endpointer?.speechStartMs;
+  const cut = start == null ? 0 : Math.max(0, Math.round((start - PRE_ROLL_MS) * BYTES_PER_MS)) & ~1;
+  return { data_b64: base64(all.subarray(cut)), sample_rate: SAMPLE_RATE };
 }
 
 /** Double-press cancel: close the mic and throw the audio away. */
@@ -209,6 +257,7 @@ export async function cancelCapture(): Promise<void> {
   }
   await closeMic('cancelCapture');
   session = false;
+  endpointCb = null;
   chunks = [];
   bytes = 0;
 }

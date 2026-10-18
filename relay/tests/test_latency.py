@@ -1,32 +1,52 @@
 from __future__ import annotations
 
-import json
-import math
+import sys
+import types
 
-from margin_relay.latency import percentile, render, summarize
+from specs_relay import latency
+
+ROWS = [
+    {"stage": "generate", "samples": 3, "p50_ms": 1200.0, "p95_ms": 1380.0},
+    {"stage": "total", "samples": 3, "p50_ms": 1300.0, "p95_ms": 2290.0},
+    {"stage": "stt", "samples": 3, "p50_ms": 0.0, "p95_ms": 540.0},
+]
 
 
-def test_percentile_matches_percentile_cont():
-    assert percentile([1, 2, 3, 4], 0.5) == 2.5
-    assert percentile([10], 0.95) == 10
-    assert math.isclose(percentile(list(range(1, 101)), 0.95), 95.05)
-    assert math.isnan(percentile([], 0.5))
-
-
-def test_summarize_skips_stages_that_did_not_run():
-    rows = [
-        {"stt": 0, "embed": 90, "retrieve": 150, "generate": 1000, "verify": 20, "total": 1300},
-        {"stt": 600, "embed": 110, "retrieve": 170, "generate": 1400, "verify": 30, "total": 2400},
-        json.dumps({"stt": 0, "embed": 100, "retrieve": 160, "generate": 0, "verify": 0,
-                    "total": 280}),  # gated not_found, row as JSON text
-    ]
-    s = summarize(rows)
-    assert s["stt"]["n"] == 1 and s["stt"]["p50"] == 600
-    assert s["generate"]["n"] == 2 and s["generate"]["p50"] == 1200
-    assert s["total"]["n"] == 3 and s["total"]["p50"] == 1300
-    table = render(s)
-    assert "generate" in table and "1200" in table
+def test_render_orders_stages_and_formats():
+    table = latency.render(ROWS)
+    lines = table.splitlines()
+    assert [ln.split()[0] for ln in lines[2:]] == ["stt", "generate", "total"]
+    assert "1200" in table and "2290" in table
 
 
 def test_render_empty():
-    assert "-" in render(summarize([]))
+    assert "no events" in latency.render([])
+
+
+def test_verdict_against_budget():
+    assert "within" in latency.verdict(ROWS)
+    assert "OVER" in latency.verdict([{"stage": "total", "samples": 1, "p50_ms": 3500,
+                                       "p95_ms": 3500}])
+    assert latency.verdict([]) is None
+
+
+def test_fetch_reads_through_db_latency_summary(monkeypatch):
+    calls = []
+
+    async def init_pool():
+        calls.append("init")
+
+    async def close_pool():
+        calls.append("close")
+
+    async def latency_summary():
+        calls.append("summary")
+        return ROWS
+
+    fake = types.ModuleType("specs_relay.db")
+    fake.init_pool, fake.close_pool, fake.latency_summary = init_pool, close_pool, latency_summary
+    monkeypatch.setitem(sys.modules, "specs_relay.db", fake)
+    monkeypatch.setattr(sys.modules["specs_relay"], "db", fake, raising=False)
+    import asyncio
+    assert asyncio.run(latency.fetch()) == ROWS
+    assert calls == ["init", "summary", "close"]

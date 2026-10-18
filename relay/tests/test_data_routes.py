@@ -9,10 +9,10 @@ import pytest
 from part5_support import RecordingConnection, RecordingPool, schema_dependencies
 from db.seed import corpus_stats, load_corpus
 from eval import run_eval as evaluation
-from margin_relay import db
-from margin_relay.config import Settings
-from margin_relay.main import build_pipeline, create_app
-from margin_relay.schemas import Chunk, RetrievalResult
+from specs_relay import db
+from specs_relay.config import Settings
+from specs_relay.main import build_pipeline, create_app
+from specs_relay.schemas import Chunk, RetrievalResult
 
 
 def fixture_app():
@@ -139,4 +139,4 @@ async def test_evaluator_runs_against_actual_mock_relay_and_labels_evidence(caps
     metrics = evaluation.print_report(results, evidence)
     assert metrics["cases"] == 36
     assert evidence == "MOCK/FIXTURE ONLY"
-    assert "Margin [MOCK/FIXTURE ONLY]" in capsys.readouterr().out
+    assert "Specs [MOCK/FIXTURE ONLY]" in capsys.readouterr().out

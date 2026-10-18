@@ -6,7 +6,7 @@ import pytest
 
 from part5_support import ROOT, schema_dependencies
 from db import seed
-from margin_relay import db
+from specs_relay import db
 
 
 def test_corpus_has_five_effective_procedures_and_a_draft_revision():

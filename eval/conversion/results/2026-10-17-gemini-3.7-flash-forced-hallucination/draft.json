@@ -1,0 +1,123 @@
+{
+  "doc_id": "SOP-150",
+  "revision": "A",
+  "title": "Pump Seal Swap",
+  "material_id": "SOP-150",
+  "status": "ready",
+  "steps": [
+    {
+      "label": "3.1",
+      "glance": "Remove four M6 gland nuts with 10 mm socket",
+      "body": "Remove the four M6 gland nuts with the 10 mm socket. Keep the nuts for reuse.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Remove the four M6 gland nuts with the 10 mm socket. Keep the nuts for reuse."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3.2",
+      "glance": "Lift gland plate off shaft and discard old O-ring",
+      "body": "Lift the gland plate off the shaft and discard the old O-ring.",
+      "warning": "Do not reuse the old O-ring.",
+      "checkpoint": null,
+      "quotes": [
+        "Lift the gland plate off the shaft and discard the old O-ring.",
+        "Do not reuse the old O-ring."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3.3",
+      "glance": "Fit new O-ring HX2-311 dry into groove",
+      "body": "Fit the new O-ring HX2-311 into the groove of the seal housing. Fit it dry.",
+      "warning": "Do not lubricate the new O-ring.",
+      "checkpoint": null,
+      "quotes": [
+        "Fit the new O-ring HX2-311 into the groove of the seal housing. Fit it dry.",
+        "Do not lubricate the new O-ring."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3.4",
+      "glance": "Torque four M6 gland nuts to 5 N-m",
+      "body": "Refit the gland plate and torque the four M6 gland nuts to 5 N-m in the order shown in Figure 1: upper left, lower right, upper right, lower left.",
+      "warning": null,
+      "checkpoint": null,
+      "quotes": [
+        "Refit the gland plate and torque the four M6 gland nuts to 4 N-m in the order shown in Figure 1: upper left, lower right, upper right, lower left."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": false,
+        "reason": "glance says 5 N-m; no quote contains 5 N-m; body says 5 N-m; no quote contains 5 N-m",
+        "citations": []
+      }
+    },
+    {
+      "label": "3.5",
+      "glance": "Check gap at all four corners with 0.20 mm feeler gauge",
+      "body": "Check the gap under the gland plate with the 0.20 mm feeler gauge at all four corners. The gauge must not enter.",
+      "warning": null,
+      "checkpoint": "The gauge must not enter.",
+      "quotes": [
+        "Check the gap under the gland plate with the 0.20 mm feeler gauge at all four corners. The gauge must not enter."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    },
+    {
+      "label": "3.6",
+      "glance": "Run pump for 30 s at 1200 rpm and check seal for drips",
+      "body": "Restore power and run the pump for 30 s at 1200 rpm. Check the seal for drips. Any drip is a nonconformance: report it under SOP-140.",
+      "warning": null,
+      "checkpoint": "Any drip is a nonconformance",
+      "quotes": [
+        "Restore power and run the pump for 30 s at 1200 rpm. Check the seal for drips. Any drip is a nonconformance: report it under SOP-140."
+      ],
+      "diagram": null,
+      "diagram_id": null,
+      "diagram_approved": false,
+      "verify": {
+        "ok": true,
+        "reason": null,
+        "citations": []
+      }
+    }
+  ],
+  "warnings": [
+    "WARNING: Isolate power and drain the pump before opening the seal housing.",
+    "Do not reuse the old O-ring. Do not lubricate the new O-ring."
+  ]
+}

@@ -1,6 +1,6 @@
 # Relay + Caddy on the Vultr VM.  From the repo root:  make deploy
 # (= docker compose -f deploy/docker-compose.yml --env-file .env up -d --build)
-name: margin
+name: specs
 
 services:
   relay:
@@ -14,7 +14,7 @@ services:
       - "127.0.0.1:8080:8080"
     healthcheck:
       # Unresponsive for 3 tries -> SIGTERM PID 1 -> restart policy restarts it.
-      test: ["CMD", "python", "/usr/local/bin/margin-healthcheck", "--kill"]
+      test: ["CMD", "python", "/usr/local/bin/specs-healthcheck", "--kill"]
       interval: 15s
       timeout: 12s
       retries: 3
@@ -24,16 +24,21 @@ services:
       options: { max-size: "10m", max-file: "3" }
 
   caddy:
-    image: caddy:2.8
+    # Caddy with the employer portal baked in at /srv/portal (deploy/caddy.Dockerfile).
+    build:
+      context: ..
+      dockerfile: deploy/caddy.Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     environment:
-      MARGIN_DOMAIN: ${MARGIN_DOMAIN:?set MARGIN_DOMAIN in .env, e.g. margin.example.com}
+      SPECS_DOMAIN: ${SPECS_DOMAIN:?set SPECS_DOMAIN in .env, e.g. getyourassto.work}
       ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env for the Let's Encrypt account}
     volumes:
+      # The Caddyfile is baked into the image; the mount lets a config edit apply with
+      # `docker compose restart caddy`, without a rebuild.
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config

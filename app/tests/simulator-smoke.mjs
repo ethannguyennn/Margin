@@ -1,70 +1,79 @@
-// Uses only the official simulator's documented automation API.
-// Run against a freshly launched `npm run dev:mock` + `npm run simulate`.
+// Actual Even Hub simulator + its WebView2 dev controls. No controller/state injection.
 import assert from 'node:assert/strict';
-import { mkdir, writeFile } from 'node:fs/promises';
-const origin = 'http://127.0.0.1:9898';
-const output = new URL('../test-artifacts/', import.meta.url);
-await mkdir(output, { recursive: true });
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-async function get(path) {
-  const result = await fetch(`${origin}/api/${path}`, { signal: AbortSignal.timeout(5000) });
-  assert.ok(result.ok, `${path}: ${result.status}`); return result;
-}
-async function consoleEntries() { return (await (await get('console')).json()).entries; }
-async function screen() {
-  const entries = await consoleEntries();
-  return entries.filter(e => e.message.includes('[Margin] screen=')).at(-1)?.message.match(/screen=(\w+)/)?.[1];
-}
-const checks = [];
-async function assertScreen(expected) {
-  const actual = await screen(); assert.equal(actual, expected);
-  checks.push({ expected, actual }); console.log(`PASS ${expected}`);
-}
-async function input(action, expected, ms = 180) {
-  const response = await fetch(`${origin}/api/input`, { method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action }), signal: AbortSignal.timeout(5000) });
-  assert.ok(response.ok); await wait(ms); if (expected) await assertScreen(expected);
-}
-async function screenshot(name) {
-  for (const view of ['glasses','webview']) {
-    const response = await get(`screenshot/${view}`);
-    await writeFile(new URL(`${name}-${view}.png`, output), Buffer.from(await response.arrayBuffer()));
+import {spawn} from 'node:child_process';
+import {mkdir,writeFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+const base='http://127.0.0.1:9899',cdp='http://127.0.0.1:9224',url='http://localhost:5176';
+const output=new URL('../test-artifacts/v2/',import.meta.url);
+await mkdir(output,{recursive:true});
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const binary=createRequire(import.meta.url).resolve(`@evenrealities/sim-${process.platform}-${process.arch}/bin/evenhub-simulator${process.platform==='win32'?'.exe':''}`);
+function launch(scenario){return spawn(binary,[`${url}/?scenario=${scenario}`,'--automation-port','9899'],{
+  stdio:'inherit',windowsHide:true,env:{...process.env,
+    WEBVIEW2_USER_DATA_FOLDER:fileURLToPath(new URL(`webview-${scenario}/`,output)),
+    WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS:'--remote-debugging-port=9224'}});}
+if(process.argv.includes('--launch')){launch('m1');}else{
+  const checks=[],runs=[];
+  async function until(fn,label,timeout=10000){const start=Date.now();let last;while(Date.now()-start<timeout){try{last=await fn();if(last)return last;}catch{}await wait(80);}throw new Error('Timed out: '+label+' '+JSON.stringify(last));}
+  async function entries(){const r=await fetch(`${base}/api/console`,{signal:AbortSignal.timeout(3000)});return(await r.json()).entries;}
+  async function lastScreen(){return(await entries()).filter(e=>e.message.includes('[Specs] rendered screen=')).at(-1)?.message;}
+  async function screen(name,step,timeout){await until(async()=>{const line=await lastScreen();return line?.includes('screen='+name+' ') && (step===undefined || line.includes('step='+step+' '));},name+' '+step,timeout);checks.push({screen:name,...(step===undefined?{}:{step})});console.log('PASS',name,step??'');}
+  async function touch(action){await fetch(`${base}/api/input`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({action})});await wait(150);}
+  async function capture(name){await wait(160);for(const kind of ['glasses','webview']){const r=await fetch(`${base}/api/screenshot/${kind}`,{signal:AbortSignal.timeout(10000)});assert.ok(r.ok);await writeFile(new URL(`${name}-${kind}.png`,output),Buffer.from(await r.arrayBuffer()));}}
+  async function connect(){
+    const target=await until(async()=>{const targets=await(await fetch(cdp+'/json/list')).json();return targets.find(t=>t.url.startsWith(url));},'CDP app target');
+    const ws=new WebSocket(target.webSocketDebuggerUrl),pending=new Map();let id=0;
+    await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
+    ws.onmessage=event=>{const packet=JSON.parse(event.data);if(packet.id){const p=pending.get(packet.id);pending.delete(packet.id);packet.error?p?.reject(new Error(packet.error.message)):p?.resolve(packet.result);}};
+    function send(method,params={}){return new Promise((resolve,reject)=>{const key=++id;pending.set(key,{resolve,reject});ws.send(JSON.stringify({id:key,method,params}));});}
+    return {send,close:()=>ws.close(),async evaluate(expression){const r=await send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(JSON.stringify(r.exceptionDetails));return r.result?.value;}};
   }
+  async function dev(session,id){await session.evaluate(`document.getElementById(${JSON.stringify(id)}).click()`);}
+  async function say(session,text){await session.evaluate(`document.getElementById('dev-utterance').value=${JSON.stringify(text)}`);await dev(session,'dev-nod');await screen('LISTENING');}
+  async function setup(){await until(async()=>{const r=await fetch(base+'/api/ping');return r.ok;},'simulator startup');const session=await connect();await until(async()=>!!await lastScreen(),'first screen');
+    if((await lastScreen()).includes('screen=PRIVACY ')){await capture('privacy');await touch('click');}
+    return session;
+  }
+  async function stop(child){if(child.exitCode===null)child.kill();await until(async()=>{try{await fetch(base+'/api/ping',{signal:AbortSignal.timeout(300)});return false;}catch{return true;}},'simulator exit',6000);}
+  let child,session;
+  try{
+    // M1 setup may acknowledge privacy. The measured flow uses only the Nod button.
+    child=launch('m1');session=await setup();await screen('IDLE');await capture('m1-idle');
+    await dev(session,'dev-nod');await screen('LISTENING');await capture('m1-listening');
+    await screen('THINKING');await screen('ANSWER_GLANCE');await capture('m1-answer');
+    await screen('IDLE',undefined,23000);await capture('m1-dim');
+    let log=await entries();assert.equal(log.filter(e=>e.message.includes('[Specs] mock-ask=')).length,1);
+    assert.equal(log.filter(e=>e.message.includes('[Specs] layout=')).length,0);
+    runs.push({flow:'M1',input:'dev Nod button only after setup',taps:0,rebuilds:0});
+    await writeFile(new URL('m1-console.json',output),JSON.stringify(log,null,2));
+    session.close();await stop(child);
+    child=launch('m2');session=await setup();await screen('TASK_READY',0,14000);await capture('m2-task-ready');
+    await dev(session,'dev-nod');await screen('STEP',0);await capture('m2-step-1');
+    await say(session,'next');await screen('STEP',1);
+    await say(session,'next');await screen('STEP',2);await capture('m2-step-3');
+    await say(session,'show diagram');await screen('DIAGRAM',2);
+    await until(async()=> (await entries()).filter(e=>e.message.includes('tile=') && e.message.includes('status=success')).length===2,'two rendered tiles');
+    await capture('m2-diagram');await dev(session,'dev-shake');await screen('STEP',2);await capture('m2-return-step-3');
+    log=await entries();const progress=log.filter(e=>e.message.includes('[Specs] progress=')).map(e=>JSON.parse(e.message.split('progress=')[1]));
+    assert.deepEqual(progress.map(e=>[e.kind,e.step_id]),[['task_started',null],['step_started','SOP-114:C:5.1'],['step_completed','SOP-114:C:5.1'],['step_started','SOP-114:C:5.3'],['step_completed','SOP-114:C:5.3'],['step_started','SOP-114:C:5.4']]);
+    assert.ok(progress.every((e,i)=>!i || e.ts>progress[i-1].ts));
+    assert.equal(log.filter(e=>e.message.includes('[Specs] layout=')).length,2);
+    runs.push({flow:'M2',progress:progress.map(({kind,step_id})=>({kind,step_id})),tiles:2,rebuilds:2,input:'dev Nod/Shake; Part 2 mock commands'});
+    for(const [utterance,answer] of [['question','ANSWER_GLANCE'],['not found','NOT_FOUND'],['error','ERROR']]){
+      await say(session,utterance);await screen(answer,2);await capture('step-question-'+answer.toLowerCase());await dev(session,'dev-shake');await screen('STEP',2);
+    }
+    // v1 tap fallback and native root exit. Pause retains the assigned step.
+    await touch('double_click');await screen('IDLE',2);await touch('double_click');
+    await until(async()=> (await entries()).some(e=>e.message.includes('native exit accepted')),'native root exit');await capture('root-exit');
+    const beforeReload=(await entries()).at(-1)?.id??0;
+    await session.send('Page.reload');
+    await until(async()=>{const recent=(await entries()).filter(e=>e.id>beforeReload);return recent.some(e=>e.message.includes('rendered screen=STEP ') && e.message.includes('step=2 '));},'cold-start restore STEP 3',14000);
+    await capture('cold-start-step-3');checks.push({screen:'STEP',step:2,coldStart:true});
+    log=await entries();const errors=log.filter(e=>e.level==='error' || /\[uncaught\]|\[unhandledrejection\]/.test(e.message));assert.deepEqual(errors,[]);
+    await writeFile(new URL('m2-console.json',output),JSON.stringify(log,null,2));
+    await writeFile(new URL('results.json',output),JSON.stringify({checks,runs,rootExit:true,coldStartStep:3,hardware:'not yet tested on hardware',integration:'Part 2 mocks (VITE_MOCK=1); not IMU replay or live relay',errors},null,2));
+    console.log('PASS M1, M2, returnTo, native exit, cold start; '+checks.length+' screen assertions.');
+  }catch(error){await writeFile(new URL('failure-console.json',output),JSON.stringify(await entries().catch(()=>[]),null,2));throw error;}
+  finally{session?.close();if(child)await stop(child);}
 }
-
-assert.equal(await (await get('ping')).text(), 'pong');
-const initial = await screen();
-assert.ok(['PRIVACY','IDLE'].includes(initial), 'Launch a fresh fixture session before smoke test');
-if (initial === 'PRIVACY') await input('click', 'IDLE');
-await assertScreen('IDLE');
-await screenshot('idle');
-await input('click', 'LISTENING'); await screenshot('listening');
-await input('click', 'THINKING', 100); await wait(650); await assertScreen('ANSWER_GLANCE'); await screenshot('answer-glance');
-await input('click', 'ANSWER_EXPANDED'); await screenshot('answer-expanded');
-await input('click', 'ANSWER_GLANCE'); await input('double_click', 'IDLE');
-await input('click', 'LISTENING'); await input('click', 'THINKING', 100); await wait(650); await assertScreen('NOT_FOUND'); await screenshot('not-found');
-await input('double_click', 'IDLE');
-await input('click', 'LISTENING'); await input('click', 'THINKING', 100); await wait(650); await assertScreen('ERROR'); await screenshot('error');
-await input('double_click', 'IDLE');
-await input('click', 'LISTENING'); await input('click', 'THINKING', 100); await wait(650); await assertScreen('WALKTHROUGH'); await screenshot('walkthrough-1');
-await input('down', 'WALKTHROUGH'); await input('click', 'ANSWER_EXPANDED');
-await input('down', 'ANSWER_EXPANDED'); await screenshot('walkthrough-details-page-2');
-await input('double_click', 'WALKTHROUGH'); await input('down', 'WALKTHROUGH'); await screenshot('walkthrough-3');
-const walkLogs = (await consoleEntries()).filter(e => e.message.includes('[Margin] screen=WALKTHROUGH'));
-assert.ok(walkLogs.some(e => e.message.includes('step=1'))); assert.ok(walkLogs.some(e => e.message.includes('step=2')));
-const fixtureLogs = (await consoleEntries()).filter(e => e.message.includes('[Margin] UI fixture='));
-assert.equal(fixtureLogs.length, 4, 'Step navigation must not call ask');
-await input('double_click', 'IDLE');
-await input('click', 'LISTENING'); await input('click', 'THINKING', 100); await wait(650); await assertScreen('LOGGED'); await screenshot('logged');
-await input('click', 'IDLE');
-// Root exit last: the simulator may close its active page after this call.
-await input('double_click'); await screenshot('root-exit');
-const entries = await consoleEntries();
-assert.ok(entries.some(e => e.message.includes('[Margin] native exit confirmation requested')));
-assert.ok(entries.some(e => e.message.includes('[Margin] native exit accepted')), 'SDK must accept the native shutdown request');
-const systemExitEventObserved = entries.some(e => e.message.includes('"eventType":7'));
-const errors = entries.filter(e => e.level === 'error' || /\[uncaught\]|\[unhandledrejection\]|\[Margin\] boot failed/.test(e.message));
-assert.deepEqual(errors, [], 'No simulator/app errors');
-await writeFile(new URL('simulator-console.json', output), JSON.stringify(entries, null, 2));
-await writeFile(new URL('simulator-results.json', output), JSON.stringify({ checks, nativeExitAccepted: true, systemExitEventObserved, errors }, null, 2));
-console.log(`PASS ${checks.length} screen assertions; local walkthrough; native root exit; no console errors.`);
