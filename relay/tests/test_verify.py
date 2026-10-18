@@ -289,6 +289,16 @@ def test_html_encoded_degrees_return_a_decoded_supported_quote():
     assert reason is None and citations[0]["quote"] == source
 
 
+def test_normalized_table_quote_returns_the_stored_source_instead_of_a_rewritten_quote():
+    source = "| Shot time | 25 to 30 seconds |"
+    chunks = [{"chunk_id": "X:C:1", "doc_id": "X", "revision": "C", "section": "1", "text": source}]
+    d = draft("Shot time 25 to 30 seconds", "", [("X:C:1", "Shot time\n25 to 30 seconds")])
+    reason, citations = check_draft(d, chunks)
+    assert reason is None and citations[0]["quote"] == source
+    d["citations"][0]["quote"] = "Shot time 25 to 40 seconds"
+    assert check_draft(d, chunks)[0].startswith("quote_not_found")
+
+
 def test_fuzzy_quote_matching_cannot_change_a_unit_in_a_long_quote():
     source = "Before starting the shift, wash hands with soap and warm water at 100\u00b0F and dry with a single-use towel."
     assert not quote_in_text(source.replace("\u00b0F", "\u00b0C"), source)

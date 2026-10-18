@@ -28,7 +28,7 @@ def normalized(text: str) -> str:
     for before, after in (("°", " deg"), ("µ", "u"), ("μ", "u"), ("–", "-"), ("—", "-"),
                           ("·", "-"), ("“", '"'), ("”", '"'), ("’", "'")):
         text = text.replace(before, after)
-    text = text.casefold()
+    text = re.sub(r"\s*\|\s*", " ", text.casefold())  # Markdown cell separators are not source facts
     for spelling, unit in ((r"deg\s*f|degrees?\s*(?:fahrenheit|f)|fahrenheit|f", "degf"),
                            (r"deg\s*c|degrees?\s*(?:celsius|c)|celsius|c", "degc"),
                            (r"seconds?|sec|s", "s"), (r"minutes?|min", "min"),

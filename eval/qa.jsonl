@@ -2,10 +2,10 @@
 {"id":"a02","category":"answerable","q":"How fast do I have to greet a guest?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"3.1","must_contain":["10 seconds"]}
 {"id":"a03","category":"answerable","q":"How much extra is oat milk?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"4.3","must_contain":["$0.75"]}
 {"id":"a04","category":"answerable","q":"How much is a medium cappuccino?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"4.2","must_contain":["$5.50"]}
-{"id":"a05","category":"answerable","q":"Can I sell a large flat white?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"4.1","must_contain":["Small and Medium only"]}
+{"id":"a05","category":"answerable","q":"Can I sell a large flat white?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"4.1","must_contain":["Small and Medium only"],"alternative_sections":["4.2"],"alternative_content":[["No","not sold"],["Large","not sold"]]}
 {"id":"a06","category":"answerable","q":"What do I do when a guest mentions an allergy?","expect":"answered","doc_id":"SOP-201","revision":"C","section":"5.1","must_contain":["ALLERGY button"]}
 {"id":"a07","category":"answerable","q":"What is the biggest bill we accept?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"2.2","must_contain":["$50"]}
-{"id":"a08","category":"answerable","q":"What does a black mark from the pen mean on a fifty?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"2.3","must_contain":["dark brown or black"]}
+{"id":"a08","category":"answerable","q":"What does a black mark from the pen mean on a fifty?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"2.3","must_contain":["dark brown or black"],"alternative_content":[["black","counterfeit"]]}
 {"id":"a09","category":"answerable","q":"When do I need to do a cash drop?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"3.2","must_contain":["$400.00","$200.00"]}
 {"id":"a10","category":"answerable","q":"Who has to approve a fifteen dollar refund?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"5.2","must_contain":["$10.01 to $25.00","Shift lead"]}
 {"id":"a11","category":"answerable","q":"How long after purchase can I give a refund?","expect":"answered","doc_id":"SOP-202","revision":"C","section":"5.3","must_contain":["24 hours"]}
@@ -24,7 +24,7 @@
 {"id":"a24","category":"answerable","q":"Where is the first aid kit?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"7.2","must_contain":["under the back counter"],"alternative_content":[["under back counter"]]}
 {"id":"a25","category":"answerable","q":"How long should an espresso shot take?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.5","must_contain":["25 to 30 seconds"],"alternative_sections":["2.1"]}
 {"id":"a26","category":"answerable","q":"What is the espresso dose?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"2.1","must_contain":["18.0 g"]}
-{"id":"a27","category":"answerable","q":"My shot ran twenty seconds, what do I do?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.6","must_contain":["grind finer"]}
+{"id":"a27","category":"answerable","q":"My shot ran twenty seconds, what do I do?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.6","must_contain":["grind finer"],"alternative_sections":["5.1"]}
 {"id":"a28","category":"answerable","q":"What temperature do I steam almond milk to?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.1","must_contain":["130 to 140°F"]}
 {"id":"a29","category":"answerable","q":"How hot is extra hot?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.2","must_contain":["160°F"]}
 {"id":"a30","category":"answerable","q":"How much foam goes on a cappuccino?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.3","must_contain":["3/4 inch"]}
