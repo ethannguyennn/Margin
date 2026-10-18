@@ -1,0 +1,17 @@
+{
+  "material": "corpus/materials/SOP-152-valve-lineup-photo.jpg",
+  "mime": "image/jpeg",
+  "doc_id": "SOP-152",
+  "revision": "A",
+  "title": "Valve Lineup for Flushing",
+  "exercises": "phone photo of a printed page (skew, shadow): OCR path + crop",
+  "steps": [
+    {"label": "1", "must_contain": ["V1"]},
+    {"label": "2", "must_contain": ["V3"]},
+    {"label": "3", "must_contain": ["V4", "45 deg"]},
+    {"label": "4", "must_contain": ["0.5 bar"]},
+    {"label": "5", "must_contain": ["V2", "10 s"]}
+  ],
+  "diagrams": [{"step": 1, "kind": "crop"}],
+  "warning_must_contain": ["splash goggles"]
+}

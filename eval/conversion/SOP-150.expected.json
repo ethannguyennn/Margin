@@ -1,0 +1,18 @@
+{
+  "material": "corpus/materials/SOP-150-pump-seal-swap.pdf",
+  "mime": "application/pdf",
+  "doc_id": "SOP-150",
+  "revision": "A",
+  "title": "Pump Seal Swap",
+  "exercises": "text-layer PDF, 2 pages, warning box, exploded-view figure",
+  "steps": [
+    {"label": "3.1", "must_contain": ["M6", "10 mm"]},
+    {"label": "3.2", "must_contain": ["O-ring"]},
+    {"label": "3.3", "must_contain": ["HX2-311"]},
+    {"label": "3.4", "must_contain": ["4 N-m", "M6"]},
+    {"label": "3.5", "must_contain": ["0.20 mm"]},
+    {"label": "3.6", "must_contain": ["30 s", "1200 rpm"]}
+  ],
+  "diagrams": [{"step": 4, "kind": "crop"}],
+  "warning_must_contain": ["Isolate power"]
+}
