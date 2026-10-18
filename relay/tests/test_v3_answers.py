@@ -117,6 +117,19 @@ def test_clarify_does_not_leak_to_another_session():
     assert ret.queries[-1] == "cappuccino"
 
 
+def test_long_document_titles_use_untruncated_grounded_headings_instead():
+    chunks = [chunk("SOP-220", "4.1"), chunk("SOP-210", "3.6")]
+    result = _clarify(chunks, sanitize)
+    assert result is not None
+    assert all(option in {c.heading for c in chunks} for option in result.options)
+
+
+def test_a_reference_only_recipe_hit_starts_the_matching_procedural_group():
+    with client(pipeline(Retriever([chunk("SOP-230", "3.1")]), Generator())) as c:
+        walk = ask(c, "walk me through making a cappuccino")["walkthrough"]
+    assert [s["label"] for s in walk["steps"][walk["scope"]["start"]:walk["scope"]["end"]]] == ["3.2", "3.3", "3.4"]
+
+
 def test_follow_up_keeps_current_source_first_then_previous_citations():
     prior = chunk("SOP-220", "4.2")
     draft = Draft(answerable=True, glance="Extra hot: 160 degF", citations=[
