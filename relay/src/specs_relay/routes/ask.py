@@ -392,10 +392,11 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
     follow_up = ctx.intent == "question" and _is_follow_up(ctx.transcript)
     retrieval_query = query
     if follow_up:
-        if here is not None:
-            retrieval_query += f"\nCurrent step: {here.heading}"
         if previous is not None and previous.outcome == "answered":
-            retrieval_query += f"\nPrevious question: {previous.transcript}\nPrevious answer: {previous.glance}"
+            # Keep the topic without drowning the new terms in the old answer's values.
+            retrieval_query += f" {previous.transcript}"
+        elif here is not None:
+            retrieval_query += f" {here.heading}"
     retrieved = await _retrieve(p, retrieval_query, revision)
     candidates = [here] if here is not None else []
     if (ctx.intent == "question" and previous is not None and previous.outcome == "answered"
