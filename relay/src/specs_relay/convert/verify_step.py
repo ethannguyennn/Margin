@@ -26,10 +26,12 @@ from collections import Counter
 from typing import Any
 
 from ..pipeline.sanitize import sanitize
+from ..schemas import STEP_CHECKPOINT_MAX, STEP_WARNING_MAX
 from ..pipeline.verify import BODY_MAX, GLANCE_MAX, _get, iter_number_tokens, normalize, quote_in_text
 
-WARNING_MAX = 80
-CHECKPOINT_MAX = 60
+# Limits for new steps, tighter than the contract ceilings (see schemas.py).
+WARNING_MAX = STEP_WARNING_MAX
+CHECKPOINT_MAX = STEP_CHECKPOINT_MAX
 ALT_MAX = 80
 LABEL_MAX = 12
 ELEMENTS_MAX = 40

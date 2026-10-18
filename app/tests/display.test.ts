@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { CONTAINERS, createLayout, LensDisplay } from '../src/ui/layout';
-import { renderScreen } from '../src/ui/screens';
+import { compactSource, renderScreen } from '../src/ui/screens';
 import { sanitizeForG2 } from '../src/ui/glyphs';
 import { stateFor } from './support';
 import type { Screen } from '../src/state';
@@ -17,6 +17,20 @@ describe('lens screens/layout', () => {
     expect(layout.textObject!.filter(c => c.isEventCapture === 1)).toHaveLength(1);
     expect(layout.textObject!.every(c => c.zOrderIndex === undefined)).toBe(true);
     expect(layout.textObject!.every(c => (c.content?.length ?? 0) <= 1000)).toBe(true);
+  });
+  it('drops gesture hints once learned but keeps content footers', () => {
+    for (const screen of screens) {
+      const on = renderScreen(stateFor(screen), 0.8), off = renderScreen(stateFor(screen), 0.8, { hints: false });
+      expect(off.main).toBe(on.main);
+      expect(off.footer).not.toMatch(/(press|double|swipe|shake|nod)( twice)?:/);
+    }
+    const glance = renderScreen(stateFor('ANSWER_GLANCE'), 0, { hints: false });
+    expect(glance.footer).toContain('[+]');
+  });
+  it('shortens the source to document and section on the lens', () => {
+    expect(compactSource('SOP-114 Sec 4.2 rev C')).toBe('SOP-114 4.2');
+    expect(compactSource('SOP-114 Sec 4.2')).toBe('SOP-114 4.2');
+    expect(compactSource('something else')).toBe('something else');
   });
   it('positions non-overlapping containers inside the canvas with explicit brightness', () => {
     for (const c of CONTAINERS) {

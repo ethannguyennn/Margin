@@ -36,8 +36,7 @@ it('highlights source quotes without executing material HTML', () => {
 
 it('uses the shared lens screen renderer', () => {
   const d = draft(); const node = preview(d, d.steps[0], 0);
-  expect(node.textContent).toContain('SOP-150 rev A');
-  expect(node.textContent).toContain('step 1/1');
+  expect(node.textContent).toContain('1/1');
   expect(node.textContent).toContain('Torque to 4 N-m');
 });
 

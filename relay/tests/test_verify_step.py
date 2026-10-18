@@ -117,7 +117,7 @@ def test_step_without_quotes_fails():
 
 
 def test_warning_shortened_by_deletion_passes():
-    w = "Isolate power and drain the pump before opening the housing."
+    w = "Isolate power and drain the pump."
     assert reasons(warning=w, quotes=[Q4, "WARNING: Isolate power and drain the pump before "
                                           "opening the seal housing."]) == []
 
@@ -154,10 +154,10 @@ def test_step_label_may_appear_in_glance():
 
 
 @pytest.mark.parametrize("field, value, limit", [
-    ("glance", "Torque the M6 gland nuts to 4 N-m in a star pattern, upper left", 60),
-    ("body", "Torque the M6 gland nuts to 4 N-m in a star pattern. " * 10, 450),
-    ("warning", "Isolate power and drain the pump before opening the seal housing. " * 2, 80),
-    ("checkpoint", "the gap under the gland plate is checked with a feeler gauge now", 60),
+    ("glance", "Torque the M6 gland nuts to 4 N-m in a star pattern, upper left", 40),
+    ("body", "Torque the M6 gland nuts to 4 N-m in a star pattern. " * 10, 200),
+    ("warning", "Isolate power and drain the pump before opening the seal housing. " * 2, 50),
+    ("checkpoint", "the gap under the gland plate is checked with a feeler gauge now", 40),
 ])
 def test_caps_after_sanitize(field, value, limit):
     quotes = [Q4, "Isolate power and drain the pump before opening the seal housing.",
@@ -167,10 +167,10 @@ def test_caps_after_sanitize(field, value, limit):
 
 
 def test_caps_measure_the_sanitized_text():
-    # 60 chars as typed, but "°" sanitizes to " deg": over the cap on the lens.
-    g = "Torque M6 gland nuts to 4 N-m at 20° " + "x" * 23
-    assert len(g) == 60
-    assert any(x.startswith("glance is 63 chars") for x in reasons(glance=g))
+    # 40 chars as typed, but "°" sanitizes to " deg": over the cap on the lens.
+    g = "Torque M6 nuts to 4 N-m at 20° " + "x" * 9
+    assert len(g) == 40
+    assert any(x.startswith("glance is 43 chars") for x in reasons(glance=g))
 
 
 def test_empty_glance_fails():

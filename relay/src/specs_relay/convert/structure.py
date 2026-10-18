@@ -19,9 +19,9 @@ import logging
 from typing import Any
 
 from ..pipeline.sanitize import sanitize
-from ..pipeline.verify import _get, quote_in_text
+from ..pipeline.verify import BODY_MAX, GLANCE_MAX, _get, quote_in_text
 from .extract import box_from_2d
-from .verify_step import step_failures
+from .verify_step import CHECKPOINT_MAX, WARNING_MAX, step_failures
 
 log = logging.getLogger("specs.convert")
 
@@ -36,10 +36,14 @@ Use ONLY the provided MATERIAL. Never add steps, values, tools or warnings that 
    If the material numbers its own steps, each numbered step is exactly one step and its label
    is that number (e.g. "3.4"); never split or merge numbered steps. Split only unnumbered prose,
    labelled 1, 2, 3... Headings, scope, tool lists and records are not steps.
-2. glance: <= 60 chars, imperative, include the key value + unit. body: <= 450 chars, plain sentences.
-3. warning: the material's own warning text for this step, shortened only by deletion, <= 80 chars.
+""" + f"""\
+2. Steps are read on smart glasses mid-task: use as few words as possible.
+   glance: <= {GLANCE_MAX} chars, verb + object + value, no articles or filler ("Torque M5 to 4 N-m").
+   body: <= {BODY_MAX} chars, at most 2 short sentences, only what the glance leaves out; empty if none.
+3. warning: the material's own warning text for this step, shortened only by deletion, <= {WARNING_MAX} chars.
    Never delete "not", "no" or "never". Else an empty string.
-4. checkpoint: a measurable acceptance check from the material, <= 60 chars. Else an empty string.
+4. checkpoint: a measurable acceptance check from the material, <= {CHECKPOINT_MAX} chars. Else an empty string.
+""" + """\
 5. quotes: verbatim spans copied from MATERIAL that support every claim in glance, body, warning,
    checkpoint and diagram labels. Copy character for character, including symbols; each quote
    <= 200 chars. Every number, unit and part code you write must appear in one of the quotes.

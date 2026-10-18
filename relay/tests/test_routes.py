@@ -62,7 +62,7 @@ def test_answered_torque(client):
     assert r.status_code == 200
     b = r.json()
     assert b["outcome"] == "answered" and b["intent"] == "question" and b["verified"] is True
-    assert b["glance"] == "Step 4.2: torque M5 to 4 N-m"
+    assert b["glance"] == "Torque M5 to 4 N-m"
     assert b["source"] == "SOP-114 Sec 4.2 rev C"
     c = b["citations"][0]
     assert (c["chunk_id"], c["doc_id"], c["revision"], c["section"]) == (
@@ -87,10 +87,10 @@ def test_walkthrough_returns_every_step(client):
     assert len(b["citations"]) == 7
 
 
-def test_answered_clean_long_body(client):
+def test_answered_clean_body_within_answer_cap(client):
     b = ask(client, "how do i clean and disinfect the housing").json()
     assert b["outcome"] == "answered" and b["source"].startswith("SOP-120 Sec 4.3 rev B")
-    assert 300 < len(b["body"]) <= 450  # long enough to paginate on the lens
+    assert 0 < len(b["body"]) <= 200  # answers stay short; the phone shows the full section
 
 
 def test_not_found_without_llm_call(client_app):
