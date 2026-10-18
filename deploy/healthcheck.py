@@ -30,7 +30,7 @@ def probe(url: str, tries: int = 3, timeout: float = 3.0, verbose: bool = False)
                 if verbose:
                     print(f"{resp.status} {body}")
                     print(f"x-trace-id: {resp.headers.get('x-trace-id')}")
-                if resp.status == 200 and json.loads(body).get("ok") is not None:
+                if resp.status == 200 and json.loads(body).get("ok") is True:
                     return True
         except (urllib.error.URLError, OSError, ValueError) as exc:
             if verbose:

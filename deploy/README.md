@@ -1,5 +1,34 @@
 # Deploy: relay + Caddy on Vultr, behind `getyourassto.work`
 
+## v3 deployment checkpoint
+
+`make deploy-remote` reads `VM_HOST` from a make argument, the process environment, then the
+root `.env` (in that order). For this VM: `make deploy-remote VM_HOST=root@45.32.88.132`.
+It uses existing SSH key authentication, refuses a remote checkout outside `main` or with
+tracked edits, then fast-forwards `/root/specs` and runs `make deploy`. It never copies the
+local `.env`. This Windows checkout currently has no usable deployment SSH key; a deployment
+has not been performed from it.
+
+Before the v3 deploy, the account/VM owner must confirm these values in the **VM's** `.env`:
+`MOCK_MODE=0`, `NOT_FOUND_MIN_SIM=0.68`, `NOT_FOUND_MIN_RRF=0.04`, the selected conversion model,
+and the paid/higher-quota Gemini project. Announce VM configuration changes first. Local
+calibration values can differ and must not silently overwrite these measured v3 thresholds.
+Merge tested branches through PRs in the build-plan order; never deploy a feature branch as main.
+
+`make health URL=https://getyourassto.work` now requests `/v1/health?verbose=1`. On this
+branch, `mock` / `ask_mock` describe answer-path dependencies; `conversion_mock` is separate.
+Verbose health also reports `mocked`, `git_sha`, the gate thresholds, and process-lifetime
+`gemini_429_total` / `gemini_429_by_stage` counters. A restart resets counters. They count
+provider failures observed by stage boundaries and conversion jobs, not HTTP requests, and
+do not include retries recovered internally inside an SDK module. Quota-counter logs omit provider bodies.
+The normal health response retains its four existing fields. Health probing now requires
+`ok: true`; a `200` carrying `ok: false` is unhealthy.
+
+After deployment, verify live asks and DB, the expected commit and thresholds, then run the
+paced voice and gap diagnostics. M9 additionally requires 30 asks at a worker's pace with no
+quota failures and a v3 pack handed to Part 4. None of those live acceptance results is implied
+by a green unit suite. See `tools/diagnostic/README.md` for the current gap-probe dependency.
+
 Deploy the mock relay first (`MOCK_MODE=1`), then flip to real mode once Parts 4
 and 5 are merged. The public HTTPS origin is the fallback for venue Wi-Fi that
 isolates clients; a phone hotspot is the backup.
@@ -121,3 +150,21 @@ and `VITE_RELAY_ORIGIN` must be the same string.
 `make dev-relay` binds `0.0.0.0:8080`; point the app at `http://<laptop LAN IP>:8080`
 (never `localhost` on the phone) and allow that origin via `ALLOWED_ORIGINS` or
 `ALLOWED_ORIGIN_REGEX`.
+
+## v3 integration preparation
+
+The API client accepts bounded `clarify` fields, retains verified picture IDs, and refuses
+malformed walkthrough scopes. The gap wrapper delegates to Part 2's scored, paced CLI once
+that branch is integrated. `make deploy` exports its checkout's commit as `GIT_SHA`; Compose
+sets it explicitly on the relay so verbose health identifies the running source. Verbose
+health also reports configured model names (never provider credentials).
+
+The current 0.4.1 app pack is built from the combined candidate, with
+`VITE_RELAY_ORIGIN=https://getyourassto.work`, `VITE_MOCK=0`, and
+`VITE_ASK_TIMEOUT_MS=50000`. Public app tracing uses the whitelisted ingest origin with the
+unsupported relay tunnel off. Keep the source commit and SHA-256 with the `.ehpk`. Source preparation
+and offline tests do not establish deployment, quota capacity, latency or field acceptance.
+The prior SSH blocker is resolved. The existing identity deployed the integration candidate
+from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
+rollback. Verbose health identifies the actual serving commit. Promotion to main waits for
+the acceptance results in `TODO.md`, including the pending two-wearer field recordings.

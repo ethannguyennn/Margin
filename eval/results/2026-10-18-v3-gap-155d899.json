@@ -1,0 +1,2639 @@
+{
+  "recorded_at": "2026-10-18T11:53:36.409337+00:00",
+  "relay": "https://getyourassto.work",
+  "models": {
+    "transcribe": "gemini-3.5-flash-lite",
+    "embed": "gemini-embedding-2",
+    "generate": "gemini-3.5-flash-lite",
+    "convert": "gemini-3.8-flash"
+  },
+  "evidence": "LIVE RELAY",
+  "metrics": {
+    "cases": 14,
+    "answered_correct_rate": 0.8461538461538461,
+    "not_found_precision": 0.5,
+    "not_found_recall": 1.0,
+    "citation_verification_pass_rate": 1.0,
+    "median_latency_ms": 644.7184999997262,
+    "answered": 12,
+    "unverified_answers": 0,
+    "failed_cases": 2,
+    "core_answerable": {
+      "correct": 0,
+      "total": 0,
+      "rate": null
+    },
+    "category_passes": {
+      "ambiguous": {
+        "passed": 2,
+        "total": 2
+      },
+      "answerable": {
+        "passed": 10,
+        "total": 12
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "v3-w2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 758.7684000027366,
+      "reason": "",
+      "response": {
+        "trace_id": "7aef342a9c90446ea1f3c3d70aa9f2b6",
+        "transcript": "Take me through closing out the till",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-202, 9 steps",
+        "body": "Cashier - Payments, Refunds, Voids, and Closing the Till, 9 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:2.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+          },
+          {
+            "chunk_id": "SOP-202:C:6.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "On the POS, go to Reports, then End of Day. Print two copies."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.4",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.5",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.5",
+            "quote": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-202",
+          "revision": "C",
+          "title": "Cashier - Payments, Refunds, Voids, and Closing the Till",
+          "total": 9,
+          "index": 4,
+          "steps": [
+            {
+              "step_id": "SOP-202:C:2.3",
+              "label": "2.3",
+              "glance": "Check $50 bills",
+              "body": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+            },
+            {
+              "step_id": "SOP-202:C:3.1",
+              "label": "3.1",
+              "glance": "Make change",
+              "body": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cash-handling",
+              "source_text": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+            },
+            {
+              "step_id": "SOP-202:C:3.2",
+              "label": "3.2",
+              "glance": "Cash drops",
+              "body": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+            },
+            {
+              "step_id": "SOP-202:C:6.1",
+              "label": "6.1",
+              "glance": "Sell a gift card",
+              "body": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+            },
+            {
+              "step_id": "SOP-202:C:7.1",
+              "label": "7.1",
+              "glance": "Run the end-of-day report",
+              "body": "On the POS, go to Reports, then End of Day. Print two copies.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "On the POS, go to Reports, then End of Day. Print two copies."
+            },
+            {
+              "step_id": "SOP-202:C:7.2",
+              "label": "7.2",
+              "glance": "Count the drawer",
+              "body": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+            },
+            {
+              "step_id": "SOP-202:C:7.3",
+              "label": "7.3",
+              "glance": "Leave the float",
+              "body": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+            },
+            {
+              "step_id": "SOP-202:C:7.4",
+              "label": "7.4",
+              "glance": "Check the variance",
+              "body": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+            },
+            {
+              "step_id": "SOP-202:C:7.5",
+              "label": "7.5",
+              "glance": "Secure and sign",
+              "body": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 4,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-w3",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 613.7862000032328,
+      "reason": "",
+      "response": {
+        "trace_id": "1985661f60d348b6a5845032a0af8e81",
+        "transcript": "Guide me through kitchen opening",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 1,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 1,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-w4",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 576.4103999827057,
+      "reason": "",
+      "response": {
+        "trace_id": "855d293fa3a841d097191128d454e634",
+        "transcript": "Show me how to pull a good espresso shot",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Espresso Bar - Shot and Milk Standards, 12 steps",
+        "body": "Espresso Bar - Shot and Milk Standards, 12 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:3.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Run the group head for 3 seconds to flush it."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.3",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Lock in the portafilter and start the shot and the timer together."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "Purge the steam wand for 2 seconds before and after every use."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.5",
+            "quote": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.6",
+            "quote": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.7",
+            "quote": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.8",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.8",
+            "quote": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-220",
+          "revision": "C",
+          "title": "Espresso Bar - Shot and Milk Standards",
+          "total": 12,
+          "index": 0,
+          "steps": [
+            {
+              "step_id": "SOP-220:C:3.1",
+              "label": "3.1",
+              "glance": "Purge",
+              "body": "Run the group head for 3 seconds to flush it.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Run the group head for 3 seconds to flush it."
+            },
+            {
+              "step_id": "SOP-220:C:3.2",
+              "label": "3.2",
+              "glance": "Dose",
+              "body": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+            },
+            {
+              "step_id": "SOP-220:C:3.3",
+              "label": "3.3",
+              "glance": "Tamp",
+              "body": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+            },
+            {
+              "step_id": "SOP-220:C:3.4",
+              "label": "3.4",
+              "glance": "Pull the shot",
+              "body": "Lock in the portafilter and start the shot and the timer together.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Lock in the portafilter and start the shot and the timer together."
+            },
+            {
+              "step_id": "SOP-220:C:3.5",
+              "label": "3.5",
+              "glance": "Stop at yield",
+              "body": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:3.6",
+              "label": "3.6",
+              "glance": "Adjust the grind",
+              "body": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+            },
+            {
+              "step_id": "SOP-220:C:3.7",
+              "label": "3.7",
+              "glance": "Record it",
+              "body": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+            },
+            {
+              "step_id": "SOP-220:C:4.4",
+              "label": "4.4",
+              "glance": "Purge the wand",
+              "body": "Purge the steam wand for 2 seconds before and after every use.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Purge the steam wand for 2 seconds before and after every use."
+            },
+            {
+              "step_id": "SOP-220:C:4.5",
+              "label": "4.5",
+              "glance": "Start cold",
+              "body": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41 degF. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+            },
+            {
+              "step_id": "SOP-220:C:4.6",
+              "label": "4.6",
+              "glance": "Stretch",
+              "body": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+            },
+            {
+              "step_id": "SOP-220:C:4.7",
+              "label": "4.7",
+              "glance": "Spin",
+              "body": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:4.8",
+              "label": "4.8",
+              "glance": "Finish",
+              "body": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 0,
+            "end": 7
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-w5",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 586.5555999916978,
+      "reason": "",
+      "response": {
+        "trace_id": "9c78fb45bf6a4a8d829483121e757bd2",
+        "transcript": "Walk me through making a cappuccino",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Drink Recipes, 24 steps",
+        "body": "Drink Recipes, 24 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:2.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "If flavored, pump the syrup into the empty cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.4",
+            "quote": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.5",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.5",
+            "quote": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Pull the shots (see SOP-220) directly into the cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "Pull the shots (see SOP-220) directly into the cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:5.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Fill the cup with the hot water first."
+          },
+          {
+            "chunk_id": "SOP-230:C:5.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Pump syrup into the cold cup if flavored, then pour in the cold milk."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Fill the cup with ice up to the ice line."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "Pump the mocha sauce into the empty cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it."
+          },
+          {
+            "chunk_id": "SOP-230:C:8.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.2",
+            "quote": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once."
+          },
+          {
+            "chunk_id": "SOP-230:C:8.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.3",
+            "quote": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41\u00b0F or below. Filter, label with the date, and use within 14 days."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.2",
+            "quote": "Sift the matcha powder into the cup to remove lumps."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.3",
+            "quote": "Add 2 oz of 175\u00b0F water and whisk in a W motion until the slurry is smooth with no lumps."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.4",
+            "quote": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:10.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "10.1",
+            "quote": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210)."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-230",
+          "revision": "C",
+          "title": "Drink Recipes",
+          "total": 24,
+          "index": 4,
+          "steps": [
+            {
+              "step_id": "SOP-230:C:2.2",
+              "label": "2.2",
+              "glance": "Latte: add syrup",
+              "body": "If flavored, pump the syrup into the empty cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "If flavored, pump the syrup into the empty cup."
+            },
+            {
+              "step_id": "SOP-230:C:2.3",
+              "label": "2.3",
+              "glance": "Latte: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup."
+            },
+            {
+              "step_id": "SOP-230:C:2.4",
+              "label": "2.4",
+              "glance": "Latte: steam milk",
+              "body": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds."
+            },
+            {
+              "step_id": "SOP-230:C:2.5",
+              "label": "2.5",
+              "glance": "Latte: pour",
+              "body": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name."
+            },
+            {
+              "step_id": "SOP-230:C:3.2",
+              "label": "3.2",
+              "glance": "Cappuccino: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup."
+            },
+            {
+              "step_id": "SOP-230:C:3.3",
+              "label": "3.3",
+              "glance": "Cappuccino: steam milk",
+              "body": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam."
+            },
+            {
+              "step_id": "SOP-230:C:3.4",
+              "label": "3.4",
+              "glance": "Cappuccino: pour",
+              "body": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:4.2",
+              "label": "4.2",
+              "glance": "Flat white: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup."
+            },
+            {
+              "step_id": "SOP-230:C:4.3",
+              "label": "4.3",
+              "glance": "Flat white: steam milk",
+              "body": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds."
+            },
+            {
+              "step_id": "SOP-230:C:4.4",
+              "label": "4.4",
+              "glance": "Flat white: pour",
+              "body": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:5.2",
+              "label": "5.2",
+              "glance": "Americano: add water",
+              "body": "Fill the cup with the hot water first.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with the hot water first."
+            },
+            {
+              "step_id": "SOP-230:C:5.3",
+              "label": "5.3",
+              "glance": "Americano: add espresso",
+              "body": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface."
+            },
+            {
+              "step_id": "SOP-230:C:6.2",
+              "label": "6.2",
+              "glance": "Iced latte: add syrup and milk",
+              "body": "Pump syrup into the cold cup if flavored, then pour in the cold milk.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pump syrup into the cold cup if flavored, then pour in the cold milk."
+            },
+            {
+              "step_id": "SOP-230:C:6.3",
+              "label": "6.3",
+              "glance": "Iced latte: add ice",
+              "body": "Fill the cup with ice up to the ice line.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with ice up to the ice line."
+            },
+            {
+              "step_id": "SOP-230:C:6.4",
+              "label": "6.4",
+              "glance": "Iced latte: add espresso",
+              "body": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:7.2",
+              "label": "7.2",
+              "glance": "Mocha: add sauce",
+              "body": "Pump the mocha sauce into the empty cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pump the mocha sauce into the empty cup."
+            },
+            {
+              "step_id": "SOP-230:C:7.3",
+              "label": "7.3",
+              "glance": "Mocha: pull espresso",
+              "body": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved."
+            },
+            {
+              "step_id": "SOP-230:C:7.4",
+              "label": "7.4",
+              "glance": "Mocha: steam and pour",
+              "body": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it."
+            },
+            {
+              "step_id": "SOP-230:C:8.2",
+              "label": "8.2",
+              "glance": "Cold brew: serve",
+              "body": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once."
+            },
+            {
+              "step_id": "SOP-230:C:8.3",
+              "label": "8.3",
+              "glance": "Cold brew batch recipe",
+              "body": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41 degF or below. Filter, label with the date, and use within 14 days.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41\u00b0F or below. Filter, label with the date, and use within 14 days."
+            },
+            {
+              "step_id": "SOP-230:C:9.2",
+              "label": "9.2",
+              "glance": "Matcha: sift",
+              "body": "Sift the matcha powder into the cup to remove lumps.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Sift the matcha powder into the cup to remove lumps."
+            },
+            {
+              "step_id": "SOP-230:C:9.3",
+              "label": "9.3",
+              "glance": "Matcha: whisk",
+              "body": "Add 2 oz of 175 degF water and whisk in a W motion until the slurry is smooth with no lumps.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Add 2 oz of 175\u00b0F water and whisk in a W motion until the slurry is smooth with no lumps."
+            },
+            {
+              "step_id": "SOP-230:C:9.4",
+              "label": "9.4",
+              "glance": "Matcha: add milk",
+              "body": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:10.1",
+              "label": "10.1",
+              "glance": "Drip coffee service",
+              "body": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210)."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 4,
+            "end": 7
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-c5",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1629.3429000070319,
+      "reason": "",
+      "response": {
+        "trace_id": "ff439ac952144a8db6e6beadb5103d73",
+        "transcript": "How many pumps?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Pump sizes",
+            "Flavor syrup amounts",
+            "Mocha specifications"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-c5-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1252.9718999867328,
+      "reason": "",
+      "response": {
+        "trace_id": "2150259170e841dbb524a8eaf5c49c3f",
+        "transcript": "small mocha",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "2 pumps mocha sauce",
+        "body": "",
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:7.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "| Mocha sauce | 2 pumps | 3 pumps | 4 pumps |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "recipe-pumps"
+      }
+    },
+    {
+      "id": "v3-f1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 1570.6393999862485,
+      "reason": "wrong citation or missing expected content",
+      "response": {
+        "trace_id": "ad2f9c64e21c4f89b9d5df00c46e02d9",
+        "transcript": "How hot should the milk be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "150 to 155 degF (65 to 68 degC)",
+        "body": "Never exceed 160 degF (71 degC). Discard if above.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Whole and 2 percent | 150 to 155\u00b0F (65 to 68\u00b0C)"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Never exceed 160\u00b0F (71\u00b0C). If milk goes above 160\u00b0F, discard it and start over."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-f1-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "not_found",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1336.9037000229582,
+      "reason": "unexpected outcome",
+      "response": {
+        "trace_id": "b05ddc90bf6443d58949abfe6505392d",
+        "transcript": "And for a kids drink?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-f1-turn-2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1353.6265000002459,
+      "reason": "",
+      "response": {
+        "trace_id": "2ff9557aa0124cf28d8dbb2ecf2dd7c3",
+        "transcript": "What about extra hot?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "\"Extra hot\" is 160 degF (71 degC)",
+        "body": "This is the maximum.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "v3-p1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 419.51180004980415,
+      "reason": "",
+      "response": {
+        "trace_id": "ed426431bdd54be6a9f611b5e8f689a3",
+        "transcript": "What does the steam wand look like?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Milk pitcher, wand and tip",
+        "body": "",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "steam wand"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.8",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.8",
+            "quote": "pitcher"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.9",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.9",
+            "quote": "pitcher"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "milk-steaming"
+      }
+    },
+    {
+      "id": "gap-standards",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 675.6507999962196,
+      "reason": "",
+      "response": {
+        "trace_id": "c34872673c354f36938c835d880b37a5",
+        "transcript": "Pull up the espresso standards.",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Espresso Bar - Shot and Milk Standards, 12 steps",
+        "body": "Espresso Bar - Shot and Milk Standards, 12 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:3.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Run the group head for 3 seconds to flush it."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.3",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Lock in the portafilter and start the shot and the timer together."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "Purge the steam wand for 2 seconds before and after every use."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.5",
+            "quote": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.6",
+            "quote": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.7",
+            "quote": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.8",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.8",
+            "quote": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-220",
+          "revision": "C",
+          "title": "Espresso Bar - Shot and Milk Standards",
+          "total": 12,
+          "index": 0,
+          "steps": [
+            {
+              "step_id": "SOP-220:C:3.1",
+              "label": "3.1",
+              "glance": "Purge",
+              "body": "Run the group head for 3 seconds to flush it.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Run the group head for 3 seconds to flush it."
+            },
+            {
+              "step_id": "SOP-220:C:3.2",
+              "label": "3.2",
+              "glance": "Dose",
+              "body": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+            },
+            {
+              "step_id": "SOP-220:C:3.3",
+              "label": "3.3",
+              "glance": "Tamp",
+              "body": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+            },
+            {
+              "step_id": "SOP-220:C:3.4",
+              "label": "3.4",
+              "glance": "Pull the shot",
+              "body": "Lock in the portafilter and start the shot and the timer together.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Lock in the portafilter and start the shot and the timer together."
+            },
+            {
+              "step_id": "SOP-220:C:3.5",
+              "label": "3.5",
+              "glance": "Stop at yield",
+              "body": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:3.6",
+              "label": "3.6",
+              "glance": "Adjust the grind",
+              "body": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+            },
+            {
+              "step_id": "SOP-220:C:3.7",
+              "label": "3.7",
+              "glance": "Record it",
+              "body": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+            },
+            {
+              "step_id": "SOP-220:C:4.4",
+              "label": "4.4",
+              "glance": "Purge the wand",
+              "body": "Purge the steam wand for 2 seconds before and after every use.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Purge the steam wand for 2 seconds before and after every use."
+            },
+            {
+              "step_id": "SOP-220:C:4.5",
+              "label": "4.5",
+              "glance": "Start cold",
+              "body": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41 degF. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+            },
+            {
+              "step_id": "SOP-220:C:4.6",
+              "label": "4.6",
+              "glance": "Stretch",
+              "body": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+            },
+            {
+              "step_id": "SOP-220:C:4.7",
+              "label": "4.7",
+              "glance": "Spin",
+              "body": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:4.8",
+              "label": "4.8",
+              "glance": "Finish",
+              "body": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 0,
+            "end": 7
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "gap-cash-count",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 592.9587000282481,
+      "reason": "",
+      "response": {
+        "trace_id": "cb1468d9b2484505a53fe44bb02b4662",
+        "transcript": "I need to do the cash count for closing.",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-202, 9 steps",
+        "body": "Cashier - Payments, Refunds, Voids, and Closing the Till, 9 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:2.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+          },
+          {
+            "chunk_id": "SOP-202:C:6.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "On the POS, go to Reports, then End of Day. Print two copies."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.4",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.5",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.5",
+            "quote": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-202",
+          "revision": "C",
+          "title": "Cashier - Payments, Refunds, Voids, and Closing the Till",
+          "total": 9,
+          "index": 4,
+          "steps": [
+            {
+              "step_id": "SOP-202:C:2.3",
+              "label": "2.3",
+              "glance": "Check $50 bills",
+              "body": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+            },
+            {
+              "step_id": "SOP-202:C:3.1",
+              "label": "3.1",
+              "glance": "Make change",
+              "body": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cash-handling",
+              "source_text": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+            },
+            {
+              "step_id": "SOP-202:C:3.2",
+              "label": "3.2",
+              "glance": "Cash drops",
+              "body": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+            },
+            {
+              "step_id": "SOP-202:C:6.1",
+              "label": "6.1",
+              "glance": "Sell a gift card",
+              "body": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+            },
+            {
+              "step_id": "SOP-202:C:7.1",
+              "label": "7.1",
+              "glance": "Run the end-of-day report",
+              "body": "On the POS, go to Reports, then End of Day. Print two copies.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "On the POS, go to Reports, then End of Day. Print two copies."
+            },
+            {
+              "step_id": "SOP-202:C:7.2",
+              "label": "7.2",
+              "glance": "Count the drawer",
+              "body": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+            },
+            {
+              "step_id": "SOP-202:C:7.3",
+              "label": "7.3",
+              "glance": "Leave the float",
+              "body": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+            },
+            {
+              "step_id": "SOP-202:C:7.4",
+              "label": "7.4",
+              "glance": "Check the variance",
+              "body": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+            },
+            {
+              "step_id": "SOP-202:C:7.5",
+              "label": "7.5",
+              "glance": "Secure and sign",
+              "body": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 4,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "gap-opening",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 605.4755999939516,
+      "reason": "",
+      "response": {
+        "trace_id": "a6ba98daba12463a9ff8bbcec8cc9417",
+        "transcript": "Let's start the back of house opening.",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 1,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 1,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    },
+    {
+      "id": "gap-cleaning",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 600.6126999855042,
+      "reason": "",
+      "response": {
+        "trace_id": "771b60b37a9148f38a6ba638bb662b65",
+        "transcript": "Open the cleaning procedure.",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 9,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 9,
+            "end": 13
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null
+      }
+    }
+  ]
+}

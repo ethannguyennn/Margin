@@ -6,7 +6,7 @@ import { useStore } from '../store';
 
 /** Everything the glance line had to leave out: full text, citations, walkthrough. */
 export default function AnswerPage() {
-  const { state, sessionId, busy, error, clearError, setContext, repeatLast } = useStore();
+  const { state, sessionId, busy, error, clearError, setContext, repeatLast, askNow } = useStore();
   const res = state.lastAnswer;
 
   return (
@@ -52,6 +52,7 @@ export default function AnswerPage() {
             key={res.trace_id}
             res={res}
             pinnedStepId={state.context.step_id}
+            onAsk={busy === 'ask' ? undefined : (text) => void askNow(text)}
             onUseStep={(step) =>
               setContext({ doc_id: res.walkthrough?.doc_id ?? state.context.doc_id, step_id: step.step_id })
             }

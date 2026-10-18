@@ -135,9 +135,21 @@ MOCK_CHUNKS: list[Chunk] = [
        "drying.", _T120, 4),
 ]
 
+MOCK_CHUNKS.extend([
+    _c("SOP-230", "C", "1.3", "Flavor syrup amounts",
+       "Flavored drinks get 2 pumps in Small, 3 pumps in Medium, and 4 pumps in Large.", "Drink Recipes"),
+    _c("SOP-230", "C", "2.1", "Latte", "Small latte: 2 espresso shots.", "Drink Recipes"),
+    _c("SOP-230", "C", "3.1", "Cappuccino", "Small cappuccino: 2 espresso shots.", "Drink Recipes"),
+    _c("SOP-230", "C", "3.2", "Cappuccino: pull espresso", "Pull the shots directly into the cup.", "Drink Recipes", 1),
+    _c("SOP-230", "C", "3.3", "Cappuccino: steam milk", "Stretch for 6 to 8 seconds to build thick foam.", "Drink Recipes", 2),
+    _c("SOP-230", "C", "3.4", "Cappuccino: pour", "Pour the milk into the espresso and spoon on extra foam.", "Drink Recipes", 3),
+])
+
 # keyword -> RRF-ordered hits. "walk me through"/"guide me" questions also mention the
 # bracket, so the walkthrough resolves to SOP-114 through the same table.
 _TOPICS: list[tuple[re.Pattern[str], list[str]]] = [
+    (re.compile(r"cappuccino|latte|syrup|pumps"),
+     ["SOP-230:C:3.2", "SOP-230:C:2.1", "SOP-230:C:3.1", "SOP-230:C:1.3"]),
     (re.compile(r"clean|disinfect"), ["SOP-120:B:4.3", "SOP-120:B:4.4"]),
     (re.compile(r"how tight|torque|\bm5\b|bracket|mounting|guide me|walk me through|boom"),
      ["SOP-114:C:4.2", "SOP-114:C:4.1"]),
@@ -170,6 +182,8 @@ _FILLER = frozenset({"ok", "okay", "um", "uh", "please", "specs", "hey"})
 def parse_command(transcript: str | None) -> str | None:
     """The command if the *whole* utterance (filler stripped from the ends) is one."""
     words = re.findall(r"[a-z]+", (transcript or "").lower())
+    if " ".join(words) == "show me the picture":
+        return "diagram"
     lo, hi = 0, len(words)
     while lo < hi:
         hit = _PHRASE_TO_COMMAND.get(" ".join(words[lo:hi]))
@@ -268,6 +282,8 @@ class MockRetriever:
                 break
         if not hits:
             return RetrievalResult(chunks=[], best_sim=0.12, best_rrf=0.004)
+        if re.search(r"pumps|syrup", q):
+            hits = sorted(hits, key=lambda chunk_id: chunk_id != "SOP-230:C:1.3")
         ranked = [by_id[i].model_copy(update={"sim": 0.86 - 0.1 * n, "rrf": 1 / (61 + n) * 2})
                   for n, i in enumerate(hits) if i in by_id]
         if revision:
@@ -293,6 +309,7 @@ class MockRetriever:
                 step_id=c.chunk_id, label=c.section,
                 glance=extra.get("glance") or _fit(f"{c.section} {c.heading or ''}".strip(), GLANCE_MAX),
                 body=extra.get("body") or _fit(c.text, BODY_MAX),
+                source_text=c.text,
                 warning=extra.get("warning"), checkpoint=extra.get("checkpoint"),
                 diagram=extra.get("diagram")))
         return out
@@ -312,7 +329,11 @@ class MockGenerator:
             raise LlmTimeout("mock generator timed out (boom)")
         if not chunks:
             return Draft(answerable=False)
+        if "pumps" in query.casefold() and not re.search(r"\b(?:latte|cappuccino)\b", query, re.I):
+            return Draft(answerable=False, needs_clarification=True)
         top = chunks[0]
+        if "pumps" in query.casefold():
+            top = next((c for c in chunks if c.chunk_id == "SOP-230:C:1.3"), top)
         # Leading whole sentences of the top chunk within the answer limit. The citation
         # quotes the whole chunk, so every number in glance or body is covered.
         body = ""

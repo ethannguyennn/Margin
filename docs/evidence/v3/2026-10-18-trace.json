@@ -1,0 +1,11 @@
+{
+  "recorded_at": "2026-10-18T12:03:01.935Z",
+  "evidence": "SYNTHETIC NODE CLIENT + LIVE VM HEALTH; NO GLASSES",
+  "trace_id": "ca17b3beff154f9281eb333863af7c65",
+  "relay_trace_id": "ca17b3beff154f9281eb333863af7c65",
+  "continued": true,
+  "flush_completed": true,
+  "ingest_http_statuses": [
+    200
+  ]
+}

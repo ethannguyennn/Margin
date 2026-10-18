@@ -12,10 +12,11 @@ import logging
 import re
 import time
 import uuid
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Iterator, Mapping
 from contextlib import contextmanager
 from contextvars import ContextVar
+from threading import Lock
 from typing import Any
 
 import sentry_sdk
@@ -28,6 +29,38 @@ log = logging.getLogger("specs.obs")
 
 STAGES = ("stt", "embed", "retrieve", "generate", "verify")
 _SENTRY_TRACE_RE = re.compile(r"^\s*([0-9a-f]{32})(?:-[0-9a-f]{16})?(?:-[01])?\s*$")
+_quota_lock = Lock()
+_quota_counts: Counter[str] = Counter()
+request_quota: ContextVar[bool] = ContextVar("specs_request_quota", default=False)
+
+
+def quota_snapshot() -> dict:
+    """Process-lifetime counters; no prompts, credentials or request bodies."""
+    with _quota_lock:
+        return {"gemini_429_total": sum(_quota_counts.values()),
+                "gemini_429_by_stage": dict(_quota_counts)}
+
+
+def record_quota_error(exc: BaseException, stage: str) -> bool:
+    """Count a propagated provider 429 once, even through nested timing spans."""
+    current, found, seen = exc, None, set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        code = getattr(current, "code", None) or getattr(current, "status_code", None)
+        if str(code) == "429" or re.search(r"\bHTTP\s+429\b|\bRESOURCE_EXHAUSTED\b", str(current), re.I):
+            found = current
+        current = current.__cause__ or current.__context__
+    if found is None:
+        return False
+    request_quota.set(True)
+    with _quota_lock:
+        if getattr(found, "_specs_quota_counted", False):
+            return False
+        found._specs_quota_counted = True
+        _quota_counts[stage] += 1
+        total = sum(_quota_counts.values())
+    log.warning("Gemini quota exceeded stage=%s gemini_429_total=%d", stage, total)
+    return True
 
 
 def version(settings: Settings) -> str:
@@ -127,6 +160,9 @@ def stage(name: str) -> Iterator[None]:
             timer._child_ms.append(0.0)
         try:
             yield
+        except Exception as exc:
+            record_quota_error(exc, name)
+            raise
         finally:
             elapsed = (time.perf_counter() - start) * 1000.0
             if timer is not None:

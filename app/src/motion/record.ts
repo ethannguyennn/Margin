@@ -1,16 +1,24 @@
 // Dev-only IMU recorder (?dev=1). Records {t, x, y, z} from the glasses and prints the
 // fixture JSON on the phone-side page to copy off. Motion only: no audio, no names (the
 // wearer is a letter), nothing sent to the relay. Fixtures land in app/tests/motion/fixtures/.
-import { startImu, type ImuFixture, type ImuSample } from './imu.ts';
-import { getImuPace, setImuPace } from '../settings.ts';
+import { replayName, startImu, type ImuFixture, type ImuSample } from './imu.ts';
+import { currentParams } from './gestures.ts';
+import { MOCK, getImuPace, setImuPace } from '../settings.ts';
 
 export const ACTIVITIES = ['still', 'double-nod', 'shake', 'bench-work', 'walking', 'talking-nodding'] as const;
+const MAX_RECORD_SECONDS = 1800;
 
 export async function record(seconds: number, meta: { activity: string; wearer: string }): Promise<ImuFixture> {
+  if (!Number.isFinite(seconds) || seconds < 3 || seconds > MAX_RECORD_SECONDS) {
+    throw new Error('Record between 3 and 1800 seconds.');
+  }
+  if (MOCK || replayName()) throw new Error('G2 recording requires live IMU input, without mock mode or replay.');
+  const pace = getImuPace(), params = currentParams();
   const samples: ImuSample[] = [];
-  const stop = await startImu((s) => samples.push(s));
+  const stop = await startImu((s) => samples.push(s), { fixedPace: true });
   await new Promise((r) => setTimeout(r, seconds * 1000));
   await stop();
+  if (!samples.length) throw new Error('No G2 IMU samples received. Check the glasses connection.');
   const t0 = samples[0]?.t ?? 0;
   const r3 = (v: number) => Math.round(v * 1000) / 1000;
   return {
@@ -18,7 +26,8 @@ export async function record(seconds: number, meta: { activity: string; wearer: 
       source: 'g2',
       activity: meta.activity,
       wearer: meta.wearer.replace(/[^A-Z]/gi, '').slice(0, 1).toUpperCase() || 'A', // a letter, never a name
-      pace: getImuPace(),
+      pace,
+      params,
       seconds,
       recorded_at: new Date().toISOString().slice(0, 10),
       summary: characterize(samples),
@@ -42,7 +51,11 @@ export function characterize(samples: ImuSample[]) {
     const v = samples.map((s) => s[k]);
     const mean = v.reduce((a, b) => a + b, 0) / (n || 1);
     const std = Math.sqrt(v.reduce((a, b) => a + (b - mean) ** 2, 0) / (n || 1));
-    return { mean: +mean.toFixed(3), std: +std.toFixed(3), min: Math.min(...v), max: Math.max(...v) };
+    return {
+      mean: +mean.toFixed(3), std: +std.toFixed(3),
+      min: v.reduce((a, b) => Math.min(a, b), v[0] ?? 0),
+      max: v.reduce((a, b) => Math.max(a, b), v[0] ?? 0),
+    };
   };
   const axes = { x: stats('x'), y: stats('y'), z: stats('z') };
   const mags = samples.map((s) => Math.hypot(s.x, s.y, s.z));
@@ -77,24 +90,36 @@ export function mountRecorder(root: HTMLElement): void {
   const box = document.createElement('section');
   box.innerHTML = `
     <h3>IMU recorder (dev)</h3>
+    <fieldset>
     <label>pace <select id="imu-pace">${[100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
       .map((p) => `<option ${p === getImuPace() ? 'selected' : ''}>${p}</option>`)
       .join('')}</select></label>
     <label>activity <select id="imu-act">${ACTIVITIES.map((a) => `<option>${a}</option>`).join('')}</select></label>
     <label>wearer <input id="imu-wearer" value="A" size="1" maxlength="1"></label>
-    <label>seconds <input id="imu-secs" type="number" value="30" min="3" max="180"></label>
-    <button id="imu-go">Record</button> <button id="imu-copy">Copy JSON</button>
+    <label>seconds <input id="imu-secs" type="number" value="30" min="3" max="${MAX_RECORD_SECONDS}"></label>
+    <button id="imu-go">Record</button>
+    </fieldset>
+    <button id="imu-copy">Copy JSON</button>
     <pre id="imu-sum"></pre>
     <textarea id="imu-out" rows="6" style="width:100%" readonly></textarea>`;
   root.append(box);
   const $ = <T extends HTMLElement>(id: string) => box.querySelector<T>(`#${id}`)!;
   $('imu-go').addEventListener('click', async () => {
+    const controls = box.querySelector('fieldset')!;
+    controls.disabled = true;
+    $<HTMLTextAreaElement>('imu-out').value = '';
     setImuPace(Number($<HTMLSelectElement>('imu-pace').value));
-    const seconds = Number($<HTMLInputElement>('imu-secs').value) || 30;
+    const seconds = Number($<HTMLInputElement>('imu-secs').value);
     $('imu-sum').textContent = `recording ${seconds} s...`;
-    const f = await record(seconds, { activity: $<HTMLSelectElement>('imu-act').value, wearer: $<HTMLInputElement>('imu-wearer').value });
-    $('imu-sum').textContent = JSON.stringify(f.meta, null, 1);
-    $<HTMLTextAreaElement>('imu-out').value = JSON.stringify(f);
+    try {
+      const f = await record(seconds, { activity: $<HTMLSelectElement>('imu-act').value, wearer: $<HTMLInputElement>('imu-wearer').value });
+      $('imu-sum').textContent = JSON.stringify(f.meta, null, 1);
+      $<HTMLTextAreaElement>('imu-out').value = JSON.stringify(f);
+    } catch (e) {
+      $('imu-sum').textContent = `Recording failed: ${(e as Error).message}`;
+    } finally {
+      controls.disabled = false;
+    }
   });
   $('imu-copy').addEventListener('click', () => {
     const out = $<HTMLTextAreaElement>('imu-out');

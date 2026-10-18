@@ -149,6 +149,36 @@ def test_natural_walkthrough(t):
     assert classify_intent(t) == "walkthrough"
 
 
+@pytest.mark.parametrize("t", [
+    "Open the cleaning procedure.",
+    "Pull up the espresso standards.",
+    "Let's start the back of house opening.",
+    "Bring up the closing checklist.",
+    "Start the till closing procedure.",
+    "Load the SOP for drink recipes.",
+    "Begin the cleaning routine.",
+    "Let's do the closing process.",
+    "Let\u2019s begin the opening steps.",
+])
+def test_opening_a_procedure_is_walkthrough(t):
+    assert classify_intent(t) == "walkthrough"
+
+
+@pytest.mark.parametrize("t, expected", [
+    ("what do I do if it's too warm", "question"),
+    ("how do I steam milk", "question"),
+    ("start", "command"),
+    ("continue", "command"),
+    ("open the steam wand slowly?", "question"),
+    ("is the closing float 150 dollars", "question"),
+    ("next step", "command"),
+    ("how do I start the closing procedure", "question"),
+    ("what does open the cleaning procedure mean", "question"),
+])
+def test_procedure_opening_keeps_questions_and_commands(t, expected):
+    assert classify_intent(t) == expected
+
+
 @pytest.mark.parametrize("t", ["", "  ", "...", None, "please", "um uh ok", "specs"])
 def test_filler_only_is_not_a_command(t):
     assert parse_command(t) is None
