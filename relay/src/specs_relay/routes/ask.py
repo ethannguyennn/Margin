@@ -20,6 +20,7 @@ import base64
 import binascii
 import inspect
 import logging
+import time
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -47,6 +48,12 @@ from .common import load_walkthrough
 from .deviation import log_deviation
 
 log = logging.getLogger("specs.ask")
+
+# A second Gemini attempt is only started with at least this much budget left; less
+# than that and it would just be cancelled, and the lens would wait for nothing.
+MIN_ATTEMPT_S = 1.0
+# Pause before retrying after a 429 / 5xx from Gemini.
+TRANSIENT_BACKOFF_S = 0.4
 router = APIRouter()
 
 CODES = {"stt_failed", "db_down", "llm_timeout", "bad_request", "internal"}
@@ -150,24 +157,40 @@ def _is_timeout(exc: BaseException) -> bool:
 CLARIFY = "clarify"  # _answer's marker: the model found the question ambiguous
 
 
-async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult
-                  ) -> tuple[str, str, list[Citation]] | str | None:
+async def _answer(p: Pipeline, settings: Any, query: str, r: RetrievalResult,
+                  deadline: float | None = None) -> tuple[str, str, list[Citation]] | str | None:
     """generate -> verify, retried once with the failure reason. None means not_found,
-    CLARIFY means not_found with needs_clarification."""
+    CLARIFY means not_found with needs_clarification.
+
+    ``deadline`` (time.monotonic()) is the end of the ask budget: each attempt is capped
+    by what is left, and the retry is skipped when too little remains to finish it."""
     feedback: str | None = None
     last_exc: BaseException | None = None
+    transient = False
     for _attempt in range(2):
+        timeout = settings.generate_timeout_s
+        if deadline is not None:
+            left = deadline - time.monotonic()
+            if _attempt and left < MIN_ATTEMPT_S + (TRANSIENT_BACKOFF_S if transient else 0):
+                log.info("skipping generation retry: %.1f s of the ask budget left", left)
+                break
+            timeout = min(timeout, max(left, MIN_ATTEMPT_S))
+        if transient:
+            await asyncio.sleep(TRANSIENT_BACKOFF_S)
         try:
             with obs.stage("generate"):
                 draft = await asyncio.wait_for(
                     p.generator.generate(query, r.chunks, feedback=feedback),
-                    timeout=settings.generate_timeout_s)
+                    timeout=timeout)
         except Exception as exc:
             if _is_timeout(exc):
                 raise _fail_from(exc, "llm_timeout", "generation") from exc
-            last_exc = exc  # malformed output / API error: one retry, like a verify failure
-            feedback = f"malformed_output: {type(exc).__name__}. Return JSON matching the schema."
+            last_exc = exc
+            transient = bool(getattr(exc, "transient", False))
+            if not transient:  # malformed output / API error: one retry, like a verify failure
+                feedback = f"malformed_output: {type(exc).__name__}. Return JSON matching the schema."
             continue
+        transient = False
         last_exc = None
         if draft.needs_clarification:
             return CLARIFY
@@ -200,6 +223,7 @@ def _response(trace_id: str, ctx: _Ctx, timer: obs.StageTimer, **kw: Any) -> Ask
 async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: _Ctx,
                timer: obs.StageTimer) -> AskResponse:
     session_id = str(req.session_id)
+    deadline = time.monotonic() + settings.ask_budget_s
     ctx.transcript = await _transcript(req, p, settings)
 
     # v2 command fast path (README-PART-3 section 4): whole-utterance commands return
@@ -285,7 +309,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
                          walkthrough=walk)
 
     # question
-    answer = await _answer(p, settings, ctx.transcript, retrieved)
+    answer = await _answer(p, settings, ctx.transcript, retrieved, deadline)
     if answer is None or answer == CLARIFY:
         ctx.outcome = "not_found"
         return _response(trace_id, ctx, timer, needs_clarification=answer == CLARIFY)

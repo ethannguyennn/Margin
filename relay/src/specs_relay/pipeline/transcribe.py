@@ -51,7 +51,10 @@ class GeminiTranscriber:
     def from_settings(cls, settings: Any, client: Any = None) -> "GeminiTranscriber":
         from .generate import gemini_client
 
-        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_transcribe)
+        # Just under the route's outer guard (STT_TIMEOUT_S); see GeminiGenerator.from_settings.
+        timeout = max(1.0, float(getattr(settings, "stt_timeout_s", TRANSCRIBE_TIMEOUT_S + 1)) - 0.5)
+        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_transcribe,
+                   timeout=timeout)
 
     async def transcribe(self, pcm: bytes, sample_rate: int) -> str:
         from google.genai import types

@@ -66,6 +66,17 @@ class GenerationTimeout(GenerationError):
     pass
 
 
+class GenerationUnavailable(GenerationError):
+    """Gemini said "not now" (429 quota, 5xx overload): worth one retry after a short
+    pause, but not with feedback to the model -- its last answer was not the problem."""
+
+    transient = True
+
+
+# HTTP codes from the Gemini API that mean "try again shortly", not "your request is bad".
+TRANSIENT_CODES = frozenset({429, 500, 503, 504})
+
+
 def _get(obj: Any, name: str, default: Any = None) -> Any:
     if isinstance(obj, dict):
         return obj.get(name, default)
@@ -122,7 +133,11 @@ class GeminiGenerator:
 
     @classmethod
     def from_settings(cls, settings: Any, client: Any = None) -> "GeminiGenerator":
-        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate)
+        # The route's outer guard (GENERATE_TIMEOUT_S) owns the budget; this inner timeout
+        # sits just under it so a slow call surfaces as GenerationTimeout, not a bare cancel.
+        timeout = max(1.0, float(getattr(settings, "generate_timeout_s", GENERATE_TIMEOUT_S + 1)) - 0.5)
+        return cls(client or gemini_client(settings.gemini_api_key), settings.gemini_model_generate,
+                   timeout=timeout)
 
     async def generate(self, query: str, chunks: list[Any], feedback: str | None = None):
         from google.genai import types
@@ -144,6 +159,9 @@ class GeminiGenerator:
         except asyncio.TimeoutError as e:
             raise GenerationTimeout("generation timed out") from e
         except Exception as e:  # never echo the prompt or key
+            code = getattr(e, "code", None)
+            if code in TRANSIENT_CODES:
+                raise GenerationUnavailable(f"generation unavailable: HTTP {code}") from e
             raise GenerationError(f"generation failed: {type(e).__name__}") from e
         return parse_draft(resp.text or "")
 
