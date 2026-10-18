@@ -67,8 +67,14 @@ Run deliberately against a live relay, with pacing for the shared provider quota
 ```bash
 PYTHONPATH=relay/src python eval/run_eval.py --base-url https://getyourassto.work --pace 10 --output eval/results/YYYY-MM-DD-v3.json
 PYTHONPATH=relay/src python tools/diagnostic/gap_probe.py --relay https://getyourassto.work --pace 10
+PYTHONPATH=relay/src python tools/diagnostic/clarify_rate.py --relay https://getyourassto.work --pace 10 --output eval/results/YYYY-MM-DD-step-regression.json
 ```
 
 The gap probe is safe to import, refuses mock evidence, and exits nonzero on failed or missing
 checks. Reports include timestamps and model identifiers when verbose health provides them;
 missing model data is recorded as null. Offline tests are fixtures, never live quality evidence.
+
+The step regression accepts verified glance-only answers and independently scores all 18
+responses, rather than applying the obsolete empty-body error rule. It is safe to import.
+The till walkthrough uses the plan's explicit till-closing phrase; a generic closing checklist
+can also refer to back-of-house closing. Cleaning is SOP-210 5.1-5.4, distinct from closing 6.x.
