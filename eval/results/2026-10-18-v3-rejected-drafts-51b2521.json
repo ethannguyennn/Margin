@@ -1,0 +1,497 @@
+[
+  {
+    "q": "How do I backflush the group heads?",
+    "attempt": 1,
+    "chunks": [
+      {
+        "chunk_id": "SOP-210:C:5.1",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.1",
+        "text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+        "heading": "Backflush the group heads",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 10,
+        "sim": null,
+        "rrf": 0.03278688524590164
+      },
+      {
+        "chunk_id": "SOP-220:C:3.1",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "3.1",
+        "text": "Run the group head for 3 seconds to flush it.",
+        "heading": "Purge",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": true,
+        "step_order": 1,
+        "sim": null,
+        "rrf": 0.03225806451612903
+      },
+      {
+        "chunk_id": "SOP-220:C:6.2",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "6.2",
+        "text": "If the low-water light comes on, stop making espresso and tell the shift lead. Do not run the machine empty. If a group head leaks, stop using it and tell the shift lead.",
+        "heading": "Low water or leaks",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.031024531024531024
+      },
+      {
+        "chunk_id": "SOP-210:C:5.2",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.2",
+        "text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+        "heading": "Soak the portafilters",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.015873015873015872
+      },
+      {
+        "chunk_id": "SOP-210:C:5.5",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.5",
+        "text": "Brush out the burr chamber every day. Do a full grinder deep clean every Sunday at close.",
+        "heading": "Grinder",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.015625
+      },
+      {
+        "chunk_id": "SOP-210:C:5.4",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.4",
+        "text": "Empty and wash the knock box and the drip tray.",
+        "heading": "Knock box and drip tray",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 13,
+        "sim": null,
+        "rrf": 0.015384615384615385
+      }
+    ],
+    "draft": {
+      "answerable": true,
+      "needs_clarification": false,
+      "glance": "Backflush 5 times with cleaner 3 g",
+      "body": "Run pump 10s on and 10s off, then repeat five times with plain water only.",
+      "citations": [
+        {
+          "chunk_id": "SOP-210:C:5.1",
+          "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+        }
+      ],
+      "graphic_id": "espresso-cleaning"
+    },
+    "ok": false,
+    "reason": "unsupported_number: glance states '5' but no cited quote contains it; copy values and units exactly as the quote writes them"
+  },
+  {
+    "q": "How do I backflush the group heads?",
+    "attempt": 2,
+    "chunks": [
+      {
+        "chunk_id": "SOP-210:C:5.1",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.1",
+        "text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+        "heading": "Backflush the group heads",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 10,
+        "sim": null,
+        "rrf": 0.03278688524590164
+      },
+      {
+        "chunk_id": "SOP-220:C:3.1",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "3.1",
+        "text": "Run the group head for 3 seconds to flush it.",
+        "heading": "Purge",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": true,
+        "step_order": 1,
+        "sim": null,
+        "rrf": 0.03225806451612903
+      },
+      {
+        "chunk_id": "SOP-220:C:6.2",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "6.2",
+        "text": "If the low-water light comes on, stop making espresso and tell the shift lead. Do not run the machine empty. If a group head leaks, stop using it and tell the shift lead.",
+        "heading": "Low water or leaks",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.031024531024531024
+      },
+      {
+        "chunk_id": "SOP-210:C:5.2",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.2",
+        "text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+        "heading": "Soak the portafilters",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.015873015873015872
+      },
+      {
+        "chunk_id": "SOP-210:C:5.5",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.5",
+        "text": "Brush out the burr chamber every day. Do a full grinder deep clean every Sunday at close.",
+        "heading": "Grinder",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.015625
+      },
+      {
+        "chunk_id": "SOP-210:C:5.4",
+        "doc_id": "SOP-210",
+        "revision": "C",
+        "section": "5.4",
+        "text": "Empty and wash the knock box and the drip tray.",
+        "heading": "Knock box and drip tray",
+        "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+        "is_step": true,
+        "step_order": 13,
+        "sim": null,
+        "rrf": 0.015384615384615385
+      }
+    ],
+    "draft": {
+      "answerable": true,
+      "needs_clarification": false,
+      "glance": "Backflush 10 s on 10 s off 5 times",
+      "body": "Insert blind basket, add 3 g cleaner, repeat 5 times with water.",
+      "citations": [
+        {
+          "chunk_id": "SOP-210:C:5.1",
+          "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+        }
+      ],
+      "graphic_id": "espresso-cleaning"
+    },
+    "ok": false,
+    "reason": "unsupported_number: glance states '10 s' but no cited quote contains it; copy values and units exactly as the quote writes them"
+  },
+  {
+    "q": "What temperature do I steam almond milk to?",
+    "attempt": 1,
+    "chunks": [
+      {
+        "chunk_id": "SOP-220:C:4.1",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.1",
+        "text": "| Milk | Target temperature |\n|---|---|\n| Whole and 2 percent | 150 to 155\u00b0F (65 to 68\u00b0C) |\n| Soy | 140 to 150\u00b0F (60 to 65\u00b0C) |\n| Oat | 140 to 150\u00b0F (60 to 65\u00b0C) |\n| Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |\n\nNever exceed 160\u00b0F (71\u00b0C). If milk goes above 160\u00b0F, discard it and start over.",
+        "heading": "Target temperatures",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.03252247488101534
+      },
+      {
+        "chunk_id": "SOP-230:C:2.4",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "2.4",
+        "text": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.",
+        "heading": "Latte: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 3,
+        "sim": null,
+        "rrf": 0.03149801587301587
+      },
+      {
+        "chunk_id": "SOP-230:C:3.3",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "3.3",
+        "text": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.",
+        "heading": "Cappuccino: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 6,
+        "sim": null,
+        "rrf": 0.030776515151515152
+      },
+      {
+        "chunk_id": "SOP-230:C:4.3",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "4.3",
+        "text": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds.",
+        "heading": "Flat white: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 9,
+        "sim": null,
+        "rrf": 0.030090497737556562
+      },
+      {
+        "chunk_id": "SOP-230:C:7.4",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "7.4",
+        "text": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.",
+        "heading": "Mocha: steam and pour",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 18,
+        "sim": null,
+        "rrf": 0.029437229437229435
+      },
+      {
+        "chunk_id": "SOP-220:C:4.7",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.7",
+        "text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+        "heading": "Spin",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.029030910609857977
+      }
+    ],
+    "draft": {
+      "answerable": true,
+      "needs_clarification": false,
+      "glance": "Almond milk: 130 to 140\u00b0F (54 to 60\u00b0C)",
+      "body": "",
+      "citations": [
+        {
+          "chunk_id": "SOP-220:C:4.1",
+          "quote": "| Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |"
+        }
+      ],
+      "graphic_id": null
+    },
+    "ok": false,
+    "reason": "glance_too_long: 44 chars, the limit is 40"
+  },
+  {
+    "q": "What temperature do I steam almond milk to?",
+    "attempt": 2,
+    "chunks": [
+      {
+        "chunk_id": "SOP-220:C:4.1",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.1",
+        "text": "| Milk | Target temperature |\n|---|---|\n| Whole and 2 percent | 150 to 155\u00b0F (65 to 68\u00b0C) |\n| Soy | 140 to 150\u00b0F (60 to 65\u00b0C) |\n| Oat | 140 to 150\u00b0F (60 to 65\u00b0C) |\n| Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |\n\nNever exceed 160\u00b0F (71\u00b0C). If milk goes above 160\u00b0F, discard it and start over.",
+        "heading": "Target temperatures",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.03252247488101534
+      },
+      {
+        "chunk_id": "SOP-230:C:2.4",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "2.4",
+        "text": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.",
+        "heading": "Latte: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 3,
+        "sim": null,
+        "rrf": 0.03149801587301587
+      },
+      {
+        "chunk_id": "SOP-230:C:3.3",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "3.3",
+        "text": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.",
+        "heading": "Cappuccino: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 6,
+        "sim": null,
+        "rrf": 0.030776515151515152
+      },
+      {
+        "chunk_id": "SOP-230:C:4.3",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "4.3",
+        "text": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds.",
+        "heading": "Flat white: steam milk",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 9,
+        "sim": null,
+        "rrf": 0.030090497737556562
+      },
+      {
+        "chunk_id": "SOP-230:C:7.4",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "7.4",
+        "text": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.",
+        "heading": "Mocha: steam and pour",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 18,
+        "sim": null,
+        "rrf": 0.029437229437229435
+      },
+      {
+        "chunk_id": "SOP-220:C:4.7",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.7",
+        "text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+        "heading": "Spin",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.029030910609857977
+      }
+    ],
+    "draft": {
+      "answerable": true,
+      "needs_clarification": false,
+      "glance": "Almond milk: 130-140F (54-60C)",
+      "body": "",
+      "citations": [
+        {
+          "chunk_id": "SOP-220:C:4.1",
+          "quote": "| Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |"
+        }
+      ],
+      "graphic_id": null
+    },
+    "ok": true,
+    "reason": null
+  },
+  {
+    "q": "How hot is extra hot?",
+    "attempt": 1,
+    "chunks": [
+      {
+        "chunk_id": "SOP-220:C:4.2",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.2",
+        "text": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum. \"Kid's temp\" is 130\u00b0F (54\u00b0C).",
+        "heading": "Special temperature requests",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.032266458495966696
+      },
+      {
+        "chunk_id": "SOP-220:C:4.7",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "4.7",
+        "text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+        "heading": "Spin",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.03128054740957967
+      },
+      {
+        "chunk_id": "SOP-230:C:5.1",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "5.1",
+        "text": "| | Small | Medium | Large |\n|---|---|---|---|\n| Espresso shots | 2 | 2 | 3 |\n| Hot water | 8 oz | 12 oz | 14 oz |\n\nHot water comes from the tap set to 195\u00b0F (90\u00b0C).",
+        "heading": "Americano specifications",
+        "title": "Drink Recipes",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.03125
+      },
+      {
+        "chunk_id": "SOP-220:C:2.2",
+        "doc_id": "SOP-220",
+        "revision": "C",
+        "section": "2.2",
+        "text": "Small and Medium drinks use one double (2 shots). Large drinks use one double plus one single (3 shots). An extra shot adds one single.",
+        "heading": "Shots by size",
+        "title": "Espresso Bar - Shot and Milk Standards",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.03076923076923077
+      },
+      {
+        "chunk_id": "SOP-201:C:4.3",
+        "doc_id": "SOP-201",
+        "revision": "C",
+        "section": "4.3",
+        "text": "Oat, almond, or soy milk: add $0.75. Extra espresso shot: add $1.00. Flavor syrup (vanilla, caramel, or hazelnut): add $0.60. Whipped cream, decaf, and extra hot are free.",
+        "heading": "Modifier charges",
+        "title": "Cashier - Station Setup and Order Taking",
+        "is_step": false,
+        "step_order": null,
+        "sim": null,
+        "rrf": 0.029726775956284153
+      },
+      {
+        "chunk_id": "SOP-230:C:5.2",
+        "doc_id": "SOP-230",
+        "revision": "C",
+        "section": "5.2",
+        "text": "Fill the cup with the hot water first.",
+        "heading": "Americano: add water",
+        "title": "Drink Recipes",
+        "is_step": true,
+        "step_order": 11,
+        "sim": null,
+        "rrf": 0.028577260665441927
+      }
+    ],
+    "draft": {
+      "answerable": true,
+      "needs_clarification": false,
+      "glance": "\"Extra hot\" is 160\u00b0F (71\u00b0C)",
+      "body": "This is the maximum.",
+      "citations": [
+        {
+          "chunk_id": "SOP-220:C:4.2",
+          "quote": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum."
+        }
+      ],
+      "graphic_id": null
+    },
+    "ok": true,
+    "reason": null
+  }
+]
