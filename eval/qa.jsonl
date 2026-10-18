@@ -21,8 +21,8 @@
 {"id":"a21","category":"answerable","q":"How do I backflush the group heads?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"5.1","must_contain":["10 seconds on"]}
 {"id":"a22","category":"answerable","q":"How long do I soak the portafilters?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"5.2","must_contain":["20 minutes"]}
 {"id":"a23","category":"answerable","q":"What temperature is the wash sink water?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"6.3","must_contain":["110°F"]}
-{"id":"a24","category":"answerable","q":"Where is the first aid kit?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"7.2","must_contain":["under the back counter"]}
-{"id":"a25","category":"answerable","q":"How long should an espresso shot take?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.5","must_contain":["25 to 30 seconds"]}
+{"id":"a24","category":"answerable","q":"Where is the first aid kit?","expect":"answered","doc_id":"SOP-210","revision":"C","section":"7.2","must_contain":["under the back counter"],"alternative_content":[["under back counter"]]}
+{"id":"a25","category":"answerable","q":"How long should an espresso shot take?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.5","must_contain":["25 to 30 seconds"],"alternative_sections":["2.1"]}
 {"id":"a26","category":"answerable","q":"What is the espresso dose?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"2.1","must_contain":["18.0 g"]}
 {"id":"a27","category":"answerable","q":"My shot ran twenty seconds, what do I do?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"3.6","must_contain":["grind finer"]}
 {"id":"a28","category":"answerable","q":"What temperature do I steam almond milk to?","expect":"answered","doc_id":"SOP-220","revision":"C","section":"4.1","must_contain":["130 to 140°F"]}

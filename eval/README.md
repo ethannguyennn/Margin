@@ -80,3 +80,10 @@ The till walkthrough uses the plan's explicit till-closing phrase; a generic clo
 can also refer to back-of-house closing. Cleaning is SOP-210 5.1-5.4, distinct from closing 6.x.
 The generic milk-temperature lead-in checks the 160 degF maximum; individual milk targets
 differ, so a correct whole-milk answer need not include the soy/oat lower bound of 140 degF.
+
+Live-run scoring corrections retain all 45 original questions and required values. Unit spelling
+and HTML degree entities are normalized without changing values or units. `a24` also accepts
+"under back counter" (the same location with the article omitted); "above" still fails. `a25`
+accepts the approved shot-time specification table in 2.1 as well as the procedure in 3.5.
+These alternatives are explicit annotations and have wrong-fact regression tests. Historical
+reports keep their original scores; reruns identify the new scorer/code revision.

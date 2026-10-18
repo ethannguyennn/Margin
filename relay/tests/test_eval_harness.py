@@ -243,3 +243,27 @@ def test_step_regression_import_is_offline_and_scores_all_18_asks(monkeypatch):
     assert len(cases) == len({c["id"] for c in cases}) == 18
     assert all(c["context"]["step_id"] == f"SOP-210:C:{c['section']}" for c in cases)
     assert all(c["expect"] == "answered" and c["must_contain"] for c in cases)
+
+
+@pytest.mark.parametrize("actual,expected", [("160deg F", "160\u00b0F"), ("160 Fahrenheit", "160 degF"),
+    ("10 sec on", "10 seconds on"), ("4 h", "4 hours")])
+def test_scoring_normalizes_unit_spelling_without_changing_values_or_units(actual, expected):
+    assert evaluation.contains(actual, expected)
+    assert not evaluation.contains(actual, expected.replace("160", "161").replace("10", "11").replace("4", "5"))
+    assert not evaluation.contains("160 degC", "160 degF")
+    assert not evaluation.contains("10 min", "10 sec")
+
+
+def test_documented_equivalent_answers_still_require_the_right_fact():
+    bank = {c["id"]: c for c in evaluation.load_cases(ROOT / "eval/qa.jsonl")}
+    index = evaluation.citation_index()
+    for case_id, section, glance, quote, wrong in [
+        ("a24", "7.2", "First aid kit under back counter", "The first aid kit is under the back counter by the dish sink.", "First aid kit above back counter"),
+        ("a25", "2.1", "Shot time: 25 to 30 sec", "Shot time | 25 to 30 seconds", "Shot time: 35 to 40 sec"),
+    ]:
+        case = bank[case_id]
+        chunk = index[f"{case['doc_id']}:C:{section}"]
+        response = {"outcome": "answered", "verified": True, "glance": glance, "body": "",
+                    "citations": [{k: chunk[k] for k in ("chunk_id", "doc_id", "revision", "section")} | {"quote": quote}]}
+        assert evaluation.score_case(case, response, index, 1).correct
+        assert not evaluation.score_case(case, {**response, "glance": wrong}, index, 1).correct
