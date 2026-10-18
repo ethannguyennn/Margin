@@ -1,0 +1,4541 @@
+{
+  "recorded_at": "2026-10-18T12:39:14.596824+00:00",
+  "relay": "https://getyourassto.work",
+  "models": {
+    "transcribe": "gemini-3.5-flash-lite",
+    "embed": "gemini-embedding-2",
+    "generate": "gemini-3.5-flash-lite",
+    "convert": "gemini-3.8-flash"
+  },
+  "git_sha": "7cdbbc6",
+  "health_before": {
+    "ok": true,
+    "mock": false,
+    "db": "ok",
+    "version": "0.3.0+7cdbbc6",
+    "ask_mock": false,
+    "conversion_mock": false,
+    "mocked": [],
+    "git_sha": "7cdbbc6",
+    "models": {
+      "transcribe": "gemini-3.5-flash-lite",
+      "embed": "gemini-embedding-2",
+      "generate": "gemini-3.5-flash-lite",
+      "convert": "gemini-3.8-flash"
+    },
+    "gate": {
+      "min_sim": 0.68,
+      "min_rrf": 0.04
+    },
+    "gemini_429_total": 0,
+    "gemini_429_by_stage": {}
+  },
+  "health_after": {
+    "ok": true,
+    "mock": false,
+    "db": "ok",
+    "version": "0.3.0+7cdbbc6",
+    "ask_mock": false,
+    "conversion_mock": false,
+    "mocked": [],
+    "git_sha": "7cdbbc6",
+    "models": {
+      "transcribe": "gemini-3.5-flash-lite",
+      "embed": "gemini-embedding-2",
+      "generate": "gemini-3.5-flash-lite",
+      "convert": "gemini-3.8-flash"
+    },
+    "gate": {
+      "min_sim": 0.68,
+      "min_rrf": 0.04
+    },
+    "gemini_429_total": 0,
+    "gemini_429_by_stage": {}
+  },
+  "evidence": "LIVE RELAY",
+  "pace_seconds": 10,
+  "order_note": "Previously failing cases first; all original and v3 questions included exactly once",
+  "metrics": {
+    "cases": 74,
+    "answered_correct_rate": 0.9166666666666666,
+    "not_found_precision": 0.9333333333333333,
+    "not_found_recall": 1.0,
+    "citation_verification_pass_rate": 0.9830508474576272,
+    "median_latency_ms": 1310.4735000233632,
+    "answered": 59,
+    "unverified_answers": 1,
+    "failed_cases": 5,
+    "core_answerable": {
+      "correct": 31,
+      "total": 36,
+      "rate": 0.8611111111111112
+    },
+    "category_passes": {
+      "ambiguous": {
+        "passed": 12,
+        "total": 12
+      },
+      "answerable": {
+        "passed": 50,
+        "total": 55
+      },
+      "near-miss": {
+        "passed": 3,
+        "total": 3
+      },
+      "off-domain": {
+        "passed": 4,
+        "total": 4
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "a21",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1629.070499970112,
+      "reason": "",
+      "response": {
+        "trace_id": "994489e509b7442a8ad6fcdea405c2a2",
+        "transcript": "How do I backflush the group heads?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Backflush 10 sec on and 10 sec off",
+        "body": "Insert the blind basket, add 3 g of cleaner, and run pump five times. Repeat five times with plain water.",
+        "source": "SOP-210 Sec 5.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "espresso-cleaning",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 302,
+          "retrieve": 218,
+          "generate": 1083,
+          "verify": 1,
+          "total": 1606
+        }
+      }
+    },
+    {
+      "id": "a28",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "not_found",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 2376.8342999974266,
+      "reason": "unexpected outcome",
+      "response": {
+        "trace_id": "67db8b0c5554410e853e25b3bd4bf9f5",
+        "transcript": "What temperature do I steam almond milk to?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 212,
+          "retrieve": 127,
+          "generate": 1975,
+          "verify": 0,
+          "total": 2317
+        }
+      }
+    },
+    {
+      "id": "a29",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1250.7048000115901,
+      "reason": "",
+      "response": {
+        "trace_id": "b052fdd77a72441abb8cee365b77bfea",
+        "transcript": "How hot is extra hot?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "\"Extra hot\" is 160 degF (71 degC)",
+        "body": "",
+        "source": "SOP-220 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 260,
+          "retrieve": 104,
+          "generate": 846,
+          "verify": 0,
+          "total": 1211
+        }
+      }
+    },
+    {
+      "id": "v3-f1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 3089.397599978838,
+      "reason": "",
+      "response": {
+        "trace_id": "958e293d860a4a7b8a93975b7e247214",
+        "transcript": "How hot should the milk be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Target: 150 to 155 degF",
+        "body": "Whole and 2 percent: 150 to 155 degF (65 to 68 degC). Soy and Oat: 140 to 150 degF (60 to 65 degC). Almond: 130 to 140 degF (54 to 60 degC). Never exceed 160 degF (71 degC).",
+        "source": "SOP-220 Sec 4.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "| Whole and 2 percent | 150 to 155\u00b0F (65 to 68\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "| Soy | 140 to 150\u00b0F (60 to 65\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "| Oat | 140 to 150\u00b0F (60 to 65\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "| Almond | 130 to 140\u00b0F (54 to 60\u00b0C) |"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Never exceed 160\u00b0F (71\u00b0C)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 254,
+          "retrieve": 105,
+          "generate": 2499,
+          "verify": 2,
+          "total": 3047
+        }
+      }
+    },
+    {
+      "id": "v3-f1-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1665.0731000117958,
+      "reason": "",
+      "response": {
+        "trace_id": "62f8f6441057420682bac349397902aa",
+        "transcript": "And for a kids drink?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Kid's temp: 130 degF (54 degC)",
+        "body": "",
+        "source": "SOP-220 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "\"Kid's temp\" is 130\u00b0F (54\u00b0C)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 1098,
+          "verify": 0,
+          "total": 1622
+        }
+      }
+    },
+    {
+      "id": "v3-f1-turn-2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1523.1076999916695,
+      "reason": "",
+      "response": {
+        "trace_id": "f9ce95534b454084bf551f0e6a144677",
+        "transcript": "What about extra hot?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "\"Extra hot\" is 160 degF (71 degC)",
+        "body": "Extra hot is free.",
+        "source": "SOP-220 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "\"Extra hot\" is 160\u00b0F (71\u00b0C), which is the maximum."
+          },
+          {
+            "chunk_id": "SOP-201:C:4.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Whipped cream, decaf, and extra hot are free."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 277,
+          "retrieve": 104,
+          "generate": 900,
+          "verify": 1,
+          "total": 1467
+        }
+      }
+    },
+    {
+      "id": "c01",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 355.74619995895773,
+      "reason": "",
+      "response": {
+        "trace_id": "79d96c20fe214c1a97b454416966d1b5",
+        "transcript": "How long does it last?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Long waits",
+            "Last call",
+            "Shelf life after opening"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 205,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 310
+        }
+      }
+    },
+    {
+      "id": "a01",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1357.5969000230543,
+      "reason": "",
+      "response": {
+        "trace_id": "3ff0dc6aff6e467a8a42029316dc1826",
+        "transcript": "How much money is in the opening float?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Opening float is $150.00",
+        "body": "",
+        "source": "SOP-201 Sec 2.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:2.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "The opening float is $150.00: two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 208,
+          "retrieve": 104,
+          "generate": 1004,
+          "verify": 1,
+          "total": 1317
+        }
+      }
+    },
+    {
+      "id": "a02",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1204.3227000394836,
+      "reason": "",
+      "response": {
+        "trace_id": "14fde1acb682464e961a92b0a6a85283",
+        "transcript": "How fast do I have to greet a guest?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Greet within 10 sec",
+        "body": "",
+        "source": "SOP-201 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:3.1",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Greet every guest within 10 seconds of their reaching the counter."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 255,
+          "retrieve": 104,
+          "generate": 791,
+          "verify": 0,
+          "total": 1152
+        }
+      }
+    },
+    {
+      "id": "a03",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1200.9450999903493,
+      "reason": "",
+      "response": {
+        "trace_id": "0d0a4034c8994708b74722828c8ccaac",
+        "transcript": "How much extra is oat milk?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Add $0.75 for oat milk",
+        "body": "",
+        "source": "SOP-201 Sec 4.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Oat, almond, or soy milk: add $0.75."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 212,
+          "retrieve": 134,
+          "generate": 810,
+          "verify": 0,
+          "total": 1158
+        }
+      }
+    },
+    {
+      "id": "a04",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1718.1111999670975,
+      "reason": "",
+      "response": {
+        "trace_id": "e811877c459f495fac1eaf5fc7f5595b",
+        "transcript": "How much is a medium cappuccino?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Medium cappuccino $5.50",
+        "body": "",
+        "source": "SOP-201 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "| Cappuccino | $4.75 | $5.50 | $6.25 |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 218,
+          "retrieve": 122,
+          "generate": 1323,
+          "verify": 0,
+          "total": 1664
+        }
+      }
+    },
+    {
+      "id": "a05",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 1307.8171000233851,
+      "reason": "wrong citation or missing expected content",
+      "response": {
+        "trace_id": "ae15013672dd4f2d96f62a01421b5d81",
+        "transcript": "Can I sell a large flat white?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "No, Flat White not sold",
+        "body": "",
+        "source": "SOP-201 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:4.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "| Flat White | $5.25 | $5.75 | not sold |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 217,
+          "retrieve": 134,
+          "generate": 893,
+          "verify": 1,
+          "total": 1246
+        }
+      }
+    },
+    {
+      "id": "a06",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1459.2673999723047,
+      "reason": "",
+      "response": {
+        "trace_id": "5323ec6fc3ff4b8bb4b8ec05c483030f",
+        "transcript": "What do I do when a guest mentions an allergy?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Press ALLERGY button in POS",
+        "body": "The barista will change gloves and use a clean pitcher and a freshly sanitized steam wand.",
+        "source": "SOP-201 Sec 5.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:5.1",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "If a guest mentions an allergy, press the ALLERGY button in the POS before sending the order. The barista will change gloves and use a clean pitcher and a freshly sanitized steam wand."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "cashier-station",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 263,
+          "retrieve": 123,
+          "generate": 1027,
+          "verify": 1,
+          "total": 1414
+        }
+      }
+    },
+    {
+      "id": "a07",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1192.0592000242323,
+      "reason": "",
+      "response": {
+        "trace_id": "34a776eea2e445409b68724361ef9a99",
+        "transcript": "What is the biggest bill we accept?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Largest bill: $50",
+        "body": "",
+        "source": "SOP-202 Sec 2.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:2.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "The largest bill we accept is $50."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 814,
+          "verify": 0,
+          "total": 1155
+        }
+      }
+    },
+    {
+      "id": "a08",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 1149.583199992776,
+      "reason": "wrong citation or missing expected content",
+      "response": {
+        "trace_id": "421d10bce9464632bf34bc0feac5d2c3",
+        "transcript": "What does a black mark from the pen mean on a fifty?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Black mark means counterfeit risk",
+        "body": "Ask guest for another payment method and call the shift lead.",
+        "source": "SOP-202 Sec 2.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:2.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 212,
+          "retrieve": 104,
+          "generate": 790,
+          "verify": 1,
+          "total": 1107
+        }
+      }
+    },
+    {
+      "id": "a09",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1489.6281999535859,
+      "reason": "",
+      "response": {
+        "trace_id": "ecdab0a2c7564734a59e83ebedec4be3",
+        "transcript": "When do I need to do a cash drop?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Do cash drop when drawer > $400.00",
+        "body": "Remove $200.00 in $20 and $10 bills with shift lead, put through safe slot, and record on drop log.",
+        "source": "SOP-202 Sec 3.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:3.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "till-closing",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 254,
+          "retrieve": 104,
+          "generate": 1088,
+          "verify": 1,
+          "total": 1449
+        }
+      }
+    },
+    {
+      "id": "a10",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1334.202500001993,
+      "reason": "",
+      "response": {
+        "trace_id": "804a89a357dc4946a98beb328d1d83bd",
+        "transcript": "Who has to approve a fifteen dollar refund?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Shift lead (PIN)",
+        "body": "Required for $10.01 to $25.00.",
+        "source": "SOP-202 Sec 5.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:5.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "| $10.01 to $25.00 | Shift lead (PIN) |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 247,
+          "retrieve": 105,
+          "generate": 934,
+          "verify": 0,
+          "total": 1288
+        }
+      }
+    },
+    {
+      "id": "a11",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1247.4180000135675,
+      "reason": "",
+      "response": {
+        "trace_id": "edce46f9fd0448a2bd5801c136260d8b",
+        "transcript": "How long after purchase can I give a refund?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Refunds within 24 hours",
+        "body": "After 24 hours, only a manager may approve a refund.",
+        "source": "SOP-202 Sec 5.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:5.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "Refunds are available within 24 hours of purchase. After 24 hours, only a manager may approve a refund."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 211,
+          "retrieve": 104,
+          "generate": 891,
+          "verify": 1,
+          "total": 1208
+        }
+      }
+    },
+    {
+      "id": "a12",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1367.042500001844,
+      "reason": "",
+      "response": {
+        "trace_id": "aae817a746554a75b8a7ab3837aed8e6",
+        "transcript": "How long can I void an order after payment?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Void within 5 minutes after payment",
+        "body": "Choose the POS reason code.",
+        "source": "SOP-202 Sec 5.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:5.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "A cashier may void an item or order in the same transaction before payment is finalized, or within 5 minutes after payment. Choose the POS reason code."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 288,
+          "retrieve": 104,
+          "generate": 910,
+          "verify": 1,
+          "total": 1304
+        }
+      }
+    },
+    {
+      "id": "a13",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1439.9840999976732,
+      "reason": "",
+      "response": {
+        "trace_id": "819fa19dcfe342b095c6fa5ba730a00b",
+        "transcript": "What is the maximum gift card load?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Max load $200.00",
+        "body": "",
+        "source": "SOP-202 Sec 6.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:6.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "The minimum load is $10.00 and the maximum is $200.00."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 1053,
+          "verify": 0,
+          "total": 1394
+        }
+      }
+    },
+    {
+      "id": "a14",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 2022.7946999948472,
+      "reason": "",
+      "response": {
+        "trace_id": "56ad7309c14049c59254e8eaea8f969e",
+        "transcript": "When does a till variance need a manager signature?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "A difference over $5.00 needs signature",
+        "body": "A difference over $5.00 also needs a manager signature.",
+        "source": "SOP-202 Sec 7.4 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:7.4",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "A difference over $5.00 also needs a manager signature."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 203,
+          "retrieve": 105,
+          "generate": 1662,
+          "verify": 1,
+          "total": 1972
+        }
+      }
+    },
+    {
+      "id": "a15",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1229.532899975311,
+      "reason": "",
+      "response": {
+        "trace_id": "b3b0bb47be8947ceaf7d97398c1cd3a2",
+        "transcript": "How much do I leave in the drawer when closing?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Leave $150.00 in drawer bag",
+        "body": "Put the rest in the bank bag for deposit.",
+        "source": "SOP-202 Sec 7.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:7.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "till-closing",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 225,
+          "retrieve": 104,
+          "generate": 848,
+          "verify": 1,
+          "total": 1179
+        }
+      }
+    },
+    {
+      "id": "a16",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1271.1209999979474,
+      "reason": "",
+      "response": {
+        "trace_id": "7d0c25a2a8124c2bb52549e13a053a6b",
+        "transcript": "How cold does the milk fridge need to be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Read 41 deg F or below",
+        "body": "Both walk-in cooler and milk fridge must read 41 degF (5 degC) or below.",
+        "source": "SOP-210 Sec 3.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Both must read 41\u00b0F (5\u00b0C) or below."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 214,
+          "retrieve": 104,
+          "generate": 896,
+          "verify": 1,
+          "total": 1216
+        }
+      }
+    },
+    {
+      "id": "a17",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 2660.7931000180542,
+      "reason": "",
+      "response": {
+        "trace_id": "82842cd1c8b244b593b44a21ccee6912",
+        "transcript": "How long do I wash my hands?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Wash hands for 20 sec",
+        "body": "",
+        "source": "SOP-210 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 212,
+          "retrieve": 104,
+          "generate": 2285,
+          "verify": 6,
+          "total": 2609
+        }
+      }
+    },
+    {
+      "id": "a18",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1350.5310000036843,
+      "reason": "",
+      "response": {
+        "trace_id": "9aecdc4a8ac14f00a1b65c3d80044695",
+        "transcript": "What strength should the sanitizer bucket be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Sanitizer 200 to 400 ppm",
+        "body": "Check the concentration with a test strip.",
+        "source": "SOP-210 Sec 3.7 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "sanitizer-test",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 271,
+          "retrieve": 104,
+          "generate": 922,
+          "verify": 1,
+          "total": 1299
+        }
+      }
+    },
+    {
+      "id": "a19",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1266.1020000232384,
+      "reason": "",
+      "response": {
+        "trace_id": "2494f60300bb4fa1b0432b6e20896887",
+        "transcript": "How long does opened oat milk last?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Use oat milk within 7 days",
+        "body": "Store at 41 degF or below.",
+        "source": "SOP-210 Sec 4.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:4.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "| Oat, almond, and soy milk | 7 days | 41\u00b0F or below |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 875,
+          "verify": 1,
+          "total": 1215
+        }
+      }
+    },
+    {
+      "id": "a20",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 4091.7106000124477,
+      "reason": "",
+      "response": {
+        "trace_id": "107210985849411197cb99e43db2234f",
+        "transcript": "When do I throw out drip coffee?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Discard drip coffee 60 min after brew",
+        "body": "Never top off an old carafe with fresh coffee.",
+        "source": "SOP-210 Sec 4.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:4.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Discard drip coffee 60 minutes after brewing. Never top off an old carafe with fresh coffee."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 236,
+          "retrieve": 105,
+          "generate": 3709,
+          "verify": 0,
+          "total": 4052
+        }
+      }
+    },
+    {
+      "id": "a22",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1204.0792999905534,
+      "reason": "",
+      "response": {
+        "trace_id": "4c096b2119124a62b28d19f5639346b4",
+        "transcript": "How long do I soak the portafilters?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Soak portafilters 20 min",
+        "body": "Rinse well after soaking.",
+        "source": "SOP-210 Sec 5.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 216,
+          "retrieve": 106,
+          "generate": 837,
+          "verify": 0,
+          "total": 1160
+        }
+      }
+    },
+    {
+      "id": "a23",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1359.195000026375,
+      "reason": "",
+      "response": {
+        "trace_id": "ac7915232de84d68aa1e305b6d91fc66",
+        "transcript": "What temperature is the wash sink water?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Wash at 110 degF (43 degC)",
+        "body": "",
+        "source": "SOP-210 Sec 6.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 245,
+          "retrieve": 104,
+          "generate": 956,
+          "verify": 0,
+          "total": 1307
+        }
+      }
+    },
+    {
+      "id": "a24",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1316.4707000250928,
+      "reason": "",
+      "response": {
+        "trace_id": "5f01b638f0224c8fa0fb47af70b9b12f",
+        "transcript": "Where is the first aid kit?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Find kit under back counter",
+        "body": "The first aid kit is under the back counter by the dish sink.",
+        "source": "SOP-210 Sec 7.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:7.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "The first aid kit is under the back counter by the dish sink."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 226,
+          "retrieve": 104,
+          "generate": 946,
+          "verify": 0,
+          "total": 1277
+        }
+      }
+    },
+    {
+      "id": "a25",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": false,
+      "latency_ms": 1546.289700025227,
+      "reason": "unverified answer",
+      "response": {
+        "trace_id": "0225bc71113443658b9709924c5e3082",
+        "transcript": "How long should an espresso shot take?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Shot time 25 to 30 seconds",
+        "body": "",
+        "source": "SOP-220 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:2.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Shot time \n 25 to 30 seconds"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 216,
+          "retrieve": 104,
+          "generate": 1172,
+          "verify": 0,
+          "total": 1493
+        }
+      }
+    },
+    {
+      "id": "a26",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1419.7869000490755,
+      "reason": "",
+      "response": {
+        "trace_id": "65c6c284595740718497afc2da8c43fc",
+        "transcript": "What is the espresso dose?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Dose 18.0 g, plus or minus 0.5 g",
+        "body": "",
+        "source": "SOP-220 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:2.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Dose (ground coffee, double basket) | 18.0 g, plus or minus 0.5 g |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 217,
+          "retrieve": 104,
+          "generate": 1057,
+          "verify": 1,
+          "total": 1379
+        }
+      }
+    },
+    {
+      "id": "a27",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": false,
+      "citation_verified": true,
+      "latency_ms": 1665.136000025086,
+      "reason": "wrong citation or missing expected content",
+      "response": {
+        "trace_id": "b0b69733df014310bf5ea0a79c07ea08",
+        "transcript": "My shot ran twenty seconds, what do I do?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Grind finer",
+        "body": "Shot took under 22 seconds.",
+        "source": "SOP-220 Sec 5.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:5.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Sour or thin shot, under 22 seconds"
+          },
+          {
+            "chunk_id": "SOP-220:C:5.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Grind finer"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 270,
+          "retrieve": 104,
+          "generate": 1193,
+          "verify": 1,
+          "total": 1569
+        }
+      }
+    },
+    {
+      "id": "a30",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1296.7160000116564,
+      "reason": "",
+      "response": {
+        "trace_id": "e4525ded0527418cb35bc8dd6b0d0ec3",
+        "transcript": "How much foam goes on a cappuccino?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Cappuccino foam depth: 3/4 inch (2 cm)",
+        "body": "",
+        "source": "SOP-220 Sec 4.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.3",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Cappuccino: about 3/4 inch (2 cm) of foam."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 225,
+          "retrieve": 104,
+          "generate": 922,
+          "verify": 0,
+          "total": 1253
+        }
+      }
+    },
+    {
+      "id": "a31",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1476.68550000526,
+      "reason": "",
+      "response": {
+        "trace_id": "441cfdeba68b4cafb8e8d044e3608067",
+        "transcript": "What should the steam boiler pressure read?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Steam boiler pressure: 1.0 to 1.5 bar",
+        "body": "Tell the shift lead if either is outside its range.",
+        "source": "SOP-220 Sec 6.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:6.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "Steam boiler pressure should read 1.0 to 1.5 bar. Tell the shift lead if either is outside its range."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 224,
+          "retrieve": 104,
+          "generate": 1099,
+          "verify": 1,
+          "total": 1429
+        }
+      }
+    },
+    {
+      "id": "a32",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1691.8058000155725,
+      "reason": "",
+      "response": {
+        "trace_id": "33c9b3a6b3b34fb2bdef3fab225b9914",
+        "transcript": "How much steamed milk goes in a medium latte?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Medium latte steamed milk: 12 oz",
+        "body": "",
+        "source": "SOP-230 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:2.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "| Steamed milk | 8 oz | 12 oz | 14 oz |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 276,
+          "retrieve": 103,
+          "generate": 1170,
+          "verify": 0,
+          "total": 1551
+        }
+      }
+    },
+    {
+      "id": "a33",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1261.2708000233397,
+      "reason": "",
+      "response": {
+        "trace_id": "1bc865e68a7542dfa2c3c3917a8214c9",
+        "transcript": "How many grams of matcha for a large?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Use 5 g matcha for large",
+        "body": "",
+        "source": "SOP-230 Sec 9.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:9.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.1",
+            "quote": "Matcha powder | 3 g | 4 g | 5 g |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 204,
+          "retrieve": 104,
+          "generate": 904,
+          "verify": 0,
+          "total": 1214
+        }
+      }
+    },
+    {
+      "id": "a34",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1253.5170000046492,
+      "reason": "",
+      "response": {
+        "trace_id": "66ca82fe1c5940c3964feb6949132d6c",
+        "transcript": "How much concentrate goes in a medium cold brew?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Medium cold brew concentrate: 6 oz",
+        "body": "",
+        "source": "SOP-230 Sec 8.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:8.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.1",
+            "quote": "Cold brew concentrate | 4 oz | 6 oz | 8 oz |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 237,
+          "retrieve": 104,
+          "generate": 862,
+          "verify": 0,
+          "total": 1203
+        }
+      }
+    },
+    {
+      "id": "a35",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1310.6189000536688,
+      "reason": "",
+      "response": {
+        "trace_id": "3ecffe73cd8e477dabce82373899bea4",
+        "transcript": "How long do I steep cold brew?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Steep 18 hours at 41 degF or below",
+        "body": "Keep in the walk-in.",
+        "source": "SOP-230 Sec 8.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:8.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.3",
+            "quote": "Steep for 18 hours in the walk-in at 41\u00b0F or below."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 259,
+          "retrieve": 104,
+          "generate": 905,
+          "verify": 0,
+          "total": 1269
+        }
+      }
+    },
+    {
+      "id": "a36",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1579.8065999988467,
+      "reason": "",
+      "response": {
+        "trace_id": "ff486e6f421e4f00b75680f58f7b17eb",
+        "transcript": "How many pumps of mocha sauce in a large?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Add 4 pumps mocha sauce",
+        "body": "",
+        "source": "SOP-230 Sec 7.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:7.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "| Mocha sauce | 2 pumps | 3 pumps | 4 pumps |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 1201,
+          "verify": 0,
+          "total": 1541
+        }
+      }
+    },
+    {
+      "id": "o01",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 391.3717999821529,
+      "reason": "",
+      "response": {
+        "trace_id": "5c73cbeeccc445aa9f9bf33af7d4ac35",
+        "transcript": "How do I make a croissant?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 249,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 354
+        }
+      }
+    },
+    {
+      "id": "o02",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 367.2652000095695,
+      "reason": "",
+      "response": {
+        "trace_id": "691364d4676e4848a77590b47260d344",
+        "transcript": "What is the wifi password?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 211,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 316
+        }
+      }
+    },
+    {
+      "id": "o03",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1074.8393000103533,
+      "reason": "",
+      "response": {
+        "trace_id": "a46986f0f0af49bbb69d4ad40a84d650",
+        "transcript": "How much do baristas get paid?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 207,
+          "retrieve": 104,
+          "generate": 724,
+          "verify": 0,
+          "total": 1035
+        }
+      }
+    },
+    {
+      "id": "n01",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1190.2403000276536,
+      "reason": "",
+      "response": {
+        "trace_id": "54491d72267c4793b95bade8ebf0ec45",
+        "transcript": "How do I make a pumpkin spice latte?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 219,
+          "retrieve": 104,
+          "generate": 772,
+          "verify": 0,
+          "total": 1096
+        }
+      }
+    },
+    {
+      "id": "n02",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1288.1120000383817,
+      "reason": "",
+      "response": {
+        "trace_id": "85da0168d3854f138696c30367157c1b",
+        "transcript": "How do I clean the ice machine?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 230,
+          "retrieve": 105,
+          "generate": 894,
+          "verify": 0,
+          "total": 1230
+        }
+      }
+    },
+    {
+      "id": "o04",
+      "category": "off-domain",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 416.3025000016205,
+      "reason": "",
+      "response": {
+        "trace_id": "736e0a091d5d4df18417fa32d84d68dc",
+        "transcript": "How do I request time off?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 262,
+          "retrieve": 106,
+          "generate": 0,
+          "verify": 0,
+          "total": 370
+        }
+      }
+    },
+    {
+      "id": "n03",
+      "category": "near-miss",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1310.3280999930575,
+      "reason": "",
+      "response": {
+        "trace_id": "2cac6f744e1d4c4e8dfd626f61434c53",
+        "transcript": "What concentration of bleach should I use to sanitize?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 209,
+          "retrieve": 104,
+          "generate": 940,
+          "verify": 0,
+          "total": 1254
+        }
+      }
+    },
+    {
+      "id": "c02",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 367.44220001855865,
+      "reason": "",
+      "response": {
+        "trace_id": "e534e2d1f1c54f4d984e88fe07ab8e4e",
+        "transcript": "What temperature?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Target temperatures",
+            "Spin",
+            "Recipe specifications"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 219,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 324
+        }
+      }
+    },
+    {
+      "id": "v3-w1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 573.4700000029989,
+      "reason": "",
+      "response": {
+        "trace_id": "dae4b635f97448fb89fa4c5260cfa67d",
+        "transcript": "Walk me through getting the register ready before my shift",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Cashier - Station Setup and Order Taking, 10 steps",
+        "body": "Cashier - Station Setup and Order Taking, 10 steps. Swipe to advance.",
+        "source": "SOP-201 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-201:C:2.1",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Enter your personal 4-digit employee PIN on the POS. Never share your PIN or use someone else's."
+          },
+          {
+            "chunk_id": "SOP-201:C:2.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "Count the cash drawer. The opening float is $150.00: two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each). If the float is off by any amount, tell the shift lead before opening."
+          },
+          {
+            "chunk_id": "SOP-201:C:2.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Confirm the card reader is charged above 50 percent and the receipt printer has a full roll of paper. Spare paper rolls are in the cabinet under the register."
+          },
+          {
+            "chunk_id": "SOP-201:C:2.4",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.4",
+            "quote": "Ask the shift lead which items are out of stock (86'd). Mark them unavailable in the POS so they cannot be rung in."
+          },
+          {
+            "chunk_id": "SOP-201:C:2.5",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "2.5",
+            "quote": "Wash your hands for 20 seconds with soap and warm water before touching the register or any food item."
+          },
+          {
+            "chunk_id": "SOP-201:C:3.1",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Greet every guest within 10 seconds of their reaching the counter. Make eye contact, smile, and say \"Welcome to Ember & Oak.\""
+          },
+          {
+            "chunk_id": "SOP-201:C:3.2",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Ask for the guest's first name on every drink order and write it on the cup or type it in the POS name field."
+          },
+          {
+            "chunk_id": "SOP-201:C:3.3",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Enter items in this order: size, drink, milk, then modifiers. Example: a large oat vanilla latte is entered as Large, Latte, Oat, Vanilla."
+          },
+          {
+            "chunk_id": "SOP-201:C:3.4",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Read the full order back to the guest and confirm the total before taking payment."
+          },
+          {
+            "chunk_id": "SOP-201:C:3.5",
+            "doc_id": "SOP-201",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Offer a single add-on, such as a pastry. Never offer more than one suggestion per guest, and do not repeat it if the guest says no."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-201",
+          "revision": "C",
+          "title": "Cashier - Station Setup and Order Taking",
+          "total": 10,
+          "index": 0,
+          "steps": [
+            {
+              "step_id": "SOP-201:C:2.1",
+              "label": "2.1",
+              "glance": "Log in to the POS",
+              "body": "Enter your personal 4-digit employee PIN on the POS. Never share your PIN or use someone else's.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cashier-station",
+              "source_text": "Enter your personal 4-digit employee PIN on the POS. Never share your PIN or use someone else's."
+            },
+            {
+              "step_id": "SOP-201:C:2.2",
+              "label": "2.2",
+              "glance": "Verify the drawer float",
+              "body": "Count the cash drawer. The opening float is $150.00: two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each). If the float is off by any amount, tell the shift lead before opening.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Count the cash drawer. The opening float is $150.00: two $20 bills, three $10 bills, six $5 bills, thirty $1 bills, and two rolls of quarters ($10.00 each). If the float is off by any amount, tell the shift lead before opening."
+            },
+            {
+              "step_id": "SOP-201:C:2.3",
+              "label": "2.3",
+              "glance": "Check the card reader and printer",
+              "body": "Confirm the card reader is charged above 50 percent and the receipt printer has a full roll of paper. Spare paper rolls are in the cabinet under the register.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cashier-station",
+              "source_text": "Confirm the card reader is charged above 50 percent and the receipt printer has a full roll of paper. Spare paper rolls are in the cabinet under the register."
+            },
+            {
+              "step_id": "SOP-201:C:2.4",
+              "label": "2.4",
+              "glance": "Review the 86 list",
+              "body": "Ask the shift lead which items are out of stock (86'd). Mark them unavailable in the POS so they cannot be rung in.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cashier-station",
+              "source_text": "Ask the shift lead which items are out of stock (86'd). Mark them unavailable in the POS so they cannot be rung in."
+            },
+            {
+              "step_id": "SOP-201:C:2.5",
+              "label": "2.5",
+              "glance": "Wash your hands",
+              "body": "Wash your hands for 20 seconds with soap and warm water before touching the register or any food item.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash your hands for 20 seconds with soap and warm water before touching the register or any food item."
+            },
+            {
+              "step_id": "SOP-201:C:3.1",
+              "label": "3.1",
+              "glance": "Greet the guest",
+              "body": "Greet every guest within 10 seconds of their reaching the counter. Make eye contact, smile, and say \"Welcome to Ember & Oak.\"",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Greet every guest within 10 seconds of their reaching the counter. Make eye contact, smile, and say \"Welcome to Ember & Oak.\""
+            },
+            {
+              "step_id": "SOP-201:C:3.2",
+              "label": "3.2",
+              "glance": "Take the name",
+              "body": "Ask for the guest's first name on every drink order and write it on the cup or type it in the POS name field.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cashier-station",
+              "source_text": "Ask for the guest's first name on every drink order and write it on the cup or type it in the POS name field."
+            },
+            {
+              "step_id": "SOP-201:C:3.3",
+              "label": "3.3",
+              "glance": "Ring the order in sequence",
+              "body": "Enter items in this order: size, drink, milk, then modifiers. Example: a large oat vanilla latte is entered as Large, Latte, Oat, Vanilla.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Enter items in this order: size, drink, milk, then modifiers. Example: a large oat vanilla latte is entered as Large, Latte, Oat, Vanilla."
+            },
+            {
+              "step_id": "SOP-201:C:3.4",
+              "label": "3.4",
+              "glance": "Repeat the order back",
+              "body": "Read the full order back to the guest and confirm the total before taking payment.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the full order back to the guest and confirm the total before taking payment."
+            },
+            {
+              "step_id": "SOP-201:C:3.5",
+              "label": "3.5",
+              "glance": "Offer one suggestion",
+              "body": "Offer a single add-on, such as a pastry. Never offer more than one suggestion per guest, and do not repeat it if the guest says no.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Offer a single add-on, such as a pastry. Never offer more than one suggestion per guest, and do not repeat it if the guest says no."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 0,
+            "end": 5
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 250,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 535
+        }
+      }
+    },
+    {
+      "id": "v3-w2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 577.6295000105165,
+      "reason": "",
+      "response": {
+        "trace_id": "bad7b2764b5e47339dc90313b7850c85",
+        "transcript": "Take me through closing out the till",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-202, 9 steps",
+        "body": "Cashier - Payments, Refunds, Voids, and Closing the Till, 9 steps. Swipe to advance.",
+        "source": "SOP-202 Sec 7.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:2.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+          },
+          {
+            "chunk_id": "SOP-202:C:3.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+          },
+          {
+            "chunk_id": "SOP-202:C:6.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "6.1",
+            "quote": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "On the POS, go to Reports, then End of Day. Print two copies."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.2",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.3",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.4",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+          },
+          {
+            "chunk_id": "SOP-202:C:7.5",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "7.5",
+            "quote": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-202",
+          "revision": "C",
+          "title": "Cashier - Payments, Refunds, Voids, and Closing the Till",
+          "total": 9,
+          "index": 4,
+          "steps": [
+            {
+              "step_id": "SOP-202:C:2.3",
+              "label": "2.3",
+              "glance": "Check $50 bills",
+              "body": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Mark every $50 bill with the counterfeit detector pen. An amber or yellow mark means the bill is genuine. A dark brown or black mark means it may be counterfeit: politely ask the guest for another payment method and call the shift lead."
+            },
+            {
+              "step_id": "SOP-202:C:3.1",
+              "label": "3.1",
+              "glance": "Make change",
+              "body": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "cash-handling",
+              "source_text": "Leave the guest's bill on the drawer ledge, not in the drawer, until you have given change. Count change back into the guest's hand starting from the total owed."
+            },
+            {
+              "step_id": "SOP-202:C:3.2",
+              "label": "3.2",
+              "glance": "Cash drops",
+              "body": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "When the drawer holds more than $400.00, do a cash drop with the shift lead: remove $200.00 in $20 and $10 bills, put it through the safe slot, and record it on the drop log."
+            },
+            {
+              "step_id": "SOP-202:C:6.1",
+              "label": "6.1",
+              "glance": "Sell a gift card",
+              "body": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Scan the card barcode, choose the load amount, and take payment first. The minimum load is $10.00 and the maximum is $200.00."
+            },
+            {
+              "step_id": "SOP-202:C:7.1",
+              "label": "7.1",
+              "glance": "Run the end-of-day report",
+              "body": "On the POS, go to Reports, then End of Day. Print two copies.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "On the POS, go to Reports, then End of Day. Print two copies."
+            },
+            {
+              "step_id": "SOP-202:C:7.2",
+              "label": "7.2",
+              "glance": "Count the drawer",
+              "body": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Take the drawer to the back office. Sort bills by denomination and count the cash twice. Write the total on the close form."
+            },
+            {
+              "step_id": "SOP-202:C:7.3",
+              "label": "7.3",
+              "glance": "Leave the float",
+              "body": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Leave $150.00 in the drawer bag as the next day's opening float. Put the rest in the bank bag for deposit."
+            },
+            {
+              "step_id": "SOP-202:C:7.4",
+              "label": "7.4",
+              "glance": "Check the variance",
+              "body": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Compare your count to the POS report. A difference of up to $2.00 over or short is noted on the form. A difference over $2.00 must be reported to the shift lead right away and recounted. A difference over $5.00 also needs a manager signature."
+            },
+            {
+              "step_id": "SOP-202:C:7.5",
+              "label": "7.5",
+              "glance": "Secure and sign",
+              "body": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "till-closing",
+              "source_text": "Two people must witness the sealing of the bank bag. Both sign the close log. Lock the drawer and place it in the safe."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 4,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 242,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 527
+        }
+      }
+    },
+    {
+      "id": "v3-w3",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 549.6371000190265,
+      "reason": "",
+      "response": {
+        "trace_id": "8ee77e3d2673443789b6920b1ca5f7d2",
+        "transcript": "Guide me through kitchen opening",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "SOP-210, 17 steps",
+        "body": "Back of House - Opening, Closing, Food Safety, and Cleaning, 17 steps. Swipe to advance.",
+        "source": "SOP-210 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:2.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-210:C:3.8",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.8",
+            "quote": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.1",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.1",
+            "quote": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+          },
+          {
+            "chunk_id": "SOP-210:C:5.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "5.4",
+            "quote": "Empty and wash the knock box and the drip tray."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+          },
+          {
+            "chunk_id": "SOP-210:C:6.5",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.5",
+            "quote": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-210",
+          "revision": "C",
+          "title": "Back of House - Opening, Closing, Food Safety, and Cleaning",
+          "total": 17,
+          "index": 1,
+          "steps": [
+            {
+              "step_id": "SOP-210:C:2.1",
+              "label": "2.1",
+              "glance": "Handwashing",
+              "body": "Wash hands for 20 seconds with soap and warm water of at least 100 degF (38 degC). Dry with a single-use paper towel.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Wash hands for 20 seconds with soap and warm water of at least 100\u00b0F (38\u00b0C). Dry with a single-use paper towel."
+            },
+            {
+              "step_id": "SOP-210:C:3.1",
+              "label": "3.1",
+              "glance": "Arrive and clock in",
+              "body": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Arrive by 5:15 AM for the 6:00 AM opening. Clock in at the back-office terminal."
+            },
+            {
+              "step_id": "SOP-210:C:3.2",
+              "label": "3.2",
+              "glance": "Check cold storage temperatures",
+              "body": "Read the walk-in cooler and milk fridge thermometers. Both must read 41 degF (5 degC) or below. Record each reading on the temperature log. If a reading is above 41 degF, tell the shift lead before using any dairy.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below. Record each reading on the temperature log. If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+            },
+            {
+              "step_id": "SOP-210:C:3.3",
+              "label": "3.3",
+              "glance": "Power on the espresso machine",
+              "body": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+            },
+            {
+              "step_id": "SOP-210:C:3.4",
+              "label": "3.4",
+              "glance": "Set up the grinder",
+              "body": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Check the bean hopper, purge the first few grams, and set the grind from the dial-in sheet (see SOP-220)."
+            },
+            {
+              "step_id": "SOP-210:C:3.5",
+              "label": "3.5",
+              "glance": "Brew drip coffee",
+              "body": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Start the first batch of drip coffee in the batch brewer. Label the carafe with the brew time."
+            },
+            {
+              "step_id": "SOP-210:C:3.6",
+              "label": "3.6",
+              "glance": "Fill the ice bin",
+              "body": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+            },
+            {
+              "step_id": "SOP-210:C:3.7",
+              "label": "3.7",
+              "glance": "Set up the sanitizer bucket",
+              "body": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Fill a bucket with quat sanitizer at 200 to 400 ppm. Check the concentration with a test strip. Replace the solution every 4 hours."
+            },
+            {
+              "step_id": "SOP-210:C:3.8",
+              "label": "3.8",
+              "glance": "Stock the stations",
+              "body": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Restock cups, lids, sleeves, syrups, and sauces. Follow first in, first out: put new stock behind old stock."
+            },
+            {
+              "step_id": "SOP-210:C:5.1",
+              "label": "5.1",
+              "glance": "Backflush the group heads",
+              "body": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Insert the blind basket, add 3 g (about half a teaspoon) of espresso machine cleaner, and run the pump 10 seconds on and 10 seconds off, five times. Then repeat five times with plain water only."
+            },
+            {
+              "step_id": "SOP-210:C:5.2",
+              "label": "5.2",
+              "glance": "Soak the portafilters",
+              "body": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Soak portafilters and baskets in cleaner solution for 20 minutes, then rinse well."
+            },
+            {
+              "step_id": "SOP-210:C:5.3",
+              "label": "5.3",
+              "glance": "Clean the steam wand",
+              "body": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "After every use, wipe the steam wand with a sanitized cloth and purge it for 2 seconds. At close, also remove the steam tip and soak it in cleaner solution for 20 minutes."
+            },
+            {
+              "step_id": "SOP-210:C:5.4",
+              "label": "5.4",
+              "glance": "Knock box and drip tray",
+              "body": "Empty and wash the knock box and the drip tray.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-cleaning",
+              "source_text": "Empty and wash the knock box and the drip tray."
+            },
+            {
+              "step_id": "SOP-210:C:6.2",
+              "label": "6.2",
+              "glance": "Pull and discard",
+              "body": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Discard all brewed drip coffee. Pour out leftover steamed milk. Return opened, labeled milk to the fridge."
+            },
+            {
+              "step_id": "SOP-210:C:6.3",
+              "label": "6.3",
+              "glance": "Three-compartment sink",
+              "body": "Wash in the first sink with soapy water at 110 degF (43 degC). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Wash in the first sink with soapy water at 110\u00b0F (43\u00b0C). Rinse in the second sink with clear water. Sanitize in the third sink with quat sanitizer at 200 to 400 ppm for 60 seconds. Air dry. Do not towel dry."
+            },
+            {
+              "step_id": "SOP-210:C:6.4",
+              "label": "6.4",
+              "glance": "Floors and trash",
+              "body": "Empty the trash and recycling, sweep, and mop with sanitizer solution.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "sanitizer-test",
+              "source_text": "Empty the trash and recycling, sweep, and mop with sanitizer solution."
+            },
+            {
+              "step_id": "SOP-210:C:6.5",
+              "label": "6.5",
+              "glance": "Lock up",
+              "body": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Lock the back door, turn off the espresso machine and the lights, and set the alarm. The manager gives out the alarm code."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 1,
+            "end": 9
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 222,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 509
+        }
+      }
+    },
+    {
+      "id": "v3-w4",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 560.9224999789149,
+      "reason": "",
+      "response": {
+        "trace_id": "790c867ae8b54f71b85405f3f999d03b",
+        "transcript": "Show me how to pull a good espresso shot",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Espresso Bar - Shot and Milk Standards, 12 steps",
+        "body": "Espresso Bar - Shot and Milk Standards, 12 steps. Swipe to advance.",
+        "source": "SOP-220 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:3.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Run the group head for 3 seconds to flush it."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.2",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.3",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Lock in the portafilter and start the shot and the timer together."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.5",
+            "quote": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+          },
+          {
+            "chunk_id": "SOP-220:C:3.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "Purge the steam wand for 2 seconds before and after every use."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.5",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.5",
+            "quote": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.6",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.6",
+            "quote": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.7",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.7",
+            "quote": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+          },
+          {
+            "chunk_id": "SOP-220:C:4.8",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.8",
+            "quote": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-220",
+          "revision": "C",
+          "title": "Espresso Bar - Shot and Milk Standards",
+          "total": 12,
+          "index": 0,
+          "steps": [
+            {
+              "step_id": "SOP-220:C:3.1",
+              "label": "3.1",
+              "glance": "Purge",
+              "body": "Run the group head for 3 seconds to flush it.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Run the group head for 3 seconds to flush it."
+            },
+            {
+              "step_id": "SOP-220:C:3.2",
+              "label": "3.2",
+              "glance": "Dose",
+              "body": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Grind into the portafilter and weigh 18.0 g on the scale. Adjust the grind amount if the dose is outside 17.5 to 18.5 g."
+            },
+            {
+              "step_id": "SOP-220:C:3.3",
+              "label": "3.3",
+              "glance": "Tamp",
+              "body": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Level the grounds and tamp with firm, even pressure (about 30 lb or 13.5 kg)."
+            },
+            {
+              "step_id": "SOP-220:C:3.4",
+              "label": "3.4",
+              "glance": "Pull the shot",
+              "body": "Lock in the portafilter and start the shot and the timer together.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Lock in the portafilter and start the shot and the timer together."
+            },
+            {
+              "step_id": "SOP-220:C:3.5",
+              "label": "3.5",
+              "glance": "Stop at yield",
+              "body": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "espresso-shot",
+              "source_text": "Stop the shot at 36 g of liquid on the scale. It should take 25 to 30 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:3.6",
+              "label": "3.6",
+              "glance": "Adjust the grind",
+              "body": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "If the shot takes under 22 seconds, grind finer. If it takes over 33 seconds, grind coarser. If it takes 22 to 25 or 30 to 33 seconds, taste it and decide. Change the grind one notch at a time, and discard the first two shots after any change."
+            },
+            {
+              "step_id": "SOP-220:C:3.7",
+              "label": "3.7",
+              "glance": "Record it",
+              "body": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Write the grind setting, dose, yield, time, time of day, and your initials on the dial-in sheet. Dial in at opening and again every 4 hours."
+            },
+            {
+              "step_id": "SOP-220:C:4.4",
+              "label": "4.4",
+              "glance": "Purge the wand",
+              "body": "Purge the steam wand for 2 seconds before and after every use.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Purge the steam wand for 2 seconds before and after every use."
+            },
+            {
+              "step_id": "SOP-220:C:4.5",
+              "label": "4.5",
+              "glance": "Start cold",
+              "body": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41 degF. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Pour the milk amount from the recipe (SOP-230) into a cold pitcher. Milk should be 38 to 41\u00b0F. Use the 12 oz pitcher for Small drinks and the 20 oz pitcher for Medium and Large."
+            },
+            {
+              "step_id": "SOP-220:C:4.6",
+              "label": "4.6",
+              "glance": "Stretch",
+              "body": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Place the tip just under the surface and add air: 2 to 4 seconds for a latte, 6 to 8 seconds for a cappuccino, 1 to 2 seconds for a flat white."
+            },
+            {
+              "step_id": "SOP-220:C:4.7",
+              "label": "4.7",
+              "glance": "Spin",
+              "body": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Submerge the tip deeper to spin a whirlpool until the milk reaches its target temperature, which is when the pitcher is too hot to hold for more than 2 to 3 seconds."
+            },
+            {
+              "step_id": "SOP-220:C:4.8",
+              "label": "4.8",
+              "glance": "Finish",
+              "body": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "milk-steaming",
+              "source_text": "Turn off the steam, wipe the wand with a sanitized cloth, and purge it. Tap the pitcher and swirl to remove bubbles. Pour within 30 seconds."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 0,
+            "end": 7
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 229,
+          "retrieve": 104,
+          "generate": 0,
+          "verify": 0,
+          "total": 515
+        }
+      }
+    },
+    {
+      "id": "v3-w5",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 573.2093999977224,
+      "reason": "",
+      "response": {
+        "trace_id": "814d555257644dfb9550c389dbdda5b2",
+        "transcript": "Walk me through making a cappuccino",
+        "intent": "walkthrough",
+        "outcome": "answered",
+        "glance": "Drink Recipes, 24 steps",
+        "body": "Drink Recipes, 24 steps. Swipe to advance.",
+        "source": "SOP-230 Sec 3.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:2.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.2",
+            "quote": "If flavored, pump the syrup into the empty cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.3",
+            "quote": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.4",
+            "quote": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds."
+          },
+          {
+            "chunk_id": "SOP-230:C:2.5",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.5",
+            "quote": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Pull the shots (see SOP-220) directly into the cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam."
+          },
+          {
+            "chunk_id": "SOP-230:C:3.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.4",
+            "quote": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.2",
+            "quote": "Pull the shots (see SOP-220) directly into the cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.3",
+            "quote": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds."
+          },
+          {
+            "chunk_id": "SOP-230:C:4.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:5.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "5.2",
+            "quote": "Fill the cup with the hot water first."
+          },
+          {
+            "chunk_id": "SOP-230:C:5.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "5.3",
+            "quote": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.2",
+            "quote": "Pump syrup into the cold cup if flavored, then pour in the cold milk."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "Fill the cup with ice up to the ice line."
+          },
+          {
+            "chunk_id": "SOP-230:C:6.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.2",
+            "quote": "Pump the mocha sauce into the empty cup."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.3",
+            "quote": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved."
+          },
+          {
+            "chunk_id": "SOP-230:C:7.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.4",
+            "quote": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it."
+          },
+          {
+            "chunk_id": "SOP-230:C:8.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.2",
+            "quote": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once."
+          },
+          {
+            "chunk_id": "SOP-230:C:8.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "8.3",
+            "quote": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41\u00b0F or below. Filter, label with the date, and use within 14 days."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.2",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.2",
+            "quote": "Sift the matcha powder into the cup to remove lumps."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.3",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.3",
+            "quote": "Add 2 oz of 175\u00b0F water and whisk in a W motion until the slurry is smooth with no lumps."
+          },
+          {
+            "chunk_id": "SOP-230:C:9.4",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "9.4",
+            "quote": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid."
+          },
+          {
+            "chunk_id": "SOP-230:C:10.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "10.1",
+            "quote": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210)."
+          }
+        ],
+        "walkthrough": {
+          "doc_id": "SOP-230",
+          "revision": "C",
+          "title": "Drink Recipes",
+          "total": 24,
+          "index": 4,
+          "steps": [
+            {
+              "step_id": "SOP-230:C:2.2",
+              "label": "2.2",
+              "glance": "Latte: add syrup",
+              "body": "If flavored, pump the syrup into the empty cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "If flavored, pump the syrup into the empty cup."
+            },
+            {
+              "step_id": "SOP-230:C:2.3",
+              "label": "2.3",
+              "glance": "Latte: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup. Stir if there is syrup."
+            },
+            {
+              "step_id": "SOP-230:C:2.4",
+              "label": "2.4",
+              "glance": "Latte: steam milk",
+              "body": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature (see SOP-220), stretching for 2 to 4 seconds."
+            },
+            {
+              "step_id": "SOP-230:C:2.5",
+              "label": "2.5",
+              "glance": "Latte: pour",
+              "body": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk into the espresso, finishing with a small heart or dot of foam on top. Add the lid and call the name."
+            },
+            {
+              "step_id": "SOP-230:C:3.2",
+              "label": "3.2",
+              "glance": "Cappuccino: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup."
+            },
+            {
+              "step_id": "SOP-230:C:3.3",
+              "label": "3.3",
+              "glance": "Cappuccino: steam milk",
+              "body": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, stretching for 6 to 8 seconds to build thick foam."
+            },
+            {
+              "step_id": "SOP-230:C:3.4",
+              "label": "3.4",
+              "glance": "Cappuccino: pour",
+              "body": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk into the espresso and spoon on extra foam until the foam is about 3/4 inch deep. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:4.2",
+              "label": "4.2",
+              "glance": "Flat white: pull espresso",
+              "body": "Pull the shots (see SOP-220) directly into the cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) directly into the cup."
+            },
+            {
+              "step_id": "SOP-230:C:4.3",
+              "label": "4.3",
+              "glance": "Flat white: steam milk",
+              "body": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, stretching for only 1 to 2 seconds."
+            },
+            {
+              "step_id": "SOP-230:C:4.4",
+              "label": "4.4",
+              "glance": "Flat white: pour",
+              "body": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pour the milk in one smooth stream so the microfoam blends with the espresso. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:5.2",
+              "label": "5.2",
+              "glance": "Americano: add water",
+              "body": "Fill the cup with the hot water first.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with the hot water first."
+            },
+            {
+              "step_id": "SOP-230:C:5.3",
+              "label": "5.3",
+              "glance": "Americano: add espresso",
+              "body": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pull the shots (see SOP-220) and pour them gently on top so the crema stays on the surface."
+            },
+            {
+              "step_id": "SOP-230:C:6.2",
+              "label": "6.2",
+              "glance": "Iced latte: add syrup and milk",
+              "body": "Pump syrup into the cold cup if flavored, then pour in the cold milk.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pump syrup into the cold cup if flavored, then pour in the cold milk."
+            },
+            {
+              "step_id": "SOP-230:C:6.3",
+              "label": "6.3",
+              "glance": "Iced latte: add ice",
+              "body": "Fill the cup with ice up to the ice line.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with ice up to the ice line."
+            },
+            {
+              "step_id": "SOP-230:C:6.4",
+              "label": "6.4",
+              "glance": "Iced latte: add espresso",
+              "body": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Pull the shots (see SOP-220), pour them over the ice, and stir. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:7.2",
+              "label": "7.2",
+              "glance": "Mocha: add sauce",
+              "body": "Pump the mocha sauce into the empty cup.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-pumps",
+              "source_text": "Pump the mocha sauce into the empty cup."
+            },
+            {
+              "step_id": "SOP-230:C:7.3",
+              "label": "7.3",
+              "glance": "Mocha: pull espresso",
+              "body": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Pull the shots (see SOP-220) into the cup and stir until the sauce is dissolved."
+            },
+            {
+              "step_id": "SOP-230:C:7.4",
+              "label": "7.4",
+              "glance": "Mocha: steam and pour",
+              "body": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Steam the milk to its target temperature, pour it in, and top with whipped cream if the guest wants it."
+            },
+            {
+              "step_id": "SOP-230:C:8.2",
+              "label": "8.2",
+              "glance": "Cold brew: serve",
+              "body": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup with ice up to the ice line, pour in the concentrate and then the water, and stir once."
+            },
+            {
+              "step_id": "SOP-230:C:8.3",
+              "label": "8.3",
+              "glance": "Cold brew batch recipe",
+              "body": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41 degF or below. Filter, label with the date, and use within 14 days.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Combine 1 lb (454 g) of coarse ground coffee with 1 gallon of cold water. Steep for 18 hours in the walk-in at 41\u00b0F or below. Filter, label with the date, and use within 14 days."
+            },
+            {
+              "step_id": "SOP-230:C:9.2",
+              "label": "9.2",
+              "glance": "Matcha: sift",
+              "body": "Sift the matcha powder into the cup to remove lumps.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Sift the matcha powder into the cup to remove lumps."
+            },
+            {
+              "step_id": "SOP-230:C:9.3",
+              "label": "9.3",
+              "glance": "Matcha: whisk",
+              "body": "Add 2 oz of 175 degF water and whisk in a W motion until the slurry is smooth with no lumps.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": null,
+              "source_text": "Add 2 oz of 175\u00b0F water and whisk in a W motion until the slurry is smooth with no lumps."
+            },
+            {
+              "step_id": "SOP-230:C:9.4",
+              "label": "9.4",
+              "glance": "Matcha: add milk",
+              "body": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid.",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "For a hot drink, pour in steamed milk. For an iced drink, add cold milk and ice up to the ice line. Add the lid."
+            },
+            {
+              "step_id": "SOP-230:C:10.1",
+              "label": "10.1",
+              "glance": "Drip coffee service",
+              "body": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210).",
+              "warning": null,
+              "checkpoint": null,
+              "diagram": null,
+              "graphic_id": "recipe-cup",
+              "source_text": "Fill the cup from the carafe, leaving 1/2 inch of space below the rim for cream. Add a sleeve to hot cups. Cream and sugar are at the condiment bar. Discard drip coffee 60 minutes after brewing (see SOP-210)."
+            }
+          ],
+          "assignment_id": null,
+          "scope": {
+            "start": 4,
+            "end": 7
+          }
+        },
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 218,
+          "retrieve": 103,
+          "generate": 0,
+          "verify": 0,
+          "total": 532
+        }
+      }
+    },
+    {
+      "id": "v3-c1",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1188.7824999867007,
+      "reason": "",
+      "response": {
+        "trace_id": "b454f5082f5244b1b7ff214250a16530",
+        "transcript": "How many shots?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Shots by size",
+            "Recipe specifications",
+            "Stop at yield"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 219,
+          "retrieve": 103,
+          "generate": 823,
+          "verify": 0,
+          "total": 1146
+        }
+      }
+    },
+    {
+      "id": "v3-c1-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1643.0672000278719,
+      "reason": "",
+      "response": {
+        "trace_id": "1c6eaec57290487bbf485ef7746e26d5",
+        "transcript": "small latte",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Espresso shots: 2",
+        "body": "",
+        "source": "SOP-230 Sec 2.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:2.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "2.1",
+            "quote": "| Espresso shots | 2 | 2 | 3 |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 334,
+          "retrieve": 104,
+          "generate": 1151,
+          "verify": 0,
+          "total": 1591
+        }
+      }
+    },
+    {
+      "id": "v3-c2",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1121.6002000146545,
+      "reason": "",
+      "response": {
+        "trace_id": "5c396a5496ef4ebe89a46fce1ef03dc8",
+        "transcript": "How much milk?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Start cold",
+            "Matcha: add milk",
+            "Latte: steam milk"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 236,
+          "retrieve": 105,
+          "generate": 734,
+          "verify": 0,
+          "total": 1077
+        }
+      }
+    },
+    {
+      "id": "v3-c2-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1306.290499982424,
+      "reason": "",
+      "response": {
+        "trace_id": "0340e76a9e8a4a9f8f562b6f2ec95e12",
+        "transcript": "small cappuccino",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Steamed milk: 5 oz",
+        "body": "",
+        "source": "SOP-230 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:3.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "| Steamed milk | 5 oz | 7 oz | 9 oz |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 230,
+          "retrieve": 104,
+          "generate": 932,
+          "verify": 0,
+          "total": 1267
+        }
+      }
+    },
+    {
+      "id": "v3-c3",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1359.381399990525,
+      "reason": "",
+      "response": {
+        "trace_id": "b37bd006538140f6bdf6068aafbaa2ba",
+        "transcript": "How much foam?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Foam depth",
+            "Cappuccino: pour",
+            "Latte specifications"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 239,
+          "retrieve": 104,
+          "generate": 955,
+          "verify": 0,
+          "total": 1298
+        }
+      }
+    },
+    {
+      "id": "v3-c3-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1225.8266999851912,
+      "reason": "",
+      "response": {
+        "trace_id": "6e70b67d374a4f35ae8921b987c944be",
+        "transcript": "cappuccino",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Foam about 3/4 inch (2 cm)",
+        "body": "",
+        "source": "SOP-230 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:3.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "Foam is about 3/4 inch (2 cm)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 214,
+          "retrieve": 109,
+          "generate": 857,
+          "verify": 0,
+          "total": 1181
+        }
+      }
+    },
+    {
+      "id": "v3-c4",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 419.582900009118,
+      "reason": "",
+      "response": {
+        "trace_id": "010bec01051348c49ab30e6af66d704f",
+        "transcript": "What temperature?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Target temperatures",
+            "Spin",
+            "Recipe specifications"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 253,
+          "retrieve": 105,
+          "generate": 0,
+          "verify": 0,
+          "total": 359
+        }
+      }
+    },
+    {
+      "id": "v3-c4-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1543.9869000110775,
+      "reason": "",
+      "response": {
+        "trace_id": "b670e36d7e6e48e5ac01b5efd073e221",
+        "transcript": "oat milk",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Oat milk: 140 to 150 degF",
+        "body": "Never exceed 160 degF.",
+        "source": "SOP-220 Sec 4.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Oat | 140 to 150\u00b0F (60 to 65\u00b0C)"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.1",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.1",
+            "quote": "Never exceed 160\u00b0F (71\u00b0C)."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 228,
+          "retrieve": 103,
+          "generate": 1171,
+          "verify": 1,
+          "total": 1504
+        }
+      }
+    },
+    {
+      "id": "v3-c5",
+      "category": "ambiguous",
+      "expected": "not_found",
+      "outcome": "not_found",
+      "correct": true,
+      "citation_verified": false,
+      "latency_ms": 1170.200200052932,
+      "reason": "",
+      "response": {
+        "trace_id": "e276c2f608244fadb206b869f5b6d5c2",
+        "transcript": "How many pumps?",
+        "intent": "question",
+        "outcome": "not_found",
+        "glance": "Not in approved SOPs",
+        "body": "No matching procedure. Try rephrasing or ask your supervisor.",
+        "source": "",
+        "verified": false,
+        "citations": [],
+        "walkthrough": null,
+        "clarify": {
+          "prompt": "Which one?",
+          "options": [
+            "Pump sizes",
+            "Flavor syrup amounts",
+            "Mocha specifications"
+          ]
+        },
+        "needs_clarification": true,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 197,
+          "retrieve": 105,
+          "generate": 830,
+          "verify": 0,
+          "total": 1133
+        }
+      }
+    },
+    {
+      "id": "v3-c5-turn-1",
+      "category": "ambiguous",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 2266.1018999642693,
+      "reason": "",
+      "response": {
+        "trace_id": "57f73784b8ba4ea684a88ab628f7aed9",
+        "transcript": "small mocha",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Add 2 pumps mocha sauce",
+        "body": "",
+        "source": "SOP-230 Sec 7.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-230:C:7.1",
+            "doc_id": "SOP-230",
+            "revision": "C",
+            "section": "7.1",
+            "quote": "| Mocha sauce | 2 pumps | 3 pumps | 4 pumps |"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "recipe-pumps",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 229,
+          "retrieve": 104,
+          "generate": 1878,
+          "verify": 1,
+          "total": 2212
+        }
+      }
+    },
+    {
+      "id": "v3-f2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1762.6708999741822,
+      "reason": "",
+      "response": {
+        "trace_id": "7716034ef6214d01bb868e9f76b19c7d",
+        "transcript": "What concentration should the sanitizer be?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Sanitizer 200 to 400 ppm",
+        "body": "",
+        "source": "SOP-210 Sec 3.7 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Fill a bucket with quat sanitizer at 200 to 400 ppm."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "sanitizer-test",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 268,
+          "retrieve": 104,
+          "generate": 1163,
+          "verify": 1,
+          "total": 1720
+        }
+      }
+    },
+    {
+      "id": "v3-f2-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1500.0861000153236,
+      "reason": "",
+      "response": {
+        "trace_id": "bd85909d62ca44f9a791e3f87470c482",
+        "transcript": "How often do I replace it?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Replace solution every 4 hours",
+        "body": "",
+        "source": "SOP-210 Sec 3.7 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "Replace the solution every 4 hours."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 923,
+          "verify": 1,
+          "total": 1446
+        }
+      }
+    },
+    {
+      "id": "v3-f3",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 2534.693600027822,
+      "reason": "",
+      "response": {
+        "trace_id": "011c1e7f9c134f77b62452e68340bff3",
+        "transcript": "What do I do with the fridge?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Read cooler/fridge thermometers",
+        "body": "Both must read 41 degF (5 degC) or below.",
+        "source": "SOP-210 Sec 3.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "Read the walk-in cooler and milk fridge thermometers. Both must read 41\u00b0F (5\u00b0C) or below."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 239,
+          "retrieve": 104,
+          "generate": 1967,
+          "verify": 1,
+          "total": 2495
+        }
+      }
+    },
+    {
+      "id": "v3-f3-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1678.5133000230417,
+      "reason": "",
+      "response": {
+        "trace_id": "d9d6b3e660d14e92b9851eb01fb4ae7f",
+        "transcript": "What do I do if it's too warm?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Tell shift lead if above 41 degF",
+        "body": "Do this before using any dairy.",
+        "source": "SOP-210 Sec 3.2 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.2",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.2",
+            "quote": "If a reading is above 41\u00b0F, tell the shift lead before using any dairy."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 232,
+          "retrieve": 104,
+          "generate": 1118,
+          "verify": 0,
+          "total": 1638
+        }
+      }
+    },
+    {
+      "id": "v3-f4",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1501.6495999880135,
+      "reason": "",
+      "response": {
+        "trace_id": "aae51b1ccae74fc38e739a7f36b82ffe",
+        "transcript": "What should I do with the espresso machine?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Turn on espresso machine at 5:15 AM",
+        "body": "It needs 30 minutes to warm up, so do not pull shots before 5:45 AM.",
+        "source": "SOP-210 Sec 3.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "Turn on the espresso machine at 5:15 AM. It needs 30 minutes to warm up, so do not pull shots before 5:45 AM."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 218,
+          "retrieve": 105,
+          "generate": 943,
+          "verify": 1,
+          "total": 1450
+        }
+      }
+    },
+    {
+      "id": "v3-f4-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1588.299700000789,
+      "reason": "",
+      "response": {
+        "trace_id": "0ee571d34bc54eecb435b2595a3378cf",
+        "transcript": "How long does it need to warm up?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Warm up 30 minutes",
+        "body": "",
+        "source": "SOP-210 Sec 3.3 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.3",
+            "quote": "It needs 30 minutes to warm up"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 235,
+          "retrieve": 104,
+          "generate": 979,
+          "verify": 0,
+          "total": 1532
+        }
+      }
+    },
+    {
+      "id": "v3-f5",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1477.3071000236087,
+      "reason": "",
+      "response": {
+        "trace_id": "82f3b2b29b6a4e6883955362c3595af8",
+        "transcript": "How do I prep the ice bin?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Fill ice bin",
+        "body": "Keep scoop in clean holder outside bin. Never bury scoop or use cup.",
+        "source": "SOP-210 Sec 3.6 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Fill the ice bin. Keep the ice scoop in its clean holder outside the bin. Never leave the scoop buried in the ice, and never use a cup to scoop ice."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 242,
+          "retrieve": 104,
+          "generate": 904,
+          "verify": 1,
+          "total": 1436
+        }
+      }
+    },
+    {
+      "id": "v3-f5-turn-1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 1367.5717000151053,
+      "reason": "",
+      "response": {
+        "trace_id": "6d64a4df12f041deb7109f2ff0b8bea9",
+        "transcript": "Where does the scoop go?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Store scoop in clean holder",
+        "body": "Keep the ice scoop in its clean holder outside the bin.",
+        "source": "SOP-210 Sec 3.6 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.6",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.6",
+            "quote": "Keep the ice scoop in its clean holder outside the bin."
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": null,
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 272,
+          "retrieve": 103,
+          "generate": 734,
+          "verify": 0,
+          "total": 1320
+        }
+      }
+    },
+    {
+      "id": "v3-p1",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 388.21400003507733,
+      "reason": "",
+      "response": {
+        "trace_id": "b7e45554c096482cb0f249e4112f373a",
+        "transcript": "What does the steam wand look like?",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Milk pitcher, wand and tip",
+        "body": "",
+        "source": "SOP-220 Sec 4.4 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-220:C:4.4",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.4",
+            "quote": "steam wand"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.8",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.8",
+            "quote": "pitcher"
+          },
+          {
+            "chunk_id": "SOP-220:C:4.9",
+            "doc_id": "SOP-220",
+            "revision": "C",
+            "section": "4.9",
+            "quote": "pitcher"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "milk-steaming",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 241,
+          "retrieve": 103,
+          "generate": 0,
+          "verify": 0,
+          "total": 347
+        }
+      }
+    },
+    {
+      "id": "v3-p2",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 373.62949998350814,
+      "reason": "",
+      "response": {
+        "trace_id": "6d4b79130ad747fd84171f86c3144184",
+        "transcript": "Show me the sanitizer test strip",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Sanitizer and test strip",
+        "body": "",
+        "source": "SOP-210 Sec 3.7 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "sanitizer"
+          },
+          {
+            "chunk_id": "SOP-210:C:6.3",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.3",
+            "quote": "sanitizer"
+          },
+          {
+            "chunk_id": "SOP-210:C:6.4",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "6.4",
+            "quote": "sanitizer"
+          },
+          {
+            "chunk_id": "SOP-210:C:3.7",
+            "doc_id": "SOP-210",
+            "revision": "C",
+            "section": "3.7",
+            "quote": "test strip"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "sanitizer-test",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 220,
+          "retrieve": 106,
+          "generate": 0,
+          "verify": 0,
+          "total": 328
+        }
+      }
+    },
+    {
+      "id": "v3-p3",
+      "category": "answerable",
+      "expected": "answered",
+      "outcome": "answered",
+      "correct": true,
+      "citation_verified": true,
+      "latency_ms": 428.30020003020763,
+      "reason": "",
+      "response": {
+        "trace_id": "175533a954c1415384c8cd9a3ee33cb7",
+        "transcript": "Picture of the cash drawer",
+        "intent": "question",
+        "outcome": "answered",
+        "glance": "Cash drawer and bill ledge",
+        "body": "",
+        "source": "SOP-202 Sec 3.1 rev C",
+        "verified": true,
+        "citations": [
+          {
+            "chunk_id": "SOP-202:C:3.1",
+            "doc_id": "SOP-202",
+            "revision": "C",
+            "section": "3.1",
+            "quote": "drawer ledge"
+          }
+        ],
+        "walkthrough": null,
+        "clarify": null,
+        "needs_clarification": false,
+        "graphic_id": "cash-handling",
+        "command": null,
+        "latency_ms": {
+          "stt": 0,
+          "embed": 207,
+          "retrieve": 103,
+          "generate": 0,
+          "verify": 0,
+          "total": 312
+        }
+      }
+    }
+  ]
+}
