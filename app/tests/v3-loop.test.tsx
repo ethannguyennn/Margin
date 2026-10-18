@@ -110,7 +110,7 @@ describe('chained questions', () => {
 describe('show me the picture', () => {
   it('with a reference picture and no relay diagram, opens the details beside the picture', () => {
     const s = ask(opened(), command('diagram'));
-    expect(s.screen).toBe('STEP_DETAILS'); expect(text(s).graphic_id).toBe('recipe-cup');
+    expect(s.screen).toBe('STEP_DETAILS'); expect(text(s).graphic_id).toBe('espresso-shot');
   });
   it('with neither, says so and stays on the step', () => {
     const last = transition(transition(opened(), { type: 'DOWN' }).state, { type: 'DOWN' }).state; // 3.4 has no reference

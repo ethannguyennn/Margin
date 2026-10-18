@@ -79,6 +79,8 @@ def drop_slivers(img: Image.Image, crop: list[float]) -> tuple[Image.Image, int]
 
 
 def bake(g: dict) -> tuple[Image.Image, int]:
+    if g.get("lens"):  # corpus figures ship their own 288x144 4-bit lens render
+        return Image.open(APP.parent / "corpus/figures/g2" / g["lens"]), 0
     art = Image.open(APP / "src/assets/sops" / g["file"]).convert("RGB")
     for ex, ey, ew, eh in g.get("erase", []):
         ImageDraw.Draw(art).rectangle((ex * art.width, ey * art.height, (ex + ew) * art.width,

@@ -21,14 +21,14 @@ GOOD = dict(answerable=True, glance='Purge the steam wand for 2 seconds.', body=
 def test_catalog_covers_every_current_sop_with_exact_source_anchors_and_packaged_art():
     docs, chunks = load_corpus(); by_id = {c['chunk_id']: c for c in chunks}; covered=set()
     assert len({g['id'] for g in catalog()}) == len(catalog())
-    assert len({g['file'] for g in catalog()}) == 5
+    assert len({g['file'] for g in catalog()}) == 5 + 71  # imagegen sheets + corpus figures
     for g in catalog():
         assert (ROOT/'app/src/assets/sops'/g['file']).read_bytes().startswith(b'\x89PNG')
+        assert (ROOT/'app/src/assets/lens'/f"{g['id']}.png").read_bytes().startswith(b'\x89PNG')
         x,y,w,h=g['crop']; assert 0<=x<1 and 0<=y<1 and 0<w and 0<h and x+w<=1+1e-9 and y+h<=1+1e-9
         for ref in g['references']:
             c=by_id[ref['chunk_id']]; assert ref['quote'] in c['text']; covered.add(c['doc_id'])
-    # SOP-231..300 are text-only on the lens until their corpus/figures are catalogued.
-    assert covered == {f'SOP-{n}' for n in (201, 202, 210, 220, 230)} <= {d['doc_id'] for d in docs}
+    assert covered == {d['doc_id'] for d in docs}
 
 def test_prompt_and_walkthrough_keep_revision_and_source_binding():
     assert 'milk-steaming' in build_prompt('purge wand', [CHUNK])

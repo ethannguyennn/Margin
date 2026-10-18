@@ -396,5 +396,1354 @@
         "quote": "cup"
       }
     ]
+  },
+  {
+    "id": "fig-201-float",
+    "file": "fig-201-float.png",
+    "lens": "fig-201-float.png",
+    "title": "Opening float: $150.00",
+    "alt": "Synthetic figure: Opening float: $150.00.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-201:C:2.6",
+        "quote": "Opening float is $150.00"
+      }
+    ]
+  },
+  {
+    "id": "fig-201-order-flow",
+    "file": "fig-201-order-flow.png",
+    "lens": "fig-201-order-flow.png",
+    "title": "Order flow at the register",
+    "alt": "Synthetic figure: Order flow at the register.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-201:C:3.6",
+        "quote": "Order flow"
+      }
+    ]
+  },
+  {
+    "id": "fig-201-sizes",
+    "file": "fig-201-sizes.png",
+    "lens": "fig-201-sizes.png",
+    "title": "Cup sizes",
+    "alt": "Synthetic figure: Cup sizes.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-201:C:4.5",
+        "quote": "Cup sizes"
+      }
+    ]
+  },
+  {
+    "id": "fig-201-wait",
+    "file": "fig-201-wait.png",
+    "lens": "fig-201-wait.png",
+    "title": "Wait time targets",
+    "alt": "Synthetic figure: Wait time targets.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-201:C:6.4",
+        "quote": "Wait time targets"
+      }
+    ]
+  },
+  {
+    "id": "fig-201-mobile",
+    "file": "fig-201-mobile.png",
+    "lens": "fig-201-mobile.png",
+    "title": "Mobile orders",
+    "alt": "Synthetic figure: Mobile orders.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-201:C:6.5",
+        "quote": "Mobile orders"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-bill-check",
+    "file": "fig-202-bill-check.png",
+    "lens": "fig-202-bill-check.png",
+    "title": "Checking a bill",
+    "alt": "Synthetic figure: Checking a bill.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:2.4",
+        "quote": "Checking a bill"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-cash-drop",
+    "file": "fig-202-cash-drop.png",
+    "lens": "fig-202-cash-drop.png",
+    "title": "Cash drop",
+    "alt": "Synthetic figure: Cash drop.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:3.4",
+        "quote": "Cash drop"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-void-window",
+    "file": "fig-202-void-window.png",
+    "lens": "fig-202-void-window.png",
+    "title": "Void or refund?",
+    "alt": "Synthetic figure: Void or refund?.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:5.5",
+        "quote": "Void or refund"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-refund-ladder",
+    "file": "fig-202-refund-ladder.png",
+    "lens": "fig-202-refund-ladder.png",
+    "title": "Refund approval ladder",
+    "alt": "Synthetic figure: Refund approval ladder.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:5.6",
+        "quote": "Refund approval ladder"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-close-till",
+    "file": "fig-202-close-till.png",
+    "lens": "fig-202-close-till.png",
+    "title": "Closing the till",
+    "alt": "Synthetic figure: Closing the till.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:7.6",
+        "quote": "Closing the till"
+      }
+    ]
+  },
+  {
+    "id": "fig-202-variance",
+    "file": "fig-202-variance.png",
+    "lens": "fig-202-variance.png",
+    "title": "Till variance (count vs POS)",
+    "alt": "Synthetic figure: Till variance (count vs POS).",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-202:C:7.7",
+        "quote": "Till variance"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-handwash",
+    "file": "fig-210-handwash.png",
+    "lens": "fig-210-handwash.png",
+    "title": "Handwashing: 20 seconds",
+    "alt": "Synthetic figure: Handwashing: 20 seconds.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:2.4",
+        "quote": "Handwashing"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-opening-timeline",
+    "file": "fig-210-opening-timeline.png",
+    "lens": "fig-210-opening-timeline.png",
+    "title": "Opening: 5:15 to 6:00 AM",
+    "alt": "Synthetic figure: Opening: 5:15 to 6:00 AM.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:3.9",
+        "quote": "Opening timeline"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-temps",
+    "file": "fig-210-temps.png",
+    "lens": "fig-210-temps.png",
+    "title": "Temperature cheat sheet",
+    "alt": "Synthetic figure: Temperature cheat sheet.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:4.6",
+        "quote": "Temperature cheat sheet"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-shelf-life",
+    "file": "fig-210-shelf-life.png",
+    "lens": "fig-210-shelf-life.png",
+    "title": "Shelf life after opening",
+    "alt": "Synthetic figure: Shelf life after opening.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:4.7",
+        "quote": "Shelf life after opening"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-backflush",
+    "file": "fig-210-backflush.png",
+    "lens": "fig-210-backflush.png",
+    "title": "Backflush the group heads",
+    "alt": "Synthetic figure: Backflush the group heads.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:5.6",
+        "quote": "Backflush"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-sink",
+    "file": "fig-210-sink.png",
+    "lens": "fig-210-sink.png",
+    "title": "Three-compartment sink",
+    "alt": "Synthetic figure: Three-compartment sink.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:6.6",
+        "quote": "Three-compartment sink"
+      }
+    ]
+  },
+  {
+    "id": "fig-210-closing-flow",
+    "file": "fig-210-closing-flow.png",
+    "lens": "fig-210-closing-flow.png",
+    "title": "Closing: back of house",
+    "alt": "Synthetic figure: Closing: back of house.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-210:C:6.7",
+        "quote": "Closing, back of house"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-espresso-specs",
+    "file": "fig-220-espresso-specs.png",
+    "lens": "fig-220-espresso-specs.png",
+    "title": "The espresso standard",
+    "alt": "Synthetic figure: The espresso standard.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:2.4",
+        "quote": "Espresso standard"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-dialin-steps",
+    "file": "fig-220-dialin-steps.png",
+    "lens": "fig-220-dialin-steps.png",
+    "title": "Dialing in the grinder",
+    "alt": "Synthetic figure: Dialing in the grinder.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:3.8",
+        "quote": "Dial-in steps"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-dialin-scale",
+    "file": "fig-220-dialin-scale.png",
+    "lens": "fig-220-dialin-scale.png",
+    "title": "Shot time: what to do",
+    "alt": "Synthetic figure: Shot time: what to do.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:3.9",
+        "quote": "Shot time scale"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-milk-temps",
+    "file": "fig-220-milk-temps.png",
+    "lens": "fig-220-milk-temps.png",
+    "title": "Steamed milk target temperatures",
+    "alt": "Synthetic figure: Steamed milk target temperatures.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:4.10",
+        "quote": "Milk temperatures"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-steam-stages",
+    "file": "fig-220-steam-stages.png",
+    "lens": "fig-220-steam-stages.png",
+    "title": "Steaming milk: stretch, then spin",
+    "alt": "Synthetic figure: Steaming milk: stretch, then spin.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:4.11",
+        "quote": "Steaming"
+      }
+    ]
+  },
+  {
+    "id": "fig-220-troubleshoot",
+    "file": "fig-220-troubleshoot.png",
+    "lens": "fig-220-troubleshoot.png",
+    "title": "Troubleshooting",
+    "alt": "Synthetic figure: Troubleshooting.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-220:C:5.2",
+        "quote": "Troubleshooting"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-pumps",
+    "file": "fig-230-pumps.png",
+    "lens": "fig-230-pumps.png",
+    "title": "Pumps by size",
+    "alt": "Synthetic figure: Pumps by size.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:1.5",
+        "quote": "Pumps by size"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-latte",
+    "file": "fig-230-latte.png",
+    "lens": "fig-230-latte.png",
+    "title": "Latte (hot)",
+    "alt": "Synthetic figure: Latte (hot).",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:2.6",
+        "quote": "Medium latte"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-cappuccino",
+    "file": "fig-230-cappuccino.png",
+    "lens": "fig-230-cappuccino.png",
+    "title": "Cappuccino",
+    "alt": "Synthetic figure: Cappuccino.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:3.5",
+        "quote": "Medium cappuccino"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-flat-white",
+    "file": "fig-230-flat-white.png",
+    "lens": "fig-230-flat-white.png",
+    "title": "Flat White (S and M only)",
+    "alt": "Synthetic figure: Flat White (S and M only).",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:4.5",
+        "quote": "Medium flat white"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-americano",
+    "file": "fig-230-americano.png",
+    "lens": "fig-230-americano.png",
+    "title": "Americano",
+    "alt": "Synthetic figure: Americano.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:5.4",
+        "quote": "Medium americano"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-iced-latte",
+    "file": "fig-230-iced-latte.png",
+    "lens": "fig-230-iced-latte.png",
+    "title": "Iced Latte",
+    "alt": "Synthetic figure: Iced Latte.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:6.5",
+        "quote": "Medium iced latte"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-mocha",
+    "file": "fig-230-mocha.png",
+    "lens": "fig-230-mocha.png",
+    "title": "Mocha",
+    "alt": "Synthetic figure: Mocha.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:7.5",
+        "quote": "Medium mocha"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-cold-brew",
+    "file": "fig-230-cold-brew.png",
+    "lens": "fig-230-cold-brew.png",
+    "title": "Cold Brew",
+    "alt": "Synthetic figure: Cold Brew.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:8.4",
+        "quote": "Medium cold brew"
+      }
+    ]
+  },
+  {
+    "id": "fig-230-matcha",
+    "file": "fig-230-matcha.png",
+    "lens": "fig-230-matcha.png",
+    "title": "Matcha Latte",
+    "alt": "Synthetic figure: Matcha Latte.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-230:C:9.5",
+        "quote": "Medium matcha latte"
+      }
+    ]
+  },
+  {
+    "id": "fig-231-tea",
+    "file": "fig-231-tea.png",
+    "lens": "fig-231-tea.png",
+    "title": "Hot tea: water and steep time",
+    "alt": "Synthetic figure: Hot tea: water and steep time.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-231:C:2.5",
+        "quote": "Tea"
+      }
+    ]
+  },
+  {
+    "id": "fig-231-chai",
+    "file": "fig-231-chai.png",
+    "lens": "fig-231-chai.png",
+    "title": "Chai Latte",
+    "alt": "Synthetic figure: Chai Latte.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-231:C:3.6",
+        "quote": "Medium chai latte"
+      }
+    ]
+  },
+  {
+    "id": "fig-231-hot-chocolate",
+    "file": "fig-231-hot-chocolate.png",
+    "lens": "fig-231-hot-chocolate.png",
+    "title": "Hot Chocolate",
+    "alt": "Synthetic figure: Hot Chocolate.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-231:C:4.6",
+        "quote": "Medium hot chocolate"
+      }
+    ]
+  },
+  {
+    "id": "fig-231-steamer",
+    "file": "fig-231-steamer.png",
+    "lens": "fig-231-steamer.png",
+    "title": "Steamer (milk + syrup)",
+    "alt": "Synthetic figure: Steamer (milk + syrup).",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-231:C:5.4",
+        "quote": "Medium steamer"
+      }
+    ]
+  },
+  {
+    "id": "fig-231-frappe",
+    "file": "fig-231-frappe.png",
+    "lens": "fig-231-frappe.png",
+    "title": "Chocolate Frappe (blended)",
+    "alt": "Synthetic figure: Chocolate Frappe (blended).",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-231:C:6.6",
+        "quote": "Chocolate frappe"
+      }
+    ]
+  },
+  {
+    "id": "fig-240-case",
+    "file": "fig-240-case.png",
+    "lens": "fig-240-case.png",
+    "title": "Display cases",
+    "alt": "Synthetic figure: Display cases.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-240:C:2.3",
+        "quote": "The pastry case holds croissants"
+      }
+    ]
+  },
+  {
+    "id": "fig-240-warming",
+    "file": "fig-240-warming.png",
+    "lens": "fig-240-warming.png",
+    "title": "Toaster oven 350°F: warming times",
+    "alt": "Synthetic figure: Toaster oven 350°F: warming times.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-240:C:4.5",
+        "quote": "Toaster oven at 350°F"
+      }
+    ]
+  },
+  {
+    "id": "fig-240-sandwich-temp",
+    "file": "fig-240-sandwich-temp.png",
+    "lens": "fig-240-sandwich-temp.png",
+    "title": "Breakfast sandwich: 165°F",
+    "alt": "Synthetic figure: Breakfast sandwich: 165°F.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-240:C:4.6",
+        "quote": "A breakfast sandwich is done when the inside reads 165°F"
+      }
+    ]
+  },
+  {
+    "id": "fig-240-markdown",
+    "file": "fig-240-markdown.png",
+    "lens": "fig-240-markdown.png",
+    "title": "Pastry day timeline",
+    "alt": "Synthetic figure: Pastry day timeline.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-240:C:5.4",
+        "quote": "Pastry day"
+      }
+    ]
+  },
+  {
+    "id": "fig-250-complaint",
+    "file": "fig-250-complaint.png",
+    "lens": "fig-250-complaint.png",
+    "title": "Handling a complaint",
+    "alt": "Synthetic figure: Handling a complaint.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-250:C:3.5",
+        "quote": "Complaint steps"
+      }
+    ]
+  },
+  {
+    "id": "fig-250-comp-ladder",
+    "file": "fig-250-comp-ladder.png",
+    "lens": "fig-250-comp-ladder.png",
+    "title": "Who can comp or refund goods",
+    "alt": "Synthetic figure: Who can comp or refund goods.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-250:C:4.3",
+        "quote": "Comp authority"
+      }
+    ]
+  },
+  {
+    "id": "fig-250-escalation",
+    "file": "fig-250-escalation.png",
+    "lens": "fig-250-escalation.png",
+    "title": "Upset or unsafe guest",
+    "alt": "Synthetic figure: Upset or unsafe guest.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-250:C:5.5",
+        "quote": "Upset or unsafe guest"
+      }
+    ]
+  },
+  {
+    "id": "fig-250-lost-found",
+    "file": "fig-250-lost-found.png",
+    "lens": "fig-250-lost-found.png",
+    "title": "Lost and found",
+    "alt": "Synthetic figure: Lost and found.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-250:C:6.4",
+        "quote": "Lost and found"
+      }
+    ]
+  },
+  {
+    "id": "fig-260-floorplan",
+    "file": "fig-260-floorplan.png",
+    "lens": "fig-260-floorplan.png",
+    "title": "Café floor plan",
+    "alt": "Synthetic figure: Café floor plan.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-260:C:2.2",
+        "quote": "Café floor plan"
+      }
+    ]
+  },
+  {
+    "id": "fig-260-lobby-cycle",
+    "file": "fig-260-lobby-cycle.png",
+    "lens": "fig-260-lobby-cycle.png",
+    "title": "Lobby check: every 30 minutes",
+    "alt": "Synthetic figure: Lobby check: every 30 minutes.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-260:C:4.3",
+        "quote": "Lobby check every 30 minutes"
+      }
+    ]
+  },
+  {
+    "id": "fig-260-table-reset",
+    "file": "fig-260-table-reset.png",
+    "lens": "fig-260-table-reset.png",
+    "title": "Resetting a table",
+    "alt": "Synthetic figure: Resetting a table.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-260:C:5.5",
+        "quote": "Table reset"
+      }
+    ]
+  },
+  {
+    "id": "fig-260-closing-timeline",
+    "file": "fig-260-closing-timeline.png",
+    "lens": "fig-260-closing-timeline.png",
+    "title": "Closing the front of house",
+    "alt": "Synthetic figure: Closing the front of house.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-260:C:6.5",
+        "quote": "Front of house closing"
+      }
+    ]
+  },
+  {
+    "id": "fig-270-schedule",
+    "file": "fig-270-schedule.png",
+    "lens": "fig-270-schedule.png",
+    "title": "Cleaning schedule",
+    "alt": "Synthetic figure: Cleaning schedule.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-270:C:2.3",
+        "quote": "Cleaning schedule"
+      }
+    ]
+  },
+  {
+    "id": "fig-270-ice-machine",
+    "file": "fig-270-ice-machine.png",
+    "lens": "fig-270-ice-machine.png",
+    "title": "Ice machine: monthly clean",
+    "alt": "Synthetic figure: Ice machine: monthly clean.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-270:C:3.7",
+        "quote": "Ice machine, monthly"
+      }
+    ]
+  },
+  {
+    "id": "fig-270-brewer",
+    "file": "fig-270-brewer.png",
+    "lens": "fig-270-brewer.png",
+    "title": "Batch brewer: Sunday clean",
+    "alt": "Synthetic figure: Batch brewer: Sunday clean.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-270:C:4.4",
+        "quote": "Batch brewer, Sunday"
+      }
+    ]
+  },
+  {
+    "id": "fig-270-blender",
+    "file": "fig-270-blender.png",
+    "lens": "fig-270-blender.png",
+    "title": "Blender wash",
+    "alt": "Synthetic figure: Blender wash.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-270:C:5.5",
+        "quote": "Blender wash after every use"
+      }
+    ]
+  },
+  {
+    "id": "fig-270-grinder",
+    "file": "fig-270-grinder.png",
+    "lens": "fig-270-grinder.png",
+    "title": "Grinder parts",
+    "alt": "Synthetic figure: Grinder parts.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-270:C:6.3",
+        "quote": "Grinder"
+      }
+    ]
+  },
+  {
+    "id": "fig-280-delivery-week",
+    "file": "fig-280-delivery-week.png",
+    "lens": "fig-280-delivery-week.png",
+    "title": "Delivery week",
+    "alt": "Synthetic figure: Delivery week.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-280:C:2.3",
+        "quote": "Delivery week"
+      }
+    ]
+  },
+  {
+    "id": "fig-280-receiving-flow",
+    "file": "fig-280-receiving-flow.png",
+    "lens": "fig-280-receiving-flow.png",
+    "title": "Receiving a delivery",
+    "alt": "Synthetic figure: Receiving a delivery.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-280:C:3.6",
+        "quote": "Receiving"
+      }
+    ]
+  },
+  {
+    "id": "fig-280-fifo",
+    "file": "fig-280-fifo.png",
+    "lens": "fig-280-fifo.png",
+    "title": "First in, first out",
+    "alt": "Synthetic figure: First in, first out.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-280:C:4.2",
+        "quote": "First in, first out"
+      }
+    ]
+  },
+  {
+    "id": "fig-280-par",
+    "file": "fig-280-par.png",
+    "lens": "fig-280-par.png",
+    "title": "Par levels and reorder point",
+    "alt": "Synthetic figure: Par levels and reorder point.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-280:C:5.3",
+        "quote": "Par levels and reorder points"
+      }
+    ]
+  },
+  {
+    "id": "fig-280-waste-log",
+    "file": "fig-280-waste-log.png",
+    "lens": "fig-280-waste-log.png",
+    "title": "Waste log",
+    "alt": "Synthetic figure: Waste log.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-280:C:7.2",
+        "quote": "Waste log columns"
+      }
+    ]
+  },
+  {
+    "id": "fig-290-where",
+    "file": "fig-290-where.png",
+    "lens": "fig-290-where.png",
+    "title": "Where things are",
+    "alt": "Synthetic figure: Where things are.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:2.2",
+        "quote": "Where things are"
+      }
+    ]
+  },
+  {
+    "id": "fig-290-burn",
+    "file": "fig-290-burn.png",
+    "lens": "fig-290-burn.png",
+    "title": "Burn first aid",
+    "alt": "Synthetic figure: Burn first aid.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:3.5",
+        "quote": "Burns"
+      }
+    ]
+  },
+  {
+    "id": "fig-290-spill",
+    "file": "fig-290-spill.png",
+    "lens": "fig-290-spill.png",
+    "title": "Spills and broken glass",
+    "alt": "Synthetic figure: Spills and broken glass.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:5.6",
+        "quote": "Spills"
+      }
+    ]
+  },
+  {
+    "id": "fig-290-pass",
+    "file": "fig-290-pass.png",
+    "lens": "fig-290-pass.png",
+    "title": "Fire extinguisher: P.A.S.S.",
+    "alt": "Synthetic figure: Fire extinguisher: P.A.S.S..",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:6.4",
+        "quote": "Fire extinguisher P.A.S.S."
+      }
+    ]
+  },
+  {
+    "id": "fig-290-evac",
+    "file": "fig-290-evac.png",
+    "lens": "fig-290-evac.png",
+    "title": "Fire: get out",
+    "alt": "Synthetic figure: Fire: get out.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:6.5",
+        "quote": "Fire evacuation"
+      }
+    ]
+  },
+  {
+    "id": "fig-290-power",
+    "file": "fig-290-power.png",
+    "lens": "fig-290-power.png",
+    "title": "Power outage",
+    "alt": "Synthetic figure: Power outage.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-290:C:7.5",
+        "quote": "Power outage"
+      }
+    ]
+  },
+  {
+    "id": "fig-300-time-off",
+    "file": "fig-300-time-off.png",
+    "lens": "fig-300-time-off.png",
+    "title": "Requesting time off",
+    "alt": "Synthetic figure: Requesting time off.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-300:C:4.4",
+        "quote": "Time off"
+      }
+    ]
+  },
+  {
+    "id": "fig-300-shift-swap",
+    "file": "fig-300-shift-swap.png",
+    "lens": "fig-300-shift-swap.png",
+    "title": "Swapping a shift",
+    "alt": "Synthetic figure: Swapping a shift.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-300:C:5.4",
+        "quote": "Shift swap"
+      }
+    ]
+  },
+  {
+    "id": "fig-300-breaks",
+    "file": "fig-300-breaks.png",
+    "lens": "fig-300-breaks.png",
+    "title": "Breaks in an 8-hour shift",
+    "alt": "Synthetic figure: Breaks in an 8-hour shift.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-300:C:6.4",
+        "quote": "Breaks on an 8-hour shift"
+      }
+    ]
+  },
+  {
+    "id": "fig-300-uniform",
+    "file": "fig-300-uniform.png",
+    "lens": "fig-300-uniform.png",
+    "title": "Uniform check",
+    "alt": "Synthetic figure: Uniform check.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-300:C:7.3",
+        "quote": "Uniform check"
+      }
+    ]
+  },
+  {
+    "id": "fig-300-training",
+    "file": "fig-300-training.png",
+    "lens": "fig-300-training.png",
+    "title": "Training path",
+    "alt": "Synthetic figure: Training path.",
+    "crop": [
+      0.0,
+      0.0,
+      1.0,
+      1.0
+    ],
+    "references": [
+      {
+        "chunk_id": "SOP-300:C:8.3",
+        "quote": "Training path"
+      }
+    ]
   }
 ]
