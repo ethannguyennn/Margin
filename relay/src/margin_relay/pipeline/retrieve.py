@@ -190,10 +190,14 @@ class GeminiEmbedder:
         )
 
     async def _embed(self, contents: list[str], task_type: str) -> list[list[float]]:
+        from google.genai import types
+
         try:
             resp = await asyncio.wait_for(
                 self.client.aio.models.embed_content(
-                    model=self.model, contents=contents, config=self._config(task_type)
+                    # One Content per text: Embedding 2 aggregates a bare list into one vector.
+                    model=self.model, contents=[types.Content(parts=[types.Part.from_text(text=c)]) for c in contents],
+                    config=self._config(task_type),
                 ),
                 timeout=self.timeout,
             )

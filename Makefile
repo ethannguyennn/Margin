@@ -91,7 +91,7 @@ logs:
 
 # Read-only, detached checkouts of every team branch under _branches/ (gitignored),
 # refreshed from origin. For browsing (e.g. in Obsidian); never commit in them.
-BRANCHES := part-1-lens-ui part-2-app-io part-4-rag-pipeline part-5-data-corpus
+BRANCHES := part-1-lens-hands-free-ui part-2-motion-voice-io part-3-relay-platform part-4-conversion-diagrams part-5-portal-data
 sync-branches:
 	git fetch origin --prune
 	git worktree prune
