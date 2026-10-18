@@ -394,6 +394,7 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
     revision = req.revision or None
     previous = p.sessions.get(session_id)
     query = _clarify_query(ctx.transcript, previous) if ctx.intent == "question" else ctx.transcript
+    resolving = previous is not None and previous.clarify is not None and query != ctx.transcript
     here = await _current_step(p, req) if ctx.intent == "question" else None
     follow_up = ctx.intent == "question" and _is_follow_up(ctx.transcript)
     retrieval_query = query
@@ -404,12 +405,18 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
         elif here is not None:
             retrieval_query += f" {here.heading}"
     retrieved = await _retrieve(p, retrieval_query, revision)
+    if resolving:
+        reply = await _retrieve(p, ctx.transcript, revision)
+        chunks = {c.chunk_id: c for c in [*retrieved.chunks[:3], *reply.chunks[:3]]}
+        retrieved = retrieved.model_copy(update={"chunks": list(chunks.values()),
+            "best_sim": max(retrieved.best_sim, reply.best_sim), "best_rrf": max(retrieved.best_rrf, reply.best_rrf)})
+        query = f"ORIGINAL QUESTION: {previous.transcript}\nCLARIFICATION REPLY: {ctx.transcript}"
     candidates = [here] if here is not None else []
     if (ctx.intent == "question" and previous is not None and previous.outcome == "answered"
             and follow_up):
         candidates.extend(Chunk(**c.model_dump(), text=c.quote) for c in previous.citations
                           if revision is None or c.revision == revision)
-        query += f"\n(Previous question in this session: {previous.transcript})"
+        query += f"\n(Previous question in this session: {previous.transcript}; previous answer: {previous.glance})"
     if candidates:
         unique: dict[str, Chunk] = {}
         for chunk in candidates:

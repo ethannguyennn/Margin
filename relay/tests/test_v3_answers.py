@@ -105,7 +105,12 @@ def test_clarify_reply_resolves_in_the_same_session(reply, combine):
         assert first["clarify"]["options"] == ["Latte", "Cappuccino"]
         assert first["verified"] is False and first["citations"] == []
         ask(c, reply, sid)
-    assert ret.queries[-1] == ("How many pumps of syrup? " + reply if combine else reply)
+    assert ret.queries[1] == ("How many pumps of syrup? " + reply if combine else reply)
+    if combine:
+        assert ret.queries[2] == reply
+        assert "CLARIFICATION REPLY:" in gen.requests[-1][0]
+    else:
+        assert "CLARIFICATION REPLY:" not in gen.requests[-1][0]
 
 
 def test_clarify_does_not_leak_to_another_session():
@@ -115,6 +120,27 @@ def test_clarify_does_not_leak_to_another_session():
         assert ask(c, "How many pumps?")["clarify"] is not None
         ask(c, "cappuccino")
     assert ret.queries[-1] == "cappuccino"
+
+
+def test_clarification_keeps_shared_rules_and_the_selected_procedure_within_six_chunks():
+    rule, recipe = chunk("SOP-230", "1.3"), chunk("SOP-230", "3.1")
+    class Split(Retriever):
+        async def retrieve(self, query, revision):
+            self.chunks = [recipe] if query == "cappuccino" else [rule, chunk("SOP-230", "1.2"), chunk("SOP-230", "2.2")]
+            return await super().retrieve(query, revision)
+    gen = Generator(Draft(answerable=False, needs_clarification=True), Draft(
+        answerable=True, glance="Flavor syrup amounts", body=rule.text,
+        citations=[{"chunk_id": rule.chunk_id, "quote": rule.text}]))
+    sid = uuid4()
+    with client(pipeline(Split([]), gen)) as c:
+        assert ask(c, "How many pumps of syrup?", sid)["clarify"]
+        out = ask(c, "cappuccino", sid)
+    assert out["verified"] and out["outcome"] == "answered"
+    query, chunks = gen.requests[-1]
+    assert "ORIGINAL QUESTION: How many pumps of syrup?" in query
+    assert "CLARIFICATION REPLY: cappuccino" in query
+    assert {rule.chunk_id, recipe.chunk_id} <= {c.chunk_id for c in chunks}
+    assert len(chunks) <= 6
 
 
 def test_long_document_titles_use_untruncated_grounded_headings_instead():

@@ -51,6 +51,13 @@ Rules:
     Put a long procedure's instructions in body, with only a short action in glance.
     If both temperature scales exceed the glance cap, put the parenthetic scale in body.
     Never HTML-escape source quotes (copy \u00b0, not &deg;).
+11. If QUESTION labels ORIGINAL QUESTION and CLARIFICATION REPLY, use the reply to identify
+    the retrieved procedure and answer the original question. General rules may be conditional:
+    state their conditions explicitly. If only a size or variant remains unspecified and the
+    approved rule lists alternatives, return the labeled alternatives rather than guessing one.
+    For alternatives, use a short number-free source heading in glance and copy the applicable
+    source sentences into body, preserving conditions and the unit after every value.
+    This applies only after clarification; initially ambiguous questions still need clarification.
 Return JSON: {{answerable, needs_clarification, glance, body, citations:[{{chunk_id, quote}}], graphic_id}}
 When answerable=false, return empty glance, body and citations."""
 
