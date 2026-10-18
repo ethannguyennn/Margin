@@ -34,3 +34,40 @@ def sid() -> str:
 
 def ask(client: TestClient, text: str, session_id: str | None = None, **extra: Any):
     return client.post("/v1/ask", json={"session_id": session_id or sid(), "text": text, **extra})
+
+
+# --- v2 helpers ---------------------------------------------------------------------
+
+PORTAL_TOKEN = "portal-test-token"
+PORTAL = {"authorization": f"Bearer {PORTAL_TOKEN}"}
+
+
+def v2_client(**overrides: Any) -> tuple[TestClient, Any]:
+    """Mock relay with the portal enabled. Enter it (`with client:`) so background
+    conversion jobs keep one event loop alive between requests."""
+    values: dict[str, Any] = {"portal_token": PORTAL_TOKEN}
+    values.update(overrides)
+    return make_client(**values)
+
+
+def device(token: str) -> dict[str, str]:
+    return {"authorization": f"Bearer {token}"}
+
+
+def wait_material(client: TestClient, material_id: str, timeout: float = 10.0) -> dict:
+    import time
+
+    deadline = time.monotonic() + timeout
+    while True:
+        body = client.get(f"/v1/materials/{material_id}", headers=PORTAL).json()
+        if body.get("status") != "converting" or time.monotonic() > deadline:
+            return body
+        time.sleep(0.02)
+
+
+def pair_and_claim(client: TestClient, worker: str = "Bay 3") -> dict:
+    pairing = client.post("/v1/devices/pair", json={"session_id": sid()}).json()
+    claimed = client.post("/v1/devices/claim", headers=PORTAL,
+                          json={"pair_code": pairing["pair_code"], "worker_name": worker})
+    assert claimed.status_code == 200, claimed.text
+    return pairing

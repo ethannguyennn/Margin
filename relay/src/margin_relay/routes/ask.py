@@ -1,6 +1,8 @@
 """POST /v1/ask -- the one place the request flow lives.
 
-transcript -> intent -> branch:
+transcript -> parse_command (v2: whole-utterance command -> outcome 'command', no
+              retrieval, no LLM; "repeat" counts only inside a task)
+-> intent -> branch:
   deviation   -> store + notify                       -> logged
   repeat      -> session's last answer, no pipeline
   walkthrough -> retrieve -> top chunk's doc -> every step at once
@@ -16,6 +18,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import binascii
+import inspect
 import logging
 from dataclasses import dataclass, field
 from typing import Any
@@ -39,9 +42,8 @@ from ..schemas import (
     Intent,
     Outcome,
     RetrievalResult,
-    Step,
-    Walkthrough,
 )
+from .common import load_walkthrough
 from .deviation import log_deviation
 
 log = logging.getLogger("margin.ask")
@@ -199,8 +201,24 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
                timer: obs.StageTimer) -> AskResponse:
     session_id = str(req.session_id)
     ctx.transcript = await _transcript(req, p, settings)
+
+    # v2 command fast path (README-PART-3 section 4): whole-utterance commands return
+    # immediately -- no retrieval, no LLM, one events row. "repeat" is a command only
+    # inside a task (context has step_id); outside one it keeps v1's replay below.
+    command = p.parse_command(ctx.transcript) if ctx.transcript else None
+    if command == "repeat" and not req.context.step_id:
+        command = None
+    if command:
+        ctx.intent = ctx.outcome = "command"
+        ctx.doc_ids = [req.context.doc_id] if req.context.doc_id else []
+        return _response(trace_id, ctx, timer, glance="", body="", source="", citations=[],
+                         verified=False, command=command)
+
     classified = p.classify(ctx.transcript)
     ctx.intent = classified.intent
+    if ctx.intent == "command":
+        # The classifier matched a command the fast path declined ("repeat" outside a task).
+        ctx.intent = "repeat" if p.parse_command(ctx.transcript) == "repeat" else "question"
 
     if ctx.intent == "unknown":
         ctx.outcome = "not_found"
@@ -243,28 +261,28 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
 
     if ctx.intent == "walkthrough":
         top = retrieved.chunks[0]
-        loaded = await _walkthrough_steps(p, top, revision)
-        if loaded is None:
+        try:
+            # The one walkthrough code path (also /v1/assignments/next): keeps the v2
+            # warning, checkpoint and approved diagram on every step.
+            walk = await load_walkthrough(p, top.doc_id, revision or top.revision,
+                                          title_hint=top.title)
+        except PipelineError as exc:
+            raise Fail(exc.code, exc.message) from exc
+        if walk is None:
             ctx.outcome = "not_found"
             return _response(trace_id, ctx, timer)
-        rev, title, raw_steps = loaded
-        # Re-validated (not model_copy): sanitizing can lengthen text, and the caps must bite.
-        steps = [Step(step_id=s.step_id, label=s.label, glance=p.sanitize(s.glance).strip(),
-                      body=p.sanitize(s.body).strip()) for s in raw_steps]
-        title = p.sanitize(title).strip()
-        citations = [Citation(chunk_id=s.step_id, doc_id=top.doc_id, revision=rev,
-                              section=s.label, quote=s.body) for s in steps]
-        n = len(steps)
-        glance = f"{title}, {n} steps"
+        citations = [Citation(chunk_id=s.step_id, doc_id=walk.doc_id, revision=walk.revision,
+                              section=s.label, quote=s.body) for s in walk.steps]
+        n = walk.total
+        glance = f"{walk.title}, {n} steps"
         if len(glance) > GLANCE_MAX:
-            glance = f"{top.doc_id}, {n} steps"
+            glance = f"{walk.doc_id}, {n} steps"
         ctx.outcome = "answered"
-        ctx.doc_ids = [top.doc_id]
+        ctx.doc_ids = [walk.doc_id]
         return _response(trace_id, ctx, timer, glance=glance,
-                         body=f"{title}, {n} steps. Swipe to advance."[:BODY_MAX],
+                         body=f"{walk.title}, {n} steps. Swipe to advance."[:BODY_MAX],
                          source=_source(citations[0]), citations=citations, verified=True,
-                         walkthrough=Walkthrough(doc_id=top.doc_id, revision=rev, title=title,
-                                                 total=n, index=0, steps=steps))
+                         walkthrough=walk)
 
     # question
     answer = await _answer(p, settings, ctx.transcript, retrieved)
@@ -278,42 +296,12 @@ async def _run(req: AskRequest, p: Pipeline, settings: Any, trace_id: str, ctx: 
                      source=_source(citations[0]), citations=citations, verified=True)
 
 
-async def _walkthrough_steps(p: Pipeline, top: Any, revision: str | None
-                             ) -> tuple[str, str, list[Step]] | None:
-    """(revision, title, steps) for the top chunk's document, or None for not_found.
-
-    Real mode uses Part 5's walkthrough.build_walkthrough (revision pinned, every step);
-    otherwise the retriever's steps_for."""
-    if p.walkthrough is not None:
-        try:
-            built = await p.walkthrough.build_walkthrough(top.doc_id, revision)
-        except LookupError:
-            return None
-        except ValueError as exc:  # an over-cap step body: corpus problem, never truncate
-            raise Fail("internal", f"walkthrough {top.doc_id} violates the step caps") from exc
-        except Exception as exc:
-            raise _fail_from(exc, "db_down", "loading the walkthrough") from exc
-        steps = [Step.model_validate(s) for s in built["steps"]]
-        return (built["revision"], built["title"], steps) if steps else None
+def _accepts(fn: Any, name: str) -> bool:
     try:
-        steps = await p.retriever.steps_for(top.doc_id, revision)
-    except Exception as exc:
-        raise _fail_from(exc, "db_down", "loading steps") from exc
-    if not steps:
-        return None
-    title = top.title or await _doc_title(p, top.doc_id, top.revision) or top.doc_id
-    return top.revision, title, list(steps)
-
-
-async def _doc_title(p: Pipeline, doc_id: str, revision: str) -> str | None:
-    try:
-        for row in await p.db.list_procedures():
-            get = row.get if isinstance(row, dict) else lambda k, r=row: getattr(r, k, None)
-            if get("doc_id") == doc_id and get("revision") == revision:
-                return get("title")
-    except Exception:  # noqa: BLE001 - a title is cosmetic
-        return None
-    return None
+        params = inspect.signature(fn).parameters.values()
+    except (TypeError, ValueError):
+        return False
+    return any(prm.name == name or prm.kind is inspect.Parameter.VAR_KEYWORD for prm in params)
 
 
 @router.post("/v1/ask", response_model=AskResponse)
@@ -344,9 +332,12 @@ async def ask(req: AskRequest, request: Request, background: BackgroundTasks) ->
     latency = timer.latency()
     sentry_sdk.set_tag("outcome", ctx.outcome)
     log.info("ask intent=%s outcome=%s total=%dms", ctx.intent, ctx.outcome, latency.total)
+    # v2: the task context goes on the events row once Part 5's writer takes it.
+    extra = ({"assignment_id": req.context.assignment_id}
+             if req.context.assignment_id and _accepts(p.db.write_event, "assignment_id") else {})
     background.add_task(obs.write_event, p.db, session_id=str(req.session_id), trace_id=trace_id,
                         intent=ctx.intent, outcome=ctx.outcome, doc_ids=ctx.doc_ids,
-                        transcript=ctx.transcript, latency_ms=latency.model_dump())
+                        transcript=ctx.transcript, latency_ms=latency.model_dump(), **extra)
     if isinstance(response, JSONResponse):
         response.background = background
     return response

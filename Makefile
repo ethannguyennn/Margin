@@ -6,9 +6,11 @@
 #   make dev-app     # cd app && npm run dev
 #   make dev-ios     # iPhone companion web app on :5175
 #   make sim         # even simulator against the dev app
-#   make test        # pytest relay/tests + npm test in app + ios build (must stay green)
+#   make dev-portal  # employer portal dev server (Part 5), proxies /v1 to the relay on :8080
+#   make test        # relay + app + ios + portal (must stay green)
 #   make seed        # python db/seed.py            (Part 5)
 #   make eval        # python eval/run_eval.py      (Part 5)
+#   make eval-conversion  # material -> procedure eval, 0 fabricated values (Part 4)
 #   make latency     # p50/p95 per stage from the events hypertable
 #   make deploy      # docker compose up -d --build (run on the Vultr VM)
 
@@ -27,11 +29,12 @@ PY ?= $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(SYS_PY))
 
 COMPOSE := docker compose -f deploy/docker-compose.yml --env-file .env
 
-.PHONY: help venv install dev-relay dev-app dev-ios sim test test-relay test-app test-ios \
-        seed eval latency deploy deploy-remote logs health sync-branches
+.PHONY: help venv install dev-relay dev-app dev-ios dev-portal sim test test-relay test-app \
+        test-ios test-portal seed eval eval-conversion latency deploy deploy-remote logs health \
+        sync-branches
 
 help:
-	@echo targets: install dev-relay dev-app dev-ios sim test seed eval latency deploy deploy-remote logs health
+	@echo targets: install dev-relay dev-app dev-ios dev-portal sim test seed eval eval-conversion latency deploy deploy-remote logs health
 
 venv:
 	$(SYS_PY) -m venv .venv
@@ -43,6 +46,9 @@ ifneq ($(wildcard app/package.json),)
 endif
 ifneq ($(wildcard ios/package.json),)
 	cd ios && npm ci
+endif
+ifneq ($(wildcard portal/package.json),)
+	cd portal && npm ci
 endif
 
 dev-relay:
@@ -58,7 +64,11 @@ dev-ios:
 sim:
 	cd app && npx evenhub-simulator $(SIM_URL)
 
-test: test-relay test-app test-ios
+# The portal's dev server proxies /v1 to the relay on :8080 (start `make dev-relay` too).
+dev-portal:
+	cd portal && npm run dev
+
+test: test-relay test-app test-ios test-portal
 
 test-relay:
 	$(PY) -m pytest relay/tests -q
@@ -78,6 +88,13 @@ else
 	@echo ios/ not merged on this branch - skipping companion checks
 endif
 
+test-portal:
+ifneq ($(wildcard portal/package.json),)
+	cd portal && npm test
+else
+	@echo portal/ not merged on this branch - skipping portal tests
+endif
+
 seed:
 	$(PY) db/seed.py $(ARGS)
 
@@ -85,6 +102,15 @@ seed:
 EVAL_URL ?= http://127.0.0.1:$(PORT)
 eval:
 	$(PY) eval/run_eval.py --base-url $(EVAL_URL) $(ARGS)
+
+# Part 4's conversion eval: runs extract -> convert -> verify_step -> render directly (no
+# HTTP) and exits non-zero if any *passing* step contains a fabricated value.
+eval-conversion:
+ifneq ($(wildcard eval/conversion/run_conversion_eval.py),)
+	$(PY) eval/conversion/run_conversion_eval.py $(ARGS)
+else
+	@echo eval/conversion/run_conversion_eval.py not merged on this branch yet - Part 4
+endif
 
 latency:
 	$(PY) -m margin_relay.latency $(ARGS)
