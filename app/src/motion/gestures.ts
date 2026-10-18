@@ -71,8 +71,11 @@ export const DEFAULT_PARAMS: DetectorParams = {
   hpMs: 0,
   maxGapMs: 300,
   lobeEnd: 0.3,
-  down: 50,
-  up: 40,
+  // As low as the motion gate and the walking-train check allow: a double nod is never
+  // accidental, so sensitivity wins. 22/18 caught 5-9 deg nods at 25 Hz in BLE bursts with
+  // no false trigger on still, walking or bench work (synthetic, 5 noise seeds).
+  down: 22,
+  up: 18,
   nodMinMs: 60,
   nodMaxMs: 600,
   doubleMinMs: 250,
@@ -114,7 +117,8 @@ export class Detector {
   private pitch: Lobe | null = null;
   private yawCur: Lobe | null = null;
   private yawLobes: Lobe[] = [];
-  private lastNod: { start: number; t: number } | null = null;
+  private lastNod: { start: number; t: number; busy: boolean } | null = null;
+  private lobeStarts: number[] = [];
   private lastEmit = -Infinity;
   private readonly roll: Axis;
   private mode: Exclude<DetectorParams['signal'], 'auto'> | null = null;
@@ -135,6 +139,7 @@ export class Detector {
     this.bias = { p: 0, y: 0, r: 0 };
     this.hist = [];
     this.pitch = this.yawCur = this.lastNod = null;
+    this.lobeStarts = [];
     this.yawLobes = [];
     this.rest = this.grav = null;
   }
@@ -231,6 +236,7 @@ export class Detector {
     if (!sign) return null;
     const lobe: Lobe = { sign, t0: f.t, open: true, peak: Math.abs(f.p) };
     this.pitch = lobe;
+    this.lobeStarts = [...this.lobeStarts.filter((t) => t >= f.t - HISTORY_MS), f.t];
     // A nod: a down lobe, then the return lobe soon after, with yaw and roll quiet.
     if (sign !== 1 || cur?.sign !== -1) return null;
     const gap = f.t - cur.t0;
@@ -238,11 +244,15 @@ export class Detector {
     const pk = this.peaks(cur.t0, f.t);
     if (Math.max(pk.y, pk.r) >= P.quietRatio * pk.p) return null;
     lobe.nod = { down: cur.peak };
-    const nod = { start: cur.t0, t: f.t };
-    if (P.single) return this.emit('NOD', nod.start, f.t);
+    // Walking bobs the head in a steady train of nod-like lobes; a deliberate nod starts from
+    // a still head. Any lobe in the gate window before the down lobe = part of a train.
+    const from = cur.t0 - P.gateLeadMs - P.gateMs;
+    const busy = this.lobeStarts.some((t) => t >= from && t < cur.t0 - P.gateLeadMs);
+    const nod = { start: cur.t0, t: f.t, busy };
+    if (P.single) return busy ? null : this.emit('NOD', nod.start, f.t);
     const first = this.lastNod;
     this.lastNod = nod;
-    if (!first) return null;
+    if (!first || first.busy) return null;
     const between = nod.t - first.t;
     if (between < P.doubleMinMs || between > P.doubleMaxMs) return null;
     this.lastNod = null;
@@ -379,7 +389,8 @@ const median = (xs: number[]): number => {
 
 /**
  * Prompt for 3 double nods (Part 1 shows the prompt), then set down/up to 60 % of this
- * wearer's median peak rates. Nods too weak to clear the floor (60 % of the defaults)
+ * wearer's median peak rates, never above the defaults (calibration only ever makes the
+ * detector more sensitive). Nods too weak to clear the floor (60 % of the defaults)
  * keep the defaults and return ok: false. Gestures are not emitted while calibrating.
  */
 export async function calibrate(
@@ -425,8 +436,8 @@ export async function calibrate(
   if (!result.ok) return result;
   const s = getSensitivity();
   // Persist unscaled values: the sensitivity slider applies on top at load time.
-  const down = 0.6 * median(nods.map((n) => n.down)) * s;
-  const up = 0.6 * median(nods.map((n) => n.up)) * s;
+  const down = Math.min(DEFAULT_PARAMS.down, 0.6 * median(nods.map((n) => n.down)) * s);
+  const up = Math.min(DEFAULT_PARAMS.up, 0.6 * median(nods.map((n) => n.up)) * s);
   if (down < 0.6 * DEFAULT_PARAMS.down || up < 0.6 * DEFAULT_PARAMS.up) {
     console.info('[motion] calibration: nods too weak, keeping defaults', { down, up });
     return { ok: false };

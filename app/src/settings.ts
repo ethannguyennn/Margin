@@ -82,8 +82,9 @@ export const getDevice = (): DeviceCredential | null => {
 export const setDevice = (d: DeviceCredential | null): void => save(DEVICE_KEY, d);
 
 /** Per-wearer detector overrides written by calibrate(); merged over DEFAULT_PARAMS. */
-// v2: calibrations before it measured nod speed with the BLE burst bug, so they are dropped.
-const PARAMS_KEY = 'specs.detector.v2';
+// v3: v1 measured nod speed with the BLE burst bug; v2 could calibrate above today's lower
+// defaults. Both are dropped.
+const PARAMS_KEY = 'specs.detector.v3';
 export const getDetectorOverrides = (): Record<string, unknown> | null => load(PARAMS_KEY, null);
 export const setDetectorOverrides = (p: Record<string, unknown> | null): void => save(PARAMS_KEY, p);
 

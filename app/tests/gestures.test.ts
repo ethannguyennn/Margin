@@ -147,7 +147,7 @@ test('sensitivity and nod mode come from settings', () => {
   };
   store['specs.sensitivity'] = '2';
   store['specs.nodMode'] = '"single"';
-  store['specs.detector.v2'] = JSON.stringify({ down: 70, gate: 'junk' });
+  store['specs.detector.v3'] = JSON.stringify({ down: 70, gate: 'junk' });
   const p = currentParams();
   assert.equal(p.down, 35, 'override 70 / sensitivity 2');
   assert.equal(p.up, DEFAULT_PARAMS.up / 2);
@@ -292,7 +292,7 @@ test('live: a fixed-pace recording suppresses probing, including after foregroun
 const nodSession = (amp: number, n = 3) =>
   trace(3 * n + 1, (t) => [...Array(n)].reduce((acc, _, i) => acc + bump(t, 1 + 3 * i, amp) + bump(t, 1.65 + 3 * i, amp), 0));
 
-test('calibrate: 3 double nods set down/up to 60 % of the median peak and persist', async () => {
+test('calibrate: 3 double nods set down/up to 60 % of the median peak, never above the defaults', async () => {
   const store: Record<string, string> = {};
   (globalThis as any).localStorage = {
     getItem: (k: string) => store[k] ?? null,
@@ -308,17 +308,26 @@ test('calibrate: 3 double nods set down/up to 60 % of the median peak and persis
   assert.deepEqual(await p, { ok: true });
   assert.deepEqual(progress, [0, 1, 2, 3]);
   assert.equal(g.isCalibrated(), true);
-  const saved = JSON.parse(store['specs.detector.v2']);
-  assert.ok(saved.down > DEFAULT_PARAMS.down && saved.down < 100, `down=${saved.down}`);
+  const saved = JSON.parse(store['specs.detector.v3']);
+  assert.equal(saved.down, DEFAULT_PARAMS.down, 'firm nods never make the detector stiffer');
   assert.deepEqual(hw.calls.at(-1), [false, undefined], 'calibration started the IMU, so it stops it');
 
+  // Gentle nods: thresholds drop below the defaults.
+  delete store['specs.detector.v3'];
+  const gentle = g.calibrate(() => {}, { timeoutMs: 3000 });
+  await settle();
+  hw.feed(shifted(nodSession(5), 70000));
+  assert.deepEqual(await gentle, { ok: true });
+  const soft = JSON.parse(store['specs.detector.v3']);
+  assert.ok(soft.down < DEFAULT_PARAMS.down && soft.down >= 0.6 * DEFAULT_PARAMS.down, `down=${soft.down}`);
+
   // Weak nods: detected by the relaxed pass, but below the floor -> defaults kept, ok: false.
-  delete store['specs.detector.v2'];
+  delete store['specs.detector.v3'];
   const weak = g.calibrate(() => {}, { timeoutMs: 3000 });
   await settle();
-  hw.feed(shifted(nodSession(7), 90000));
+  hw.feed(shifted(nodSession(3), 90000));
   assert.deepEqual(await weak, { ok: false });
-  assert.equal(store['specs.detector.v2'], undefined);
+  assert.equal(store['specs.detector.v3'], undefined);
   delete (globalThis as any).localStorage;
 });
 
@@ -351,6 +360,16 @@ test('accel: BLE bursts of 3 samples per arrival at 25 Hz still find every doubl
   // Each sample arrives with the last one of its burst; the next burst comes 3 samples later.
   const bursty = s.map((x, i) => ({ ...x, t: s[Math.min(s.length - 1, i - (i % 3) + 2)].t }));
   assert.equal(count(detect(bursty, DEFAULT_PARAMS), 'NOD'), 10);
+});
+
+test('accel: walking with sensor noise is a train of nod-like lobes, never a double nod', () => {
+  let seed = 1;
+  const noise = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648 - 0.5) * 0.017; // ~0.005 g RMS
+  const walk = gravity(fixtureSamples(load('walking.synthetic.json'))).map((s) => ({ t: s.t, x: s.x + noise(), y: s.y + noise(), z: s.z + noise() }));
+  assert.equal(count(detect(walk, DEFAULT_PARAMS), 'NOD'), 0);
+  // The same noise does not hide gentle (6-11 deg) double nods.
+  const gentle = gravity(nods.map((s) => ({ ...s, x: s.x * 0.5 }))).map((s) => ({ t: s.t, x: s.x + noise(), y: s.y + noise(), z: s.z + noise() }));
+  assert.equal(count(detect(gentle, DEFAULT_PARAMS), 'NOD'), 10);
 });
 
 test('live: a pace too slow for a nod is replaced by one that is not, and remembered', async () => {
