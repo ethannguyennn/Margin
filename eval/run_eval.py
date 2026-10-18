@@ -253,7 +253,8 @@ async def run_suite(client: httpx.AsyncClient, cases: list[dict], index: dict, *
                 raise ValueError("Expected an object response")
             result = score_case(case, payload, index, (time.perf_counter() - started) * 1000)
             result.response = {key: payload[key] for key in ("trace_id", "transcript", "intent", "outcome",
-                "glance", "body", "citations", "walkthrough", "clarify", "needs_clarification", "graphic_id", "error") if key in payload}
+                "glance", "body", "source", "verified", "citations", "walkthrough", "clarify",
+                "needs_clarification", "graphic_id", "command", "latency_ms", "error") if key in payload}
             if not response.is_success:
                 result.correct = False
                 result.reason = f"HTTP {response.status_code}; {result.reason}".rstrip("; ")
