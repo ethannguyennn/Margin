@@ -159,9 +159,12 @@ that branch is integrated. `make deploy` exports its checkout's commit as `GIT_S
 sets it explicitly on the relay so verbose health identifies the running source. Verbose
 health also reports configured model names (never provider credentials).
 
-The 0.4.0 app pack must be built from the combined candidate, with
+The current 0.4.1 app pack is built from the combined candidate, with
 `VITE_RELAY_ORIGIN=https://getyourassto.work`, `VITE_MOCK=0`, and
-`VITE_ASK_TIMEOUT_MS=50000`. Keep its commit and SHA-256 with the `.ehpk`. Source preparation
+`VITE_ASK_TIMEOUT_MS=50000`. Public app tracing uses the whitelisted ingest origin with the
+unsupported relay tunnel off. Keep the source commit and SHA-256 with the `.ehpk`. Source preparation
 and offline tests do not establish deployment, quota capacity, latency or field acceptance.
-The prior SSH blocker is resolved: the existing key completed a read-only VM check on
-2026-10-18; the service was still on `61b9c1e` at that check.
+The prior SSH blocker is resolved. The existing identity deployed the integration candidate
+from `/root/specs-v3-candidate`; the original `/root/specs` main checkout is retained for
+rollback. Verbose health identifies the actual serving commit. Promotion to main waits for
+the acceptance results in `TODO.md`, including the pending two-wearer field recordings.
