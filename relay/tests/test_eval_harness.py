@@ -232,9 +232,10 @@ def test_gap_probe_import_is_offline_and_uses_scored_conversations(monkeypatch):
     monkeypatch.setattr(httpx, "Client", lambda *a, **k: pytest.fail("import must not send requests"))
     from tools.diagnostic import gap_probe
     cases = gap_probe.cases()
-    assert len(cases) == 11
+    assert len(cases) == 12
     assert any(c["q"] == "Pull up the espresso standards." for c in cases)
     assert any(c.get("turns") for c in cases)
+    assert any(c["q"] == "How many pumps of syrup?" and c["turns"][0]["q"] == "cappuccino" for c in cases)
 
 
 def test_step_regression_import_is_offline_and_scores_all_18_asks(monkeypatch):

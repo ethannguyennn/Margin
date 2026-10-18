@@ -20,6 +20,9 @@ def cases():
     bank = {case["id"]: case for case in run_eval.load_cases(ROOT / "eval/qa.jsonl")}
     selected = [bank[key] for key in ("v3-w2", "v3-w3", "v3-w4", "v3-w5", "v3-c5", "v3-f1", "v3-p1")]
     selected.extend([
+        {**bank["v3-c5"], "id": "gap-syrup", "q": "How many pumps of syrup?",
+         "turns": [{"q": "cappuccino", "expect": "answered", "doc_id": "SOP-230",
+                    "revision": "C", "section": "1.3", "must_contain": ["2", "3", "4"]}]},
         {**bank["v3-w4"], "id": "gap-standards", "q": "Pull up the espresso standards."},
         {**bank["v3-w2"], "id": "gap-cash-count", "q": "I need to do the cash count for closing."},
         {**bank["v3-w3"], "id": "gap-opening", "q": "Let's start the back of house opening."},
