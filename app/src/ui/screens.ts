@@ -22,7 +22,7 @@ const safe = (text: ScreenText): ScreenText => ({ header: sanitizeForG2(text.hea
     main: sanitizeForG2(text.main), footer: sanitizeForG2(text.footer),
     ...(text.graphic_id ? { graphic_id: text.graphic_id } : {}) });
 const join = (...parts: string[]) => parts.filter(Boolean).join('  ');
-/** "SOP-114 Sec 4.2 rev C" -> "SOP-114 4.2". The revision stays on the phone. */
+/** "<doc> Sec <section> rev <rev>" -> "<doc> <section>". The revision stays on the phone. */
 export function compactSource(source: string): string {
     const m = /^(\S+) Sec (\S+)(?: rev \S+)?$/.exec(source.trim());
     return m ? `${m[1]} ${m[2]}` : source;
