@@ -1,6 +1,7 @@
 import { Route, Routes, useLocation } from 'react-router-dom';
 import { RelayStatus } from './components/RelayStatus';
 import { TabBar } from './components/TabBar';
+import { ThemeToggle } from './components/ThemeToggle';
 import AnswerPage from './pages/AnswerPage';
 import LensPage from './pages/LensPage';
 import SopsPage from './pages/SopsPage';
@@ -20,11 +21,14 @@ export default function App() {
       <div className="app">
         <header className="app-header">
           <div className="head-text">
-            <p className="eyebrow">Margin · phone display</p>
+            <p className="eyebrow">Margin</p>
             <h1>{head.title}</h1>
             <p className="subtitle">{head.subtitle}</p>
           </div>
-          <RelayStatus />
+          <div className="head-actions">
+            <RelayStatus />
+            <ThemeToggle />
+          </div>
         </header>
 
         <main className="app-main">
